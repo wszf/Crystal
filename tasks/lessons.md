@@ -69,12 +69,12 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 通过脚本传递 patch 前先检查文本中的反引号；优先使用不含模板语法冲突的字符串形式，或逐一转义后再提交 patch。
 - Verification: 重新提交同一文档 patch 后成功应用，再运行文档差异检查和 Go 全量校验。
 
-### 2026-08-11 — .NET 导出器必须单独标注未编译验证
+### 2026-08-11 — .NET 工具必须单独标注未编译验证
 
-- Symptom: 新增 `Crystal.LegacyWorldExport` 后尝试执行 .NET 构建，当前环境没有 `dotnet`，命令以 `dotnet unavailable` 退出。
+- Symptom: 新增 `Crystal.LegacyWorldExport` 或修改 `Crystal.ProtocolProbe` 后尝试执行 .NET 构建，当前环境没有 `dotnet`，命令输出 `dotnet unavailable`。
 - Root cause: 运行环境只具备 Go 工具链，不能把 .NET 项目静态检查当成真实编译验证。
-- Prevention: 提交前先探测 `dotnet`/`csc`/`mcs`；若均不可用，记录未验证边界，并在有 .NET 8 SDK 的环境补跑 exporter 和现有 Probe。
-- Verification: Go 的 `test`、`race`、`vet`、`build` 与差异检查通过；.NET exporter 保留为待 SDK 环境验证项。
+- Prevention: 提交前先探测 `dotnet`/`csc`/`mcs`；若均不可用，记录 exporter 与 probe 的未验证边界，并在有 .NET 8 SDK 的环境补跑两者及现有客户端探针。
+- Verification: Go 的 `test`、`race`、`vet`、`build` 与差异检查通过；.NET exporter 和 ProtocolProbe 保留为待 SDK 环境验证项。
 
 ### 2026-08-11 — 地图格式修正必须同步 fixture 的真实记录步长
 
@@ -169,7 +169,7 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-11 — apply_patch 上下文必须重新读取精确空格
 
-- Symptom: 批量加入魔法 packet ordinal 的 patch、随后给 `world.go` 增加字段的 patch，以及更新迁移矩阵的 patch，都因实际对齐空格或换行与手写上下文不一致而未应用。
+- Symptom: 批量加入魔法 packet ordinal 的 patch、随后给 `world.go` 增加字段的 patch、更新迁移矩阵的 patch，以及本轮加入 Chat ordinal 的 patch，都因实际对齐空格或换行与手写上下文不一致而未应用。
 - Root cause: patch 上下文包含了脆弱的列对齐空格，未先读取目标文件的精确文本。
 - Prevention: 修改已有表格、结构体或文档段落时先用 `rg`/`sed -n l` 核对精确上下文，再拆成以稳定字段名或单行句子为锚点的小 patch；patch 失败后不继续假设文件已变更，并在同一轮重复失败时改用更小的锚点。
-- Verification: 重新读取 `packet_test.go`、`world.go` 与迁移矩阵后按稳定行锚点分块应用，`gofmt`、`go test ./internal/protocol` 和 `go test ./...` 通过。
+- Verification: 重新读取 `packet_test.go`、`world.go` 与迁移矩阵后按稳定行锚点分块应用，`gofmt`、`go test ./internal/protocol`、`go test ./...`、`go test -race ./...` 和 `go vet ./...` 通过。
