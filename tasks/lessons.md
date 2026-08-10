@@ -54,3 +54,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: auth 层使用语义化的 `time.Time`，而 Crystal wire payload 使用 `DateTime.ToBinary()` 的 64 位值，边界转换遗漏。
 - Prevention: 领域层保留 `time.Time`，进入协议结构或 payload 时统一调用 `protocol.DotNetDateTimeBinary`，并为零时间保留 .NET `DateTime.MinValue` 的编码。
 - Verification: 修正后重新运行完整 Go 测试、`go vet`、race 测试和构建。
+
+### 2026-08-11 — Go 复合字面量中不能插入局部语句
+
+- Symptom: 角色运行时字段接入后，`gofmt`/编译在 `UserInfo{}` 内的 `hp, mp :=` 处报告缺少逗号和非法语法。
+- Root cause: 局部变量声明和条件语句被放进了结构体复合字面量；复合字面量只能包含字段表达式。
+- Prevention: 先在字面量外完成默认值和派生值计算，再把最终变量作为字段值传入。
+- Verification: 修正后重新运行 `gofmt`、`go test ./...`、`go vet ./...` 和 `git diff --check`。
+
+### 2026-08-11 — 通过脚本封装 apply_patch 时必须处理 Markdown 反引号
+
+- Symptom: 更新包含 Go/Markdown 代码反引号的文档时，工具调用脚本先因 JavaScript 模板字符串语法错误而未执行。
+- Root cause: patch 文本被放进 JavaScript 模板字符串，未转义其中的反引号；这是工具封装层错误，不是项目源码错误。
+- Prevention: 通过脚本传递 patch 前先检查文本中的反引号；优先使用不含模板语法冲突的字符串形式，或逐一转义后再提交 patch。
+- Verification: 重新提交同一文档 patch 后成功应用，再运行文档差异检查和 Go 全量校验。
