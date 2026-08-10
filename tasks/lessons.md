@@ -173,3 +173,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: patch 上下文包含了脆弱的列对齐空格，未先读取目标文件的精确文本。
 - Prevention: 修改已有表格、结构体或文档段落时先用 `rg`/`sed -n l` 核对精确上下文，再拆成以稳定字段名或单行句子为锚点的小 patch；patch 失败后不继续假设文件已变更，并在同一轮重复失败时改用更小的锚点。
 - Verification: 重新读取 `packet_test.go`、`world.go` 与迁移矩阵后按稳定行锚点分块应用，地图 gate 测试与 `gofmt`、`go test ./internal/protocol`、`go test ./...`、`go test -race ./...`、`go vet ./...` 通过。
+
+### 2026-08-11 — net.Pipe 测试必须先消费副作用包
+
+- Symptom: NPC `ENTERMAP` 端到端测试在传送后直接发送 keep-alive，测试挂起；第一次断言还在服务端完成持久化前读取了角色状态。
+- Root cause: `net.Pipe` 没有缓冲，地图切换后的静态对象移除包尚未被客户端消费时，服务端会阻塞写包；读取响应包也不等于 handler 已完成后续副作用。
+- Prevention: 为每条 net.Pipe transcript 列出完整发送顺序，先消费 `ObjectRemove` 等副作用包，再用后续 keep-alive/响应建立处理完成屏障后检查持久化状态。
+- Verification: `TestSessionNPCEnterMapConsumesNeedMoveDestination` 补齐旧地图 NPC 移除断言和 keep-alive 屏障后，定向 Go 测试通过。
