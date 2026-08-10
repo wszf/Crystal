@@ -169,7 +169,7 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-11 — apply_patch 上下文必须重新读取精确空格
 
-- Symptom: 批量加入魔法 packet ordinal 的 patch、随后给 `world.go` 增加字段的 patch、更新迁移矩阵的 patch，以及本轮加入 Chat ordinal 的 patch，都因实际对齐空格或换行与手写上下文不一致而未应用。
+- Symptom: 批量加入魔法 packet ordinal 的 patch、随后给 `world.go` 增加字段的 patch、更新迁移矩阵的 patch、本轮加入 Chat ordinal 的 patch，以及本轮更新地图 gate 文案的 patch，都因实际对齐空格或换行与手写上下文不一致而未应用。
 - Root cause: patch 上下文包含了脆弱的列对齐空格，未先读取目标文件的精确文本。
 - Prevention: 修改已有表格、结构体或文档段落时先用 `rg`/`sed -n l` 核对精确上下文，再拆成以稳定字段名或单行句子为锚点的小 patch；patch 失败后不继续假设文件已变更，并在同一轮重复失败时改用更小的锚点。
-- Verification: 重新读取 `packet_test.go`、`world.go` 与迁移矩阵后按稳定行锚点分块应用，`gofmt`、`go test ./internal/protocol`、`go test ./...`、`go test -race ./...` 和 `go vet ./...` 通过。
+- Verification: 重新读取 `packet_test.go`、`world.go` 与迁移矩阵后按稳定行锚点分块应用，地图 gate 测试与 `gofmt`、`go test ./internal/protocol`、`go test ./...`、`go test -race ./...`、`go vet ./...` 通过。
