@@ -75,3 +75,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 运行环境只具备 Go 工具链，不能把 .NET 项目静态检查当成真实编译验证。
 - Prevention: 提交前先探测 `dotnet`/`csc`/`mcs`；若均不可用，记录未验证边界，并在有 .NET 8 SDK 的环境补跑 exporter 和现有 Probe。
 - Verification: Go 的 `test`、`race`、`vet`、`build` 与差异检查通过；.NET exporter 保留为待 SDK 环境验证项。
+
+### 2026-08-11 — 地图格式修正必须同步 fixture 的真实记录步长
+
+- Symptom: 按原版 `LoadMapCellsV100` 修正 v100 为 27 字节单元后，旧测试仍把 fishing 字段写在 30 字节偏移，地图测试失败。
+- Root cause: fixture 是按迁移代码的旧猜测构造的，没有与 .NET 字段偏移和记录步长绑定。
+- Prevention: 每种地图格式先从原版 loader 固定 header、字段偏移、记录步长，再生成最小 fixture；修正偏移时同时更新正向和截断数据测试。
+- Verification: fixture 修正后重新运行 mapdata 全量测试，并继续执行 Go 全量测试、race、vet、build 和 diff 检查。
