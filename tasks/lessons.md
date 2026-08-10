@@ -110,3 +110,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把字段数量误当成了额外的长度，未按 `uint32 + int32 + int32 + 4*byte` 逐字段求和。
 - Prevention: 每个 packet 先从 legacy `WritePacket` 列出字段类型和顺序，手算并在测试中同时断言长度与关键偏移；不要凭相邻 payload 估算长度。
 - Verification: 修正为 16 字节后，协议测试通过；提交前继续运行 `go test ./...`、`go test -race ./...`、`go vet ./...` 和 `git diff --check`。
+
+### 2026-08-11 — 新增 packet ordinal 测试必须同步 wants 与 got
+
+- Symptom: 门 packet ordinal 测试加入 legacy 期望后，测试报告 `ServerOpendoor = 0`，但协议常量本身已正确设置为 253。
+- Root cause: 测试只把新 ID 加进期望表，遗漏了实际值表，导致 map 缺失项被 Go 的零值掩盖。
+- Prevention: 每新增一个 ordinal，必须同时更新 legacy `wants`、Go `got` 两侧，并保留显式数值期望；优先让测试在第一轮编译后立即执行。
+- Verification: 补齐 `got["ServerOpendoor"]` 后，协议、地图和服务端测试重新通过。
+
+### 2026-08-11 — 移动阻挡测试必须验证实际目标格
+
+- Symptom: 门自动关闭测试把玩家放在门内，随后向远离门的方向移动，却期望移动被门阻挡。
+- Root cause: 测试场景没有先核对方向对应的目标坐标；关闭的门只阻挡进入带门的目标格，不阻挡离开该格。
+- Prevention: 编写移动/碰撞断言时先画出起点、方向、步数和每个中间目标格；门阻挡用“门外进入门格”场景验证，离开门格单独验证可通行。
+- Verification: 将玩家恢复到门外并尝试进入关闭门格后，门状态单测通过。
