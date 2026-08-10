@@ -68,3 +68,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: patch 文本被放进 JavaScript 模板字符串，未转义其中的反引号；这是工具封装层错误，不是项目源码错误。
 - Prevention: 通过脚本传递 patch 前先检查文本中的反引号；优先使用不含模板语法冲突的字符串形式，或逐一转义后再提交 patch。
 - Verification: 重新提交同一文档 patch 后成功应用，再运行文档差异检查和 Go 全量校验。
+
+### 2026-08-11 — .NET 导出器必须单独标注未编译验证
+
+- Symptom: 新增 `Crystal.LegacyWorldExport` 后尝试执行 .NET 构建，当前环境没有 `dotnet`，命令以 `dotnet unavailable` 退出。
+- Root cause: 运行环境只具备 Go 工具链，不能把 .NET 项目静态检查当成真实编译验证。
+- Prevention: 提交前先探测 `dotnet`/`csc`/`mcs`；若均不可用，记录未验证边界，并在有 .NET 8 SDK 的环境补跑 exporter 和现有 Probe。
+- Verification: Go 的 `test`、`race`、`vet`、`build` 与差异检查通过；.NET exporter 保留为待 SDK 环境验证项。
