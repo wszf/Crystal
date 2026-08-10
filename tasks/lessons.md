@@ -111,12 +111,12 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 每个 packet 先从 legacy `WritePacket` 列出字段类型和顺序，手算并在测试中同时断言长度与关键偏移；不要凭相邻 payload 估算长度。
 - Verification: 修正为 16 字节后，协议测试通过；提交前继续运行 `go test ./...`、`go test -race ./...`、`go vet ./...` 和 `git diff --check`。
 
-### 2026-08-11 — 新增 packet ordinal 测试必须同步 wants 与 got
+### 2026-08-11 — 新增 packet ordinal 测试必须同步 wants 与 got（强化）
 
-- Symptom: 门 packet ordinal 测试加入 legacy 期望后，测试报告 `ServerOpendoor = 0`，但协议常量本身已正确设置为 253。
-- Root cause: 测试只把新 ID 加进期望表，遗漏了实际值表，导致 map 缺失项被 Go 的零值掩盖。
-- Prevention: 每新增一个 ordinal，必须同时更新 legacy `wants`、Go `got` 两侧，并保留显式数值期望；优先让测试在第一轮编译后立即执行。
-- Verification: 补齐 `got["ServerOpendoor"]` 后，协议、地图和服务端测试重新通过。
+- Symptom: 门 packet ordinal 测试加入 legacy 期望后，测试先报告 `ServerOpendoor = 0`；同一阶段新增 `ServerWorldMapSetup` 时又复现了 `= 0`。
+- Root cause: 新 ID 被分两次 patch 追加，第二次只更新了期望表，遗漏实际值表，map 缺失项被 Go 的零值掩盖。
+- Prevention: 每新增一个 ordinal，必须在同一个 patch 中成对更新 legacy `wants` 与 Go `got`，两侧都保留显式 legacy 数值；patch 后立即运行 ordinal 测试，再继续写功能代码。
+- Verification: 补齐 `got["ServerOpendoor"]` 和 `got["ServerWorldMapSetup"]` 后，协议、地图和服务端测试重新通过。
 
 ### 2026-08-11 — 移动阻挡测试必须验证实际目标格
 
@@ -124,3 +124,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试场景没有先核对方向对应的目标坐标；关闭的门只阻挡进入带门的目标格，不阻挡离开该格。
 - Prevention: 编写移动/碰撞断言时先画出起点、方向、步数和每个中间目标格；门阻挡用“门外进入门格”场景验证，离开门格单独验证可通行。
 - Verification: 将玩家恢复到门外并尝试进入关闭门格后，门状态单测通过。
+
+### 2026-08-11 — Go 测试 helper 作用域必须按 package 检查
+
+- Symptom: 地图查询测试在 `cmd/crystal-server` 编译时找不到 `readTestDotNetString`，同时缺少该测试自己的二进制解析 import。
+- Root cause: 把 `internal/protocol` package 的测试私有 helper 当成了 `main` package 可复用 API；Go 测试文件之间只有同 package 标识符可见，`*_test.go` helper 不会跨 package 导出。
+- Prevention: 新增测试先确认 package 声明和 helper 所在目录；跨 package 只调用公开函数，必要时在当前 package 定义带 `t.Helper()` 的本地适配器。
+- Verification: 改为调用公开 `protocol.ReadDotNetString` 并补齐 `encoding/binary` 后，地图协议测试编译通过。
+
+### 2026-08-11 — 复合协议包必须覆盖外层字段
+
+- Symptom: 地图信息测试能正确解析标题和地图内容，但对照 `NewMapInfo.WritePacket` 时发现 Go payload 遗漏了开头的 `MapIndex`；真实客户端会从错误的偏移读取标题。
+- Root cause: 只验证了复用的 `ClientMapInfo.Save` 内容，没有把外层 packet 类自己的字段纳入 payload 对照。
+- Prevention: 每个复合 packet 先分别列出 packet 外层字段和嵌套对象字段；测试从第一个字节开始解析完整 payload，并断言外层索引、长度和嵌套字段。
+- Verification: `NewMapInfoPayload` 现在先写入 `MapIndex`，协议、world 和 net.Pipe 测试均从完整 payload 解析并通过。
