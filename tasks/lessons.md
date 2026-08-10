@@ -159,3 +159,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试只按“远程命中”直觉填写 `Killed` 和通知数量，没有先按当前确定性伤害公式核算 HP 终态。
 - Prevention: 战斗测试先列出攻击力、护甲、有效伤害、初始/最终 HP，再决定 struck、damage、death packet 序列；通知数量必须与该终态一致。
 - Verification: 修正远程 transcript 断言为四包并重新运行 Go 全量测试通过。
+
+### 2026-08-11 — awk 枚举核对变量不要使用保留字
+
+- Symptom: 用 awk 计算原版 packet enum ordinal 时，命令因 `in` 变量名触发语法错误而未执行。
+- Root cause: `in` 是 awk 的语法关键字，不能作为普通变量名；这是核对脚本错误，不是项目源码错误。
+- Prevention: 编写 awk 枚举脚本时使用 `inside` 等非保留变量名，并先用最小命令验证脚本能运行，再依赖其输出修改协议常量。
+- Verification: 改用 `inside` 后成功核对 `MagicKey=57`、`Magic=58`、`NewMagic=117`、`Magic=120`、`MagicDelay=121`、`MagicCast=122`、`ObjectMagic=123`，随后以原版 enum 数值为依据实现测试。
+
+### 2026-08-11 — apply_patch 上下文必须重新读取精确空格
+
+- Symptom: 批量加入魔法 packet ordinal 的 patch、随后给 `world.go` 增加字段的 patch，以及更新迁移矩阵的 patch，都因实际对齐空格或换行与手写上下文不一致而未应用。
+- Root cause: patch 上下文包含了脆弱的列对齐空格，未先读取目标文件的精确文本。
+- Prevention: 修改已有表格、结构体或文档段落时先用 `rg`/`sed -n l` 核对精确上下文，再拆成以稳定字段名或单行句子为锚点的小 patch；patch 失败后不继续假设文件已变更，并在同一轮重复失败时改用更小的锚点。
+- Verification: 重新读取 `packet_test.go`、`world.go` 与迁移矩阵后按稳定行锚点分块应用，`gofmt`、`go test ./internal/protocol` 和 `go test ./...` 通过。
