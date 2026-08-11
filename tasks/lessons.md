@@ -664,3 +664,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 业务动作的副作用早于目标地图资格校验提交，失败结果没有回滚。
 - Prevention: 所有 RequiredGroup 入口先完成地图存在、坐标和组人数校验；成功后才写回 HP/坐标，ENTERMAP 只有非门禁失败时才消费 pending 目的地。
 - Verification: RequiredGroup world 测试断言 TownRevive 不恢复 HP、ENTERMAP 保留 pending；全量 Go 门禁通过。
+
+### 2026-08-12 — 物品加入背包前必须复制网络快照
+
+- Symptom: NPC 商店批量购买改为先更新角色背包后再编码 `GainedItem` 时，`addCharacterItem` 合并/消耗了传入对象，客户端收到的购买数量变成 0。
+- Root cause: 领域层的背包操作会原地修改传入 `StoredItem`；网络 payload 不能直接引用会被后续事务改变的对象。
+- Prevention: 所有会调用 `addCharacterItem`、堆叠合并或删除的路径，在第一次状态变更前复制独立的 packet snapshot；测试同时断言内部持久化数量和线上的 `GainedItem.Count`。
+- Verification: NPC 商店普通购买和 `[BUYBACK]` 会话 transcript 均断言数量/UniqueID，Go 全量 test、race、vet、build 和 `git diff --check` 通过。
