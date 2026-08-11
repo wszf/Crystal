@@ -425,3 +425,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只迁移了 Chat packet 类型，没有从 `Shared/Language.cs` 核对 `ServerTextKeys` 的默认字符串。
 - Prevention: 对每个失败/提示分支同时对照 packet 类型、默认文本和参数；未迁移本地化表时先使用原版英文键值，不自行改写措辞。
 - Verification: Go handler 已使用 `CanNotDrop` 和 `CannotPickupNotOwner` 的默认文本，并通过全量 Go 测试与差异检查。
+
+### 2026-08-11 — Storage bootstrap transcript 必须消费物品定义
+
+- Symptom: 新增 Storage net.Pipe 测试时，启动 helper 期望先收到 `MapInformation`，实际先收到 `NewItemInfo`，导致 bootstrap 断言失败。
+- Root cause: 角色包含 `ItemInfos` 时，Go Game bootstrap 与 legacy 一样会在地图和用户信息前发送每个物品定义；测试直接复用了只适用于空物品目录的 helper。
+- Prevention: 每个 session fixture 先列出 `ItemInfos` 数量和完整 bootstrap 顺序；含物品定义时逐个消费 `NewItemInfo`，或使用显式支持物品目录的 helper，不能按测试名称猜测首包。
+- Verification: Storage store/take-back JSON transcript 改为消费物品定义后，Storage 定向测试和 Go 全量测试通过。
+
+### 2026-08-11 — apply_patch 新增函数必须立即检查闭合与上下文空行
+
+- Symptom: 通过 patch 插入 Storage 协议测试时，函数末尾闭合大括号遗漏，`gofmt` 在后续函数声明处报告 `expected '('`；多个小 patch 还因空行上下文未标记而被拒绝。
+- Root cause: patch 数组同时承载 JavaScript 字符串、apply_patch 标记和 Go 语法，插入函数前后只核对了行为行，没有检查新增函数的完整括号和空行上下文。
+- Prevention: 新增函数 patch 必须包含并核对完整 `func`/`}`；空行在 hunk 中用带上下文或新增标记显式表示；patch 返回后立即查看目标文件、运行 `gofmt`，再继续扩展功能。
+- Verification: 补齐协议测试闭合后，`gofmt`、协议/auth/server 定向测试通过；继续执行完整 race/vet/build 门禁。
