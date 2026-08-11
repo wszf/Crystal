@@ -215,3 +215,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 相似断言跨多个测试重复出现，patch 没有把 `world.magicAttack` 或测试函数名作为唯一锚点。
 - Prevention: 修改相似测试时先用测试函数名和调用函数组成双重上下文；patch 后立即用 `git diff --` 检查命中位置，再运行最小定向测试，避免依赖单个常量断言定位。
 - Verification: 恢复近战断言、按 `TestGameWorldFireBallEmitsMagicAndDamageTranscript` 唯一上下文重做后，FireBall 定向测试和 `go test ./...` 通过。
+
+### 2026-08-11 — 协议类型命名必须先避开已有 packet 常量
+
+- Symptom: 新增客户端魔法资料结构时，Go 编译器报告 `ClientMagic (constant) is not a type` 和同名类型重复声明。
+- Root cause: `internal/protocol` 已经用 `ClientMagic` 表示客户端 packet ordinal，却在同一包中再次使用该标识符声明 wire 数据类型。
+- Prevention: 新增协议领域类型前先检索同包常量、函数和类型名称；packet ID 保留 legacy 名称，数据结构使用 `ClientMagicInfo` 等不冲突的明确后缀。
+- Verification: 重命名后定向协议/auth/world 测试、Go 全量测试、race、vet 和 build 全部通过。
