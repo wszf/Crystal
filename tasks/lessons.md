@@ -211,10 +211,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-11 — 跨功能测试 patch 必须使用唯一行为锚点
 
-- Symptom: 更新 FireBall 延迟/MP transcript 时，通用的 `Damage != 4` 上下文先误改了相邻的近战测试，导致编译器报告 `worldAttackResult` 没有魔法字段。
-- Root cause: 相似断言跨多个测试重复出现，patch 没有把 `world.magicAttack` 或测试函数名作为唯一锚点。
-- Prevention: 修改相似测试时先用测试函数名和调用函数组成双重上下文；patch 后立即用 `git diff --` 检查命中位置，再运行最小定向测试，避免依赖单个常量断言定位。
-- Verification: 恢复近战断言、按 `TestGameWorldFireBallEmitsMagicAndDamageTranscript` 唯一上下文重做后，FireBall 定向测试和 `go test ./...` 通过。
+- Symptom: 更新 FireBall 延迟/MP transcript 时，通用的 `Damage != 4` 上下文先误改了相邻的近战测试；本轮修改远程 fixture 的同名 HP 行又误改了 melee fixture。
+- Root cause: 相似断言或 fixture 行跨多个测试重复出现，patch 没有把 `world.magicAttack`/`world.rangeAttack` 或测试函数名作为唯一锚点。
+- Prevention: 修改相似测试时先用测试函数名和调用函数组成双重上下文；同一常量在多个 fixture 出现时必须把函数头、地图尺寸和调用一起纳入 patch；patch 后立即用 `git diff --` 检查命中位置，再运行最小定向测试。
+- Verification: 恢复近战 fixture、按 `TestGameWorldRangedAttackUsesTargetPacketAndDamageTranscript` 唯一上下文重做后，远程命中/Miss 定向测试、`go test ./...`、race、vet 和 build 均通过。
 
 ### 2026-08-11 — 协议类型命名必须先避开已有 packet 常量
 
@@ -236,3 +236,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 依赖历史命名假设，没有先用 `find`/`go.mod` 和 Git 根目录确认独立项目的位置；实际项目是同级的 `Crystal.GoServer`。
 - Prevention: 涉及多个仓库时，先在当前目录及同级范围发现 `go.mod`，再分别执行 `git rev-parse --show-toplevel` 和状态检查；后续命令只使用已验证的绝对仓库根目录。
 - Verification: 定位并确认 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 后，格式化、Go 全量测试、竞态测试、`vet`、构建和 `git diff --check` 均通过。
+
+### 2026-08-11 — apply_patch JavaScript 封装必须逐行校验 patch 标记
+
+- Symptom: 通过 `functions.exec` 组装 patch 时，多次因未引用 `@@`/`*** End Patch` 或错误的数组行而出现 JavaScript 语法错误或 patch 解析失败。
+- Root cause: patch 文本和 JavaScript 源码共用一层封装，工具标记没有作为字符串逐行传入；失败后也曾继续沿用同一写法。
+- Prevention: 使用数组拼接 patch 时，`*** Begin/End Patch`、每个 `@@` 和所有上下文行都必须是独立字符串；执行前先检查引号闭合，失败后改用更小的 patch，不把工具成功或失败当成源码状态。
+- Verification: 将配置、world、测试和文档拆成小 patch 后，目标文件 diff 与 `git diff --check` 均正确，Go 定向/全量/race/vet/build 全部通过。
