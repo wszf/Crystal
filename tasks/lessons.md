@@ -222,3 +222,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `internal/protocol` 已经用 `ClientMagic` 表示客户端 packet ordinal，却在同一包中再次使用该标识符声明 wire 数据类型。
 - Prevention: 新增协议领域类型前先检索同包常量、函数和类型名称；packet ID 保留 legacy 名称，数据结构使用 `ClientMagicInfo` 等不冲突的明确后缀。
 - Verification: 重命名后定向协议/auth/world 测试、Go 全量测试、race、vet 和 build 全部通过。
+
+### 2026-08-11 — apply_patch 目标路径必须先验证仓库根目录
+
+- Symptom: 新增协议测试时误把目标路径写成仓库外的相似目录，工具实际创建了一个临时文件，正确仓库没有变化。
+- Root cause: 手写绝对路径时重复了目录片段，调用前没有用当前仓库根目录和目标文件存在性做交叉确认。
+- Prevention: 生成 patch 前先执行 `pwd`/`git rev-parse --show-toplevel`，对新增文件逐项检查目标路径；patch 后立即检查 `git status --short` 和目标文件绝对路径，禁止凭工具成功返回推断命中正确仓库。
+- Verification: 删除误创建的仓库外文件，按正确路径重新创建测试，并通过定向协议/world 测试和 diff 检查。
+
+### 2026-08-11 — 同级迁移仓库路径必须先从实际目录发现
+
+- Symptom: 继续 Go 迁移时先假定 Go 项目位于原仓库内的 `Crystal-Go`，检查命令因工作目录不存在而未启动。
+- Root cause: 依赖历史命名假设，没有先用 `find`/`go.mod` 和 Git 根目录确认独立项目的位置；实际项目是同级的 `Crystal.GoServer`。
+- Prevention: 涉及多个仓库时，先在当前目录及同级范围发现 `go.mod`，再分别执行 `git rev-parse --show-toplevel` 和状态检查；后续命令只使用已验证的绝对仓库根目录。
+- Verification: 定位并确认 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 后，格式化、Go 全量测试、竞态测试、`vet`、构建和 `git diff --check` 均通过。
