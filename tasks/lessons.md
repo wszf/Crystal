@@ -531,3 +531,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只记住了仓库名称，没有复用前面 `git rev-parse --show-toplevel` 得到的绝对路径。
 - Prevention: 所有跨仓库命令（包括只读的 README/文档检索）统一使用已验证的绝对根目录；命令失败后先检查路径和两仓库 status，再继续。
 - Verification: 改用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 后 README/迁移矩阵检查完成，未产生文件修改。
+
+### 2026-08-11 — NPC 响应包不能作为动作执行完成屏障
+
+- Symptom: `SET` 会话测试读到 `ServerNPCResponse` 后立即检查角色旗标，偶发看到旧值并误报迁移失败。
+- Root cause: Go NPC handler 按 legacy transcript 先写响应包，再执行页面 Actions；`net.Pipe` 客户端读到响应时，服务端仍可能在执行 `SET`。
+- Prevention: 会话测试在断言 NPC 动作副作用前发送并消费 `ClientKeepAlive`/`ServerKeepAlive`，把 keep-alive 返回作为当前请求处理完成的屏障。
+- Verification: `SET` + `BREAK` + 下一页面 `CHECK` 会话测试改用 keep-alive 屏障后稳定通过。
