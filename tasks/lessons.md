@@ -341,3 +341,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 跨仓库编辑没有把已确认的绝对仓库根目录和 apply_patch hunk 语法作为调用前的机械检查项。
 - Prevention: 修改前先用 `git rev-parse --show-toplevel`/目标文件存在性确认仓库；patch 数组逐行检查 Begin/End、`@@` 和上下文首字符，失败后立即查看目标仓库 `git status` 与 diff。
 - Verification: 物品协议测试和文档最终都落在 `Crystal.GoServer`，原仓库无误写；ordinal 定向测试、Go 全量校验和 `git diff --check` 作为提交前门禁。
+
+### 2026-08-11 — 物品槽位 transcript 必须逐步计算交换与空位
+
+- Symptom: `MoveItem(0→2)` 后的 P6 端到端测试把原槽 1 物品期望在槽 0，导致 logout 持久化断言失败。
+- Root cause: 只看“移动到目标槽”的直觉，没有按 legacy `array[to] = array[from]`、`array[from] = oldTarget` 逐步推导后续 split 空位和 merge 槽位。
+- Prevention: 物品事务测试先画出每一步的槽位、UniqueID、Count，再断言 split 产生的新槽和 merge 后的空槽；不要只按请求文字推断终态。
+- Verification: 修正 transcript 后，Move/Split/Merge 的 net.Pipe 响应顺序和 JSON logout 持久化状态通过。
