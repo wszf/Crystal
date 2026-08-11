@@ -538,3 +538,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Go NPC handler 按 legacy transcript 先写响应包，再执行页面 Actions；`net.Pipe` 客户端读到响应时，服务端仍可能在执行 `SET`。
 - Prevention: 会话测试在断言 NPC 动作副作用前发送并消费 `ClientKeepAlive`/`ServerKeepAlive`，把 keep-alive 返回作为当前请求处理完成的屏障。
 - Verification: `SET` + `BREAK` + 下一页面 `CHECK` 会话测试改用 keep-alive 屏障后稳定通过。
+
+### 2026-08-11 — 跨仓库并行查询必须按调用拆分
+
+- Symptom: 本轮并行核对 NPC 技能时，其中一条 Go workdir 命令混入了原版 `Shared/Enums.cs` 路径，查询报文件不存在；源码没有被修改，但原版证据检查被打断。
+- Root cause: 并行命令数组只统一设置了一个 workdir，却把两个仓库的相对路径放进同一批查询中。
+- Prevention: 同一批跨仓库查询也必须按仓库拆成独立调用；Go 调用只使用 Go 相对路径，原版调用只使用 Crystal 相对路径，并在输出中保留仓库标识。
+- Verification: 后续原版 enum/NPC 动作查询改用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，Go 协议/运行时查询改用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`。
+
+### 2026-08-11 — NPC 技能重复判断必须以角色技能列表为准
+
+- Symptom: Go 运行时为了兼容无持久化技能的测试玩家可能注入默认 FireBall；如果 GIVESKILL 只检查运行时 `Magics` map，会把默认技能误判为角色已经学习，或在移除时无法与持久化列表对齐。
+- Root cause: 运行时施法表和角色持久化 `Info.Magics` 的职责不同；前者可能包含迁移阶段的 fallback，后者才对应原版 NPC `player.Info.Magics.Any(...)` 判断。
+- Prevention: GIVESKILL/REMOVESKILL 的存在性、索引和持久化更新统一以 `SelectInfo.Magics`/`worldPlayer.Character.Magics` 为源；运行时 map 只负责施法门禁和数值。
+- Verification: NPC 技能 net.Pipe 测试从持久化 FireBall 学习 ThunderBolt、按索引移除 FireBall，并同时断言 auth 与 world 快照一致。
