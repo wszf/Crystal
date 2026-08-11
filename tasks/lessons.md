@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-11 — 迁移状态必须贯通原版导出器与 Go 持久化桥
+
+- Symptom: Refine 的 Go JSON/运行时状态已经支持 `CurrentRefine`，但原版账户导出器没有输出当前强化物品和收取截止时间，跨数据库迁移会丢失进行中的强化任务。
+- Root cause: 只检查了 Go 侧的 JSON bridge 和 logout persistence，没有沿着原版数据库 → .NET exporter → Go JSON → Game stage 的完整链路核对字段与时间单位。
+- Prevention: 每个迁移功能都要同时检查原版持久化字段、导出器字段、Go bridge 字段和运行时恢复逻辑；单调计时器必须在导出时转换成跨进程的绝对时间，并验证零值语义。
+- Verification: `Crystal.LegacyAccountExport` 已补充 Refine workbench/current item/deadline 导出；当前环境没有 .NET SDK，需在具备 SDK 的环境补跑 exporter 编译，Go 验证继续执行全量 test/race/vet/build。
+
+### 2026-08-11 — Refine 概率断言必须逐项代入公式
+
+- Symptom: Refine 材料测试把成功率期望写成 79，实际实现按原版公式得到 94。
+- Root cause: 手算时漏加了幸运项的 5% 和基础成功率的 20%，测试断言没有逐项列出中间结果。
+- Prevention: 写强化概率断言前固定列出材料、矿石、幸运、基础四项及最终减项；涉及整数除法和边界材料时逐项核算后再运行测试。
+- Verification: 修正期望为 94 后，Refine 定向测试通过；后续继续执行全量 Go 测试与竞态验证。
+
 ## Entry format
 
 ```markdown
