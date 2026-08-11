@@ -348,3 +348,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只看“移动到目标槽”的直觉，没有按 legacy `array[to] = array[from]`、`array[from] = oldTarget` 逐步推导后续 split 空位和 merge 槽位。
 - Prevention: 物品事务测试先画出每一步的槽位、UniqueID、Count，再断言 split 产生的新槽和 merge 后的空槽；不要只按请求文字推断终态。
 - Verification: 修正 transcript 后，Move/Split/Merge 的 net.Pipe 响应顺序和 JSON logout 持久化状态通过。
+
+### 2026-08-11 — 装备条件比较必须显式统一整数类型
+
+- Symptom: 新增装备解析时，Go 编译器拒绝 `byte` 的 `RequiredAmount` 与 `uint16` 的角色等级直接比较。
+- Root cause: 协议字段保留 legacy 的 `byte` 宽度，领域角色等级使用 `uint16`，边界比较遗漏了显式转换。
+- Prevention: 从 wire 读取的窄整数进入等级/计数比较前统一转换到领域类型，并在新增条件分支后立即运行定向 `go test`。
+- Verification: 将候选装备等级转换为 `uint16` 后，协议与服务端装备测试通过。
+
+### 2026-08-11 — 装备 fixture 必须填充 legacy 默认关联字段
+
+- Symptom: 装备单测中的物品明明类型、职业和性别都匹配，却被 `WeddingRing != -1` 规则拒绝。
+- Root cause: Go 零值 `WeddingRing=0` 不等于 legacy `UserItem` 构造器的默认 `-1`，测试 fixture 没有显式还原该默认值。
+- Prevention: 构造现代 `StoredItem` fixture 时显式设置所有非零语义默认值，尤其是 `SoulBoundID=-1`、`WeddingRing=-1`、空 sockets/awakening 与耐久度。
+- Verification: 补齐默认字段后，装备/卸下限制、属性刷新和会话 transcript 均通过。
+
+### 2026-08-11 — nil 物品格与空物品格必须区分
+
+- Symptom: 会话装备请求返回失败；原因是持久化的 equipment slice 是非 nil 空数组，默认容量补齐函数只对 nil 生效。
+- Root cause: legacy 14 格默认语义在 Go 中由 `nil` 触发，空 slice 表示一个真实的零长度格子，不能混同为缺省值。
+- Prevention: 对需要默认容量的导入数据传递 nil 或显式补齐 14/46/40 格；测试同时覆盖 nil、空 slice 和正确容量三种输入。
+- Verification: 会话 fixture 改为 nil equipment/quest grids 后，Equip/Remove/Logout transcript 与持久化断言通过。
+
+### 2026-08-11 — 装备阶段跨仓库 patch 目标复发后必须先锁定根目录
+
+- Symptom: 在原 Crystal 仓库工作目录下首次补协议时，patch 错把目标写成 `internal/protocol/item_actions.go`，未命中同级 Go 仓库。
+- Root cause: 已知 Go 仓库是同级目录，却没有在 apply_patch 调用中使用已验证的 `../Crystal.GoServer/...` 目标。
+- Prevention: 每次跨仓库编辑前执行 `git rev-parse --show-toplevel`，再把同一绝对根目录转换为 apply_patch 的相对目标；工具失败后立即检查两仓库 status。
+- Verification: 改用 `../Crystal.GoServer/...` 后所有装备源码、测试和文档均落在 Go 仓库，原仓库没有误写代码。
+
+### 2026-08-11 — 装备 patch 仍需机械校验 hunk 标记
+
+- Symptom: 插入装备会话 case 和测试循环时，JavaScript patch 封装曾因未引用 `*** End Patch`，以及上下文行缺少前导空格而整块拒绝。
+- Root cause: patch 标记、上下文语义和 JavaScript 字符串层级同时手写，调用前没有逐行校验。
+- Prevention: 所有 patch 行先放入已引用的字符串数组；逐行确认 Begin/End、`@@`、上下文空格和新增/删除标记，再调用工具并查看 diff。
+- Verification: 重做小块 patch 后 main handler、会话测试和 `git diff --check` 均通过。
