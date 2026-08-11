@@ -587,3 +587,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: JavaScript patch 字符串和 Go 字符串各有一层转义，写入后没有立即用十六进制/源码读取确认实际字节。
 - Prevention: 生成脚本 fixture 后立刻检查目标行；Go 双引号字符串只保留单层反斜杠 n，跨工具层需要用普通字符串拼接，禁止凭视觉判断转义层级。
 - Verification: 修正为真实换行转义后，GOTO/CALL 与 GOTO 特殊面板测试通过；此前同类换行边界规则继续适用。
+
+### 2026-08-11 — 同一连接重新登录必须清空可见对象缓存
+
+- Symptom: 任务登出后在同一连接重新 StartGame，服务器先发送任务状态，但没有重新发送 NPC 对象；会话验收按启动包序列阻塞。
+- Root cause: logout 已移除 world player，却保留了 session 层 `visibleNPCs`/`visibleMonsters` 集合，下一次刷新把仍存在的静态对象误判为客户端已拥有。
+- Prevention: 任何离开 Game stage 的路径都同时清理 world player、活动 NPC 状态和可见对象缓存；重进验收必须断言静态对象与任务状态都重新 bootstrap。
+- Verification: `TestQuestSessionAcceptFinishAndPersist` 覆盖接取→登出保存→同连接重登恢复→完成→再次登出；Go 全量测试通过。
+
+### 2026-08-11 — .NET exporter 与 Go JSON bridge 必须逐字段核对语义
+
+- Symptom: 导出器把 `CurrentQuests` 写成任务对象列表，而 Go bridge 的同名字段是 `[]int32`，导致真实账户 JSON 无法按预期恢复。
+- Root cause: 只对照了字段名，没有对照字段的元素类型和“ID 列表/详情列表”职责。
+- Prevention: 每增加跨语言字段，必须同时核对 C# 类型、导出 JSON 形状、Go 结构体类型和 round-trip fixture；`currentQuests` 只保存 ID，`questProgress` 保存详情。
+- Verification: 增加 JSON 原始形状断言和加载后进度 round-trip 测试。
+
+### 2026-08-11 — Quest NPC 校验不能信任客户端上下文
+
+- Symptom: Go 实现曾把 `AcceptQuest.NPCIndex` 和当前活动 NPC 作为完成任务的额外条件，导致合法请求可能被拒绝。
+- Root cause: 将“客户端打开了哪个 NPC”误当成了原版 `PlayerObject` 的授权条件；原版按任务定义查找 NPC，只检查当前地图和 DataRange。
+- Prevention: request 中可由客户端伪造的 NPC ID 和 session 中缓存的 active NPC 只用于 UI/script 状态，不参与 Quest accept/finish 授权；回归测试必须覆盖错误 ID 仍能通过。
+- Verification: Quest NPC range/request-ID 测试和同连接重登后的接取/完成会话测试通过。
+
+### 2026-08-11 — 测试断言要区分 normalize 的状态修复与业务进度变化
+
+- Symptom: 对旧版缺少任务明细的进度调用 normalize 后，测试把结构补全误判为“没有变化”或反过来误报业务进度变化。
+- Root cause: 断言只看 `changed` 数量，没有先区分 schema normalization、任务状态变化和实际计数变化。
+- Prevention: 测试同时断言规范化后的 task 数组、计数、完成状态和 packet 语义；不要用一个布尔值代表所有变化。
+- Verification: legacy progress normalization、任务列表和 JSON round-trip 测试覆盖上述边界。
+
+### 2026-08-11 — 工具链格式化必须按语言分组
+
+- Symptom: Quest 收尾时把 C# exporter 文件和 Go 文件一起传给 `gofmt`，命令在 C# 文件处报 `expected 'package'`，导致格式化门禁中断。
+- Root cause: 只按本批改动文件列表执行格式化，没有按扩展名和项目工具链拆分命令。
+- Prevention: 提交前按语言分别运行格式化和编译检查；Go 只交给 `gofmt`，C# 只交给 .NET SDK/对应格式化工具，并在命令失败后确认源码没有被部分修改。
+- Verification: 重跑仅包含 Go 文件的 `gofmt`、`git diff --check`，随后单独检查 .NET SDK 可用性并记录未验证边界。
