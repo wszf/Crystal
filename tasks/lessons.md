@@ -2,6 +2,34 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-12 — 买回数量测试必须区分堆叠上限与当前存量
+
+- Symptom: 买回用例用 `Count=9` 配合 `StackSize=1/5`，加入原版堆叠上限门控后 transcript 等待超时；旧实现因缺少门控反而掩盖了 fixture 错误。
+- Root cause: 把“超过当前存量时截断”误写成“任意超大数量都截断”；原版先拒绝超过 `ItemInfo.StackSize` 的请求，再把合法范围内超过存量的请求截到存量。
+- Prevention: 数量测试同时列出 `request.Count`、`ItemInfo.StackSize`、`stored.Count`；截断场景必须满足 `stored.Count < request.Count <= StackSize`。
+- Verification: 买回用例改为 `9 <= StackSize=10`，UsedGoods 用例改为 `3 < Count=4 <= StackSize=5`，并通过完整 net.Pipe transcript。
+
+### 2026-08-12 — 原版物品价格必须按附加属性数值总量计算
+
+- Symptom: 带多个或负值附加属性的 UsedGoods 买回价格可能与原版不同。
+- Root cause: Go 价格辅助函数曾按附加属性键数量计算；原版 `Stats.Count` 是每个属性值绝对值之和。
+- Prevention: 迁移包含 `Stats` 的物品公式时，先对照 `Stats.Count` 的实现及符号规则，再复用统一的数值总量辅助函数；不要把 map 长度当成属性强度。
+- Verification: 增加附加属性买回价格回归测试，`{2, -3}`、数量 2、单价 1000 得到原版价格 3000。
+
+### 2026-08-12 — 背包持久化断言必须按物品身份而非槽位
+
+- Symptom: `[BUYUSED]` net.Pipe transcript 的购买和登出数据都正确，但测试按 `Inventory[0]` 断言，实际物品被放入原版可用背包区的第 7 格而失败。
+- Root cause: 把背包内部的自动落位策略误当成了对外行为契约；物品加入逻辑会按物品类别选择合法起始槽位。
+- Prevention: 验证跨层物品迁移时按 `UniqueID`、数量、状态和持久化结果断言；只有原版明确固定槽位的 Move/Storage 测试才断言数组索引。
+- Verification: 改为扫描持久化背包查找 `UniqueID` 后，`[BUYUSED]`、UsedGoods 合并/刷新及登出测试通过。
+
+### 2026-08-12 — NPC 商品响应面板与购买请求类型不是同一语义
+
+- Symptom: 初版 `[BUYUSED]` transcript 使用 `PanelType.BuySub` 发送购买请求；静态对照客户端后确认真实客户端会一直发送 `PanelType.Buy`，原版服务端因此会拒绝该初版请求。
+- Root cause: 把 `NPCGoods.Type`（控制客户端显示 BuySub 子面板）误当成 `ClientPackets.BuyItem.Type`（原版购买入口只接受 Buy）。
+- Prevention: 每个双向协议功能分别核对服务端响应字段、客户端发送字段和服务端门控；不能从同名/相近 enum 值推断请求值。
+- Verification: Go 服务端 `[BUYUSED]` 请求门控改为接受 `Buy`，返回仍保持 `BuySub`；net.Pipe transcript 和客户端源码对照均通过。
+
 ### 2026-08-11 — NPC 条件接线必须复用现有依赖并先核对语义字段
 
 - Symptom: 新增 NPC 地图光照条件的服务端定向测试先因使用未导入的 `fmt` 编译失败；随后按相似字段接线时发现 `MAPLIGHT` 被错误映射到地图环境光字节。
