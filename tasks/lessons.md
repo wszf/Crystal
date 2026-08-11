@@ -327,3 +327,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 多个测试包含相同的 `cfg.AllowStartGame`/`cfg.TimeOut` 行，patch 没有把测试函数名和 fixture 一起作为定位条件。
 - Prevention: 修改重复配置时必须把完整测试函数头、关键 fixture 或调用 API 放入 patch 上下文；patch 后先看 `git diff --unified=0` 和所有同名配置行，再运行定向测试。
 - Verification: 已恢复可见性测试原有 2 秒 timeout，仅保留 PvP transcript 的 30 秒 timeout，并重新通过定向测试。
+
+### 2026-08-11 — apply_patch 上下文行首字符必须保留（强化）
+
+- Symptom: 本轮同步 NPC 升级上限时，第一次 patch 把代码上下文行写成了没有前导空格的字符串，工具拒绝整个 hunk；第二次又因文档行未按实际完整句子定位而失败。
+- Root cause: 组装 patch 数组时把 hunk 的上下文语义误当成普通源码文本，且没有先读取目标行的完整前后文；失败后还同时修改多个文件，扩大了定位范围。
+- Prevention: patch 数组中每个上下文行必须显式以一个空格开头，新增/删除行分别以 `+`/`-` 开头；先用 `nl -ba` 或 `sed -n l` 读取精确行，再按单文件、单行为锚点拆 patch，失败后检查 diff 再重试。
+- Verification: 拆分为代码 patch 和文档 patch 后，NPC 会话上限同步及 README/迁移矩阵措辞均正确落盘；后续用 `gofmt`、定向测试和 `git diff --check` 验证。
