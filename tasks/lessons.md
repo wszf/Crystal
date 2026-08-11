@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-11 — 会话测试 fixture 必须复用真实桥接签名
+
+- Symptom: Craft net.Pipe 测试初版调用 UpdateCharacterItems 时少传了一个物品网格参数，并把 mapdata.NewOpen 的宽度变量以 int 传入，导致测试包无法编译。
+- Root cause: 新测试 fixture 是按记忆拼接 helper 调用，没有先读取现有持久化 API 和地图构造函数的完整签名。
+- Prevention: 新增跨层测试 fixture 前先用 rg/源码确认 helper 签名；对 UpdateCharacterItems 明确按 ItemInfos、Inventory、Equipment、QuestInventory 四段传参，地图尺寸在调用边界显式转换为 int32。
+- Verification: 修正后 go test ./cmd/crystal-server -run 'TestCraftSession' -count=1 通过。
+
 ### 2026-08-11 — 迁移状态必须贯通原版导出器与 Go 持久化桥
 
 - Symptom: Refine 的 Go JSON/运行时状态已经支持 `CurrentRefine`，但原版账户导出器没有输出当前强化物品和收取截止时间，跨数据库迁移会丢失进行中的强化任务。
