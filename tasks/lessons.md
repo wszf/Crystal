@@ -313,3 +313,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 用 `!now.Before(...)` 近似了 legacy 的严格 `Envir.Time > BrownTime`，并把 `Guild.IsEnemy(null)` 的 false 语义简化成了双方必须有公会。
 - Prevention: 对照原版条件逐运算符迁移（`Before`/`After` 保持严格边界），并为 null guild、同 guild、敌对 guild、非敌对 guild 分别建立 truth table 和测试。
 - Verification: 增加 BrownTime 相等时刻、敌对公会、非敌对公会和无公会 ally 测试；Go 定向测试通过，提交前继续运行 race、vet、build 和 diff 检查。
+
+### 2026-08-11 — net.Pipe 广播必须并发消费所有接收者
+
+- Symptom: 玩家 PvP 端到端 transcript 在服务端广播攻击和死亡包时挂起。
+- Root cause: `net.Pipe` 没有缓冲；服务端向多个连接顺序写广播包时，尚未被读取的接收者会阻塞后续写入，单独消费一个连接无法推进整个广播。
+- Prevention: 为每个 net.Pipe transcript 列出所有接收者和完整包序列；涉及广播时为每个连接启动并发 reader，或先建立等价的消费屏障，再等待 handler 完成。
+- Verification: `TestSessionPlayerMeleePvPTranscript` 并发消费目标连接的 7 个广播包，PvP 定向测试通过；提交前继续执行 race 测试。
+
+### 2026-08-11 — 重复测试配置必须用函数名锚定 patch
+
+- Symptom: 修复 PvP transcript 的 timeout 时，非唯一上下文曾误改已有可见性测试的 `cfg.TimeOut`。
+- Root cause: 多个测试包含相同的 `cfg.AllowStartGame`/`cfg.TimeOut` 行，patch 没有把测试函数名和 fixture 一起作为定位条件。
+- Prevention: 修改重复配置时必须把完整测试函数头、关键 fixture 或调用 API 放入 patch 上下文；patch 后先看 `git diff --unified=0` 和所有同名配置行，再运行定向测试。
+- Verification: 已恢复可见性测试原有 2 秒 timeout，仅保留 PvP transcript 的 30 秒 timeout，并重新通过定向测试。
