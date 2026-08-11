@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-11 — NPC 条件接线必须复用现有依赖并先核对语义字段
+
+- Symptom: 新增 NPC 地图光照条件的服务端定向测试先因使用未导入的 `fmt` 编译失败；随后按相似字段接线时发现 `MAPLIGHT` 被错误映射到地图环境光字节。
+- Root cause: 接线前没有先检查主文件已有的字符串转换依赖，也没有从原版 `Envir.AdjustLights`/`MAPLIGHT` 实现确认它比较的是全局 `LightSetting` 名称。
+- Prevention: 新增运行时字段前先复用当前文件已有标准库依赖；每个条件从原版 parser、context 数据源和 evaluator 三处逐字段核对，禁止按同名/相似字段推断语义。
+- Verification: 改用已有 `strconv`，并按 `Dawn/Day/Evening/Night` 的原版时间规则实现；纯条件、光照规则和 net.Pipe NPC 会话定向测试均通过。
+
+### 2026-08-11 — apply_patch hunk 的上下文行必须显式标记
+
+- Symptom: 修改 NPC 条件测试时，第一次 patch 因未给上下文行添加空格/加号标记而被工具拒绝。
+- Root cause: 手写 patch 时把普通源码行当成了未标记的 hunk 内容，没有遵守 unified diff 的上下文格式。
+- Prevention: 通过工具封装 patch 前，所有保留行都以空格开头，删除行以 `-` 开头，新增行以 `+` 开头；patch 失败后先重新读取目标文件，不假设变更已经落盘。
+- Verification: 按稳定锚点拆分 patch 后，四个 Go 文件的 diff、gofmt、定向测试和 `git diff --check` 均通过。
+
 ### 2026-08-11 — 会话测试 fixture 必须复用真实桥接签名
 
 - Symptom: Craft net.Pipe 测试初版调用 UpdateCharacterItems 时少传了一个物品网格参数，并把 mapdata.NewOpen 的宽度变量以 int 传入，导致测试包无法编译。
