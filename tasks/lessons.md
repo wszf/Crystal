@@ -299,3 +299,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `world.magicAttack`/`world.tick` 只构造并返回 `worldNotification`，不会自动调用 `deliverWorldNotifications`；测试只检查返回 slice，没有执行投递层。
 - Prevention: 需要验证实际客户端包时，先断言 world 返回的通知 transcript，再显式调用 `deliverWorldNotifications`，最后检查 Send capture；不要把返回通知误认为已经写入连接。
 - Verification: 补齐 cast/impact 两段通知投递后，目标/施法者 packet 顺序断言通过，且全量 race 测试通过。
+
+### 2026-08-11 — functions.exec 封装 patch 前必须先校验字符串和工作目录
+
+- Symptom: 本轮协议、auth、world 和 main 的多个 patch 曾因 JavaScript 数组中遗漏字符串引号、未引用 patch 结束标记或把加号写成数组外表达式而未执行；一次检索还因 workdir 重复目录导致进程无法创建。
+- Root cause: patch 文本、JavaScript 语法和跨仓库绝对路径同时手写，没有在调用前做逐行 hunk 标记检查、JavaScript 语法检查和仓库根目录复核。
+- Prevention: 组装 patch 时所有 Begin/End、@@、上下文和新增行都必须是独立字符串；调用前检查每个 hunk 行首字符属于空格、加号或减号，并复用已确认的绝对仓库根目录；工具失败后立即检查目标文件，不把失败返回当成部分成功。
+- Verification: 重新按数组字符串逐行修正后，protocol/auth/world/main 修改均落在 Go 仓库，gofmt 与 protocol/auth/world 定向测试通过；后续继续执行全量检查。
+
+### 2026-08-11 — PvP 友方规则必须保留 legacy 的严格时间和空公会语义
+
+- Symptom: 复核攻击模式迁移时发现 Red/Brown 在 `BrownTime` 恰好到期时被 Go 判为友方；EnemyGuild 对无公会施法者也被错误判为非友方。
+- Root cause: 用 `!now.Before(...)` 近似了 legacy 的严格 `Envir.Time > BrownTime`，并把 `Guild.IsEnemy(null)` 的 false 语义简化成了双方必须有公会。
+- Prevention: 对照原版条件逐运算符迁移（`Before`/`After` 保持严格边界），并为 null guild、同 guild、敌对 guild、非敌对 guild 分别建立 truth table 和测试。
+- Verification: 增加 BrownTime 相等时刻、敌对公会、非敌对公会和无公会 ally 测试；Go 定向测试通过，提交前继续运行 race、vet、build 和 diff 检查。
