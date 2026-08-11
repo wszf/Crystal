@@ -439,3 +439,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: patch 数组同时承载 JavaScript 字符串、apply_patch 标记和 Go 语法，插入函数前后只核对了行为行，没有检查新增函数的完整括号和空行上下文。
 - Prevention: 新增函数 patch 必须包含并核对完整 `func`/`}`；空行在 hunk 中用带上下文或新增标记显式表示；patch 返回后立即查看目标文件、运行 `gofmt`，再继续扩展功能。
 - Verification: 补齐协议测试闭合后，`gofmt`、协议/auth/server 定向测试通过；继续执行完整 race/vet/build 门禁。
+
+### 2026-08-11 — 跨仓库绝对路径必须复用已验证根目录
+
+- Symptom: 本轮补 Trade 溢出邮件时，apply_patch 首次把 Go 仓库路径写成了重复目录，工具找不到目标文件，补丁未落地。
+- Root cause: 已知 Go 仓库真实根目录为 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，但调用时凭记忆手写路径，未在 patch 前交叉验证目标文件。
+- Prevention: 跨仓库修改前先执行 `git rev-parse --show-toplevel` 和目标文件存在性检查；apply_patch 只使用该输出生成的绝对路径，失败后立即检查两仓库 status，禁止凭工具错误/成功推断源码状态。
+- Verification: 改用已验证路径后 StoredMail、auth 持久化、Trade fallback 和测试均正确落在 Go 仓库；定向 Go 测试、竞态测试和 `git diff --check` 通过。
