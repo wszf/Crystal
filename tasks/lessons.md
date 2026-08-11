@@ -64,10 +64,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-11 — 通过脚本封装 apply_patch 时必须处理 Markdown 反引号
 
-- Symptom: 更新 lessons 文本时，新增测试前置状态条目仍因使用 JavaScript 模板字符串承载反引号而未执行 patch。
-- Root cause: 已知道 patch 含反引号，却在实际调用时仍选择了模板字符串，说明预防步骤没有在工具调用前落实。
-- Prevention: 只要 patch 文本包含反引号，就禁止使用模板字符串；在调用前直接选择普通字符串数组拼接，代码 fixture 使用显式转义字符串，并在工具返回后检查目标文件。
-- Verification: 改用普通字符串数组后 lessons patch 成功应用，随后检查新增条目和工作区差异；条件 NPC 定向测试、文档差异检查和 Go 全量测试均通过。
+- Symptom: 本轮更新 NPCAction 模型时，包含 JSON struct tag 的 patch 又因使用 JavaScript 模板字符串承载反引号而未执行。
+- Root cause: 预防规则只在新增 lessons 时落实，代码 patch 仍沿用了模板字符串；工具封装层和源码问题没有区分处理。
+- Prevention: 所有包含 struct tag、Markdown 或 raw-string 内容的 patch 都禁止模板字符串；统一用普通字符串数组拼接，或拆成不含反引号的稳定锚点 patch，并在工具返回后检查目标文件。
+- Verification: 改用稳定锚点 patch 后 NPC 消息动作实现成功，parser/端到端定向测试、Go 全量 race/vet/build、文档差异检查均通过。
 
 ### 2026-08-11 — .NET 工具必须单独标注未编译验证
 
