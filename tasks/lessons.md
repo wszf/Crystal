@@ -474,3 +474,18 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 依赖二手摘要和心算，没有从完整 `ClientPacketIds` 枚举以及 C# `float` 截断规则分别建立证据和计算表。
 - Prevention: 新增 packet 先从完整 `Shared/Enums.cs` 计算 ordinal 并加入显式 legacy wants；涉及金额时按原版字段类型、运算顺序、截断点和每一步余额写出 transcript，再填写断言。
 - Verification: 原版核对确认 `RepairItem=54`、`SRepairItem=56`；协议 ordinal/payload 测试与普通/特殊 Repair net.Pipe transcript 通过，费用断言分别为 93 和 375。
+
+### 2026-08-11 — 跨仓库只读检索也必须使用对应根目录
+
+- Symptom: 本轮把原版 `Shared`/`Server` 检索路径放在 Go 仓库工作目录下，命令报路径不存在；源码没有被修改，但检查结果不完整。
+- Root cause: 只确认了 Go 仓库的 workdir，没有为同一批跨仓库命令分别绑定原版 Crystal 根目录和 Go 根目录。
+- Prevention: 跨仓库读写前分别执行 `git rev-parse --show-toplevel`，并让每条命令的 workdir 与目标文件所属仓库一致；不要在一个仓库 workdir 中访问另一个仓库的相对路径。
+- Verification: 后续原版查询统一使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，Go 查询统一使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，并在修改前检查两个仓库的 status。
+- Strengthening after recurrence: 禁止在同一条 `exec_command` 中混合两个仓库的相对路径；需要跨仓库时拆成独立调用，并在输出中保留仓库标识。
+
+### 2026-08-11 — 商店会话 fixture 必须恢复 RentalInformation 元数据
+
+- Symptom: NPC 商店 Sell 失败门禁测试预期 Rental `DontSell` 返回普通失败包，但测试先收到“此处不能出售该物品”的类型限制聊天包。
+- Root cause: fixture 只创建了 Rental 对应的 `ItemInfo`，没有把 `RentalInformation.BindingFlags=DontSell` 挂到实际背包物品；服务端因此按 `[TYPES]` 分支处理了它。
+- Prevention: 测试 legacy 物品绑定规则时分别核对 definition 级 `ItemInfo.Bind`、instance 级 `StoredItem.RentalInformation.BindingFlags` 和 NPC 的 `[TYPES]`，不要只按索引命名推断 fixture 已具备语义元数据。
+- Verification: 为实际 Rental item 补齐 binding flags 后，DontSell、Rental DontSell、类型限制的 net.Pipe transcript 与全量 Go 测试通过。
