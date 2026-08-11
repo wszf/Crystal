@@ -489,3 +489,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: fixture 只创建了 Rental 对应的 `ItemInfo`，没有把 `RentalInformation.BindingFlags=DontSell` 挂到实际背包物品；服务端因此按 `[TYPES]` 分支处理了它。
 - Prevention: 测试 legacy 物品绑定规则时分别核对 definition 级 `ItemInfo.Bind`、instance 级 `StoredItem.RentalInformation.BindingFlags` 和 NPC 的 `[TYPES]`，不要只按索引命名推断 fixture 已具备语义元数据。
 - Verification: 为实际 Rental item 补齐 binding flags 后，DontSell、Rental DontSell、类型限制的 net.Pipe transcript 与全量 Go 测试通过。
+
+### 2026-08-11 — 新协议 patch 必须以当前常量表为唯一上下文
+
+- Symptom: TownRevive 协议 patch 把尚未存在的 `ClientChangeHero` 当作 Go 常量表上下文，apply_patch 被拒绝；目标文件没有部分修改。
+- Root cause: 直接套用了原版 enum 的相邻名称，没有先读取 Go 当前已迁移常量的精确范围。
+- Prevention: 新增 packet ordinal 时先从完整原版 enum 锁定数值，再从目标 Go 文件读取真实相邻标识；只使用当前存在的单行稳定锚点，patch 失败后立即检查 diff/status。
+- Verification: 改用 `ServerUserStorage`、`ServerObjectRevived` 和当前存在的客户端常量作为锚点后继续实现，并在定向协议测试中同时断言 legacy ordinal。
+
+### 2026-08-11 — TownRevive 回归验证必须检查 fixture 与仓库边界
+
+- Symptom: PK Town 配置测试初版把换行写成字面量标记；本轮多个 `functions.exec` patch wrapper 又出现漏引号/漏 hunk 标记；一次只读检索还使用了不完整的 Go 仓库路径。
+- Root cause: 测试 fixture、JavaScript patch 字符串和跨仓库 workdir 都依赖手写文本，调用前没有逐层检查实际文件内容、hunk 首字符和仓库根目录。
+- Prevention: 写入后用源码读取确认 fixture 的真实转义层级；patch 先逐行检查字符串引号、`*** Begin/End Patch`、`@@` 及上下文前导空格；跨仓库命令分别使用已验证的绝对根目录，禁止混用相对路径。
+- Verification: 修正 fixture 后 config/TownRevive 定向测试和 Go 全量 test/race/vet/build 通过；每次工具调用后均检查对应仓库 status/diff，未发生跨仓库误写。
