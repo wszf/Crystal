@@ -208,3 +208,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: fixture 只设置了金币，却忘记 CreateCharacter 的默认等级是 1；测试场景期望等级条件 LEVEL >= 2 成功。
 - Prevention: 每个条件 transcript 在启动会话前显式写入并断言等级、金币、性别、职业、地图和坐标等前置状态，不依赖创建默认值。
 - Verification: 显式写入等级 2 后，低金币 ELSE 和满足等级/金币 SUCCESS 两条 net.Pipe 路径均通过，且 race 全量测试通过。
+
+### 2026-08-11 — 跨功能测试 patch 必须使用唯一行为锚点
+
+- Symptom: 更新 FireBall 延迟/MP transcript 时，通用的 `Damage != 4` 上下文先误改了相邻的近战测试，导致编译器报告 `worldAttackResult` 没有魔法字段。
+- Root cause: 相似断言跨多个测试重复出现，patch 没有把 `world.magicAttack` 或测试函数名作为唯一锚点。
+- Prevention: 修改相似测试时先用测试函数名和调用函数组成双重上下文；patch 后立即用 `git diff --` 检查命中位置，再运行最小定向测试，避免依赖单个常量断言定位。
+- Verification: 恢复近战断言、按 `TestGameWorldFireBallEmitsMagicAndDamageTranscript` 唯一上下文重做后，FireBall 定向测试和 `go test ./...` 通过。
