@@ -566,3 +566,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 运行时施法表和角色持久化 `Info.Magics` 的职责不同；前者可能包含迁移阶段的 fallback，后者才对应原版 NPC `player.Info.Magics.Any(...)` 判断。
 - Prevention: GIVESKILL/REMOVESKILL 的存在性、索引和持久化更新统一以 `SelectInfo.Magics`/`worldPlayer.Character.Magics` 为源；运行时 map 只负责施法门禁和数值。
 - Verification: NPC 技能 net.Pipe 测试从持久化 FireBall 学习 ThunderBolt、按索引移除 FireBall，并同时断言 auth 与 world 快照一致。
+
+### 2026-08-11 — NPC 链式页必须逐页执行特殊面板
+
+- Symptom: GOTO/CALL 初版只在整条链最后按 active page 发送 shop/repair/refine 面板，链中间进入功能页时客户端只能收到文本，缺少对应功能包。
+- Root cause: 控制流 job 队列只复用了页面文本和 actions，特殊页处理仍留在原请求末尾，没有随每个 job 的生命周期执行。
+- Prevention: 把 NPC 页处理拆成“选择响应 → 执行动作/追加链 → 当前页特殊处理”，每个链式 job 都按自身 page key 跑 shop、repair、refine、storage 和 collect 分支，并分别锁定包序列。
+- Verification: 新增 GOTO 到 refine 页和自循环上限的 net.Pipe 测试；现有 shop、repair、refine、storage 测试和控制流测试均通过。
+
+### 2026-08-11 — 无响应门禁测试不能调用 writeAndRead
+
+- Symptom: 为验证 CALL 外部脚本的 active-script 页面门禁时，测试使用 writeAndRead 发送应被忽略的请求，net.Pipe 一直等待响应并触发超时。
+- Root cause: 被拒绝的 NPC 请求按协议不会产生响应，writeAndRead 的读取步骤只能用于必有响应的请求。
+- Prevention: 无响应断言只编码并写入请求，再发送一个确定有响应的 KeepAlive 作为处理完成屏障；需要包序列时显式区分忽略请求和响应请求。
+- Verification: active-script 越权页测试改为 raw write + KeepAlive，定向控制流测试在 15 秒门禁内稳定通过。
+
+### 2026-08-11 — NPC 脚本 fixture 必须检查源码实际反斜杠层级
+
+- Symptom: 新增链式 refine fixture 时把双反斜杠 n 写成了 Go 源码中的双反斜杠，解析器看见字面量换行标记，测试在读取链式响应时阻塞。
+- Root cause: JavaScript patch 字符串和 Go 字符串各有一层转义，写入后没有立即用十六进制/源码读取确认实际字节。
+- Prevention: 生成脚本 fixture 后立刻检查目标行；Go 双引号字符串只保留单层反斜杠 n，跨工具层需要用普通字符串拼接，禁止凭视觉判断转义层级。
+- Verification: 修正为真实换行转义后，GOTO/CALL 与 GOTO 特殊面板测试通过；此前同类换行边界规则继续适用。
