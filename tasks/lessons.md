@@ -383,3 +383,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: patch 标记、上下文语义和 JavaScript 字符串层级同时手写，调用前没有逐行校验。
 - Prevention: 所有 patch 行先放入已引用的字符串数组；逐行确认 Begin/End、`@@`、上下文空格和新增/删除标记，再调用工具并查看 diff。
 - Verification: 重做小块 patch 后 main handler、会话测试和 `git diff --check` 均通过。
+
+### 2026-08-11 — UseItem/DeleteItem transcript 必须区分副作用与回显字段
+
+- Symptom: 迁移物品使用时，若把普通药水当作即时治疗，或把 DeleteItem 的实际裁剪数量写回响应，会与原版客户端可观察行为不一致。
+- Root cause: legacy `UseItem` 对普通药水只累加恢复池、太阳水按 `ChangeHP` → `ChangeMP` 顺序产生健康包；`PlayerObject.DeleteItem` 在构造响应后才裁剪 `Count`，因此响应仍回显请求值。
+- Prevention: 新增物品动作先从原版 handler、领域副作用方法和客户端响应处理共同列出完整 transcript；分别保存“实际状态变化”和“wire 回显字段”，并为每个分支增加 net.Pipe 顺序断言。
+- Verification: 协议布局、普通/太阳水单测、太阳水健康包顺序、删除超量回显和 logout JSON 持久化测试通过。
