@@ -239,7 +239,7 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-11 — apply_patch JavaScript 封装必须逐行校验 patch 标记
 
-- Symptom: 通过 `functions.exec` 组装 patch 时，多次因未引用 `@@`/`*** End Patch` 或错误的数组行而出现 JavaScript 语法错误或 patch 解析失败。
-- Root cause: patch 文本和 JavaScript 源码共用一层封装，工具标记没有作为字符串逐行传入；失败后也曾继续沿用同一写法。
-- Prevention: 使用数组拼接 patch 时，`*** Begin/End Patch`、每个 `@@` 和所有上下文行都必须是独立字符串；执行前先检查引号闭合，失败后改用更小的 patch，不把工具成功或失败当成源码状态。
-- Verification: 将配置、world、测试和文档拆成小 patch 后，目标文件 diff 与 `git diff --check` 均正确，Go 定向/全量/race/vet/build 全部通过。
+- Symptom: 通过 `functions.exec` 组装 patch 时，多次因未引用 `@@`/`*** End Patch` 或错误的数组行出现 JavaScript 语法错误；本轮 GreatFireBall/ThunderBolt 文档和测试 patch 又重复了同类失败。
+- Root cause: patch 文本和 JavaScript 源码共用一层封装，工具标记没有作为字符串逐行传入；修正后仍有调用使用了未闭合或未引用的 marker。
+- Prevention: 使用数组拼接 patch 时，`*** Begin/End Patch`、每个 `@@`、每个上下文行都必须是独立字符串；先完成 `const patch = [...].join("\\n")` 的语法检查，再调用工具，失败后改用更小 patch，不把工具返回当成源码状态。
+- Verification: 将配置、world、远程/魔法测试和文档拆成小 patch 后，目标文件 diff 与 `git diff --check` 均正确；`go test ./...`、race、vet、build 全部通过，GreatFireBall/ThunderBolt 提交为 `46732e4`。
