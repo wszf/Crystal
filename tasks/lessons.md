@@ -643,3 +643,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: JavaScript 工具封装中的绝对路径是手写的，提交前没有检查目标文件是否存在；复杂 Markdown/raw 内容也容易遗漏 End Patch 闭合标记。
 - Prevention: 调用 apply_patch 前先确认绝对路径和目标文件；多行 Markdown/raw 内容使用普通字符串数组拼接，明确包含 Begin Patch/End Patch，并在返回后读取文件确认落盘。
 - Verification: 修正路径后 lessons 成功追加；随后 git diff --check 通过。
+
+### 2026-08-12 — 会话测试账号必须符合认证层字符约束
+
+- Symptom: RequiredGroup net.Pipe 测试使用带连字符的账号 ID，登录在测试 fixture 阶段被认证层拒绝，无法到达地图门禁断言。
+- Root cause: 测试 fixture 只关注业务语义，没有先复用认证 parser 对账号 ID 的字符集约束。
+- Prevention: 新增会话测试账号先从认证校验和现有 fixture 归纳合法字符集；优先使用仅含小写字母和数字的稳定 ID，不把非法账号错误归因于业务功能。
+- Verification: 改用 `requiredgroup`/`rgleader` 等合法 ID 后，RequiredGroup 普通、登录恢复、多会话测试通过。
+
+### 2026-08-12 — 跨会话地图变更必须延迟同步 session 局部状态
+
+- Symptom: 组员被动离组时，world 已经把玩家移回安全地图，但直接在其他 session 回调里修改 `activeMap`/坐标会与主循环并发访问，且可能遗漏静态可见对象刷新。
+- Root cause: world 通知在调用方或 ticker goroutine 投递，session 局部状态只应由所属读循环拥有；地图切换的 wire transcript 与本地状态提交被混在一个回调里。
+- Prevention: 回调只发送换图包并把 transition 放入 mutex 保护的 pending 状态；所属 session 在下一次读包前统一更新地图、坐标、角色快照、持久化和静态可见对象。
+- Verification: 双 net.Pipe 会话覆盖 DeleteGroup、ObjectRemove、MapChanged、UserLocation、ObjectPlayer、Chat 顺序；普通/race/vet/build 全部通过。
+
+### 2026-08-12 — 地图门禁失败路径必须保持事务性
+
+- Symptom: TownRevive 先恢复 HP、ENTERMAP 先清空 pending 目的地，再检查 RequiredGroup 时，失败请求会留下不可见的生命值或入口状态变化。
+- Root cause: 业务动作的副作用早于目标地图资格校验提交，失败结果没有回滚。
+- Prevention: 所有 RequiredGroup 入口先完成地图存在、坐标和组人数校验；成功后才写回 HP/坐标，ENTERMAP 只有非门禁失败时才消费 pending 目的地。
+- Verification: RequiredGroup world 测试断言 TownRevive 不恢复 HP、ENTERMAP 保留 pending；全量 Go 门禁通过。
