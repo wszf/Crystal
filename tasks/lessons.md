@@ -313,6 +313,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: patch 封装层的字符串标记没有逐行复核，且相似文案没有在修改前用文件名和行号确认唯一目标。
 - Prevention: Markdown patch 使用双引号数组逐行拼接，避免把 `+` 放在字符串外；调用前逐项检查每个 hunk 行都以空格、`+` 或 `-` 开始，新增行不得遗漏 `+`；每次只修改一个文件，先用 `nl -ba`/`sed -n l` 核对完整行，再按文件分别检查 `git diff`。
 - Verification: README 与 `docs/migration-matrix.md` 已分别按精确上下文更新，`git diff --check` 和 Go 全量测试通过；本轮复发后已强化 hunk 首字符检查规则。
+- Strengthening after recurrence: 删除 Markdown 列表项时，patch 行必须以两个连字符开头（第一个是 diff 删除标记，第二个是文档列表标记）；上下文列表项必须以空格再接连字符开头。应用前按“patch 标记 + 文档内容”两层机械检查。
 
 ### 2026-08-11 — 多观察者战斗 transcript 必须展开接收者数量
 
@@ -650,6 +651,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只按本批改动文件列表执行格式化，没有按扩展名和项目工具链拆分命令。
 - Prevention: 提交前按语言分别运行格式化和编译检查；Go 只交给 `gofmt`，C# 只交给 .NET SDK/对应格式化工具，并在命令失败后确认源码没有被部分修改。
 - Verification: 重跑仅包含 Go 文件的 `gofmt`、`git diff --check`，随后单独检查 .NET SDK 可用性并记录未验证边界。
+- Strengthening after recurrence: Mail 收尾再次把 `Program.cs` 放入 `gofmt` 参数后，禁止直接复用“全部改动文件”作为格式化输入；必须先按 `.go` 扩展名生成或人工核对参数清单，C# exporter 另行探测 `dotnet`/`csc`/`mcs`，本轮已用显式 Go 文件清单完成格式化。
 
 ### 2026-08-11 — 断线广播不能被失效连接短路
 
@@ -699,3 +701,52 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 领域层的背包操作会原地修改传入 `StoredItem`；网络 payload 不能直接引用会被后续事务改变的对象。
 - Prevention: 所有会调用 `addCharacterItem`、堆叠合并或删除的路径，在第一次状态变更前复制独立的 packet snapshot；测试同时断言内部持久化数量和线上的 `GainedItem.Count`。
 - Verification: NPC 商店普通购买和 `[BUYBACK]` 会话 transcript 均断言数量/UniqueID，Go 全量 test、race、vet、build 和 `git diff --check` 通过。
+
+### 2026-08-12 — 邮件落库与在线到达 transcript 必须分别验收
+
+- Symptom: 玩家邮件和交易溢出邮件已经写入收件箱，但在线客户端只收到 `ReceiveMail` 或完全没有即时刷新，缺少原版 `NewMail` 系统聊天及完整附件定义顺序。
+- Root cause: 只沿持久化状态验证了 `MailInfo.Send` 的结果，没有迁移 `NewMail -> Process -> ReceiveChat -> CheckItem -> GetMail` 这条在线可观察链路。
+- Prevention: 每个创建邮件的入口同时验收离线存储和在线 `Chat -> NewItemInfo* -> ReceiveMail` transcript；跨会话只生成通知快照，释放 world/mail 锁后再写连接。
+- Verification: 普通邮件、带邮票附件邮件、交易取消溢出邮件测试均断言到达顺序，Mail 定向普通与 race 测试通过。
+
+### 2026-08-12 — 禁邮标志不能合并成一个通用失败分支
+
+- Symptom: Go 初版把 `DontTrade`、`NoMail` 和 Rental `DontTrade` 都返回通用聊天加 `MailSent(-1)`，且聊天文本没有附带 legacy FriendlyName。
+- Root cause: 只迁移了“物品不可邮寄”的领域结论，没有逐分支对照原版的聊天文本、FriendlyName 清洗和是否发送失败结果包。
+- Prevention: 失败分类必须保留 definition/rental 标志来源；按原版先 trailing-digits、后方括号清洗名称，并分别锁定 `DontTrade`/Rental 仅 Chat、`NoMail` 为 Chat 加 `MailSent(-1)`。
+- Verification: net.Pipe 会话分别覆盖 definition `DontTrade`、`NoMail` 和 Rental `DontTrade`，断言精确默认英文、差异化包序列和失败后背包状态；全量普通/race 测试通过。
+
+### 2026-08-12 — 全局邮件锁不得跨网络写包
+
+- Symptom: Refine 取消的误迁移邮件分支曾用 `defer` 释放 `mailMu`，导致后续取消结果包也可能在全局邮件锁内写入；慢客户端会阻塞其他邮件、交易和登出路径。
+- Root cause: 锁的作用域按整个函数设置，而真正需要原子保护的只有邮件持久化及 world 快照同步。
+- Prevention: `mailMu` 只包围邮件状态读取/提交，并保持 `mailMu -> world.mu` 顺序；在任何 `writePacket`、跨会话 Send 或日志保存前显式释放。
+- Verification: 删除不符合原版可达语义的 Refine 邮件分支；其余 Mail/Trade 路径均先生成快照或通知、释放 `mailMu`，再执行网络投递。
+
+### 2026-08-12 — 迁移分支必须证明可达性而非补全注释意图
+
+- Symptom: Go 把 Refine 取消时“最后一个空槽被前一物品占用”的后续物品自动邮寄，并准备补发新邮件通知；原版此时不会进入邮寄分支，而会把物品保留在 Refine 工作台。
+- Root cause: 只根据 `RefineCancel` 中的邮寄注释和 `MailInfo.Send` 推断意图，没有把外层空槽循环与 `CanGainItem` 的实现合并做可达性分析；原版只在先找到空槽后调用 `CanGainItem`，而后者发现任意空槽就直接返回 true。
+- Prevention: 对看似存在的 legacy 分支同时核对调用条件、循环边界和被调函数，并构造状态表证明分支可达；不可达意图不能替代客户端实际可观察行为。
+- Verification: Go 现在只为找到空槽的 Refine 物品发送 `RetrieveRefineItem`，背包填满后的后续物品继续留在工作台；单元测试和交互取消→KeepAlive→登出持久化 transcript 均通过。
+
+### 2026-08-12 — 启动包排序必须区分角色物品与功能定义阶段
+
+- Symptom: Quest 会话测试仍要求三个任务物品定义出现在 `MapInformation` 前，并一度准备把 Quest/Recipe 所需定义全部提前到地图包之前。
+- Root cause: 把 Go bridge 的 `SelectInfo.ItemInfos` 目录与世界级 Quest/Recipe 定义混为一谈，没有沿 legacy `StartGameSuccess` 的实际调用顺序核对：`GetItemInfo` 只遍历角色三类物品格，随后才是 `GetMapInfo -> GetUserInfo -> GetQuestInfo -> GetRecipeInfo`；Recipe 的关联物品定义也由后置的 `CheckRecipeInfo` 发送。
+- Prevention: 修改 bootstrap 顺序前同时列出 `StartGameSuccess` 调用链、每个 helper 的真实遍历范围和 FIFO `Enqueue` 行为；不能因为包都叫 `NewItemInfo` 就把不同来源统一提前。
+- Verification: Quest 首次登录 transcript 改为 `MapInformation -> UserInformation -> quest NewItemInfo* -> NewQuestInfo`，通用 bootstrap 状态机继续区分角色物品和功能定义阶段；Go 全量普通/race 测试、vet、build 与 diff 检查通过。
+
+### 2026-08-12 — 定时协议常量必须先查完整枚举
+
+- Symptom: 启动状态机补任务定时包时曾使用不存在的 `protocol.ServerQuestExpired`，导致新增测试无法编译。
+- Root cause: 按业务语义猜测了包名，没有先检索 legacy `ServerPacketIds` 和 Go 常量表；实际任务计时使用通用 `ServerSetTimer`。
+- Prevention: 新增 transcript 常量前先用 `rg` 同时核对 legacy enum、packet class 和 Go 常量，并在同一修改中补显式 ordinal 断言；禁止从功能名称推导常量名。
+- Verification: bootstrap helper 现在只接受已核实的 `ServerSetTimer`/`ServerChangeQuest`，协议和服务端全量门禁通过。
+
+### 2026-08-12 — 持久化物品目录不能代替连接级已发送状态
+
+- Symptom: Quest 定义在第一次登录顺序正确，但定义被写入 `SelectInfo.ItemInfos` 后，重登会把全部定义错误提前到 `MapInformation` 前；Mail 附件也可能因目录中已有定义而跳过其应位于 `ReceiveMail` 前的 `NewItemInfo`。
+- Root cause: `gameItemCatalog` 同时承担服务端持久化定义目录和客户端当前连接已知集合；前者跨登录保留，后者必须随每次 StartGame 清空，两者语义不能合并。
+- Prevention: 每个连接维护独立、并发安全的 sent-item-info 集合；初始角色格、Quest、Recipe、Mail、NPC 商品和显式 RequestItemInfo 各按原版阶段检查并标记，目录是否已有定义只决定服务端是否追加，不能决定是否发包。
+- Verification: Quest 重登锁定“当前携带定义 → Map/User → 其余 Quest 定义”，Mail 嵌套附件锁定“CompleteQuest → NewItemInfo* → ReceiveMail”，UsedGoods 与重复 RequestItemInfo transcript 通过；Go 全量 test、race、vet、build 和 `git diff --check` 全部通过。
