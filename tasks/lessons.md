@@ -232,10 +232,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-11 — 同级迁移仓库路径必须先从实际目录发现
 
-- Symptom: 继续 Go 迁移时先假定 Go 项目位于原仓库内的 `Crystal-Go`，检查命令因工作目录不存在而未启动。
-- Root cause: 依赖历史命名假设，没有先用 `find`/`go.mod` 和 Git 根目录确认独立项目的位置；实际项目是同级的 `Crystal.GoServer`。
-- Prevention: 涉及多个仓库时，先在当前目录及同级范围发现 `go.mod`，再分别执行 `git rev-parse --show-toplevel` 和状态检查；后续命令只使用已验证的绝对仓库根目录。
-- Verification: 定位并确认 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 后，格式化、Go 全量测试、竞态测试、`vet`、构建和 `git diff --check` 均通过。
+- Symptom: 继续 Go 迁移时先假定 Go 项目位于原仓库内的 `Crystal-Go`，本轮竞态命令又因手写成重复的 `Dropbox/Dropbox` 而未启动。
+- Root cause: 跨仓库命令没有在执行前复用已核对的绝对根目录，路径依赖手写和历史命名假设。
+- Prevention: 涉及多个仓库时，先发现 `go.mod` 并执行 `git rev-parse --show-toplevel`；将输出的绝对根目录作为后续所有命令的唯一 `workdir`，不手写拼接路径。
+- Verification: 使用已确认的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 重跑后，格式化、Go 全量测试、竞态测试、`vet`、构建和 `git diff --check` 均通过。
 
 ### 2026-08-11 — apply_patch JavaScript 封装必须逐行校验 patch 标记
 
@@ -257,6 +257,20 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 每个目标的 `ObjectStruck`/`DamageIndicator` 会分别发送给范围内的施法者和观察者，测试只按目标数计算，没有乘以接收者数。
 - Prevention: 编写广播型战斗 transcript 时先列出目标数、每目标包数和每个范围内接收者，再按发送顺序断言总数与关键 payload；私有包和广播包分开计算。
 - Verification: 修正 MeteorShower 期望为 12 条后，定向测试通过，并将继续运行 race/vet/build 全量校验。
+
+### 2026-08-11 — 怪物 fixture 不应假设 spawn 输入顺序
+
+- Symptom: ThunderStorm/FlameField 测试把 object ID 2 当作亡灵，实际读取到的是位于 `(3,0)` 的普通 Goblin。
+- Root cause: `loadMonsters` 会按 `MapIndex`、`RespawnIndex`、`MonsterIndex` 和坐标排序后再分配 object ID，输入 slice 顺序不是稳定的对象身份契约。
+- Prevention: 生成怪物 fixture 后按坐标、`Info.Undead` 或其他领域属性定位目标；只有在 loader 明确保证顺序时才断言 object ID。
+- Verification: 测试改为按坐标和 `Undead` 属性查找目标，`TestGameWorldThunderStormAndFlameFieldAreaRules` 通过。
+
+### 2026-08-11 — 测试 helper 调用必须核对完整函数签名
+
+- Symptom: 修正怪物 fixture 后，测试编译失败，`monstersNear` 实际需要四个参数但调用只传了三个。
+- Root cause: 修改测试时只记住了查询坐标和距离，遗漏了函数签名中的 `mapIndex` 参数。
+- Prevention: 复用测试 helper 前先检索函数声明和现有调用，按参数名称逐项核对地图、坐标和范围；修改后立即运行定向编译测试。
+- Verification: 补齐 `mapIndex` 参数并执行 `gofmt` 后，ThunderStorm/FlameField 定向测试通过。
 
 ### 2026-08-11 — MagicInfo 伤害期望必须逐项代入公式
 
