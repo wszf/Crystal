@@ -390,3 +390,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: legacy `UseItem` 对普通药水只累加恢复池、太阳水按 `ChangeHP` → `ChangeMP` 顺序产生健康包；`PlayerObject.DeleteItem` 在构造响应后才裁剪 `Count`，因此响应仍回显请求值。
 - Prevention: 新增物品动作先从原版 handler、领域副作用方法和客户端响应处理共同列出完整 transcript；分别保存“实际状态变化”和“wire 回显字段”，并为每个分支增加 net.Pipe 顺序断言。
 - Verification: 协议布局、普通/太阳水单测、太阳水健康包顺序、删除超量回显和 logout JSON 持久化测试通过。
+
+### 2026-08-11 — 地面物品测试必须移动到真实拾取格
+
+- Symptom: 地面物品/金币已经掉落到 `(1,0)`，测试却让玩家停在 `(0,0)` 直接拾取，结果没有收到任何拾取结果。
+- Root cause: legacy `PickUp` 只遍历玩家当前 cell，不会在可见范围内自动寻找物品；测试只验证了可见性，没有验证当前格语义。
+- Prevention: 每个掉落 transcript 先记录 origin、搜索到的 drop location、移动步骤和 pickup cell；可见不等于可拾取，拾取前必须显式移动到对象坐标。
+- Verification: 修正 world fixture，并在双会话 transcript 中通过走到 `(1,0)`/`(2,0)` 后再拾取。
+
+### 2026-08-11 — net.Pipe 多会话启动也必须消费 bootstrap 广播
+
+- Symptom: 第二个会话启动后等待第一个会话的 `ObjectPlayer` 超时。
+- Root cause: `world.enter` 之后服务端先向第二个连接写已有玩家对象，再向第一个连接写新玩家对象；`net.Pipe` 无缓冲，第二个连接未消费前服务端无法继续到第一个连接。
+- Prevention: 多会话 transcript 先列出 bootstrap 广播顺序；启动第二会话后先消费其 `ObjectPlayer`，再等待第一会话的对等包；后续每次广播为所有接收者建立并发 reader。
+- Verification: 双会话掉落/拾取/金币 transcript 通过普通测试和 `go test -race ./...`。
+
+### 2026-08-11 — Go 与 C# 工具链必须按文件类型隔离
+
+- Symptom: 迁移过程中曾把 C# 导出器文件交给 `gofmt`，命令报语法错误；Go 源码本身没有问题。
+- Root cause: 批量格式化命令使用了过宽的路径集合，没有先按扩展名和语言工具链划分目标。
+- Prevention: `gofmt` 只接收 Go 文件/Go 目录；C# 只在检测到 `dotnet`/C# 工具链后使用对应格式化或构建命令，不能用 Go 工具替代静态验证。
+- Verification: 本轮只对 Go 目录执行 `gofmt`；C# exporter 仅做最小字段 diff 检查，并明确保留 .NET SDK 环境下的编译验证边界。
+
+### 2026-08-11 — FriendlyName 清洗顺序必须保持 legacy 顺序
+
+- Symptom: 地面物品名称清洗初稿先移除方括号再移除尾部数字，`Drop Blade7[rare]` 会错误变成 `Drop Blade`。
+- Root cause: 原版 `ItemInfo.FriendlyName` 明确先执行尾部数字正则，再移除方括号；相似的两个清洗步骤不可交换。
+- Prevention: 迁移字符串派生字段时保留原方法的操作顺序，并用“数字在方括号前/后”两种 fixture 做差异断言。
+- Verification: Go 实现改为 trailing-digits → bracketed-text，双会话 ObjectItem transcript 与全量测试通过。
+
+### 2026-08-11 — 系统提示文本也属于可观察协议行为
+
+- Symptom: 地图禁止丢弃和 Owner 拒绝拾取的 Go 提示初稿语义相近但不等于原版默认本地化文本。
+- Root cause: 只迁移了 Chat packet 类型，没有从 `Shared/Language.cs` 核对 `ServerTextKeys` 的默认字符串。
+- Prevention: 对每个失败/提示分支同时对照 packet 类型、默认文本和参数；未迁移本地化表时先使用原版英文键值，不自行改写措辞。
+- Verification: Go handler 已使用 `CanNotDrop` 和 `CannotPickupNotOwner` 的默认文本，并通过全量 Go 测试与差异检查。
