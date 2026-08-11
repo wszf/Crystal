@@ -64,10 +64,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-11 — 通过脚本封装 apply_patch 时必须处理 Markdown 反引号
 
-- Symptom: 更新包含 Go/Markdown 代码反引号的文档时，工具调用脚本先因 JavaScript 模板字符串语法错误而未执行。
-- Root cause: patch 文本被放进 JavaScript 模板字符串，未转义其中的反引号；这是工具封装层错误，不是项目源码错误。
-- Prevention: 通过脚本传递 patch 前先检查文本中的反引号；优先使用不含模板语法冲突的字符串形式，或逐一转义后再提交 patch。
-- Verification: 重新提交同一文档 patch 后成功应用，再运行文档差异检查和 Go 全量校验。
+- Symptom: 更新 lessons 文本时，新增测试前置状态条目仍因使用 JavaScript 模板字符串承载反引号而未执行 patch。
+- Root cause: 已知道 patch 含反引号，却在实际调用时仍选择了模板字符串，说明预防步骤没有在工具调用前落实。
+- Prevention: 只要 patch 文本包含反引号，就禁止使用模板字符串；在调用前直接选择普通字符串数组拼接，代码 fixture 使用显式转义字符串，并在工具返回后检查目标文件。
+- Verification: 改用普通字符串数组后 lessons patch 成功应用，随后检查新增条目和工作区差异；条件 NPC 定向测试、文档差异检查和 Go 全量测试均通过。
 
 ### 2026-08-11 — .NET 工具必须单独标注未编译验证
 
@@ -201,3 +201,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 用宽泛上下文替换相似代码时命中了相邻的 CHANGELEVEL 状态写回，未立即检查 helper 调用后的变量来源。
 - Prevention: 抽取状态计算函数后，立即逐行核对 result 的 Level、Experience、HP、MP 写回点，并在继续扩展功能前运行 gofmt、定向编译和单元测试。
 - Verification: 修正为使用计算结果的 Level 后，经验表、世界状态、NPC parser、net.Pipe transcript 和 go test ./... 全部通过。
+
+### 2026-08-11 — 条件 NPC transcript 必须显式设置角色前置状态
+
+- Symptom: 条件 NPC 端到端测试在第二次调用时仍收到 ELSE 文本，成功分支没有被选中。
+- Root cause: fixture 只设置了金币，却忘记 CreateCharacter 的默认等级是 1；测试场景期望等级条件 LEVEL >= 2 成功。
+- Prevention: 每个条件 transcript 在启动会话前显式写入并断言等级、金币、性别、职业、地图和坐标等前置状态，不依赖创建默认值。
+- Verification: 显式写入等级 2 后，低金币 ELSE 和满足等级/金币 SUCCESS 两条 net.Pipe 路径均通过，且 race 全量测试通过。
