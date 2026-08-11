@@ -109,7 +109,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Symptom: 新增 `Crystal.LegacyWorldExport` 或修改 `Crystal.ProtocolProbe` 后尝试执行 .NET 构建，当前环境没有 `dotnet`，命令输出 `dotnet unavailable`。
 - Root cause: 运行环境只具备 Go 工具链，不能把 .NET 项目静态检查当成真实编译验证。
 - Prevention: 提交前先探测 `dotnet`/`csc`/`mcs`；若均不可用，记录 exporter 与 probe 的未验证边界，并在有 .NET 8 SDK 的环境补跑两者及现有客户端探针。
-- Verification: Go 的 `test`、`race`、`vet`、`build` 与差异检查通过；.NET exporter 和 ProtocolProbe 保留为待 SDK 环境验证项。
+- Verification: Go 的 `test`、`race`、`vet`、`build` 与差异检查通过；本轮怪物掉落/default NPC exporter 仍因同一环境限制未编译，.NET exporter 和 ProtocolProbe 保留为待 SDK 环境验证项。
 
 ### 2026-08-11 — 地图格式修正必须同步 fixture 的真实记录步长
 
