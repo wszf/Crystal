@@ -622,3 +622,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只按本批改动文件列表执行格式化，没有按扩展名和项目工具链拆分命令。
 - Prevention: 提交前按语言分别运行格式化和编译检查；Go 只交给 `gofmt`，C# 只交给 .NET SDK/对应格式化工具，并在命令失败后确认源码没有被部分修改。
 - Verification: 重跑仅包含 Go 文件的 `gofmt`、`git diff --check`，随后单独检查 .NET SDK 可用性并记录未验证边界。
+
+### 2026-08-11 — 断线广播不能被失效连接短路
+
+- Symptom: 组队成员通过 net.Pipe 断开后，在线 leader 先收到 ObjectRemove，收不到应有的 DeleteGroup。
+- Root cause: 广播按通知顺序写入时，第一个已断开成员的写操作报错，deliverWorldNotifications 立即返回，后续在线成员没有收到通知。
+- Prevention: 广播遍历必须继续投递所有 recipient，只保存并返回第一个错误；新增断线场景要同时断言在线成员的协议包顺序和 world 清理结果。
+- Verification: 修正广播后双会话测试稳定收到 DeleteGroup → ObjectRemove；普通测试、race、vet 和 build 全部通过。
+
+### 2026-08-11 — net.Pipe 多会话测试要先建立 reader 并消费完整 transcript
+
+- Symptom: 组队邀请/离开测试曾因服务端写包等待客户端读取，或在第一包到达时过早检查共享状态而失败。
+- Root cause: net.Pipe 没有缓冲；组队操作会向双方发送多包，最后一个响应不等于另一会话的清理已经完成。
+- Prevention: 在触发跨会话操作前为每条连接建立异步 reader，按 legacy 顺序消费全部副作用包；检查 world 状态前使用会话完成 channel 作为屏障，并在读取共享 map 时持锁。
+- Verification: TestSessionTwoPlayerGroupInviteAcceptAndLeave 覆盖邀请、接受、DeleteGroup、ObjectRemove 和断线清理，且 race 测试通过。
+
+### 2026-08-11 — apply_patch 封装必须验证路径和闭合标记
+
+- Symptom: 更新 lessons 时一次 patch 因目标路径重复了仓库目录而未应用。
+- Root cause: JavaScript 工具封装中的绝对路径是手写的，提交前没有检查目标文件是否存在；复杂 Markdown/raw 内容也容易遗漏 End Patch 闭合标记。
+- Prevention: 调用 apply_patch 前先确认绝对路径和目标文件；多行 Markdown/raw 内容使用普通字符串数组拼接，明确包含 Begin Patch/End Patch，并在返回后读取文件确认落盘。
+- Verification: 修正路径后 lessons 成功追加；随后 git diff --check 通过。
