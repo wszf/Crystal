@@ -503,3 +503,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试 fixture、JavaScript patch 字符串和跨仓库 workdir 都依赖手写文本，调用前没有逐层检查实际文件内容、hunk 首字符和仓库根目录。
 - Prevention: 写入后用源码读取确认 fixture 的真实转义层级；patch 先逐行检查字符串引号、`*** Begin/End Patch`、`@@` 及上下文前导空格；跨仓库命令分别使用已验证的绝对根目录，禁止混用相对路径。
 - Verification: 修正 fixture 后 config/TownRevive 定向测试和 Go 全量 test/race/vet/build 通过；每次工具调用后均检查对应仓库 status/diff，未发生跨仓库误写。
+
+### 2026-08-11 — NPC 物品堆叠终态必须逐步推导
+
+- Symptom: 本轮 `GIVEITEM` 测试的背包终态曾两次误算，先后把 fresh stack 的协议数量、已有堆叠和空槽放置顺序混在一起。
+- Root cause: 没有按每次 `AddItem` 的“先合并已有堆、再按物品类别找槽位”逐步记录操作前后状态，也没有把发送前 clone 与背包中的可变对象分开核算。
+- Prevention: 物品 transcript 先列出每个 fresh item 的 UniqueID/Count、合并目标、剩余数量和最终槽位；wire clone 与库存终态分别断言，不能凭总数量推断槽位。
+- Verification: 修正 `GIVEITEM/TAKEITEM` 单测和 net.Pipe 持久化断言后，定向测试与 Go 全量 test/race/vet/build 通过。
+
+### 2026-08-11 — 跨功能 patch 必须使用唯一函数锚点
+
+- Symptom: NPC 物品动作 patch 曾因使用相似的 `return`/`addCharacterItem` 上下文误命中 `addCharacterItem`，目标函数没有得到预期修改。
+- Root cause: 相邻功能复用了相同的局部代码形状，patch 没有同时带上完整函数签名和行为调用作为唯一定位条件。
+- Prevention: 修改已有 helper 时以完整函数声明、调用方和唯一行为行组成双重锚点；每次 patch 后立即查看目标文件的 `git diff`，确认没有跨函数命中。
+- Verification: 误命中在测试前被发现并修正；当前 `item_transactions.go` diff 只包含 NPC 物品 helper，定向测试、全量门禁和 `git diff --check` 通过。
+
+### 2026-08-11 — apply_patch 上下文行必须显式保留前导空格
+
+- Symptom: 本轮修改 NPC 物品 handler 时，两次 patch 因 `log.Printf` 和函数末尾 `}` 作为上下文行却缺少 hunk 要求的前导空格而被拒绝；源码没有部分落盘。
+- Root cause: JavaScript 字符串数组把源码行和 patch 语义混在一起，人工检查只看了内容，没有检查每行首字符。
+- Prevention: 调用 `apply_patch` 前逐行检查上下文以一个空格开头、删除以 `-` 开头、新增以 `+` 开头；失败后先查 status/diff，再重试更小 hunk。
+- Verification: 按单函数小 hunk 重做，检查到 `executeNPCItemAction` 的完整返回状态与日志均落盘；随后用 gofmt、定向测试和完整 Go 门禁验证。
+
+### 2026-08-11 — 文档检索也必须复用已确认的仓库根目录
+
+- Symptom: 本轮 Go 文档检索命令把工作目录手写成重复的 `me_work` 路径，进程未能启动，文档检查被延迟。
+- Root cause: 只记住了仓库名称，没有复用前面 `git rev-parse --show-toplevel` 得到的绝对路径。
+- Prevention: 所有跨仓库命令（包括只读的 README/文档检索）统一使用已验证的绝对根目录；命令失败后先检查路径和两仓库 status，再继续。
+- Verification: 改用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 后 README/迁移矩阵检查完成，未产生文件修改。
