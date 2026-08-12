@@ -915,3 +915,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把一次诊断请求误解成了长期监控和每轮汇报要求。
 - Prevention: 临时排查默认只回答当次；除非同类异常再次影响迁移、需要用户决策或用户明确追问，否则不主动重复诊断结论，也不把它加入固定进度模板。
 - Verification: 后续迁移仅在整批完成、真实阻塞或需要用户决策时汇报，不再附带该一次性排查内容。
+
+### 2026-08-12 — 跨语言 round-trip fixture 不得直接比较含 map 的结构体
+
+- Symptom: 公会导出 schema 测试首次编译失败，测试用 `!=` 比较包含 `ItemStats` map 的 `protocol.ItemInfo`。
+- Root cause: 把结构体整体比较误当成通用零值检查，未先确认其字段是否全部可比较。
+- Prevention: 为跨语言 JSON fixture 做零值或完整对象断言前，先检查 slice、map、pointer 字段；包含不可比较字段时统一使用 `reflect.DeepEqual` 或逐字段断言。
+- Verification: 零值 creation-cost Item 改用 `reflect.DeepEqual` 后，`go test ./internal/worlddata -count=1` 通过。
+
+### 2026-08-12 — C# 顶层导出器新增显式参数类型时必须核对命名空间
+
+- Symptom: 公会 creation-cost helper 使用了 `GuildItemVolume` 作为参数类型，而该类型声明在 `Server.MirObjects`，原有 exporter imports 不包含该命名空间。
+- Root cause: 调用点可通过类型推断访问成员，但抽成具名 helper 后需要编译器直接解析参数类型；静态审查最初只核对了字段，没有核对类型所属 namespace。
+- Prevention: C# exporter 新增 helper 签名时，用原版类型声明反查 namespace，并显式加入对应 `using`；无 SDK 环境的静态 guard 同时锁定该 import 和签名。
+- Verification: world exporter 已加入 `using Server.MirObjects;`，静态 schema guard 覆盖 import；`go test ./internal/worlddata -count=1` 通过，真实 C# 编译仍留待具备 .NET 8 SDK 的环境验证。
+
+### 2026-08-12 — 公会默认创建费用必须解析 Legacy 物品名
+
+- Symptom: Go 无 world export 时最初只要求 1,000,000 金币；补上默认 `WoomaHorn` 后，费用记录只有名称、索引为零，导致真实背包中的 Wooma Horn 无法匹配。
+- Root cause: Legacy 默认配置先保存去空格物品名，再由 `LinkGuildCreationItems` 对完整物品目录解析；Go 把已解析的 `ItemInfo` 与未解析的默认名称当成了同一种输入。
+- Prevention: 默认费用保留 Legacy 的金币加 WoomaHorn 两项；事务开始前按去空格、忽略大小写规则从角色物品定义解析名称，随后才执行原子校验和扣除。默认配置和 exporter 配置必须共用同一事务路径。
+- Verification: auth 测试锁定 `WoomaHorn` → `Wooma Horn` 的解析与扣除，完整 NPC 会话锁定 `DeleteItem → LoseGold → GuildStatus`，Go 全量普通/race 门禁通过。
+
+### 2026-08-12 — 注销通知快照与投递时机必须分离
+
+- Symptom: 公会注销状态包若在 `world.leave` 前立即投递，会先写向正在关闭且无人读取的 net.Pipe，阻塞后续在线成员；若在 leave 后才构造，又丢失注销者姓名并退化为角色数字 ID。
+- Root cause: 把“从在线 world 读取姓名并生成通知”和“向剩余会话实际写包”绑定在同一步，没有保留快照边界。
+- Prevention: 离线流程先在玩家仍在线时提交 auth 状态并构造包含姓名的通知快照，完成 world 移除后再投递；通知接收者列表排除注销者，持久化在状态提交后执行。
+- Verification: 双成员 world 测试锁定仅另一成员收到 `GuildMemberChange(Status=0, Name=leader)`；公会会话测试、Go 全量普通/race 门禁通过。
