@@ -2,12 +2,42 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — `go test -run` 正则必须作为单个 shell 参数引用
+
+- Symptom: 定向测试命令中的 `TestA|TestB` 未加引号，zsh 把竖线解析成管道，首段测试输出被后续的 `command not found` 覆盖。
+- Root cause: 在构造 shell 命令时只关注 Go 的正则语义，没有同时保护 shell 元字符。
+- Prevention: 所有含 `|`、`(`、`)` 或通配符的 `go test -run` 表达式统一用单引号包成一个参数；若通过参数数组组装命令，不能用无转义的空格拼接后直接交给 shell。
+- Verification: 改为 `-run 'TestFishing|TestAwakening|TestRanking|TestEquipCharacterSlotItem'` 后，服务端定向测试通过。
+
+### 2026-08-13 — 有序协议 transcript 禁止使用 map 驱动
+
+- Symptom: P11 Go 探针定向测试在发送觉醒重置请求时出现 `io: read/write on closed pipe`，对端已因收到顺序漂移的前一请求而退出。
+- Root cause: 测试用 Go map 保存 NPC 面板读取器和客户端请求函数，却让 `net.Pipe` 服务端按固定 Legacy 顺序读取；map 迭代顺序不稳定，不能表达 wire transcript。
+- Prevention: 所有有序协议、数据库迁移步骤和副作用序列统一用显式 slice/数组声明顺序；map 仅用于不关心顺序的集合断言。对端报 EOF/closed pipe 时先核对双方完整 packet 序列。
+- Verification: 两处 map 已改成具名函数的有序 slice；P11 定向测试连续运行 10 次、`internal/probe` 整包测试、P11 race 测试和 `go vet` 均通过。
+
+### 2026-08-13 — 新测试 fixture 必须先检索真实 bootstrap API
+
+- Symptom: 排行榜领域测试按记忆调用不存在的 `AddTestAccount`，导致包级编译失败。
+- Root cause: 把其他项目常见的测试 helper 名称带入当前 auth 包，没有先检索现有账户 fixture；本项目公开 helper 实际是 `AddPlaintextAccount`。
+- Prevention: 新测试调用服务 bootstrap/helper 前先用 `rg` 查声明和同包现有用法，复制真实签名后再写测试；包级仅编译门禁应紧跟新增 fixture。
+- Verification: 排行榜 fixture 改用 `AddPlaintextAccount(id, password, nil)`，auth 定向测试恢复通过。
+- Strengthening after recurrence: 即使 helper 名称已通过检索确认，也必须读取其完整函数签名，不能凭同类 `Update...` 方法习惯推断有 `bool` 返回值；本次 `UpdateCharacterMapRuntime` 是无返回值写入，测试误将其用在条件表达式导致包级编译失败。新增 fixture 后先跑最小包级编译，再扩展网络 transcript。
+
+### 2026-08-13 — 新功能 ordinal 必须套用当前基线的历史插入偏移
+
+- Symptom: P11 首次把本地 Legacy enum 直接计数得到的钓鱼、觉醒和排行榜 ordinal 写入 Go，立即与当前 Go 的 `SendOutputMessage` 等常量冲突。
+- Root cause: 忘记当前迁移 wire 基线在 `DeleteItem` 和 `TownRevive` 处各有一个历史插入；本地只读 C# 快照的后续枚举值必须整体加一，不能把原始计数直接用于当前基线。
+- Prevention: 每批新增协议先定位目标包前后两个已迁移常量，机械应用已记录的方向插入偏移，再在同一 patch 中加入显式 ordinal 和方向唯一性测试；任何冲突都先修正基线计算，不能挪用空闲 ID。
+- Verification: P11 生产常量改为 Server `ObjectEffect=125`、`FishingUpdate=201`、`NPCAwakening=225`、`Rankings=253`，Client `FishingCast=103`、`AwakeningNeedMaterials=112`、`GetRanking=136`；现有 ordinal 测试表在统一偏移循环前故意填写 C# 快照原值，`got` 才填写当前生产值。首次把当前值直接写进 `wants` 导致测试再次加一，现已修正并由完整唯一性测试锁定。
+
 ### 2026-08-13 — 清理 helper 的多 hunk patch 也必须逐段复读
 
 - Symptom: 清理两个未使用 helper 时，一次多 hunk patch 因第二个函数正文与记忆中的调用顺序不一致而整体拒绝；随后把 `rg`、格式化和测试串在同一命令中，又因预期的零匹配让整条门禁提前退出。
 - Root cause: 依赖先前摘要而没有在 patch 前复读每个目标函数的精确正文，并把“零匹配即成功”的检索当作普通零退出命令。
 - Prevention: 删除多个独立 helper 时逐个读取、逐个 patch；需要断言无匹配的 `rg` 单独执行并按空输出验收，不能让其退出码短路后续格式化或测试。
 - Verification: 两个 helper 已按实际正文分别删除，无用 `strings` import 单独清理；格式化、定向测试和全量门禁随后独立执行。
+- Strengthening after recurrence: `git diff --no-index` 在文件确有差异且内容合法时也固定返回 1；不得把它与 `git diff --check` 串成一个总门禁并把预期的 1 误报为失败。新增文件检查要单独运行，并显式把“有差异”的退出码 1 转换为成功，同时保留真正的 whitespace 错误输出。
 
 ### 2026-08-13 — 跨领域锁内禁止调用公会 authority
 
@@ -41,8 +71,22 @@ Record project-specific corrections and failure-prevention patterns here.
 
 - Symptom: 为公会仓库补协议向量和导出字段时，直接修改了迁移仓库中的两个 `.cs` 工具文件，破坏了用户用于逐项对照的 C# 基线。
 - Root cause: 把“C# 可作为迁移辅助工具”误当成了允许继续演进 C#；实际上服务端、测试客户端、协议探针和数据转换工具都属于待迁移范围。
-- Prevention: 两个仓库中的所有 `.cs` 一律只读，不新增、不修改、不删除；只可读取作为行为证据。运行时、测试客户端、协议探针、导入/导出工具全部用 Go 实现。每次提交前分别执行 `git diff --name-only -- '*.cs'`，结果必须为空。
-- Verification: 已用反向补丁精确撤销本批两个未提交 C# 差异，Go 仓库和 Legacy 仓库当前均无 `.cs` diff；后续替代能力只落入 Go 文件。
+- Prevention: 两个仓库中的所有 `.cs` 一律只读，不新增、不修改、不删除、不重命名；只可读取作为行为证据。运行时、测试客户端、协议探针、导入/导出及其他迁移工具全部用 Go 实现。每次提交前分别执行工作区 diff、暂存区 diff 和未跟踪文件三项 `.cs` 检查，结果必须全部为空。
+- Verification: 已用反向补丁精确撤销本批两个未提交 C# 差异，并把语言边界固化到 `AGENTS.md`；用户再次明确工具也必须用 Go 后，本批只修改 Go、Markdown 和 Git 元数据，提交前继续以两仓库六项 `.cs` 零输出门禁验收。
+
+### 2026-08-13 — 跨 auth/world 物品事务必须先同步权威状态再投递网络
+
+- Symptom: P11 审查发现 Storage 附件已经在 auth 原子提交，但 world 物品快照直到 `RefreshItem`/结果包写出后才更新；钓鱼 Tick 也先投递通知再持久化，觉醒拆解新增的 `ItemInfos` 没有同步到 world。连接写失败后的 cleanup 可能用旧 world 快照覆盖已提交状态。
+- Root cause: 把成功响应顺序当成了整个事务顺序，没有区分“auth/world 双权威状态提交”和“可能失败的网络通知”；同时只同步物品格，遗漏了新物品定义目录。
+- Prevention: 所有跨 auth/world 的物品事务先完成 auth 提交、world `ItemInfos`/三类物品格同步及必要落盘，再按 Legacy 顺序投递网络包；网络失败只能影响通知，不能让 cleanup 从旧快照回滚事务。多个定时结果先选取最后一个 changed 快照持久化，再保持原结果顺序投递全部通知。
+- Verification: `advanceFishing` 已改为先持久化最后一个变化快照再投递 Tick 通知；`EquipSlotItem` 在任何响应写入前同步 world；觉醒持久化同时同步 `ItemInfos` 与物品格，并新增 world/auth 定义一致性测试和网络材料不足事务测试。提交前继续运行普通/race 全量门禁。
+
+### 2026-08-13 — 地图未标记格与拆解满包必须保留 Legacy 怪癖
+
+- Symptom: P11 兼容审查发现地图格 Go 零值会把未标记水域误当成 `FishingAttribute=0`；拆解奖励在满包时若按普通事务回滚，又会改变原版仍发送 `GainedItem`、扣金并删除原物品的行为。
+- Root cause: Go 零值与 Legacy 构造默认值不同，并把异常但可观察的原版副作用误当成应修复的失败事务。
+- Prevention: 所有未显式标记的地图格初始化 `FishingAttribute=-1`；拆解先保留发送奖励包的快照，若 `AddItem` 无法落位仍继续原版扣金/删除流程。迁移目标是有效路径和可观察怪癖等价，不自行修正 Legacy 行为。
+- Verification: map fixture 覆盖默认 `-1` 和显式水域值；觉醒测试锁定满包时 `GainedItem -> LoseGold -> DeleteItem`、奖励不入包且原物品消失。
 
 ### 2026-08-13 — XOR 权限接口不能用 false 清除未设置位
 
@@ -86,6 +130,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: fixture 依赖了隐式默认方向和物品需求字段，没有把目标坐标公式及 CanEquipItem 的职业、性别、等级/属性门控全部固定下来。
 - Prevention: 传送 fixture 在登录前显式持久化方向并按 Front 计算目标；装备事务 fixture 显式设置合法 RequiredType、RequiredAmount、RequiredClass、RequiredGender，同时为已绑定婚戒等隐藏状态补负例。
 - Verification: 跨地图召回稳定落在预期前方坐标，婚戒替换覆盖余额不足、非法物品、已绑定婚戒及成功原子交换。
+- Strengthening after recurrence: 该规则同样适用于钓鱼附件、Mount/Socket 与 Storage 来源的 `EquipSlotItem`；`RequiredClass=0` 或 `RequiredGender=0` 不是“无限制”，而是位掩码不包含任何角色。所有可使用附件 fixture 必须显式给当前职业/性别位，边界负例则单独改变目标字段。
 
 ### 2026-08-12 — 跨会话测试数据必须避开 bootstrap 提前消费
 
@@ -181,6 +226,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 多文件 patch 依赖较早读取的长上下文，任一末端 hunk 漂移都会让整批失败；工具成功返回也不能证明每个预期字段都已落盘。
 - Prevention: 每个文件或语义 hunk 单独 patch，使用函数签名/字段名等短稳定锚点；失败后立即重新读取精确上下文，成功后用 `rg`/`sed` 和 diff 复核，JavaScript 包装只用普通字符串，禁止让未定义值变成 `NaN` 参与 patch 文本。
 - Verification: 拆分后 retired 状态、双 MailID、会话测试和文档均正确落盘，`git diff --check` 与全量 Go 门禁通过。
+- Strengthening after recurrence: P11 收尾曾把 fishing、EquipSlotItem 和 awakening 三个独立修正放入一个 patch，最后一个 main.go hunk 漂移导致整块拒绝。即使改动属于同一审查批次，也必须按单文件、单语义提交 patch；被拒绝后先确认前面 hunk 均未应用，再逐项重做并立即跑最小定向测试。
 
 ### 2026-08-12 — 买回数量测试必须区分堆叠上限与当前存量
 
