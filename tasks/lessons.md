@@ -2,6 +2,55 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-12 — 市场文本必须区分网络快照与 AddItem 后的 UserItem
+
+- Symptom: Market 系统邮件曾输出未格式化的 `7000`，市场 Success/Hint 只清理 ASCII 数字；固定价物品部分合堆时，Go 文本显示原始 `(5)`，原版因 `AddItem` 修改同一对象而显示剩余 `(3)`。
+- Root cause: 邮件与会话层各自实现 FriendlyName，且把发送前必须保留的 `GainedItem` 快照错误地同时用于操作后的文本。
+- Prevention: FriendlyName 一律先按 Unicode 数字清理尾缀、再移除方括号，金额使用千分位；物品入包前 clone 原始数量，Success/Hint 则使用 AddItem 后的剩余数量。
+- Verification: auth 与 net.Pipe 测试分别锁定 `7,000`、全角数字清理、原始 `GainedItem.Count=5` 和成功文本 `(3)`。
+
+### 2026-08-12 — 拍卖到期与 stale Search 必须保留 legacy 生命周期
+
+- Symptom: Go 初版每 500ms 并在每个 Game 请求前处理到期，消除了原版十分钟扫描窗口；已撤回拍品的旧搜索请求返回 reason 7，而原版因仍持有 AuctionInfo 引用返回 reason 3。
+- Root cause: 把按请求查询当前 map 的 Go 模型当成了原版全局定时器和连接级对象引用模型，没有验收到期前后及移除后的旧引用。
+- Prevention: 服务启动立即扫描一次、随后严格每十分钟扫描，禁止请求前隐式扫描；移除拍品时保留运行期终态 tombstone，使 stale buy 按 Sold→2、其他已移除→3 返回。
+- Verification: 定时常量、显式到期处理、stale 撤回会话和 sold/withdrawn auth 测试通过。
+
+### 2026-08-12 — GameShop 必须用不同的 GIndex 与 ItemInfo.Index 锁定怪癖
+
+- Symptom: 既有测试一直令 `GIndex == ItemInfo.Index`，掩盖了原版库存读取用 Info.Index、写入用 GIndex、Stock 包再发 Info.Index，以及每封购买邮件消费两个 MailID 的行为。
+- Root cause: fixture 使用相同索引让错误键路径退化成正常字典操作，同时只断言邮件存在，没有断言全局 ID 步进。
+- Prevention: GameShop 回归 fixture 固定使用不同索引，分别断言查找键、持久化键、Stock 包键、重复购买覆盖语义和 MailID 2/4 步进；Quantity 1..99 必须先于商品查找校验。
+- Verification: auth 与完整会话测试覆盖错位库存、非法数量静默、双 MailID、信用扣款和邮件 transcript。
+
+### 2026-08-12 — 经济事务必须先落盘再做可失败的网络投递
+
+- Symptom: SellNow、到期和 GameShop 成功后若先写在线连接，断线错误可能让已提交经济状态来不及保存；批量邮件遇到一个失效连接也可能短路其他玩家。
+- Root cause: 把持久化提交和在线通知当成一个顺序循环，没有区分权威状态与尽力投递的副作用。
+- Prevention: 在持锁事务内原子准备/提交货币、物品、拍卖、邮件和 ID，释放锁后先保存 JSON，再按 legacy 顺序投递；批量通知继续遍历，只保留第一个错误。
+- Verification: 失败不扣款/不改拍卖、断线后状态保存、多个收件人继续投递以及普通/race 测试通过。
+
+### 2026-08-12 — 会话 fixture 的角色名也必须满足 3–15 字符约束
+
+- Symptom: 新增拍卖定义测试使用 `DefinitionViewer`，角色创建返回 1，定向测试在业务逻辑前失败。
+- Root cause: 只检查了账号 ID，没有复用角色名同样存在的长度与字符集约束。
+- Prevention: 测试账号和角色名统一使用 3–15 个 ASCII 字母数字，并在 fixture 创建失败时先核对认证枚举与输入长度，再排查目标功能。
+- Verification: 改为 `DefViewer` 后嵌套 ItemInfo、市场会话及全量测试通过。
+
+### 2026-08-12 — 同一文件的格式化写入与读取验证必须串行
+
+- Symptom: 本轮曾把 `gofmt -w` 与对相同文件的 `rg` 放进并行调用；另有跨仓库读取曾通过命令链组合，存在读取中间态和混淆失败来源的风险。
+- Root cause: 只按降低延迟判断可并行性，没有把格式化视为写操作，也没有保持每个仓库、每个验证步骤的独立 workdir/退出状态。
+- Prevention: apply_patch、gofmt 和任何生成操作均串行完成，随后再并行执行互不写入的读取；跨仓库命令各用独立绝对 workdir，禁止用 `&&`、`;` 或管道拼接多个验证步骤。
+- Verification: 后续格式化、定向测试、全量 test/race/vet/build 和两个仓库的 diff/status 均用独立调用完成。
+
+### 2026-08-12 — 大型多文件 patch 必须按稳定 hunk 拆分并复读
+
+- Symptom: 一次同时修改 service/economy 的 patch 因最后一个 `removeAuctionLocked` 上下文不匹配而整体拒绝；GameShop 测试 patch 也因手写失败文案与当前源码不同而未应用。
+- Root cause: 多文件 patch 依赖较早读取的长上下文，任一末端 hunk 漂移都会让整批失败；工具成功返回也不能证明每个预期字段都已落盘。
+- Prevention: 每个文件或语义 hunk 单独 patch，使用函数签名/字段名等短稳定锚点；失败后立即重新读取精确上下文，成功后用 `rg`/`sed` 和 diff 复核，JavaScript 包装只用普通字符串，禁止让未定义值变成 `NaN` 参与 patch 文本。
+- Verification: 拆分后 retired 状态、双 MailID、会话测试和文档均正确落盘，`git diff --check` 与全量 Go 门禁通过。
+
 ### 2026-08-12 — 买回数量测试必须区分堆叠上限与当前存量
 
 - Symptom: 买回用例用 `Count=9` 配合 `StackSize=1/5`，加入原版堆叠上限门控后 transcript 等待超时；旧实现因缺少门控反而掩盖了 fixture 错误。
