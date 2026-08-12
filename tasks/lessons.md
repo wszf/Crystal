@@ -2,6 +2,34 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — 独立 Go 导出器必须复现 Legacy 加载语义而非只解码字段
+
+- Symptom: 世界导出器能完整解码 117/0 文件，但账户归档角色仍会绑定拍卖，Windows 反斜杠/大小写路径在 Unix 主机失效，嵌套 `#INSERT` 没有继续展开，缺失物品定义会中止整个拍卖或公会文件，Quest NPC ID 也可能与运行时实例不一致。
+- Root cause: 把二进制字段布局正确等同于加载结果等价，遗漏了原服务端在解码后的归档过滤、文件系统语义、增长列表展开、`BindItem` 容错及地图/NPC 实例化顺序。
+- Prevention: 所有独立 Go 迁移工具沿“读取 → Legacy 过滤/绑定 → 可观察投影”逐层验收；路径同时兼容 `\\`/`/` 和 Windows 大小写，动态 include 保留原增长列表顺序并加循环/规模保护，记录必须先完整消费再按绑定结果丢弃，运行时身份由导出器显式携带并保留旧 JSON fallback。
+- Verification: 新增归档月份边界与拍卖绑定、跨平台路径、两层/循环 Drop include、拍卖/公会缺失定义、NPC 数据库/地图顺序及无效坐标、Monster 客户端投影的 Go 回归测试；定向测试通过，提交前继续执行全量 test/race/vet/build 门禁。
+
+### 2026-08-13 — C# 源码与既有工具必须保持只读基线
+
+- Symptom: 为公会仓库补协议向量和导出字段时，直接修改了迁移仓库中的两个 `.cs` 工具文件，破坏了用户用于逐项对照的 C# 基线。
+- Root cause: 把“C# 可作为迁移辅助工具”误当成了允许继续演进 C#；实际上服务端、测试客户端、协议探针和数据转换工具都属于待迁移范围。
+- Prevention: 两个仓库中的所有 `.cs` 一律只读，不新增、不修改、不删除；只可读取作为行为证据。运行时、测试客户端、协议探针、导入/导出工具全部用 Go 实现。每次提交前分别执行 `git diff --name-only -- '*.cs'`，结果必须为空。
+- Verification: 已用反向补丁精确撤销本批两个未提交 C# 差异，Go 仓库和 Legacy 仓库当前均无 `.cs` diff；后续替代能力只落入 Go 文件。
+
+### 2026-08-13 — XOR 权限接口不能用 false 清除未设置位
+
+- Symptom: 公会仓库无取回权限测试调用 `ChangeGuildRankOption(..., "false")` 后，Members rank 反而获得了 `CanRetrieveItem`。
+- Root cause: Legacy 的 `"false"` 分支使用 XOR 切换权限位，而 Members rank 初始并没有该位；测试把切换操作误当成了幂等清除。
+- Prevention: 测试权限关闭状态时优先直接断言默认 rank；若必须走变更接口，则先设为 true 再设为 false，并断言每一步位掩码。不能用 XOR 风格接口清除一个未经确认已设置的位。
+- Verification: fixture 已改为直接验证 Members rank 初始不含 Retrieve 位，避免在目标行为前改变权限。
+
+### 2026-08-13 — 公会门禁必须以 auth 权威成员关系为准
+
+- Symptom: 公会仓库 world 入口先看 session 中缓存的 `Character.GuildIndex`，会让已失效但尚未同步的公会投影走到安全区提示；Type 3 请求还可能在确认权威成员关系前消耗一次性列表状态。
+- Root cause: 把连接局部投影当成了成员资格的授权源，并过早提交了 `GuildCanRequestItems=false` 副作用。
+- Prevention: 公会授权先在 auth 的同一锁域内校验 guild 和 member，再检查安全区/权限；一次性状态只有在所有前置校验成功后才能消耗。world 快照只用于定位连接和投递包，不决定权威成员资格。
+- Verification: 新增 stale world GuildIndex 回归测试，锁定金钱请求优先返回 NotPartOfGuild，失败的列表请求保留 `GuildCanRequestItems`；公会仓库定向测试通过。
+
 ### 2026-08-12 — 公会 ordinal 必须锁定目标 wire 基线而非相似源码快照
 
 - Symptom: 初次从本地 `Shared/Enums.cs` 计数得到公会 Client `79..83`、Server `84/166..171`，但当前迁移目标的精确 wire 基线实际整体高一位，并且需要包含 `GuildExpGain=171`。
@@ -75,6 +103,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 本次审计确认主线程当前固定为 `gpt-5.6-sol`，Luna 仅存在于历史轮次/已关闭子线程；遗留的 Maxwell、Gibbs 已关闭，当前所有子线程均为 closed，后续不再逐项转发源码比对结果。
 - Strengthening after correction: 用户对 Goal/模型状态的询问属于一次性故障排查，不得沉淀为每轮固定报告；除非用户再次询问或发现新的实际异常，后续不主动复述 Goal 数量、模型名称或子线程状态。
 - Second strengthening after correction: 用户针对异常截图或某项内部状态的单次询问，只回答当次问题；不得把该分析扩展成持续汇报模板，也不得在后续迁移批次中重复发送相同的代码比对、调度状态或原因分析。验证方式是后续仅汇报整批迁移结果、真实阻塞和必须由用户决定的事项。
+- Third strengthening after correction: 用户指出某类内部分析无需每次展示后，立即从所有后续进度模板中移除该项；即使内容更新或截图形式变化，也不能以“新结果”为由再次主动发送。除非用户明确重新询问，否则只在内部用于实现和验收。
 
 ### 2026-08-12 — 市场文本必须区分网络快照与 AddItem 后的 UserItem
 
@@ -556,6 +585,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: legacy 14 格默认语义在 Go 中由 `nil` 触发，空 slice 表示一个真实的零长度格子，不能混同为缺省值。
 - Prevention: 对需要默认容量的导入数据传递 nil 或显式补齐 14/46/40 格；测试同时覆盖 nil、空 slice 和正确容量三种输入。
 - Verification: 会话 fixture 改为 nil equipment/quest grids 后，Equip/Remove/Logout transcript 与持久化断言通过。
+- Strengthening after recurrence: auth 领域事务测试若要验证合法背包槽，也必须显式创建 Legacy 的 46 格 Inventory；新建角色的 nil/零长度 Inventory 不代表可用空背包。否则合法取出会被正确判成目标越界，容易被误判为事务实现问题。
 
 ### 2026-08-11 — 装备阶段跨仓库 patch 目标复发后必须先锁定根目录
 
@@ -922,6 +952,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把结构体整体比较误当成通用零值检查，未先确认其字段是否全部可比较。
 - Prevention: 为跨语言 JSON fixture 做零值或完整对象断言前，先检查 slice、map、pointer 字段；包含不可比较字段时统一使用 `reflect.DeepEqual` 或逐字段断言。
 - Verification: 零值 creation-cost Item 改用 `reflect.DeepEqual` 后，`go test ./internal/worlddata -count=1` 通过。
+- Strengthening after recurrence: `reflect.DeepEqual` 仍会区分 nil 与空 slice/map；wire parser 会把零长度 Slots、AddedStats、Awake.Values 规范化为空非 nil 容器。构造协议 round-trip fixture 时必须按 parser 的规范形状显式初始化这些字段，或逐字段比较语义值，不能把 nil/空容器差异误判成序列化错误。
 
 ### 2026-08-12 — C# 顶层导出器新增显式参数类型时必须核对命名空间
 
