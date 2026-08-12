@@ -799,3 +799,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `gameItemCatalog` 同时承担服务端持久化定义目录和客户端当前连接已知集合；前者跨登录保留，后者必须随每次 StartGame 清空，两者语义不能合并。
 - Prevention: 每个连接维护独立、并发安全的 sent-item-info 集合；初始角色格、Quest、Recipe、Mail、NPC 商品和显式 RequestItemInfo 各按原版阶段检查并标记，目录是否已有定义只决定服务端是否追加，不能决定是否发包。
 - Verification: Quest 重登锁定“当前携带定义 → Map/User → 其余 Quest 定义”，Mail 嵌套附件锁定“CompleteQuest → NewItemInfo* → ReceiveMail”，UsedGoods 与重复 RequestItemInfo transcript 通过；Go 全量 test、race、vet、build 和 `git diff --check` 全部通过。
+
+### 2026-08-12 — Goal 状态审计必须使用当前 CODEX_HOME 并关联线程生命周期
+
+- Symptom: 只调用当前线程的 Goal 查询时看起来只有 1 个 Goal，但当前 Codex 实例的数据库实际有 4 条 `active` 记录，容易把“当前线程 Goal”误报成“整个实例正在执行的 Goal”。
+- Root cause: Goal 查询接口按当前线程返回；同时若未先解析 `CODEX_HOME`，可能误查默认 `~/.codex`。子代理线程已经关闭后，其 Goal 行还可能残留为 `active`，单看 Goal 表不能代表仍在运行。
+- Prevention: 回答 Goal 总数前先确认当前 `CODEX_HOME`，查询其 `goals_1.sqlite`，再与同目录 `state_5.sqlite` 的线程和 `thread_spawn_edges` 生命周期关联；分别报告“数据库标记 active”和“实际仍运行”，且不得手工改内部数据库清理残留。
+- Verification: 本次关联审计确认 4 条 `active` 中仅主线程 1 条仍执行，另外 3 条都属于 `closed` 子代理；该主线程下 23 条子代理边全部为 `closed`，当前没有活跃子代理。
+
+### 2026-08-12 — 跨会话同步必须按领域 revision 定向合并
+
+- Symptom: Rental 为接收后台到期/死亡更新，把每次读包前的 world 同步扩大为整角色物品格和邮件覆盖，导致同一 session 刚完成的合成、装备、背包移动、精炼、修理、仓库和使用物品状态被 stale world 快照回滚；全量测试同时出现多类持久化和 transcript 失败。
+- Root cause: world 快照既包含跨会话共享状态，也包含当前 session 自己拥有、但并非每条业务路径都立即回写 world 的局部状态；无版本判断的全量赋值把两种所有权混在一起。
+- Prevention: 保留 Quest/Group 的既有定向同步；为 Rental 增加独立 revision，只在 Rental 生产路径实际修改网格/邮件时递增，并在 revision 变化时同步 Rental 所需字段。新增共享领域必须先明确所有权和变更版本，禁止为了接收一个后台字段而整角色覆盖。
+- Verification: 修复后先前失败的 Craft、Equipment、ItemMove、Refine、Repair、Storage、Use/Delete 会话测试与 Rental 定向测试全部恢复通过。
+
+### 2026-08-12 — 并行功能线交接后必须先恢复包级编译绿色
+
+- Symptom: Rental 与移动兼容线合入共享工作树后，`cmd/crystal-server` 留下未使用的 `oldDirection` 和尚未实现的 `deliverMovementMapTransition`，后续工作处在不可编译中间态，放大了“迁移没有进展”的感受。
+- Root cause: 多条功能线同时触碰 `main.go`/`world.go`，交接时只记录了剩余事项，没有在每个写入边界立即执行最小包级编译；新的兼容分支继续叠加在未完成的整合点上。
+- Prevention: 并行线优先按互斥文件或稳定接口拆分；任何功能线完成写入后，整合者先运行受影响包的仅编译门禁，编译未恢复绿色前不再叠加另一条共享文件修改；未完成 helper 必须与调用点在同一整合步落盘。
+- Verification: 本次 `go test ./cmd/crystal-server -run '^$' -count=1` 在 0.1 秒内准确定位两个整合缺口；修复后必须以同一命令恢复绿色，再进入 Rental 定向及全量门禁。
+
+### 2026-08-12 — 地图切换包序列必须按触发路径拆分
+
+- Symptom: Go 曾把地图坐标移动、NPC `ENTERMAP`、NPC `MOVE` 和 RequiredGroup 强制离开统一投递为 `MapChanged + UserLocation`，导致移动测试读取到后续 NPC 包，并掩盖 `ObjectTeleportIn` 的差异。
+- Root cause: 复用了一个通用 transition helper，没有保留 legacy `CompleteMapMovement`、`Teleport(..., false)` 与默认 effectful `Teleport` 三条独立调用链。
+- Prevention: transition 先标注触发类型，再分别锁定坐标移动/ENTERMAP 仅 `MapChanged`，MOVE/强制传送为 `MapChanged + ObjectTeleportIn`，TownRevive 使用自己的 `MapChanged` 路径；禁止用统一的 `UserLocation` 补包。
+- Verification: 更新 movement、ENTERMAP、MOVE、RequiredGroup 和 Rental 顺序测试后，Go 全量普通/race 测试、vet、build 与差异检查通过。
+
+### 2026-08-12 — ActionTime 迁移必须兼容连接队列与直接世界测试
+
+- Symptom: 给 Turn/Walk/Run 写入 350/600ms `ActionReadyAt` 后，既有 net.Pipe 会话连续移动被同步读循环立即拒绝，大量距离门禁和可见性测试停在原地。
+- Root cause: legacy 连接会把请求留在队列中等 `ActionTime` 到期再处理，而当前 Go 会话同步读取后立即执行；只迁移时间字段却没有迁移队列调度会改变外部行为。
+- Prevention: 世界 helper 保留精确 capability/ActionTime 边界；会话入口保留单条 retry movement，在 `ActionReadyAt` 到期后重新派发，匹配 legacy `_retryList`，不能直接清零时间门禁。
+- Verification: 直接 helper 的 capability 测试与连续 session movement、Craft/Shop 距离、地面拾取和静态可见性测试同时通过全量普通/race 门禁。
