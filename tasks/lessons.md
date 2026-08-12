@@ -2,6 +2,34 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — 清理 helper 的多 hunk patch 也必须逐段复读
+
+- Symptom: 清理两个未使用 helper 时，一次多 hunk patch 因第二个函数正文与记忆中的调用顺序不一致而整体拒绝；随后把 `rg`、格式化和测试串在同一命令中，又因预期的零匹配让整条门禁提前退出。
+- Root cause: 依赖先前摘要而没有在 patch 前复读每个目标函数的精确正文，并把“零匹配即成功”的检索当作普通零退出命令。
+- Prevention: 删除多个独立 helper 时逐个读取、逐个 patch；需要断言无匹配的 `rg` 单独执行并按空输出验收，不能让其退出码短路后续格式化或测试。
+- Verification: 两个 helper 已按实际正文分别删除，无用 `strings` import 单独清理；格式化、定向测试和全量门禁随后独立执行。
+
+### 2026-08-13 — 跨领域锁内禁止调用公会 authority
+
+- Symptom: 公会战争/领地骨架最初在持有 `world.mu` 时调用 `GuildAuthority`，而 authority 的事务顺序是 authority → auth；这会与公会投影、会话初始化或生命周期线程形成反向锁序风险。
+- Root cause: 把“刷新在线投影”写成了锁内查询权威状态，没有先切分 detached authority 快照与 world 写入阶段。
+- Prevention: 公会 authority 调用必须在 `world.mu` 外完成；先取得敌对、战争或领地结果并释放 authority/auth 锁，再进入 world 锁合并投影和构造通知，网络投递与 SaveJSON 都放在所有锁之外。懒初始化同样先复制配置/定义，再在 world 锁外构造 authority。
+- Verification: P9 接线改为 authority 查询/事务 → world 投影 → SaveJSON → 通知四阶段，服务端整包测试通过；race 门禁在提交前继续验证。
+
+### 2026-08-13 — 领域层状态成功不等于完整网络 transcript
+
+- Symptom: 战争和领地领域测试已覆盖扣款、敌对和所有权，但首次双会话测试仍暴露 `ColourChanged`/`ObjectColourChanged`/`ObjectPlayer` 的接收者顺序，以及离线时实际只有 `ObjectRemove` 而没有跨公会成员包。
+- Root cause: 只按业务提交结果推断网络行为，没有按每个在线观察者展开 Legacy 的广播循环和会话注销路径。
+- Prevention: 跨玩家功能必须同时建立领域终态测试与 net.Pipe 接收者矩阵；逐个列出发起者、同会成员、敌会成员和普通观察者的包序列，并以实际路径为准修正 fixture，不能凭相似公会通知推断注销包。
+- Verification: 新增战争双会话和领地分页/购买 transcript，锁定双方聊天、金库、颜色/对象刷新与持久终态；定向服务端测试通过。
+
+### 2026-08-13 — Schema tests must assert semantics, not gofmt alignment
+
+- Symptom: Adding GuildSettings fields made existing expected structs stale, while a static schema guard failed only because `gofmt` changed column-alignment spaces.
+- Root cause: Schema evolution was not accompanied by all aggregate fixture updates, and source-text assertions encoded incidental whitespace instead of declarations.
+- Prevention: When extending persisted structs, search every composite literal and legacy-JSON fixture for expected values; normalize source whitespace (or inspect types structurally) before static declaration checks, and explicitly test omitted JSON fields retain zero-value runtime fallbacks.
+- Verification: Guild settings fixtures now cover defaults, Setup.ini overrides, invalid-value fallback, round-trip values, and old-JSON zero values; both `./internal/worlddata` and `./internal/legacyworld` pass.
+
 ### 2026-08-13 — 独立 Go 导出器必须复现 Legacy 加载语义而非只解码字段
 
 - Symptom: 世界导出器能完整解码 117/0 文件，但账户归档角色仍会绑定拍卖，Windows 反斜杠/大小写路径在 Unix 主机失效，嵌套 `#INSERT` 没有继续展开，缺失物品定义会中止整个拍卖或公会文件，Quest NPC ID 也可能与运行时实例不一致。
