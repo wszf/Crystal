@@ -8,6 +8,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把工作区中的一个 enum 快照直接当成最终目标版本，未先与主线正在使用的当前协议基线交叉确认；同时只按用户最初列举包名收口，漏掉了夹在 `GuildInvite` 与 `GuildNameRequest` 之间、决定后者 ordinal 的 `GuildExpGain`。
 - Prevention: 对版本可能漂移的协议枚举，同时核对完整成员序列、主线当前 wire 基线和相邻占位包；显式测试必须包含整个连续区间，不能只断言功能入口包。收到权威 ordinal 修正后，以其为当前迁移基线并检查相邻常量是否遗漏。
 - Verification: 公会测试现显式断言 Client `80..84`、Server `ObjectGuildNameChanged=85` 与 `GuildNoticeChange..GuildNameRequest=167..172`，并覆盖 `GuildExpGain` UInt32 小端 payload；`go test ./internal/protocol -count=1` 通过。
+- Strengthening after recurrence: 插入枚举成员会让插入点后的所有现有常量漂移，局部修目标包会制造跨功能 ID 冲突（本次为 `ObjectGuildNameChanged=85` 与旧 `GainExperience=85`）。今后发现插入点后必须机械审计该方向所有已定义常量，更新所有领域 ordinal 测试，并让唯一性测试枚举生产常量表中的每个已定义 ID；当前验证覆盖 175 个 Server 与 116 个 Client 常量，且锁定 Server `HealthChanged=77 → DeleteItem=80 → ObjectGuildNameChanged=85 → GainExperience=86`、Client `GroupInvite=62 → TownRevive=69 → EditGuildMember=80` 边界。
 
 ### 2026-08-12 — 单次异常排查不得变成固定汇报项
 
