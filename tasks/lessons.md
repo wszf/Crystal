@@ -2,6 +2,34 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-12 — 单次异常排查不得变成固定汇报项
+
+- Symptom: 用户只为确认一次异常而询问模型、Goal 或代码比对状态，后续迁移仍反复展示同类截图分析和内部状态。
+- Root cause: 把一次性诊断误当成长期进度模板，没有在问题解释清楚后恢复到只汇报交付结果的沟通边界。
+- Prevention: 一次性异常只回答当次；除非用户再次询问或出现新的真实异常，后续不主动汇报代码比对、Goal 数量、模型名称、内部调度或已解释过的原因。正常迁移仅在整批完成、真实阻塞或必须由用户决策时汇报。
+- Verification: 本轮已停止重复发送该类状态，并继续直接完成关系功能批次。
+
+### 2026-08-12 — 跨会话状态变更必须主动唤醒目标会话
+
+- Symptom: 爱人跨地图召回已立即发送 MapChanged/ObjectTeleportIn，但目标会话的本地地图快照、位置持久化以及 NPC/怪物/地面物品刷新，要等目标客户端再发一个包才执行；全量测试还暴露了额外传送包与 barrier 的时序竞争。
+- Root cause: 共享 world 状态由发起者会话修改，目标会话却阻塞在 ReadFrame；初版 pending 队列只有轮询消费，没有事件唤醒，且测试把固定包数量误当成了跨 goroutine 的完成屏障。随后直接反复改 socket read deadline 虽能唤醒，却会与下一次 ReadFrame 竞争，造成已入队 KeepAlive 被旧 deadline 立即超时并丢失；临时 wake channel 又因重建窗口丢通知。
+- Prevention: 外部会话入队 transition 后通过会话生命周期内固定的 buffered wake channel 唤醒其所有者；会话用单个受控读 goroutine 等待客户端帧，并在等待期间可多次应用本地状态、持久化和可见对象刷新，随后继续消费同一个客户端帧。只有真正的会话/任务超时才短暂设置 read deadline，业务唤醒禁止借用 socket deadline；队列不能用单槽覆盖，wake channel 不能在读循环中重建。会话测试使用 KeepAlive 完成屏障，并允许已经验证过但可能稍后到达的传送尾包，不能靠客户端主动包来触发业务状态。
+- Verification: 同地图、跨地图静态对象刷新、无需目标主动发包的位置持久化和连续两个 pending transition 均有 net.Pipe 覆盖；Go 全量测试通过。
+
+### 2026-08-12 — 会话 fixture 必须显式设置方向并穷举装备门控
+
+- Symptom: 跨地图召回测试期望落在 (1,0)，但角色默认方向为 0，实际合法目标是原地 (0,0)；婚戒替换测试最初又因角色等级 1 与默认 RequiredType=Level/RequiredAmount=2 不符而提前走装备失败分支。
+- Root cause: fixture 依赖了隐式默认方向和物品需求字段，没有把目标坐标公式及 CanEquipItem 的职业、性别、等级/属性门控全部固定下来。
+- Prevention: 传送 fixture 在登录前显式持久化方向并按 Front 计算目标；装备事务 fixture 显式设置合法 RequiredType、RequiredAmount、RequiredClass、RequiredGender，同时为已绑定婚戒等隐藏状态补负例。
+- Verification: 跨地图召回稳定落在预期前方坐标，婚戒替换覆盖余额不足、非法物品、已绑定婚戒及成功原子交换。
+
+### 2026-08-12 — 跨会话测试数据必须避开 bootstrap 提前消费
+
+- Symptom: 为验证召回后的地面金钱刷新而预置目标地图对象时，对象在调用者 bootstrap 阶段就被发送，导致召回 transcript 缺少预期 ObjectGold。
+- Root cause: 测试在会话建立前就把共享对象放在当前可见范围，没有区分 bootstrap 可见性与目标动作后的新增可见性。
+- Prevention: 需要验证动作触发刷新时，先把对象放在不可见地图/坐标，相关客户端 bootstrap 完成后再移动到目标落点；NPC、怪物和地面对象分别断言 fixture 数量与动作后包序列。
+- Verification: 跨地图召回测试在无需 KeepAlive 触发业务的情况下收到 NPC 定义/对象、怪物和 ObjectGold。
+
 ### 2026-08-12 — 关系提交必须分离 world/auth 锁并同步会话快照
 
 - Symptom: 婚姻和导师初版在持有 `world.mu` 时调用 auth 原子事务与离线角色查询，且 session 的 `gameCharacter` 可能在另一会话提交后用旧整角色状态覆盖最新关系字段；导师经验只改了在线 world，登出可能丢失。
