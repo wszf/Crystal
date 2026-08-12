@@ -2,6 +2,21 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-12 — 关系提交必须分离 world/auth 锁并同步会话快照
+
+- Symptom: 婚姻和导师初版在持有 `world.mu` 时调用 auth 原子事务与离线角色查询，且 session 的 `gameCharacter` 可能在另一会话提交后用旧整角色状态覆盖最新关系字段；导师经验只改了在线 world，登出可能丢失。
+- Root cause: 把在线投影、权威持久状态和连接局部快照当作同一份对象，未定义跨层锁顺序和字段级同步边界。
+- Prevention: 关系事务统一由独立 `relationshipMu` 串行化，按 world 快照 → 释放 world 锁 → auth 原子提交/查询 → 重取 world 玩家并字段合并执行；禁止同时持有 world/auth 锁。session 层从 world 同步关系/进度字段，导师临时经验在登出前原子转入 auth，关系功能只合并其拥有的字段。
+- Verification: 关系 world/auth 定向测试、双会话 net.Pipe 婚姻/导师完整 transcript、导师登出/到期经验结算和 Go 全量 race 门禁用于验证。
+- Strengthening after review: 不得在持有 `world.mu` 时读取 auth 的离线关系记录；先复制角色索引/等级并释放 world 锁，再查 auth，重取 world 玩家并校验快照未漂移后提交。导师奖励必须在 `SaveJSON` 前完成 world/auth 经验变更，登录 bootstrap 严格拆成 Lover → 到期 Chat/MentorUpdate/奖励（或普通 MentorUpdate），到期只在登录检查；学生升级后再执行等级差自动解除。C# 默认 unchecked 的 `uint` 乘法、`long` 加法和 `long → uint` 转换也必须按位宽回绕，不能自行改成饱和运算。
+
+### 2026-08-12 — Go 门禁前检查并清理可重建构建缓存
+
+- Symptom: 新关系网络测试编译时出现 `no space left on device`，系统数据卷仅剩约 204 MiB，而 Go build cache 占用约 5.4 GiB。
+- Root cause: 长期多批次 `go test`/race 构建缓存累积，门禁前未检查临时卷余量。
+- Prevention: 大批次全量/race 门禁前用 `df -h` 和 `du -sh $(go env GOCACHE)` 检查空间；不足时仅执行 `go clean -cache -testcache` 清理可重建缓存，不删除项目或用户数据。
+- Verification: 清理后数据卷恢复约 25 GiB，关系双会话测试重新编译并通过。
+
 ### 2026-08-12 — 新增 bootstrap 包必须同步所有 transcript fixture
 
 - Symptom: 加入登录后的 `FriendUpdate` 后，功能测试正确，但大量旧会话测试仍把 `ReceiveMail` 后的下一包写死为物体或 `TimeOfDay`，整包测试集中失败。
@@ -23,6 +38,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 源码比对结果默认仅用于内部实现和验收；只在整批功能完成、需要用户决策、出现真实阻塞或长时间工作需简短报平安时汇报。取得子代理结果后立即关闭，并在解释模型活动前同时核对主线程当前模型和子线程生命周期。
 - Verification: 本次审计确认主线程当前固定为 `gpt-5.6-sol`，Luna 仅存在于历史轮次/已关闭子线程；遗留的 Maxwell、Gibbs 已关闭，当前所有子线程均为 closed，后续不再逐项转发源码比对结果。
 - Strengthening after correction: 用户对 Goal/模型状态的询问属于一次性故障排查，不得沉淀为每轮固定报告；除非用户再次询问或发现新的实际异常，后续不主动复述 Goal 数量、模型名称或子线程状态。
+- Second strengthening after correction: 用户针对异常截图或某项内部状态的单次询问，只回答当次问题；不得把该分析扩展成持续汇报模板，也不得在后续迁移批次中重复发送相同的代码比对、调度状态或原因分析。验证方式是后续仅汇报整批迁移结果、真实阻塞和必须由用户决定的事项。
 
 ### 2026-08-12 — 市场文本必须区分网络快照与 AddItem 后的 UserItem
 
