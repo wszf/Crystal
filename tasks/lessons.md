@@ -900,3 +900,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: legacy 连接会把请求留在队列中等 `ActionTime` 到期再处理，而当前 Go 会话同步读取后立即执行；只迁移时间字段却没有迁移队列调度会改变外部行为。
 - Prevention: 世界 helper 保留精确 capability/ActionTime 边界；会话入口保留单条 retry movement，在 `ActionReadyAt` 到期后重新派发，匹配 legacy `_retryList`，不能直接清零时间门禁。
 - Verification: 直接 helper 的 capability 测试与连续 session movement、Craft/Shop 距离、地面拾取和静态可见性测试同时通过全量普通/race 门禁。
+
+### 2026-08-12 — 一次性异常排查不能变成固定汇报项
+
+- Symptom: 用户只是临时询问一次异常现象，后续进度消息却持续重复相关分析，形成无关噪声。
+- Root cause: 把一次诊断请求误解成了长期监控和每轮汇报要求。
+- Prevention: 临时排查默认只回答当次；除非同类异常再次影响迁移、需要用户决策或用户明确追问，否则不主动重复诊断结论，也不把它加入固定进度模板。
+- Verification: 后续迁移仅在整批完成、真实阻塞或需要用户决策时汇报，不再附带该一次性排查内容。
