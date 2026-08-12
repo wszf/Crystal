@@ -2,12 +2,27 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-12 — 新增 bootstrap 包必须同步所有 transcript fixture
+
+- Symptom: 加入登录后的 `FriendUpdate` 后，功能测试正确，但大量旧会话测试仍把 `ReceiveMail` 后的下一包写死为物体或 `TimeOfDay`，整包测试集中失败。
+- Root cause: bootstrap 是共享、严格有序的协议面；只更新通用 helper 和新功能测试，没有先枚举所有手写启动序列。
+- Prevention: 每新增、删除或重排 bootstrap 包，先用 `rg` 搜索前后相邻包 ID，并一次性更新通用状态机与所有显式 expected 序列；随后先跑整个会话 package，再跑全量门禁。
+- Verification: 所有 `ReceiveMail` 后的启动序列已加入 `FriendUpdate`，`go test ./cmd/crystal-server -count=1` 通过。
+
+### 2026-08-12 — 邮件 transcript 必须消费发送方删除包与接收方定义包
+
+- Symptom: 带附件的黑名单邮件兼容测试先期望 `MailSent`，实际先收到 `DeleteItem`；接收方先期望 `ReceiveMail`，实际先收到附件的 `NewItemInfo`。
+- Root cause: 测试只关注邮件结果，遗漏附件发送的完整可观察包序列。
+- Prevention: 邮件 fixture 按是否有附件分别列出发送方 `DeleteItem`/扣费/`MailSent` 与接收方新邮件提示/未见物品定义/`ReceiveMail`；共享世界重登还要先用 barrier 消费加入/离开通知。
+- Verification: 黑名单下纯文本与附件两条真实网络路径均通过定向社交测试，附件删除、定义、邮件顺序和持久状态都有断言。
+
 ### 2026-08-12 — 源码比对与子任务细节只作为内部过程
 
 - Symptom: 源码逐段比对、子任务完成报告被频繁发送给用户，界面还因已完成代理未及时关闭而呈现持续活动，造成迁移反复汇报、模型来回切换的观感。
 - Root cause: 把内部审计证据和每条并行线的原始输出当成了用户必须逐项接收的进度；同时没有在取得结果后立即关闭 completed 子代理，也没有区分线程跨轮次换模与同一时刻的模型路由。
 - Prevention: 源码比对结果默认仅用于内部实现和验收；只在整批功能完成、需要用户决策、出现真实阻塞或长时间工作需简短报平安时汇报。取得子代理结果后立即关闭，并在解释模型活动前同时核对主线程当前模型和子线程生命周期。
 - Verification: 本次审计确认主线程当前固定为 `gpt-5.6-sol`，Luna 仅存在于历史轮次/已关闭子线程；遗留的 Maxwell、Gibbs 已关闭，当前所有子线程均为 closed，后续不再逐项转发源码比对结果。
+- Strengthening after correction: 用户对 Goal/模型状态的询问属于一次性故障排查，不得沉淀为每轮固定报告；除非用户再次询问或发现新的实际异常，后续不主动复述 Goal 数量、模型名称或子线程状态。
 
 ### 2026-08-12 — 市场文本必须区分网络快照与 AddItem 后的 UserItem
 
