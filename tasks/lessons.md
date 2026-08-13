@@ -2,6 +2,97 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — 提交 tracked diff 不会自动包含未跟踪源码
+
+- Symptom: P11 首次用 `git diff --name-only -z | xargs git add` 暂存时，只提交了已跟踪修改，十个新 Go 源码/测试文件仍留在工作区，提交统计与已通过测试的源码集合不一致。
+- Root cause: `git diff --name-only` 默认不列出 untracked 文件，把“当前差异清单”误当成了完整工作区清单。
+- Prevention: 提交前以 `git status --short` 为权威清单；明确暂存目标范围时同时处理 `??` 文件，提交后立即再次检查 status 与 `git show --stat`。禁止仅依赖 `git diff --name-only` 构造完整暂存集合。
+- Verification: 十个未跟踪 Go 文件已显式暂存并 amend 到同一个 P11 提交，Go 仓库提交后工作区为空，提交包含 43 个文件。
+
+### 2026-08-13 — 延迟物品生产必须同时固定锁序和最终快照顺序
+
+- Symptom: 智能生物自动生产黑石最初在 `world.mu` 内调用 auth 全局 ID 分配器；移出锁后，生产通知又排在通用持久化通知之前，后续旧角色快照可能覆盖刚生成的物品。
+- Root cause: 只把跨域调用改成延迟执行，没有把同一 tick 的所有快照按实际提交时刻排序；“锁外执行”与“最终权威状态”被当成两个无关问题。
+- Prevention: world 锁内只准备不可变创建上下文，所有 auth/全局 ID/随机物品创建在锁外执行；同一 tick 先提交锁内捕获的普通状态和拾取金币，再执行物品创建、重入 world 合并并提交包含新物品的终态。测试必须让创建回调主动获取 `world.mu` 验证无反向锁序，并逐个执行通知后检查 auth 最终物品。
+- Verification: 黑石创建回调已整体移到 world 锁外，生产通知排在通用 persist 之后；锁序超时测试和 auth 终态测试通过，`cmd/crystal-server` 整包测试通过。
+
+### 2026-08-13 — 测试 helper 与生产标识符必须先做包级冲突检查
+
+- Symptom: 新增生产 helper 时使用了测试文件已有的 `intelligentCreatureRewardRoll` 名称，导致同包编译冲突；新增磁盘会话测试又在使用 `filepath` 后遗漏 import。
+- Root cause: patch 前只检索生产文件，没有检索整个 Go package 的标识符和 import 需求，也没有紧跟最小编译检查。
+- Prevention: 新增 package 级标识符或标准库依赖前，用 `rg` 搜索整个目录（包含 `*_test.go`）；每个语义 patch 后立即 `gofmt` 并运行受影响包的定向编译/测试，再继续扩大改动。
+- Verification: 生产 helper 改为 `rollIntelligentCreatureReward`，补齐 `path/filepath` import；智能生物定向测试和服务端整包测试均通过。
+
+### 2026-08-13 — 测试调用 helper 前必须读取完整返回签名
+
+- Symptom: Buff 会话 fixture 把无返回值的 `UpdateCharacterHealth` 当成可用于条件判断的成功布尔值，造成包级编译失败。
+- Root cause: 只按同类 `Update...` 命名推断返回值，没有读取当前方法的真实声明。
+- Prevention: 每次新增测试 helper 调用先用 `rg` 定位声明并读取完整参数/返回签名；首次 patch 后先跑受影响包的最小编译，再扩展 transcript。
+- Verification: fixture 改为按无返回值签名调用，Buff 定向测试与 `cmd/crystal-server` 整包测试通过。
+
+### 2026-08-13 — 定时业务必须沿调用链传递同一个确定时间
+
+- Symptom: 自动黑石的名称时效最初使用 `time.Now()`，与 tick 测试传入的 `now` 不一致；给 fixture 名称加入 `[2h]` 后又不再匹配默认黑石配置名。
+- Root cause: 创建 helper 在调用链中重新读取墙上时间，测试 fixture 也隐式依赖默认名称匹配，随机/时间/配置三类输入没有全部显式化。
+- Prevention: 所有 tick 驱动的过期、随机和生产逻辑把同一个 `now`、roll 与配置名称封装进不可变上下文向下传递；带时效标记的物品 fixture 显式设置对应配置名，不依赖默认模糊匹配。
+- Verification: 自动黑石使用 tick 的 `now` 计算 `[2h]` 到期，测试显式调用 `setIntelligentCreatureSettings`，确定性 `CreateDropItem` 与时效测试通过。
+
+### 2026-08-13 — 通知测试 helper 不得隐式提交所有副作用
+
+- Symptom: 为方便测试而让 tick helper 自动执行所有 `BeforeSend` 后，既有用例无法再断言延迟持久化/创建的通知数量和时序。
+- Root cause: 读取状态的 helper 混入了投递副作用，调用者无法选择观察“生成通知”还是“完成投递”两个阶段。
+- Prevention: tick helper 只返回通知；另设显式 deliver helper，并在需要时逐项执行 `BeforeSend`。涉及多阶段事务的测试分别断言通知顺序、阶段中间态和最终权威状态。
+- Verification: `intelligentCreatureTestTick` 与 `intelligentCreatureTestDeliver` 已拆分，黑石锁序和 stale 快照回归测试可分别验收投递前后状态。
+
+### 2026-08-13 — Buff 协议对象必须使用运行时 ObjectID
+
+- Symptom: 智能生物奖励和安全区 Buff 测试若使用持久化角色 Index 编码 `AddBuff`/`PauseBuff`，单角色 fixture 可能碰巧通过，但观察者会定位到错误世界对象。
+- Root cause: 把数据库角色身份和当前 world 会话身份混用，没有在 wire transcript 中用不同数值锁定边界。
+- Prevention: 所有 Object*、Buff 增删/暂停协议字段使用 `worldPlayer.ObjectID`；持久化 API 才使用 `SelectInfo.Index`。会话 fixture 必须断言 bootstrap 分配的 ObjectID 出现在 payload 中。
+- Verification: WonderDrug `AddBuff` 与安全区 `PauseBuff` 会话测试都解析并断言真实运行时 ObjectID，同时验证 auth 与 JSON 持久化。
+
+### 2026-08-13 — 特殊物品迁移必须审计通用入口尾部副作用
+
+- Symptom: 只实现 Strongbox/BlackStone/WonderDrug/Knapsack 等特殊分支时，容易遗漏通用 UseItem 尾部的二次响应、源物品消耗或无效果也消费等 Legacy 可观察行为。
+- Root cause: 测试只调用领域 helper 或只关注奖励结果，没有覆盖生产 dispatch 返回后的通用处理链。
+- Prevention: 每种特殊物品同时测试领域结果和真实生产入口；逐项列出分支内部与通用尾部各自的消费、持久化和响应包，尤其锁定 Strongbox 双 `UseItem`、FortuneCookie 无效果仍消费以及材料不足/不适用路径。
+- Verification: 当前生产会话覆盖 BlackStone、Strongbox、WonderDrug、FortuneCookie、Knapsack 全部 shape，并断言完整包序列、源物品终态、auth 状态与磁盘重载。
+
+### 2026-08-13 — 测试参考模型不能替代生产入口覆盖
+
+- Symptom: 奖励 shape 的参考调度测试即使全部通过，也不能证明 `main.go` 的真实 `ClientUseItem` 分支已接线或按相同顺序持久化和发包。
+- Root cause: 参考模型与生产实现可能共享错误假设，且绕过连接状态、通用尾部和 auth/world 桥接。
+- Prevention: 参考模型只用于穷举规则；每个功能簇至少增加一个真实 dispatch/net.Pipe 会话，覆盖生产 packet 入口、状态桥、网络 transcript、登出和 JSON 重载。
+- Verification: `TestCurrentGoDispatchHandlesEveryRewardShapeInProduction` 之外，新增奖励生产会话逐 shape 经过真实 ClientUseItem，并从账户 JSON 重载验证终态。
+
+### 2026-08-13 — 会话 transcript 必须包含登录后的延迟 Buff 包
+
+- Symptom: 带持久 Buff 的角色登录后，延迟发送的 `AddBuff` 可能落在第一条业务请求响应之前，若测试只按静态 bootstrap 列包会把它误判成目标动作响应。
+- Root cause: 登录状态完成与定时/延迟通知并非同一同步边界，fixture 没有把已持久 Buff 的后续投递列入 transcript。
+- Prevention: 带 Buff 的会话测试在首个业务 marker 前显式消费并断言登录后 `AddBuff`，或把它作为有序 transcript 的第一项；payload 同时断言运行时 ObjectID。
+- Verification: 安全区移动会话锁定 `AddBuff -> PauseBuff -> HealthChanged -> UserLocation`，并通过登出及磁盘重载验证。
+
+### 2026-08-13 — 地图领域通知与真实接收者矩阵必须同时验收
+
+- Symptom: 智能生物召回/跨图/禁宠地图的领域状态正确，不代表 owner、旧地图观察者和目标地图观察者都收到正确的 Teleport/Remove/ObjectMonster/Health 顺序。
+- Root cause: 只断言 world 对象坐标或通知总数，没有按每个接收者过滤领域通知并走真实会话投递。
+- Prevention: 地图对象功能同时建立领域接收者矩阵和 net.Pipe 会话：分别断言 owner、旧观察者、新观察者的 packet ID、payload ObjectID 与顺序；禁用地图还要验证持久化解除召唤。
+- Verification: 智能生物 visibility 测试覆盖第二观察者登录、移动、召回、跨图和禁宠地图，逐接收者断言通知并通过服务端整包测试。
+
+### 2026-08-13 — Buff 属性 fixture 必须从真实基础属性逐项计算
+
+- Symptom: WonderDrug/Knapsack 与安全区暂停测试若直接猜最终 HP、背包负重或 buff stats，容易遗漏 class/level 基础公式、现有附加属性和叠加规则。
+- Root cause: 把预期终值按直觉填写，没有从角色基础属性、物品 AddedStats、已有 Buff 和暂停状态逐项代入生产计算。
+- Prevention: 属性测试固定角色 class/level/HP/MP 和源物品 Stats/AddedStats，先列出基础值与每层增量，再断言最终 stats、生命钳制和“延长时长但不替换原 stats”等怪癖。
+- Verification: 当前测试锁定 WonderDrug HP、Knapsack Luck→BagWeight 及二次使用仅延长时长，安全区暂停后 MaxHP/HP 钳制也由生产会话验证。
+
+### 2026-08-13 — 双向协议 transcript 不得按 packet ID 反推方向
+
+- Symptom: 智能生物 transcript 的第 21 项把客户端 `UpdateIntelligentCreature=125` 误判成服务端方向，因为服务端 `ObjectEffect` 也合法使用 ordinal 125。
+- Root cause: 测试只保存 ID，并通过一组服务端 ID 推导方向；Crystal 的客户端与服务端枚举是独立命名空间，允许跨方向重号。
+- Prevention: 所有双向 transcript 期望使用显式有序 `(ID, direction)` slice，每一帧同时声明 ordinal 和方向；禁止用 packet ID、数值范围或名称集合反推方向。
+- Verification: P11 transcript 已改成逐项显式 ID/方向期望，合法的 125 跨方向重号分别按真实发送方向验收。
+
 ### 2026-08-13 — `go test -run` 正则必须作为单个 shell 参数引用
 
 - Symptom: 定向测试命令中的 `TestA|TestB` 未加引号，zsh 把竖线解析成管道，首段测试输出被后续的 `command not found` 覆盖。
