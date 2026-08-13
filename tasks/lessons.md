@@ -2,6 +2,27 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — 会话局部物品变更必须先同步 world 再读取整角色快照
+
+- Symptom: P8 整包回归中，普通/太阳药水已经正确消费、删除响应也成功，但登出持久化又出现两个旧物品；`TestSessionUseAndDeleteItemTranscriptAndPersistence` 稳定失败。
+- Root cause: 本批为了宠物登出读取 world 快照，使既有 `DeleteItem` 未同步 world 的缺口变成可见；退出阶段的整角色快照覆盖了 session 中更新后的背包。最初尝试只合并 `Pets` 仍会被后续整快照覆盖，未触及真正的状态所有权问题。
+- Prevention: 任何 session 局部物品消费、删除、移动或创建一旦成功，必须在可能读取 `playerCharacterSnapshot` 前同步 `world.updatePlayerItems`；伴侣持久化只负责其领域字段，不能用条件式旧快照合并掩盖其他领域未同步。新增登出读取路径后，必须重跑所有会话物品持久化测试。
+- Verification: `ClientDeleteItem` 成功后现同步 world，删除了无效的宠物条件合并；目标用例连续运行 20 次及 `cmd/crystal-server` 整包测试均通过。
+
+### 2026-08-13 — 等级化实体恢复必须在刷新属性后无条件应用保存生命值
+
+- Symptom: 等级 2 宠物基础 HP 20、刷新后 MaxHP 60、保存 HP 50 时，旧条件 `info.HP < pet.HP` 会错误保留初始化 HP 20；Wizard 非 Clone 的零 `TameTime` 也被误当成永久宠物，且到期没有名称广播。
+- Root cause: 用刷新前/初始化生命值作为恢复条件，并把 `TameTime > 0` 错当成“字段是否存在”；Legacy 实际对 Wizard 非 Clone 总是执行 `now + TameTime`，到期解除主人后发送 `ObjectName`。
+- Prevention: 恢复等级化实体时先计算 MaxHP/属性，再无条件赋保存 HP 并钳制到 `[0, MaxHP]`；时间字段的零值语义必须沿真实加载调用核对，不能用非零判断代替存在性；所有所有权到期路径同时核对可见名称/颜色等广播。
+- Verification: 新增等级宠物 HP/属性/速度、特殊三倍经验/等级上限、PetSave 筛选、正负剩余时间，以及零 TameTime 到期 `ObjectName` 的回归测试；协议 serializer 与 malformed-data 测试通过。
+
+### 2026-08-13 — 声明的持久化字段不代表 Legacy 实际写入记录
+
+- Symptom: `PetInfo` 声明了 `TameTime`，但 117/0 `Server.MirADB` 的构造、保存和读取路径均未处理它，每只普通宠物实际仍只有 14 字节；若按字段声明追加读取会错位后续角色数据。
+- Root cause: 把模型成员列表误当成二进制格式契约，没有以真实 reader/writer 调用序列核定记录宽度。
+- Prevention: 迁移 Legacy 二进制记录时逐字段对照构造、Save 和 reader，并用后续哨兵字段锁定偏移；未写入旧格式但 Go 运行时需要的状态通过 Go JSON 模型单独贯通，不能改变旧记录宽度。
+- Verification: Go 导入器继续严格消费 14 字节并令导入 `TameTime=0`，偏移回归测试保留后续字段；非零/负 `TameTime` 已通过 protocol/auth JSON 往返测试。
+
 ### 2026-08-13 — 提交 tracked diff 不会自动包含未跟踪源码
 
 - Symptom: P11 首次用 `git diff --name-only -z | xargs git add` 暂存时，只提交了已跟踪修改，十个新 Go 源码/测试文件仍留在工作区，提交统计与已通过测试的源码集合不一致。
