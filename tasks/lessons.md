@@ -1416,3 +1416,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把“通知接收者的 Send”误当成“动作源的 Send”，没有区分 `notifyPlayers` 的 recipient 与产生 `ObjectTurn/Attack/RangeAttack/Magic` 的 source。
 - Prevention: Observer forwarding 只由动作源路径显式提交带源 ObjectID 的 packet；需要复用 world notification 时先确认源包是否也会发给源连接，禁止在通用 recipient callback 中推断来源。
 - Verification: 攻击、远程攻击改为 source `ObserverPacket`，移动和魔法保留 source path 转发；全仓普通/race 测试、vet/build 与 Observer transcript 均通过。
+
+### 2026-08-14 — CanFly 必须沿 Legacy 的逐格路径并区分技能例外
+
+- Symptom: Go 的远程与单目标魔法已有目标距离和延迟命中，却没有按地图墙体检查投射路径；直接把所有远程魔法统一加墙门禁还会错误阻断 ThunderBolt/FlameDisruptor 及 MentalState TrickShot。
+- Root cause: 只迁移了目标选择/命中距离，没有把 `MapObject.CanFly` 的八方向逐格推进、HighWall/LowWall 的共同 `Valid` 语义和各 spell 入口的例外条件连在一起；Go 地图属性常量也曾与 Legacy ordinal 反置。
+- Prevention: 先固定 `CellAttribute` 为 Walk=0、HighWall=1、LowWall=2，再复刻 `DirectionFromPoint` + `PointMove` 的每格校验；按 Legacy switch 建立需要 CanFly 的技能表，普通 RangeAttack 与 Straight/DoubleShot 单独保留 MentalState=1 绕过，FireBounce 每一跳用来源对象当前位置重验路径，延迟命中仍使用 Legacy 的目标位置窗口。
+- Verification: Go 新增地图 ordinal/解析、两种墙与边界、单目标魔法、ThunderBolt/FlameDisruptor 例外、普通远程/TrickShot、FireBounce 墙前跳转和延迟目标移动测试；受影响包及 `go test ./...` 均通过。
