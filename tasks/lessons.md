@@ -24,6 +24,14 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 本批次已分别在两个绝对工作目录执行状态检查，确认原仓库仅追加本 lessons 记录，Go 仓库仅包含 Observer 未提交改动；错误路径命令均在创建/修改前失败且未改动文件。
 - Strengthening after recurrence: 即使同一批次已经固定了两个仓库的 `workdir`，补丁仍可能因手工复制绝对路径时漏掉中间目录而指向不存在的仓库；跨仓库修改前必须对每个补丁目标执行 `test -f`/`git rev-parse --show-toplevel`，失败时先停止补丁，不得依赖 apply 工具的部分输出判断是否已修改。
 - Verification after strengthening: 本批次先分别读取 Legacy lessons 与 Go 状态，再用完整 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 根路径核验；一次错误的缺少 `me_work` 目标在写入前被拒绝，随后所有 Go 补丁均在核验后的绝对路径成功应用，两个仓库的 C# 差异/未跟踪检查保持为空。
+- Strengthening after second recurrence: 并行只读查询仍可能把已核验的 Legacy `workdir` 误配给 Go 命令；查询也必须按仓库分组逐项执行，或在每个结果中同时核对 `git rev-parse --show-toplevel`，禁止仅依赖命令返回的错误文本判断目标仓库。
+- Verification after second strengthening: 本次错误查询只在读取阶段返回 `cmd/crystal-server: No such file or directory`，没有创建或修改文件；随后改用完整 Go 根路径查询 Legacy/Go 代码，目标和工作树均已复核。
+- Strengthening after third recurrence: 禁止在同一个 `Promise.all`/并行工具调用中混放两个仓库的命令；跨仓库检索必须拆成独立调用，先执行 `git rev-parse --show-toplevel` 并核对期望根目录，再读取源码。
+- Verification after third strengthening: 本次 Legacy 查询在 Go 根目录仅返回路径错误且无写入；后续改为单仓库调用前先核对根目录，未再使用错误路径结果作为实现依据。
+- Strengthening after fourth recurrence: 单次 shell command 也不得混合 Legacy 源码路径和 Go 源码路径；每次调用只允许使用一个仓库的路径字面量，另一仓库必须在新的、独立且已核验根目录的调用中检索。
+- Verification after fourth strengthening: 本次错误的 Go 路径只在 Legacy 根目录返回不存在，未产生写入；后续仓库查询拆为独立调用并先验证根目录。
+- Strengthening after fifth recurrence: 命令参数本身也必须单仓库化；即使 `workdir` 正确，`rg`/`sed` 的路径模式不得包含另一仓库的目录。先完成当前仓库检索，再在新调用切换根目录。
+- Verification after fifth strengthening: 本次 Go 调用中的 Legacy 路径模式只返回不存在且无写入；后续不再把跨仓库路径放入同一命令，源码判断仅使用当前仓库结果。
 
 ### 2026-08-14 — UserMagic 冷却必须在世界快照中转换为剩余时间
 
@@ -1430,3 +1438,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 目标的物品定义按连接可见性规则在观察接管阶段先发送；测试只更新了目标本身的装备状态，没有重新展开观察者接管的定义包顺序。
 - Prevention: 任何会改变目标可见物品集合的 Observer/Inspect fixture，都要分别列出目标连接与观察者连接在请求后的完整 packet matrix，并在 `MapInformation` 前消费和解析新增 `NewItemInfo`。
 - Verification: Observer transcript 已锁定目标装备定义 → `MapInformation` → `UserInformation` 顺序；RangeAttack 装备门禁相关定向测试和 `go test ./cmd/crystal-server -count=1` 均通过。
+
+### 2026-08-15 — 手工 world tick 停止 ticker 必须等待 goroutine 退出
+
+- Symptom: 全仓 race 门禁曾在 FrostCrunch 会话的合成时间轴中看到 Frozen 清除通知为空；单测偶发通过。
+- Root cause: 测试只关闭后台 ticker 的 stop channel 并固定 sleep，没有确认 ticker goroutine 已退出；真实时间 tick 可能在合成时间轴 tick 前处理 1970 年的毒状态。
+- Prevention: world ticker 暴露仅供内部同步的完成 channel；手工时间轴 fixture 关闭 ticker 后等待该 channel，再调用 synthetic `world.tick`，禁止用固定 sleep 充当 goroutine 完成屏障。
+- Verification: FrostCrunch 普通与 race 定向测试各连续 10 次通过；提交前重新执行全仓 race 门禁。
