@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-14 — 无属性 Buff 不应触发派生生命/魔法刷新
+
+- Symptom: Hiding/MassHiding 的纯状态 Buff 没有任何 stat modifier，却产生了不相关的派生 HP/MP 刷新或额外状态包。
+- Root cause: 通用 Buff 应用路径在每次增删 Buff 后都无条件重算并钳制派生生命/魔法，把“Buff 状态变化”和“属性变化”当成同一类副作用。
+- Prevention: 只有实际改变会影响 MaxHP/MaxMP 或其他派生属性的 Buff 才执行对应刷新；无属性 Buff 只提交自身状态及其必要的可观察包。
+- Verification: Hiding/MassHiding 定向测试和真实 net.Pipe transcript 现锁定单次施法的 `HealthChanged` 数量、`ObjectHidden`/`AddBuff` 顺序及过期包，均通过。
+
+### 2026-08-14 — 技能经验测试必须注入确定性随机源
+
+- Symptom: 技能效果本身正确时，经验或概率门禁测试仍可能因生产随机数落点不同而偶发失败。
+- Root cause: 测试直接使用运行时随机源，未把 Legacy 需要验证的命中/训练分支固定下来。
+- Prevention: 领域测试在构造 World 后显式注入 `combatRoll`，按用例选择稳定的边界值，再单独覆盖概率负例；不要用重复运行碰运气验证技能经验。
+- Verification: Hiding/MassHiding、现有战斗技能和对应真实会话测试在固定 roll 下重复运行，经验计数和包序稳定通过。
+
 ### 2026-08-14 — LightSetting 测试必须按旧版的 hour*2 区间逐值核对
 
 - Symptom: 动态 `TimeOfDay` 定向测试把本地小时 9 期望为 Evening，Go 测试失败；旧版实际返回 Night。
@@ -36,6 +50,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after sixth strengthening: 本次错误的 Legacy 调用只在读取阶段返回 Go 路径不存在，没有写入；随后改为先独立核验 Go 根目录再查询，迁移判断未使用错误输出。
 - Strengthening after seventh recurrence: Legacy 根目录下的检索命令即使只是比较 Go 侧已有符号，也不得包含任何 Go 路径或 glob；先结束 Legacy 只读核对，再以新的、单独核验根目录的 Go 调用继续，禁止在同一 shell 中跨边界。
 - Verification after seventh strengthening: 本次 Legacy shell 中误带的 Go glob 只返回 shell 的未匹配错误，没有写入或 C# 变化；后续实现判断不使用该输出，并恢复为单仓库调用。
+- Strengthening after eighth recurrence: 即使前一条规则已要求单仓库命令，工具编排仍可能在参数层把另一仓库的绝对路径带入当前调用；跨仓库任务必须把“根目录核验、源码读取、写入”拆成独立调用，并在每次返回后核对根目录，禁止复用上一调用的路径变量。
+- Verification after eighth strengthening: 本轮错误的跨仓库查询只在读取阶段返回路径不存在且没有文件写入；随后用两个独立的绝对根目录调用完成判断，Go 改动与 Legacy lessons 均落在预期仓库，C# 状态未变。
 
 ### 2026-08-14 — UserMagic 冷却必须在世界快照中转换为剩余时间
 
