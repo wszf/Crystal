@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-14 — Inspect 测试必须区分 Hero 运行表的 owner key 与 object ID
+
+- Symptom: Hero 检查快照测试把 `world.heroes` 按 Hero `ObjectID` 建表，真实解析却按 owner `ObjectID` 查表，导致合法 Hero 请求返回空快照。
+- Root cause: 只看到 map value 中的 Hero object ID，没有读取 Go 运行表所有读写路径确认 map key 语义。
+- Prevention: 构造运行态 fixture 前先核对该表的 key contract；同时设置 map key、value 的 `ObjectID` 和 `OwnerID`，并用成功解析及深拷贝断言验证。
+- Verification: 修正 fixture 为 `world.heroes[ownerObjectID]` 后，Hero detached-snapshot 与真实 Inspect session 定向测试通过。
+
+### 2026-08-14 — 协议尾字段测试必须显式初始化非零语义哨兵
+
+- Symptom: `UserInformation` observe-flags 尾部测试用 `UserInfo{}` 的零值推断 `SummonedCreatureType=None`，实际 Legacy-compatible `None` 哨兵为 99，断言失败。
+- Root cause: 把 Go zero value 当成业务枚举的 None 值，未按生产角色创建路径显式设置协议哨兵。
+- Prevention: 固定 wire vector 时逐项初始化业务枚举和 sentinel，禁止用结构体零值代表非零 Legacy 常量；同时断言完整尾部字节序列。
+- Verification: 测试显式设置 `IntelligentCreatureNone` 后，protocol 定向、全仓普通和 race 测试均通过。
+
 ### 2026-08-13 — 在线组 fixture 必须在 world enter 后建立
 
 - Symptom: 区域魔法的 Group 模式测试已在手工 `SelectInfo` 中设置相同 `GroupID`，命中阶段仍伤害了预期友方玩家。
