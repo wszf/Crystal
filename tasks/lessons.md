@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-14 — LightSetting 测试必须按旧版的 hour*2 区间逐值核对
+
+- Symptom: 动态 `TimeOfDay` 定向测试把本地小时 9 期望为 Evening，Go 测试失败；旧版实际返回 Night。
+- Root cause: 看到 Evening 的 `16/17` 区间后按直觉把连续本地小时映射成 8/9，遗漏了 Legacy 先执行 `Now.Hour * 2 % 24`。
+- Prevention: 时间迁移先固定中间量 `hours = hour*2%24`，再列出每个边界小时的枚举和 wire 值；定义类型负例也显式转换为协议底层 `byte`，避免测试类型与业务枚举混淆。
+- Verification: 修正 hour 9 为 Night、负例显式 `byte(LightNight)` 后，协议、探针和服务端 TimeOfDay 定向测试通过。
+
+### 2026-08-14 — 全局时钟副作用必须区分在线 runtime 与纯 world fixture
+
+- Symptom: 全仓测试中大量使用合成 epoch 时间调用 `world.tick` 的战斗、掉落和治疗 transcript 收到意外 `TimeOfDay` 通知并失败。
+- Root cause: 新增的全局时间更新在所有 world fixture 上无条件执行；旧测试的 `tick` 不是在线服务 runtime，却被当成真实服务器时钟循环。
+- Prevention: 需要连接级后台 ticker 才启用全局时钟副作用；`startTicker` 负责启用并用当前/注入时钟刷新状态，纯 world fixture 默认保持关闭，定向时间测试显式开启。
+- Verification: 已把更新门禁移到 `lightsEnabled`，在线 session 通过 `setLightClock` 启用；先前受污染的现有测试及动态 TimeOfDay 定向测试随后重新运行验证。
+
 ### 2026-08-14 — 跨仓库只读检索必须显式固定工作目录
 
 - Symptom: 两次只读 `rg` 检索及一次补丁命令把原 Crystal 路径和 Crystal.GoServer 路径混用/重复拼接，输出或命令来自错误路径，增加了判断迁移状态的风险。
