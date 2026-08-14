@@ -32,6 +32,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after fourth strengthening: 本次错误的 Go 路径只在 Legacy 根目录返回不存在，未产生写入；后续仓库查询拆为独立调用并先验证根目录。
 - Strengthening after fifth recurrence: 命令参数本身也必须单仓库化；即使 `workdir` 正确，`rg`/`sed` 的路径模式不得包含另一仓库的目录。先完成当前仓库检索，再在新调用切换根目录。
 - Verification after fifth strengthening: 本次 Go 调用中的 Legacy 路径模式只返回不存在且无写入；后续不再把跨仓库路径放入同一命令，源码判断仅使用当前仓库结果。
+- Strengthening after sixth recurrence: 即使命令主体只读，单仓库调用中也不得在 Legacy 根目录拼接或检索 Go 路径；每次切换仓库前重新执行 `git rev-parse --show-toplevel`，并让命令参数只包含当前根目录下的相对路径。
+- Verification after sixth strengthening: 本次错误的 Legacy 调用只在读取阶段返回 Go 路径不存在，没有写入；随后改为先独立核验 Go 根目录再查询，迁移判断未使用错误输出。
+- Strengthening after seventh recurrence: Legacy 根目录下的检索命令即使只是比较 Go 侧已有符号，也不得包含任何 Go 路径或 glob；先结束 Legacy 只读核对，再以新的、单独核验根目录的 Go 调用继续，禁止在同一 shell 中跨边界。
+- Verification after seventh strengthening: 本次 Legacy shell 中误带的 Go glob 只返回 shell 的未匹配错误，没有写入或 C# 变化；后续实现判断不使用该输出，并恢复为单仓库调用。
 
 ### 2026-08-14 — UserMagic 冷却必须在世界快照中转换为剩余时间
 
@@ -1452,3 +1456,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 已有绝对根目录没有直接复用，临时手写路径引入重复目录片段；源码未被读取或修改。
 - Prevention: 每次跨仓库调用只使用先前 `git rev-parse --show-toplevel` 的完整根目录，并在命令前检查 `test -d`/`test -f`；失败命令不得作为证据，立即切换到新调用重跑。
 - Verification: 纠正后 Go 查询完整返回，Legacy/Go 工作树和 C# 差异均未产生额外变化。
+
+### 2026-08-15 — 支援魔法会话 fixture 必须保持在线状态与持久状态一致
+
+- Symptom: SoulShield 会话 transcript 在预期 `AddBuff` 后读到额外 `HealthChanged`，失败后后台 session 仍尝试保存已被测试清理的临时目录。
+- Root cause: fixture 在登录后把运行时 MP 改成远高于角色 MaxMP 的合成值，Buff 刷新按真实装备/等级重算并钳制生命资源；失败路径又先结束测试，掩盖了后续异步保存错误。
+- Prevention: 网络 transcript 只在与登录 bootstrap 一致的 MaxHP/MaxMP 范围内修改运行时字段；若必须手工推进 ticker，先设置读取屏障并在断言失败前关闭会话，避免把 cleanup 后的后台日志当作首要根因。
+- Verification: MP 改为当前 MaxMP 后，`HealthChanged → DeleteItem → UserLocation → Magic → AddBuff` 顺序和 JSON 物品/Buff 状态均稳定通过。
+
+### 2026-08-15 — 嵌套魔法分支修改后必须立即做语法门禁
+
+- Symptom: 支援魔法分支初版漏掉嵌套 `if` 的闭合括号，包级编译在后续函数定义处才报告 `expected '('`。
+- Root cause: 在已有长 `if/else if` 链中一次性插入两层局部逻辑，没有先验证嵌套边界。
+- Prevention: 长分支新增后立即用 `gofmt` 和 `go test <affected-package> -run '^$' -count=1`；对每个局部 `if` 先明确闭合范围，再加入行为断言。
+- Verification: 修正闭合边界后包级编译、支援魔法定向世界测试和真实 net.Pipe transcript 均通过。
