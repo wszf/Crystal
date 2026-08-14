@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — 在线组 fixture 必须在 world enter 后建立
+
+- Symptom: 区域魔法的 Group 模式测试已在手工 `SelectInfo` 中设置相同 `GroupID`，命中阶段仍伤害了预期友方玩家。
+- Root cause: `world.enter` 会主动清除持久化或手工携带的 stale `GroupID`；测试把进入前字段当成在线组权威投影，实际两名玩家入场后都已变为无组。
+- Prevention: 所有依赖在线组关系的 world 测试先让全部成员完成 `world.enter`，再调用 `establishRuntimeGroupForTest` 建立 `world.groups` 与成员 `GroupID`；目标行为前断言非零且相等，禁止只在构造体中预填组号。
+- Verification: 区域魔法 fixture 改为 enter 后建立组，Group 模式只命中后来进入区域的非组员，友方、离开者和安全区玩家均保持满血；定向测试通过。
+
 ### 2026-08-13 — 新增静态对象类型必须同步完整可见性 transcript
 
 - Symptom: KingOfHill `ObjectSpell` 已正确进入会话可见性后，服务端整包测试仍在第二次 NPC 请求前读到遗留的 packet 150，`TestSessionConquestStartStopRefreshesWarZoneAndNPCVisibility` 失败。
@@ -522,6 +529,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 手写 patch 时把普通源码行当成了未标记的 hunk 内容，没有遵守 unified diff 的上下文格式。
 - Prevention: 通过工具封装 patch 前，所有保留行都以空格开头，删除行以 `-` 开头，新增行以 `+` 开头；patch 失败后先重新读取目标文件，不假设变更已经落盘。
 - Verification: 按稳定锚点拆分 patch 后，四个 Go 文件的 diff、gofmt、定向测试和 `git diff --check` 均通过。
+- Strengthening after recurrence: 本批首次给 `worldMagicAction` 增加区域动作字段时，patch 数组中的 Go 原文以制表符直接开头，遗漏 unified diff 要求的上下文空格，整个 hunk 被拒绝。今后数组中每条保留源码行必须先加一个字面量空格，再接源码原有缩进；构造后逐行检查除 marker 外的首字符只能是空格、`+` 或 `-`。
+- Verification after recurrence: 失败补丁未产生部分修改；区域动作结构改用带显式上下文空格的小 hunk 重做，并在后续读取和最小编译中确认字段只出现一次。
 
 ### 2026-08-11 — 会话测试 fixture 必须复用真实桥接签名
 
@@ -1011,6 +1020,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Fourth strengthening after recurrence: 同一仓库的搜索目录也必须先由 `rg --files` 或已验证路径清单确认；任一不存在的目录都会让 `rg` 以 2 退出，即使同时打印了其他目录的部分结果，也不能当作完整证据。本次误带不存在的 `Libraries` 后，已仅用确认存在的 `Server`/`Shared` 重跑 Conquest 查询。
 - Fifth strengthening after recurrence: 即使同一查询只想并列核对 Go 与 Legacy 常量，也不能在 Go workdir 的 `rg` 参数中附带 `Server/...cs`；本批核对 ControlPoints 上限时该混用再次以 2 退出。以后先按仓库构造两份路径清单并分别调用，当前已在 Crystal 根目录单独重跑 `MAX_KING_POINTS/MAX_CONTROL_POINTS` 查询并取得完整结果。
 - Sixth strengthening after recurrence: 已确认仓库根目录仍不代表任意常见子目录存在；本批在原版 Crystal workdir 的检索参数中误带 Go 专属 `cmd`，使 `rg` 以 2 退出。每次多目录搜索前必须先用该仓库的 `rg --files` 生成实际顶层路径集合，命令参数只能从集合中选择；当前已移除 `cmd` 并在原版 `Server/MirObjects`、`Shared` 与 Go 仓库各自独立重跑相关查询。
+- Seventh strengthening after recurrence: 本批只读分析又在 Go 仓库搜索不存在的 `tasks`，并在 Go workdir 的同一命令中混入原版 `Server/MirObjects/PlayerObject.cs`。今后每条检索命令先在该命令自己的 workdir 用 `rg --files` 确认全部目标路径；命令参数只能来自这份清单，Go 与 Legacy 即使逻辑相关也必须拆成两个独立调用，任何 `rg` 退出码 2 都视为证据无效并在正确根目录完整重跑。
+- Verification after seventh recurrence: 已在 Crystal 根目录确认 `tasks/lessons.md` 与原版 `Server` 路径，在 Crystal.GoServer 根目录单独确认 Go 源码路径；后续区域魔法核对将按仓库独立执行，不再混合相对路径。
+- Eighth strengthening after immediate recurrence: 追加第七次规则后的下一条调用仍把 Legacy `Server` 检索附在 Go 协议读取命令后，说明仅靠执行前自然语言提醒无效。此后在提交每个 `exec_command` 前执行前缀 allowlist 检查：Crystal.GoServer 命令出现 `Server/`、`Shared/`、`Client/` 或 `tasks/` 时禁止执行；Crystal 命令出现 `cmd/`、`internal/` 或 Go 文档路径时同样禁止执行。逻辑相关的读取也必须由两个独立 tool call 承载。
+- Verification after eighth recurrence: 失败调用只完成了 Go 文件读取，Legacy 查询以退出码 2 明确作废；`BeginMagic` 证据已改在 Crystal 根目录的独立调用中重跑，后续命令逐条应用仓库前缀 allowlist。
 
 ### 2026-08-11 — 商店会话 fixture 必须恢复 RentalInformation 元数据
 
