@@ -15,6 +15,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试直接使用运行时随机源，未把 Legacy 需要验证的命中/训练分支固定下来。
 - Prevention: 领域测试在构造 World 后显式注入 `combatRoll`，按用例选择稳定的边界值，再单独覆盖概率负例；不要用重复运行碰运气验证技能经验。
 - Verification: Hiding/MassHiding、现有战斗技能和对应真实会话测试在固定 roll 下重复运行，经验计数和包序稳定通过。
+- Strengthening after recurrence: 新增真实 `net.Pipe` 会话时也必须在启动服务前注入同一确定性随机源；只固定 world 单元 fixture、遗漏 session fixture，仍会让 `MagicLeveled` 经验在完整定向回归中从 1 漂到 3。
+- Verification after strengthening: 为 Hiding session fixture 设置 `combatRoll = 0` 后，Hiding/MassHealing 定向会话连续通过，经验 payload 恢复为稳定的 1；随后继续执行全量普通/race 门禁。
 
 ### 2026-08-14 — LightSetting 测试必须按旧版的 hour*2 区间逐值核对
 
