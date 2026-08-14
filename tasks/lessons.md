@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — ControlPoints 结算必须组合 EndWar 与 TakeConquest 的提前返回
+
+- Symptom: Go 的 ControlPoints `End` 无条件清空积分并把每个控制点归一到最终 owner；静态复核发现，Legacy 平局保留当前 owner 时会在 `TakeConquest` 的“winning guild 已拥有 Conquest”门禁提前返回，控制点积分和各点 owner 实际都保持不变。
+- Root cause: 只按 `EndWar` 的“计算最终赢家后调用 TakeConquest”概括结算意图，没有把被调函数入口门禁、是否真正换 owner、积分重置和旗帜刷新组成完整可达路径。
+- Prevention: 迁移跨函数结算时分别建立“owner 真正变化”和“owner 保持”状态表；只有实际通过 `TakeConquest` 并换 owner 才重置积分、重投全部控制点（包括 owner 已相同的点）和主旗帜，平局/不可接管路径保留运行状态。
+- Verification: 领域测试现同时锁定平局保留积分/分点 owner，以及新赢家清空积分并为全部控制点生成刷新事件；控制点结束包序测试覆盖颜色 → 全部控制点 → 主 owner → `BroadcastInfo`，全量普通/race 测试通过。
+
+### 2026-08-13 — 长测试封装必须保留并轮询 exec 会话
+
+- Symptom: `go test ./cmd/crystal-server` 超过首次 30 秒 yield 后，JavaScript 包装只输出 `exit_code/output/wall`，遗漏返回的 `session_id`，外层脚本结束时无法确认测试最终状态，只能重新执行。
+- Root cause: 把首次 `exec_command` 返回当成终态，并在序列化时丢弃了继续轮询所需字段；“脚本已完成”不等于其启动的长命令已完成。
+- Prevention: 可能超过 yield 的门禁统一保留完整返回值，并在 `session_id` 存在时循环调用 `write_stdin`，直到取得明确 `exit_code`；不得以空输出或外层 cell 完成代替测试成功。
+- Verification: 服务端整包、全仓普通测试和全仓 race 均改用会话轮询取得 `exit_code=0`，随后 `go vet ./...` 与 `go build ./...` 也明确返回 0。
+
 ### 2026-08-13 — 持久化重试必须分离领域提交与可重复落盘
 
 - Symptom: 未配置账户 JSON 路径时，Conquest 生命周期通知会永久停在 `pendingSave`；连续两次资产保存失败后，重放第一条旧通知还会把 authority HP 从较新的 80 暂时写回旧值 90 再保存。
@@ -988,6 +1002,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Second strengthening after recurrence: 并行调用也不能靠“同一批任务”推断 workdir；构造每个调用后先机械核对其路径只属于该调用的仓库。本次 P9 查询把 Go 测试路径和原版 `Libraries` 路径放进 Crystal workdir，命令整体无结果；拆分为两个绝对 workdir 后再继续，防止把空检索误当成不存在。
 - Third strengthening after recurrence: 即便查询结果逻辑相关，也不能把原版源码读取与 Go 标识符检索合并成一条命令；每次调用在执行前按“命令中的每个相对路径都属于 workdir”逐项验收。本次 Conquest 核对把 `Server/MirObjects/GuildObject.cs` 放进 Go workdir，命令只读失败且无文件改动；已拆成两个仓库各自独立重跑。
 - Fourth strengthening after recurrence: 同一仓库的搜索目录也必须先由 `rg --files` 或已验证路径清单确认；任一不存在的目录都会让 `rg` 以 2 退出，即使同时打印了其他目录的部分结果，也不能当作完整证据。本次误带不存在的 `Libraries` 后，已仅用确认存在的 `Server`/`Shared` 重跑 Conquest 查询。
+- Fifth strengthening after recurrence: 即使同一查询只想并列核对 Go 与 Legacy 常量，也不能在 Go workdir 的 `rg` 参数中附带 `Server/...cs`；本批核对 ControlPoints 上限时该混用再次以 2 退出。以后先按仓库构造两份路径清单并分别调用，当前已在 Crystal 根目录单独重跑 `MAX_KING_POINTS/MAX_CONTROL_POINTS` 查询并取得完整结果。
 
 ### 2026-08-11 — 商店会话 fixture 必须恢复 RentalInformation 元数据
 
