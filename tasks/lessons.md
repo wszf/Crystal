@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — 新增静态对象类型必须同步完整可见性 transcript
+
+- Symptom: KingOfHill `ObjectSpell` 已正确进入会话可见性后，服务端整包测试仍在第二次 NPC 请求前读到遗留的 packet 150，`TestSessionConquestStartStopRefreshesWarZoneAndNPCVisibility` 失败。
+- Root cause: 生产层新增了第五类静态可见对象，但首次修改只扩展了会话状态和刷新函数，没有在同一批次更新已有开战/停战真实会话的新增与移除包期望。
+- Prevention: 每新增静态对象类型，都同时列出登录、原地重复刷新、进入/离开范围、领域创建/删除四条路径；明确旧对象移除、新普通对象加入、旧新类型移除、新类型加入的顺序，并一次性更新所有 helper 调用和精确 transcript。
+- Verification: 边界测试现锁定几何、无效格、稳定 ObjectID、登录/移动恢复和删除；真实会话锁定开战 `NPC ObjectRemove -> ObjectSpell`、停战 `NewNPCInfo -> ObjectNPC -> effect ObjectRemove`，服务端整包测试通过。
+
 ### 2026-08-13 — ControlPoints 结算必须组合 EndWar 与 TakeConquest 的提前返回
 
 - Symptom: Go 的 ControlPoints `End` 无条件清空积分并把每个控制点归一到最终 owner；静态复核发现，Legacy 平局保留当前 owner 时会在 `TakeConquest` 的“winning guild 已拥有 Conquest”门禁提前返回，控制点积分和各点 owner 实际都保持不变。
@@ -1003,6 +1010,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Third strengthening after recurrence: 即便查询结果逻辑相关，也不能把原版源码读取与 Go 标识符检索合并成一条命令；每次调用在执行前按“命令中的每个相对路径都属于 workdir”逐项验收。本次 Conquest 核对把 `Server/MirObjects/GuildObject.cs` 放进 Go workdir，命令只读失败且无文件改动；已拆成两个仓库各自独立重跑。
 - Fourth strengthening after recurrence: 同一仓库的搜索目录也必须先由 `rg --files` 或已验证路径清单确认；任一不存在的目录都会让 `rg` 以 2 退出，即使同时打印了其他目录的部分结果，也不能当作完整证据。本次误带不存在的 `Libraries` 后，已仅用确认存在的 `Server`/`Shared` 重跑 Conquest 查询。
 - Fifth strengthening after recurrence: 即使同一查询只想并列核对 Go 与 Legacy 常量，也不能在 Go workdir 的 `rg` 参数中附带 `Server/...cs`；本批核对 ControlPoints 上限时该混用再次以 2 退出。以后先按仓库构造两份路径清单并分别调用，当前已在 Crystal 根目录单独重跑 `MAX_KING_POINTS/MAX_CONTROL_POINTS` 查询并取得完整结果。
+- Sixth strengthening after recurrence: 已确认仓库根目录仍不代表任意常见子目录存在；本批在原版 Crystal workdir 的检索参数中误带 Go 专属 `cmd`，使 `rg` 以 2 退出。每次多目录搜索前必须先用该仓库的 `rg --files` 生成实际顶层路径集合，命令参数只能从集合中选择；当前已移除 `cmd` 并在原版 `Server/MirObjects`、`Shared` 与 Go 仓库各自独立重跑相关查询。
 
 ### 2026-08-11 — 商店会话 fixture 必须恢复 RentalInformation 元数据
 
