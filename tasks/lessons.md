@@ -1024,6 +1024,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after seventh recurrence: 已在 Crystal 根目录确认 `tasks/lessons.md` 与原版 `Server` 路径，在 Crystal.GoServer 根目录单独确认 Go 源码路径；后续区域魔法核对将按仓库独立执行，不再混合相对路径。
 - Eighth strengthening after immediate recurrence: 追加第七次规则后的下一条调用仍把 Legacy `Server` 检索附在 Go 协议读取命令后，说明仅靠执行前自然语言提醒无效。此后在提交每个 `exec_command` 前执行前缀 allowlist 检查：Crystal.GoServer 命令出现 `Server/`、`Shared/`、`Client/` 或 `tasks/` 时禁止执行；Crystal 命令出现 `cmd/`、`internal/` 或 Go 文档路径时同样禁止执行。逻辑相关的读取也必须由两个独立 tool call 承载。
 - Verification after eighth recurrence: 失败调用只完成了 Go 文件读取，Legacy 查询以退出码 2 明确作废；`BeginMagic` 证据已改在 Crystal 根目录的独立调用中重跑，后续命令逐条应用仓库前缀 allowlist。
+- Ninth strengthening after recurrence: FrostCrunch 复核时仍在 Crystal workdir 的多段 `sed` 末尾误附 Go 路径 `cmd/crystal-server/world.go`，最终退出码 2。以后一个 `exec_command` 只允许一个仓库的一组已存在前缀；准备调用时先按 workdir 写出允许前缀（Crystal: `Server/Shared/Client/tasks`，Go: `cmd/internal/docs/README.md`），参数中出现另一组即拆成下一次调用，禁止在已写好的命令尾部追加跨仓库路径。
+- Verification after ninth recurrence: 混合调用结果已作废；Legacy `MonsterObject.ProcessPoison`/`MapObject.ApplyPoison` 与 Go `worldMonster`/AI 字段读取分别在各自根目录重跑并取得 `exit_code=0`，后续修正也仅写入所属仓库。
 
 ### 2026-08-11 — 商店会话 fixture 必须恢复 RentalInformation 元数据
 
@@ -1320,3 +1322,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把“从在线 world 读取姓名并生成通知”和“向剩余会话实际写包”绑定在同一步，没有保留快照边界。
 - Prevention: 离线流程先在玩家仍在线时提交 auth 状态并构造包含姓名的通知快照，完成 world 移除后再投递；通知接收者列表排除注销者，持久化在状态提交后执行。
 - Verification: 双成员 world 测试锁定仅另一成员收到 `GuildMemberChange(Status=0, Name=leader)`；公会会话测试、Go 全量普通/race 门禁通过。
+
+### 2026-08-14 — 状态魔法归属必须沿 Legacy 命中分支确认
+
+- Symptom: 迁移矩阵和实现分析一度把 Slow/Frozen 当成 IceStorm 的待迁移状态，而 Legacy 的 IceStorm 实际只执行 3×3 MAC 区域伤害。
+- Root cause: 根据技能名称和常见游戏直觉推断状态归属，没有先把施法入口、延迟命中 switch 和 `AddPoison` 调用点连成完整可达路径；真正施加 Slow/Frozen 的技能是 FrostCrunch。
+- Prevention: 每批状态型技能先从 Legacy 命中 resolver 建立“spell → damage → secondary effect”表，再检索所有状态创建调用点交叉确认；文档、实现和测试必须共用该表，禁止从技能名称推断效果。
+- Verification: Legacy spell switch 确认 FireBang/IceStorm 只有区域 MAC 伤害、FrostCrunch 命中后才执行 Slow/Frozen 的独立门槛与概率；Go 区域魔法测试保持 IceStorm 纯伤害 transcript，FrostCrunch 领域和三会话测试覆盖完整状态生命周期。
+
+### 2026-08-14 — 手工 world tick 测试必须隔离后台 ticker 并使用会话屏障
+
+- Symptom: FrostCrunch 三会话测试手工推进命中/到期 tick 时，100ms 后台 world ticker 可能抢先发布状态；Frozen 攻击测试读到入口先发送的 `UserLocation` 后立即检查 world，又可能早于真正的 admission 处理。
+- Root cause: 确定性 synthetic tick 与生产后台 ticker 同时驱动同一世界，且把 handler 中间包误当成请求完成信号；`net.Pipe` 的包到达只证明该次写入完成，不证明后续领域逻辑已结束。
+- Prevention: 需要手工时间轴的会话测试在状态创建前停止该 world 的测试 ticker，并确认可能已选中的空 tick 返回；读取入口中间包后再发送并消费 `KeepAlive`，用后续请求作为所属会话完成屏障，再检查共享状态或断言没有广播。
+- Verification: 后台 ticker 隔离后，三会话 FrostCrunch transcript 稳定锁定伤害、两条 Chat、Slow/Frozen 广播、Frozen 拒绝以及逐步清除；Frozen 攻击后的 KeepAlive 屏障确认方向和动作队列均未变化。
+
+### 2026-08-14 — 状态门禁必须收窄到原版 capability 边界
+
+- Symptom: FrostCrunch 初版在普通宠物和 Conquest archer 的外层 AI tick 遇到 Frozen 就直接 `continue`，同时跳过了普通宠物驯服到期/跨图召回和 archer 搜索目标等不属于移动或攻击的生命周期工作。
+- Root cause: 把“Frozen 时不能 Move/Attack”简化成“整个对象不处理”，没有沿 Legacy `MonsterObject.Process` 的顺序区分 tame lifecycle、`ProcessSearch`、recall 与最终 `CanMove`/`CanAttack` 门禁。
+- Prevention: 每个控制状态先标注它约束的原版 capability；门禁只能放在对应动作提交点，外层对象 tick、到期清理、持久化、召回和搜索继续运行。新增状态测试必须同时覆盖“受禁动作不发生”和“非受禁生命周期仍推进”。
+- Verification: Go 已把 Frozen 从普通宠物/archer 外层循环移到 follow/target/attack 动作点；回归测试确认宠物保留目标且不移动/攻击、Frozen 期间仍执行 tame 到期广播，archer 仍更新搜索/缓存目标但不创建投射物，相关聚焦测试通过。
