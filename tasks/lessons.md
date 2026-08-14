@@ -1423,3 +1423,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只迁移了目标选择/命中距离，没有把 `MapObject.CanFly` 的八方向逐格推进、HighWall/LowWall 的共同 `Valid` 语义和各 spell 入口的例外条件连在一起；Go 地图属性常量也曾与 Legacy ordinal 反置。
 - Prevention: 先固定 `CellAttribute` 为 Walk=0、HighWall=1、LowWall=2，再复刻 `DirectionFromPoint` + `PointMove` 的每格校验；按 Legacy switch 建立需要 CanFly 的技能表，普通 RangeAttack 与 Straight/DoubleShot 单独保留 MentalState=1 绕过，FireBounce 每一跳用来源对象当前位置重验路径，延迟命中仍使用 Legacy 的目标位置窗口。
 - Verification: Go 新增地图 ordinal/解析、两种墙与边界、单目标魔法、ThunderBolt/FlameDisruptor 例外、普通远程/TrickShot、FireBounce 墙前跳转和延迟目标移动测试；受影响包及 `go test ./...` 均通过。
+
+### 2026-08-15 — Observer 接管新增可见物品时必须更新完整 transcript
+
+- Symptom: RangeAttack 装备准入 fixture 为观察目标增加装备后，Observer 会话在 `ClientObserve` 后读到 `NewItemInfo`，旧测试却直接期待 `MapInformation`。
+- Root cause: 目标的物品定义按连接可见性规则在观察接管阶段先发送；测试只更新了目标本身的装备状态，没有重新展开观察者接管的定义包顺序。
+- Prevention: 任何会改变目标可见物品集合的 Observer/Inspect fixture，都要分别列出目标连接与观察者连接在请求后的完整 packet matrix，并在 `MapInformation` 前消费和解析新增 `NewItemInfo`。
+- Verification: Observer transcript 已锁定目标装备定义 → `MapInformation` → `UserInformation` 顺序；RangeAttack 装备门禁相关定向测试和 `go test ./cmd/crystal-server -count=1` 均通过。
