@@ -2,6 +2,125 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-13 — 持久化重试必须分离领域提交与可重复落盘
+
+- Symptom: 未配置账户 JSON 路径时，Conquest 生命周期通知会永久停在 `pendingSave`；连续两次资产保存失败后，重放第一条旧通知还会把 authority HP 从较新的 80 暂时写回旧值 90 再保存。
+- Root cause: 把“没有持久化回调”误当成“保存仍未成功”，并把只应执行一次的 authority 状态提交与可重复执行的落盘操作放进同一个 `BeforeSend` 重试闭包。
+- Prevention: 可选持久化回调为空时按成功的 no-op 处理；提交后通知拆成一次性领域写入和可重复保存两个阶段，队列重试只能保存当前最新 authority，不能重新应用旧快照。
+- Verification: 新增无持久化即时投递测试，以及 90→80 两次失败后重试仍只保存最新 80 的回归测试；Conquest 定向、服务端整包、全量普通/race、vet、build 与差异门禁均通过。
+
+### 2026-08-13 — 缓存目标和延迟投射物必须在命中阶段重验攻城资格
+
+- Symptom: 玩家远程/魔法在开战时成功排入队列后，即使命中前战争结束或攻击者公会成为新 owner，仍会扣除 Conquest 资产生命；Hero 与普通宠物也能保留失效目标继续攻击。
+- Root cause: `playerCanAttackMonsterLocked` 只用于请求/选目标阶段，延迟 resolver 和伴侣缓存目标的真正命中阶段没有复用同一门禁。
+- Prevention: 所有延迟攻击和跨 tick 目标缓存都执行两阶段校验：选择/排队时校验一次，真正命中前按当前战争、owner、地图和存活状态再次校验；状态变化后必须清空伴侣目标且不产生伤害通知。
+- Verification: 回归测试覆盖 Hero/普通宠物选中后战争结束，以及玩家远程/魔法排队后战争结束或 owner 变化；目标 HP、通知和动作队列终态均已锁定，服务端整包测试通过。
+
+### 2026-08-13 — 战争颜色刷新与 BroadcastInfo 是两条独立协议副作用
+
+- Symptom: Conquest 开始/结束只为 WarZone 变化的玩家发送对象刷新，遗漏其他地图的 Legacy `BroadcastInfo`；三人测试中的颜色包顺序还随 Go map 迭代随机变化。
+- Root cause: 把 `RefreshNameColour` 的 self/object colour 包和 `StartWar`/`EndWar` 的全服逐玩家 `BroadcastInfo` 合并成一条局部通知路径，同时直接遍历无序玩家 map。
+- Prevention: 分别建模颜色变化、全局逐 subject 的附近 `ObjectPlayer` 广播和 NPC 强制开战的额外 announcement 循环；所有可观察玩家遍历先按 ObjectID 排序，再用接收者矩阵锁定每条连接的顺序与重复次数。
+- Verification: 参与地图与无关地图的双玩家矩阵均收到正确 `ObjectPlayer`，三玩家 START/STOP 精确包序连续运行 10 次稳定通过，真实会话仍保持颜色/聊天/响应/NPC 可见性顺序。
+
+### 2026-08-13 — Conquest Siege 的运行实体语义必须按实际 Gate 类型迁移
+
+- Symptom: Siege 在修复时使用 Gate 方向公式，但初始加载和普通受击只按 Wall/默认方向处理，导致同一资产在修复前后显示不一致。
+- Root cause: 依据数据库列表名 `Siege` 推断运行类型，忽略 Legacy `ConquestGuildSiegeInfo.Spawn` 实际严格创建 AI 72 `Gate` 并调用 `CheckDirection`。
+- Prevention: 迁移多态资产时沿 Spawn 的实际构造类型决定运行行为；列表分类只决定持久字段和 NPC 动作，方向、受击和对象投影应复用真实实例类型的公式。
+- Verification: Siege 加载、受击方向刷新现使用 Gate 的 midpoint-to-even 公式，并由独立方向与 `ObjectTurn` 回归测试覆盖。
+
+### 2026-08-13 — 权威状态 fixture 必须先完成领域种子再做 JSON 重载
+
+- Symptom: Conquest 全量修复的 Admin 测试预期复活 1 个 Archer，实际得到 0/1；Gate、Wall、Siege 计数仍看似正常。
+- Root cause: fixture 为设置 Admin 先保存并重载 auth，此时 JSON 已显式写入空的 `conquests` 数组；后续 Legacy seed 被现代空状态正确拒绝，Bind 只能按定义创建默认存活 Archer 和满血结构。
+- Prevention: 通过 JSON 重载改变账户元数据时，必须先导入并绑定本用例依赖的所有权威领域状态，再保存、修改和重载；重载后在执行目标动作前断言关键非默认种子仍存在。
+- Verification: fixture 已调整为 Conquest seed/Bind → Admin JSON 重载 → world load；Admin RepairAll 现稳定得到 Archer 1/1，并验证四类终态和公会金币不变。
+
+### 2026-08-13 — Go 条件中的短声明只能位于 if 初始化子句
+
+- Symptom: 新增 Conquest 测试把 `got := ...` 写在 `if existingCondition || got := ...` 中，包级编译报 non-name on left side of `:=`。
+- Root cause: 把 Go 的 `if init; condition` 语法误写成了布尔表达式内部声明。
+- Prevention: 条件需要复用计算结果时，在 `if` 前单独声明，或严格写成 `if got := expression; conditionUsingGot { ... }`；短声明不得出现在 `&&`/`||` 表达式中。
+- Verification: 结果变量改为条件前声明后，Conquest NPC 定向包测试编译并全部通过。
+
+### 2026-08-13 — 特殊物品分支不能绕过通用使用门禁
+
+- Symptom: Guild Skill Scroll 的 shape 10 分支最初直接进入公会逻辑，遗漏通用 `CanUseItem` 校验，也允许死亡角色使用。
+- Root cause: 把特殊 shape 当成完整入口实现，只迁移了分支领域效果，没有先执行所有物品共享的角色状态和物品可用性门禁。
+- Prevention: 每个特殊物品 dispatch 先列出并复用通用入口前置条件，再进入 shape 专属逻辑；至少覆盖死亡、无权限/不满足条件、定义缺失、成功消费和失败不消费。
+- Verification: shape 10 现先调用 `canUseCharacterItem` 并拒绝死亡角色；无公会、非 leader、定义缺失、重复、成功消费等真实入口测试均通过。
+
+### 2026-08-13 — 登录规范化瞬态字段必须回写权威持久层
+
+- Symptom: 登录时从 session/world 投影移除了旧 JSON 错误保存的 newbie Buff type 115，但 auth 内存仍保留旧值，正常登出或重载可能再次恢复该瞬态 Buff。
+- Root cause: 把登录规范化当成连接局部清理，没有同步拥有角色持久状态的 auth authority。
+- Prevention: 登录期间清理或修复任何持久字段时，必须同时更新 session、world 与 auth 权威记录，并通过正常登出和 JSON 重载验证旧值不会复活；瞬态运行时状态不得写回持久模型。
+- Verification: type 115 登录过滤现立即同步 auth；测试覆盖登录运行时属性生效、正常登出和磁盘重载后 type 115 不存在。
+
+### 2026-08-13 — Buff 生命与魔法钳制必须保留逐步包状态
+
+- Symptom: 同一个 Buff 同时降低 MaxHP 和 MaxMP 时，若先算最终状态再发包，两条 `HealthChanged` 会携带相同终态，丢失 Legacy 的 HP 步骤中间状态；逐包持久化又会产生重复写入。
+- Root cause: 把连续属性刷新副作用压成一个最终快照，没有分离 wire 中间状态与最终权威持久状态。
+- Prevention: 同时变化 HP/MP 时按原调用顺序捕获每一步 payload，先生成 HP 钳制包再生成 MP 钳制包；全部状态完成后只持久化最终快照一次。
+- Verification: 回归测试锁定 `HealthChanged(18,20)` 后接 `HealthChanged(18,14)`，并断言只执行一次持久化。
+
+### 2026-08-13 — 新测试引入依赖后立即执行最小编译
+
+- Symptom: Buff 测试新增 `time` 标准库调用后遗漏 import，直到后续包测试才暴露编译失败。
+- Root cause: 连续扩展测试场景时没有在首次使用新标识符后立即运行受影响包的编译门禁。
+- Prevention: 新增标准库或 package 标识符后立刻核对 import，并执行 `go test <package> -run '^$' -count=1`；恢复编译绿色后再继续增加 transcript 或跨包测试。
+- Verification: 已补齐 `time` import；Buff 定向测试和 `cmd/crystal-server` 整包测试通过，提交前继续执行全量门禁。
+
+### 2026-08-13 — 公会进度 fixture 必须显式固定等级阈值
+
+- Symptom: 公会经验测试最初没有观察到经验变化，因为共享 fixture 默认创建等级 5 公会，而测试配置的经验表已没有可升级阈值。
+- Root cause: 测试依赖公会默认等级，没有把待验证的当前等级、当前经验和下一等级阈值组成明确前置状态。
+- Prevention: 所有等级/经验测试显式设置实体等级、经验、完整阈值表和预期剩余经验；测试开始先断言该 fixture 确实存在目标升级边界。
+- Verification: fixture 现固定公会等级与阈值，并覆盖最终经验同时进入玩家、普通宠物、mentee bank 和公会贡献的路径。
+
+### 2026-08-14 — net.Pipe 包数量必须先由接收者矩阵推导
+
+- Symptom: 两人组队接受测试先后把 leader/member 读取数量写成 8/9，实际生产序列是 7/11，两个 reader 因为一方少消费、另一方等待不存在的包而互相反压并最终挂起。
+- Root cause: 根据旧测试和心算反复猜总包数，没有先把每条通知按接收者、包 ID 和顺序完整投影；`net.Pipe` 无缓冲，因此错误数量不仅造成断言失败，还会阻塞服务端向另一连接继续写入。
+- Prevention: 多连接 transcript 在编码 count 前先列出领域通知的完整接收者矩阵，再机械统计每条连接；所有连接的 reader 必须在触发操作前并发启动，读取完成后再检查共享状态。功能新增包时先更新矩阵，再更新 count 和期望 ID，禁止靠超时或试数修正。
+- Verification: 两人入组矩阵锁定 leader 7 包、member 11 包，三人入组与跨地图聊天另有精确 domain/session transcript；`TestSessionTwoPlayerGroupInviteAcceptAndLeave` 不再挂起，受影响包全量测试通过。
+
+### 2026-08-14 — Shell 搜索模式中的反引号不能裸露
+
+- Symptom: 用 `rg` 搜索 Markdown 文本时，把包含反引号的模式放进双引号，shell 尝试执行其中的 `GroupID` 并输出 `command not found`。
+- Root cause: 忽略了双引号内反引号仍会触发命令替换，把文档字面量直接拼进了 shell 命令。
+- Prevention: 搜索 Markdown、Go struct tag 或其他可能含反引号的文本时，整段 pattern 使用单引号；需要同时包含单引号时改用参数化调用或拆分模式，禁止把未知文本插入双引号命令。
+- Verification: 后续同类 `rg` 查询使用单引号模式完成，源码和文档未被命令替换影响；提交前 `git diff --check` 与敏感文件检查继续通过。
+
+### 2026-08-13 — 原子回滚测试的期望快照不能与请求共享引用
+
+- Symptom: `AttachSealedHero` 的伪造 stats 负例报告角色权威状态被修改，实际变化来自测试直接改写了与调用前 `before` 快照共享的 `StoredItem.AddedStats` map。
+- Root cause: 构造事务请求时浅拷贝了物品切片/指针，把“待篡改输入”和“零变更基线”当成两份数据，导致测试自身污染期望值。
+- Prevention: 所有原子失败测试在修改 request 前，递归深拷贝 item grids、Hero snapshots、stats maps 和嵌套 slots；失败后分别从服务重新读取角色与 registry，并与独立基线比较。
+- Verification: attach fixture 改用 `cloneItemInfos`、`cloneStoredItems`、`cloneStoredHeroes` 构造请求；伪造 stats、stale stack、stale Hero 槽、满槽、已绑定及双侧物品缺失用例均通过。
+
+### 2026-08-13 — 全局实体表不能简化成角色槽内嵌生命周期
+
+- Symptom: P8 Hero 草稿把完整 Hero 只存于角色槽；按原版执行封印时一旦清空槽位，封印物品虽然保留 Hero ID，Hero 本体却会从 Go 持久化状态消失，无法再次解封。
+- Root cause: 只迁移了 Character 保存的 Hero 槽投影，没有同时保留 Legacy 独立 Hero 全局表；把“当前绑定关系”和“实体生命周期”合并成了同一份内嵌数据。
+- Prevention: 迁移由全局表实体加外键槽位组成的数据模型时，权威存储必须分别表达实体 registry 与绑定投影；解绑、封印、删除只改变绑定/删除状态，不能隐式释放全局身份、名称或 ID。旧 JSON 可从槽位重建 registry，新格式必须覆盖游离实体保存重载和按 ID 恢复。
+- Verification: `TestUnboundHeroRegistryLifecycleSurvivesJSONAndRetainsName`、`TestHeroUnbindRetainsRegistryAndRequiresExplicitRebind`、`TestHeroRegistryIsAuthoritativeAcrossCommitAndMaximumItemIDScan`、封印会话重载及旧 JSON fallback 测试已覆盖游离实体、名字占用、`AddedStats[129]` 按 ID 恢复和 ID 连续性。
+
+### 2026-08-13 — Hero 解封业务类型必须依据变更前绑定状态
+
+- Symptom: Type 42 封印物品解封后，用“本次是否成功召唤”区分首次 Hero 与仓库 Hero，会把 `NoHero` 地图上的首次绑定误报成“已加入仓库”，并遗漏首次 Hero 的未召唤持久状态。
+- Root cause: 业务分支读取了地图门禁后的运行时结果，而 Legacy 的分支条件是解封前是否已有当前 Hero；绑定关系与召唤结果是两个独立状态。
+- Prevention: 解封事务前固定捕获 `hadCurrentHero`；提交 auth/world/JSON 后，以它决定首次 Hero 或仓库 Hero 的包形状，再独立依据地图门禁决定是否生成 runtime。首次 Hero 在 `NoHero` 地图必须持久化为已绑定但未召唤。
+- Verification: 首次解封、已有 Hero、`NoHero` 和槽位满四条真实会话均断言包序、auth/world/JSON 终态；跨 `NoHero` 地图及断线重登测试锁定未召唤状态不会复活。
+
+### 2026-08-13 — Hero 可见性必须按接收者矩阵拆分属性包
+
+- Symptom: 初版 Hero 广播给所有观察者相同的 `ObjectHealth`/`ObjectMana`，并重复发送颜色包；Hero 名称颜色还直接沿用了内部 MediumOrchid，而 Legacy 的 viewer-relative 投影为 White。
+- Root cause: 把 `Broadcast` 对象包、owner/group 属性可见性和 owner-only Mana 合并成一条通知路径，没有展开 `HumanObject.GetInfoEx(viewer)` 与召唤后的额外 owner 更新。
+- Prevention: 明确矩阵：所有可见者收到 `ObjectHero` 和一次颜色；owner 与非零同组收到可见生命，owner 额外收到 Mana 及召唤后的第二次 Health；后续进入视野只发其当时有权看到的 Health，不补 Mana。对象名称颜色从 viewer-relative 投影生成。
+- Verification: `TestGameWorldHeroSummonObserverPacketMatrix` 和 `TestRefreshStaticHeroVisibilityObserverMatrix` 分别锁定召唤时与后续入视野的 owner/group/普通观察者包序、数量、颜色和 Mana 边界。
+
 ### 2026-08-13 — 会话局部物品变更必须先同步 world 再读取整角色快照
 
 - Symptom: P8 整包回归中，普通/太阳药水已经正确消费、删除响应也成功，但登出持久化又出现两个旧物品；`TestSessionUseAndDeleteItemTranscriptAndPersistence` 稳定失败。
@@ -339,6 +458,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 每个文件或语义 hunk 单独 patch，使用函数签名/字段名等短稳定锚点；失败后立即重新读取精确上下文，成功后用 `rg`/`sed` 和 diff 复核，JavaScript 包装只用普通字符串，禁止让未定义值变成 `NaN` 参与 patch 文本。
 - Verification: 拆分后 retired 状态、双 MailID、会话测试和文档均正确落盘，`git diff --check` 与全量 Go 门禁通过。
 - Strengthening after recurrence: P11 收尾曾把 fishing、EquipSlotItem 和 awakening 三个独立修正放入一个 patch，最后一个 main.go hunk 漂移导致整块拒绝。即使改动属于同一审查批次，也必须按单文件、单语义提交 patch；被拒绝后先确认前面 hunk 均未应用，再逐项重做并立即跑最小定向测试。
+- Second strengthening after recurrence: 终端或普通 `sed` 输出的视觉换行不代表文件中的物理行边界；长段落 patch 前先用 `sed -n l` 核对行首和续行，再选择真实存在的短锚点。文档也必须按单文件 patch，避免一个错误行首让其他文件的正确 hunk 一并回滚。本次 Conquest 文档补丁确认无部分写入后按 README、迁移矩阵分别重做，并以 diff 复核落点。
 
 ### 2026-08-12 — 买回数量测试必须区分堆叠上限与当前存量
 
@@ -708,6 +828,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: patch 文本、JavaScript 语法和跨仓库绝对路径同时手写，没有在调用前做逐行 hunk 标记检查、JavaScript 语法检查和仓库根目录复核。
 - Prevention: 组装 patch 时所有 Begin/End、@@、上下文和新增行都必须是独立字符串；调用前检查每个 hunk 行首字符属于空格、加号或减号，并复用已确认的绝对仓库根目录；工具失败后立即检查目标文件，不把失败返回当成部分成功。
 - Verification: 重新按数组字符串逐行修正后，protocol/auth/world/main 修改均落在 Go 仓库，gofmt 与 protocol/auth/world 定向测试通过；后续继续执行全量检查。
+- Strengthening after recurrence: `*** End Patch` 也必须是数组中的已引用字符串，不能落在 `.join()` 调用之后成为 JavaScript token；构造后先机械确认首项为 Begin、末项为 End，再调用工具。本次 Conquest auth 补丁在执行前被 JavaScript 解析拒绝，源码无部分修改，已改为单文件小补丁重做。
 
 ### 2026-08-11 — PvP 友方规则必须保留 legacy 的严格时间和空公会语义
 
@@ -864,6 +985,9 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 跨仓库读写前分别执行 `git rev-parse --show-toplevel`，并让每条命令的 workdir 与目标文件所属仓库一致；不要在一个仓库 workdir 中访问另一个仓库的相对路径。
 - Verification: 后续原版查询统一使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，Go 查询统一使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，并在修改前检查两个仓库的 status。
 - Strengthening after recurrence: 禁止在同一条 `exec_command` 中混合两个仓库的相对路径；需要跨仓库时拆成独立调用，并在输出中保留仓库标识。
+- Second strengthening after recurrence: 并行调用也不能靠“同一批任务”推断 workdir；构造每个调用后先机械核对其路径只属于该调用的仓库。本次 P9 查询把 Go 测试路径和原版 `Libraries` 路径放进 Crystal workdir，命令整体无结果；拆分为两个绝对 workdir 后再继续，防止把空检索误当成不存在。
+- Third strengthening after recurrence: 即便查询结果逻辑相关，也不能把原版源码读取与 Go 标识符检索合并成一条命令；每次调用在执行前按“命令中的每个相对路径都属于 workdir”逐项验收。本次 Conquest 核对把 `Server/MirObjects/GuildObject.cs` 放进 Go workdir，命令只读失败且无文件改动；已拆成两个仓库各自独立重跑。
+- Fourth strengthening after recurrence: 同一仓库的搜索目录也必须先由 `rg --files` 或已验证路径清单确认；任一不存在的目录都会让 `rg` 以 2 退出，即使同时打印了其他目录的部分结果，也不能当作完整证据。本次误带不存在的 `Libraries` 后，已仅用确认存在的 `Server`/`Shared` 重跑 Conquest 查询。
 
 ### 2026-08-11 — 商店会话 fixture 必须恢复 RentalInformation 元数据
 
