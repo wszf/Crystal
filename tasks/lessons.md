@@ -22,6 +22,15 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 并行检索与补丁调用中没有复核绝对工作目录，且把仓库路径再次拼进了已绝对化的文件路径。
 - Prevention: 跨仓库查询一律使用绝对 `workdir`，同一批次先分别打印目标仓库的 `git status`，补丁目标只使用已核验的绝对路径；禁止凭相对路径或重复拼接推断结果属于哪个仓库。
 - Verification: 本批次已分别在两个绝对工作目录执行状态检查，确认原仓库仅追加本 lessons 记录，Go 仓库仅包含 Observer 未提交改动；错误路径命令均在创建/修改前失败且未改动文件。
+- Strengthening after recurrence: 即使同一批次已经固定了两个仓库的 `workdir`，补丁仍可能因手工复制绝对路径时漏掉中间目录而指向不存在的仓库；跨仓库修改前必须对每个补丁目标执行 `test -f`/`git rev-parse --show-toplevel`，失败时先停止补丁，不得依赖 apply 工具的部分输出判断是否已修改。
+- Verification after strengthening: 本批次先分别读取 Legacy lessons 与 Go 状态，再用完整 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 根路径核验；一次错误的缺少 `me_work` 目标在写入前被拒绝，随后所有 Go 补丁均在核验后的绝对路径成功应用，两个仓库的 C# 差异/未跟踪检查保持为空。
+
+### 2026-08-14 — UserMagic 冷却必须在世界快照中转换为剩余时间
+
+- Symptom: Go 运行时已经设置了每个技能的 `CastReadyAt`，但注销快照仍复制旧的 `StoredMagic.CastTime`；跨注销重登会丢失活动冷却，技能升级经验也没有统一的完整魔法 slice 提交入口。
+- Root cause: 只迁移了客户端 `ClientMagic` 的字段和在线施法门禁，没有把 Legacy 注销时“绝对 CastTime 减当前时间、就绪写入 int.MinValue”这条持久化边界接到 world/auth 提交路径。
+- Prevention: 运行时冷却使用确定的 `now` 转换为正的剩余毫秒，已就绪统一使用 Legacy 哨兵；`playerCharacterSnapshot` 与显式/异常注销、Observer 接管共同调用完整 `UpdateCharacterMagics`，并用恢复后的客户端 payload 验证边界。
+- Verification: 新增 world CastTime 活跃/到期快照测试、auth 魔法 slice 深拷贝测试；P5 ElectricShock 定向、协议 packet、服务端包级编译均通过，后续继续执行全量普通/race 门禁。
 
 ### 2026-08-14 — Inspect 测试必须区分 Hero 运行表的 owner key 与 object ID
 
