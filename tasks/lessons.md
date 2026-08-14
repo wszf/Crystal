@@ -1286,6 +1286,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: legacy 连接会把请求留在队列中等 `ActionTime` 到期再处理，而当前 Go 会话同步读取后立即执行；只迁移时间字段却没有迁移队列调度会改变外部行为。
 - Prevention: 世界 helper 保留精确 capability/ActionTime 边界；会话入口保留单条 retry movement，在 `ActionReadyAt` 到期后重新派发，匹配 legacy `_retryList`，不能直接清零时间门禁。
 - Verification: 直接 helper 的 capability 测试与连续 session movement、Craft/Shop 距离、地面拾取和静态可见性测试同时通过全量普通/race 门禁。
+- Strengthening after P5 combat recurrence: melee、range、magic 也必须复用同一条会话 retry 边界；为其补门禁后，旧 `TestSessionFireBallTranscript` 仍把“立即收到冷却拒绝”当成正确结果，首次全包测试因此在 1800ms 后读到了重派成功的 `HealthChanged`。迁移 ActionTime/AttackTime/SpellTime 时必须同步审计既有 transcript 断言，区分世界 helper 的即时 capability 拒绝与连接层 `_retryList` 的延迟重派，不能为了保留旧 Go 测试而破坏 Legacy 会话行为。
+- Verification after strengthening: FireBall 会话测试现锁定等待全局 SpellTime 后重派、再次扣 MP、更新方向并发送完整 Magic transcript；Haste/Fury 测试锁定 AttackSpeed 冷却，六技能测试锁定全局与单技能 CastTime 分离，`go test ./...` 与 `go test -race ./...` 全量通过。
 
 ### 2026-08-12 — 一次性异常排查不能变成固定汇报项
 
