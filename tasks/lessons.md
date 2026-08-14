@@ -1026,6 +1026,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after eighth recurrence: 失败调用只完成了 Go 文件读取，Legacy 查询以退出码 2 明确作废；`BeginMagic` 证据已改在 Crystal 根目录的独立调用中重跑，后续命令逐条应用仓库前缀 allowlist。
 - Ninth strengthening after recurrence: FrostCrunch 复核时仍在 Crystal workdir 的多段 `sed` 末尾误附 Go 路径 `cmd/crystal-server/world.go`，最终退出码 2。以后一个 `exec_command` 只允许一个仓库的一组已存在前缀；准备调用时先按 workdir 写出允许前缀（Crystal: `Server/Shared/Client/tasks`，Go: `cmd/internal/docs/README.md`），参数中出现另一组即拆成下一次调用，禁止在已写好的命令尾部追加跨仓库路径。
 - Verification after ninth recurrence: 混合调用结果已作废；Legacy `MonsterObject.ProcessPoison`/`MapObject.ApplyPoison` 与 Go `worldMonster`/AI 字段读取分别在各自根目录重跑并取得 `exit_code=0`，后续修正也仅写入所属仓库。
+- Tenth strengthening after recurrence: 自增益技能下一批分析时又在 Crystal.GoServer workdir 查询 Legacy `Server/...`，说明仅靠人工前缀复核仍会漏过临时追加的参数。此后 Legacy 与 Go 证据读取不仅分调用，还分不同的 `functions.exec` cell；每个 cell 只允许固定仓库根目录，调用前以该根目录的 `rg --files` 结果确认目标存在，禁止在同一 JavaScript 数组中编排两个仓库的源码查询。
+- Verification after tenth recurrence: 该退出码 2 的结果已作废；本轮恢复迁移前分别确认 Crystal 仅使用 `Server/Shared/Client/tasks`，Crystal.GoServer 仅使用 `cmd/internal/docs/README.md`，后续 ProtectionField/Rage/SwiftFeet 证据将按独立 cell 读取，并在两个仓库分别检查 `.cs` 零变化。
+- Eleventh strengthening after recurrence: 本批虽先由 `rg` 找到 Buff 定义位于 `Server/MirDatabase/BuffInfo.cs`，随后仍凭命名习惯追加了不存在的 `Buff.cs`；Go 查询又把未匹配的 shell `*catalog*_test.go` 直接作为参数，分别造成退出码 1/2。以后读取文件前只使用同一仓库 `rg --files -g '<pattern>'` 实际返回的精确路径；文件筛选使用 `rg -g`，禁止 shell 展开未验证的 glob，也禁止把已成功的 `sed` 与猜测性检索串成一条命令。
+- Verification after eleventh recurrence: Buff 模型已改用确认存在的 `Server/MirDatabase/BuffInfo.cs` 独立重读；Go 测试文件清单已用 `rg --files cmd/crystal-server -g '*magic*test.go'` 验证，后续实现只修改清单中存在的文件或通过 `apply_patch` 明确新建文件。
 
 ### 2026-08-11 — 商店会话 fixture 必须恢复 RentalInformation 元数据
 
@@ -1303,6 +1307,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 为跨语言 JSON fixture 做零值或完整对象断言前，先检查 slice、map、pointer 字段；包含不可比较字段时统一使用 `reflect.DeepEqual` 或逐字段断言。
 - Verification: 零值 creation-cost Item 改用 `reflect.DeepEqual` 后，`go test ./internal/worlddata -count=1` 通过。
 - Strengthening after recurrence: `reflect.DeepEqual` 仍会区分 nil 与空 slice/map；wire parser 会把零长度 Slots、AddedStats、Awake.Values 规范化为空非 nil 容器。构造协议 round-trip fixture 时必须按 parser 的规范形状显式初始化这些字段，或逐字段比较语义值，不能把 nil/空容器差异误判成序列化错误。
+- Second strengthening after recurrence: 即时 Buff 双连接测试又准备使用 `observerBuff != buff`，而 `ClientBuffInfo` 内含 `ItemStats` map 与 `Values` slice；虽在编译前复读时发现，仍说明新增断言没有先执行可比较性检查。今后写 `==`/`!=` 前先展开目标类型字段；协议对象默认逐字段断言，确需整体比较时才使用 `reflect.DeepEqual`，并同时明确 nil/空容器规范。
+- Verification after second recurrence: 观察者 AddBuff 改为 `reflect.DeepEqual`，随后 `go test ./cmd/crystal-server -run '^$' -count=1` 和完整即时 Buff net.Pipe 测试均通过。
 
 ### 2026-08-12 — C# 顶层导出器新增显式参数类型时必须核对命名空间
 
@@ -1345,3 +1351,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把“Frozen 时不能 Move/Attack”简化成“整个对象不处理”，没有沿 Legacy `MonsterObject.Process` 的顺序区分 tame lifecycle、`ProcessSearch`、recall 与最终 `CanMove`/`CanAttack` 门禁。
 - Prevention: 每个控制状态先标注它约束的原版 capability；门禁只能放在对应动作提交点，外层对象 tick、到期清理、持久化、召回和搜索继续运行。新增状态测试必须同时覆盖“受禁动作不发生”和“非受禁生命周期仍推进”。
 - Verification: Go 已把 Frozen 从普通宠物/archer 外层循环移到 follow/target/attack 动作点；回归测试确认宠物保留目标且不移动/攻击、Frozen 期间仍执行 tame 到期广播，archer 仍更新搜索/缓存目标但不创建投射物，相关聚焦测试通过。
+
+### 2026-08-14 — 当前批次收尾后停止的指令优先于长期迁移计划
+
+- Symptom: 用户明确要求“干完这个就不要再做”时，既有计划仍包含分析和实现下一批功能，存在当前提交完成后继续扩展工作范围的风险。
+- Root cause: 把长期迁移 Goal 的持续执行惯性当成当前轮默认，没有立即按最新的停止边界收窄计划。
+- Prevention: 收到“完成当前批次后停止”指令后，只执行在途批次必需的测试、提交、C# 零变化检查和工作树核验；不得分析或实现下一批，也不得把尚未 100% 完成的整体迁移 Goal 标记完成。
+- Verification: 本轮仅收口并提交 ProtectionField、Rage、SwiftFeet 及经验记录，核验两个仓库后停止，没有开启下一批源码修改。
