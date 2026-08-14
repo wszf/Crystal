@@ -1445,3 +1445,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试只关闭后台 ticker 的 stop channel 并固定 sleep，没有确认 ticker goroutine 已退出；真实时间 tick 可能在合成时间轴 tick 前处理 1970 年的毒状态。
 - Prevention: world ticker 暴露仅供内部同步的完成 channel；手工时间轴 fixture 关闭 ticker 后等待该 channel，再调用 synthetic `world.tick`，禁止用固定 sleep 充当 goroutine 完成屏障。
 - Verification: FrostCrunch 普通与 race 定向测试各连续 10 次通过；提交前重新执行全仓 race 门禁。
+
+### 2026-08-15 — 已核验的 Go 根目录不得再次手工拼接
+
+- Symptom: MentalState 只读检索曾把已确认的 Go 根目录重复拼成 `Crystal.GoServer.GoServer`，命令在启动前失败。
+- Root cause: 已有绝对根目录没有直接复用，临时手写路径引入重复目录片段；源码未被读取或修改。
+- Prevention: 每次跨仓库调用只使用先前 `git rev-parse --show-toplevel` 的完整根目录，并在命令前检查 `test -d`/`test -f`；失败命令不得作为证据，立即切换到新调用重跑。
+- Verification: 纠正后 Go 查询完整返回，Legacy/Go 工作树和 C# 差异均未产生额外变化。
