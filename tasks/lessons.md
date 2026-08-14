@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-14 — 跨仓库只读检索必须显式固定工作目录
+
+- Symptom: 两次只读 `rg` 检索及一次补丁命令把原 Crystal 路径和 Crystal.GoServer 路径混用/重复拼接，输出或命令来自错误路径，增加了判断迁移状态的风险。
+- Root cause: 并行检索与补丁调用中没有复核绝对工作目录，且把仓库路径再次拼进了已绝对化的文件路径。
+- Prevention: 跨仓库查询一律使用绝对 `workdir`，同一批次先分别打印目标仓库的 `git status`，补丁目标只使用已核验的绝对路径；禁止凭相对路径或重复拼接推断结果属于哪个仓库。
+- Verification: 本批次已分别在两个绝对工作目录执行状态检查，确认原仓库仅追加本 lessons 记录，Go 仓库仅包含 Observer 未提交改动；错误路径命令均在创建/修改前失败且未改动文件。
+
 ### 2026-08-14 — Inspect 测试必须区分 Hero 运行表的 owner key 与 object ID
 
 - Symptom: Hero 检查快照测试把 `world.heroes` 按 Hero `ObjectID` 建表，真实解析却按 owner `ObjectID` 查表，导致合法 Hero 请求返回空快照。
@@ -1372,3 +1379,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把长期迁移 Goal 的持续执行惯性当成当前轮默认，没有立即按最新的停止边界收窄计划。
 - Prevention: 收到“完成当前批次后停止”指令后，只执行在途批次必需的测试、提交、C# 零变化检查和工作树核验；不得分析或实现下一批，也不得把尚未 100% 完成的整体迁移 Goal 标记完成。
 - Verification: 本轮仅收口并提交 ProtectionField、Rage、SwiftFeet 及经验记录，核验两个仓库后停止，没有开启下一批源码修改。
+
+### 2026-08-14 — Observer transcript 新增 helper 后必须立即做包级编译
+
+- Symptom: Observer 会话测试初稿引用了不存在的 UserInformation parser、错误哨兵和未解析的 Name 字段，随后真实 transcript 又暴露了目标连接自身的攻击/远程/施法包顺序与战斗退出锁。
+- Root cause: 连续扩展测试时按意图猜测同包 helper 签名，并把观察者视角的转发包误当成目标连接唯一可见包，没有先复用现有 parser、核对 handler 写入顺序和 logout gate。
+- Prevention: 新增 Observer 测试先检索整个 package 的 parser/错误值/返回签名，立即运行 `go test ./cmd/crystal-server -run '^$'`；每条多连接 transcript 分别列出目标、自身、观察者和退出 gate 的包矩阵，再写断言。
+- Verification: 复用 `parseIntelligentCreatureSessionUserInfo` 并补齐 Name 后，Observer 拒绝、Admin 绕过、切换/generation、退出、持久 toggle、静态/地面对象顺序及服务端整包测试均通过。
+
+### 2026-08-14 — 广播包必须按源 ObjectID 转发给 Observer
+
+- Symptom: 复核 Observer forwarding 时发现把每个 `worldPlayer.Send` 回调都转发给该回调所属玩家的观察者，会把发送给附近接收者的源玩家动作包误投给错误观察者并可能重复。
+- Root cause: 把“通知接收者的 Send”误当成“动作源的 Send”，没有区分 `notifyPlayers` 的 recipient 与产生 `ObjectTurn/Attack/RangeAttack/Magic` 的 source。
+- Prevention: Observer forwarding 只由动作源路径显式提交带源 ObjectID 的 packet；需要复用 world notification 时先确认源包是否也会发给源连接，禁止在通用 recipient callback 中推断来源。
+- Verification: 攻击、远程攻击改为 source `ObserverPacket`，移动和魔法保留 source path 转发；全仓普通/race 测试、vet/build 与 Observer transcript 均通过。
