@@ -1597,3 +1597,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试调用通知投影时仍把 monster 保留在旧坐标，距离差没有跨越 16 格边界；断言场景没有真正表达移动事件。
 - Prevention: 构造移动通知 fixture 时显式传入 `oldX/oldY`，并保证待投影对象的坐标已经是 `newX/newY`；先逐接收者计算 old/new 可见性，再断言包序。
 - Verification: 将 monster 新坐标设为 17、旧坐标设为 16 后，矩阵得到 leaving=`ObjectRemove`、staying=`ObjectWalk`、entering=`ObjectMonster`→`ObjectWalk`。
+
+### 2026-08-14 — 跨仓库检索参数必须保持单仓库（再次强化）
+
+- Symptom: 本批次开始核对状态时把 Legacy 与 Go 状态放进同一工具编排，后续 Legacy 只读检索又夹带了 Go 相对路径；命令只在读取阶段返回路径不存在，没有产生写入，但错误输出不能作为迁移证据。
+- Root cause: 为减少往返而复用上一调用的仓库路径，未把“每个编排 cell 只绑定一个已核验根目录”落实为机械约束。
+- Prevention: 每个工具编排只允许一个仓库根目录；切换前新建独立调用，先执行 `git rev-parse --show-toplevel`，再让命令参数只包含当前仓库的相对路径。跨仓库比较只使用两次独立调用的成功输出。
+- Verification: 本轮错误查询均发生在只读阶段且两仓库源码/C# 状态未变化；纠正后 Legacy 与 Go 分别核验根目录，迁移实现和门禁只采用单仓库输出。
