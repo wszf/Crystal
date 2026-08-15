@@ -1950,3 +1950,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 每个目标的 `ObjectStruck` 和 `DamageIndicator` 都广播给范围内其他目标；按目标分别命中而不是按接收者矩阵推导，遗漏了另一目标的公开包。
 - Prevention: 扇形/区域多目标动作先按“动作顺序 × 接收者”展开 transcript，再断言每条连接的私有 `Struck/HealthChanged` 与公开广播包；不要复用单目标包序。
 - Verification: Halfmoon 测试现分别锁定先命中邻居再命中主目标时两个接收者的重复公开包，HP 和 packet transcript 均通过。
+
+### 2026-08-15 — BlackHammerCat 线攻击必须保留原目标和 Struck 冷却
+
+- Symptom: AI=116 Type=1 线攻击测试初版只建了一个邻近线目标，实际 `LineAttack` 又命中了两格处的原目标；同一 tick 的第二次命中还没有新的 `ObjectStruck`。
+- Root cause: 把 `LineAttack(damage, 2, 300)` 当成只攻击中间目标，且按每次命中都发完整 Struck 包，遗漏了 Legacy 的距离 1/2 全线扫描与 `MonsterStruckReadyAt` 500ms 门禁。
+- Prevention: 迁移线/扇形动作时逐距离展开所有有效格（包括原锁定目标），再按接收者和同 tick 的 struck 冷却状态生成公开/私有包；不能按“每个目标四包”简化多次命中。
+- Verification: BlackHammerCat 测试现锁定 MC 原目标、距离 1 与距离 2 DC actions，以及两个接收者的广播/冷却包序，定向测试通过。
