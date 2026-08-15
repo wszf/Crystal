@@ -1818,3 +1818,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 对照 Legacy 的源码检索时没有把命令参数限制为当前 Go 仓库，复用了上一侧的相对路径。
 - Prevention: 每次切换仓库都用独立调用核验 `git rev-parse --show-toplevel`，命令只允许当前根目录下的路径；混合调用的所有输出全部作废并重跑。
 - Verification: 错误调用只发生在读取阶段且无写入；随后以独立 Legacy/Go 调用完成 AI=105 对照，C# 工作区无变化。
+
+### 2026-08-15 — DeathCrawler 禁用 AI fixture 不应期待 ObjectWalk
+
+- Symptom: AI=106 命中特效测试的毒伤 tick transcript 实际为 `[HealthChanged, DamageIndicator, Poisoned]`，测试却期待了前置 `ObjectWalk`。
+- Root cause: fixture 明确设置 `monsterAIEnabled=false`，但断言沿用了启用普通怪物 AI 时的移动包；毒伤 tick 本身不会移动怪物。
+- Prevention: 编写定向 transcript 时先列出 fixture 的开关状态及本次 tick 启用的处理器，再只断言可达包；普通 AI 产生的移动必须由独立启用 AI 用例覆盖。
+- Verification: 删除 `ObjectWalk` 后 AI=106 四个定向测试通过，且命中测试仍锁定 HealthChanged、DamageIndicator、Poisoned 的顺序。
+
+### 2026-08-15 — DeathCrawler 测试必须读取 world map 的权威怪物副本
+
+- Symptom: DeathCrawler 致死测试报告局部 `monster.DeathCrawlerDeathAt` 为空，实际 `world.monsters` 已安排 500ms 后的死亡动作。
+- Root cause: fixture 返回的是写入 map 前的局部结构体地址；`killMonsterLocked` 修改并保存的是 map value 副本，局部指针不会自动反映该状态。
+- Prevention: 对 map-backed world entity 的变更断言先按 ObjectID 重新读取权威 map，再检查定时器、Dead 和后续动作；fixture 返回指针只用于初始身份/坐标。
+- Verification: 测试改为读取 `world.monsters[monster.ObjectID]`，死亡延迟、隐藏相邻目标和范围外目标断言稳定通过。
+
+### 2026-08-15 — DeathCrawler 多目标毒伤 transcript 必须保留逐目标通知顺序
+
+- Symptom: 死亡毒雾测试观察者实际收到 `[Chat, DamageIndicator, ObjectPoisoned, HealthChanged, DamageIndicator, Poisoned, DamageIndicator, ObjectPoisoned]`，原断言把对象中毒包压缩到错误位置而失败。
+- Root cause: `world.tick` 按玩家 ObjectID 逐个处理 Green poison；每个目标的 HealthChanged/Poisoned 与附近观察者的 DamageIndicator/ObjectPoisoned 会交错产生，不能只按“所有状态包”分组推断。
+- Prevention: 多目标毒伤迁移先按处理顺序展开接收者矩阵，再逐接收者记录每次伤害和状态变化的包；使用协议常量断言完整序列，不用手工合并同类包。
+- Verification: 修正 observer transcript 后 AI=106 定向测试通过，序列与现有 poison 处理路径的单目标/观察者测试保持一致。
+
+### 2026-08-15 — 新增定向测试必须清理未使用的 fixture 返回值
+
+- Symptom: AI=106 新增致死毒雾测试在包级编译阶段因 `crawler` 局部变量未使用而失败。
+- Root cause: 测试 fixture 返回的怪物值在该用例只需通过 `world.monsters` 的权威副本验证，却仍绑定了局部变量。
+- Prevention: 新测试完成后立即执行包级编译；不需要的多返回值显式使用 `_`，避免保留误导性局部状态。
+- Verification: 将该返回值改为 `_` 后，`go test ./cmd/crystal-server -run '^$'`、DeathCrawler 定向测试、全仓普通/race、vet 和 build 均通过。
