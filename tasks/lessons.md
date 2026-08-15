@@ -1629,6 +1629,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after strengthening: 第二次失败补丁没有写入；随后读取 `sed -n '108,132p'` 的真实 note，按完整上下文修正重复句并加入 AI=29 说明，Go 文档 diff 检查保持通过。
 - Strengthening after second recurrence: AI=100 更新虽使用了真实上下文，仍把被匹配的保留句再次复制进 replacement，产生重复文本；以后采用“删除旧句再插入新句”的最小补丁，应用后必须立即 `sed` 复读目标块并检查相邻句不重复。
 - Verification after second strengthening: 重复句在提交前已被移除，AI=100 note 的实际块复读正确；Go 定向测试继续通过，文档 diff 检查将在门禁中复核。
+- Strengthening after third recurrence: AI=65 更新第一次仍按视觉换行猜测物理行边界，导致完整上下文匹配失败；长 Markdown 补丁前必须用 `sed -n l` 确认实际行边界，并优先锚定已读取的短、唯一连续句。
+- Verification after third strengthening: 失败补丁未产生写入；随后按 `sed`/`sed -n l` 的真实行块成功加入 AI=65 说明，Go 文档 `git diff --check` 与全量门禁通过。
 
 ### 2026-08-15 — SandWorm 测试新增变量必须实际参与断言
 
