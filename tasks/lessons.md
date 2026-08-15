@@ -1651,6 +1651,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 每次新增 AI/协议分支后，检索所有 `excludes`/opt-in 负向测试并将样本改为明确仍未迁移的值；同时保留一条正向测试锁定新值已启用，避免负向断言掩盖实际行为。
 - Verification: fixture 改为 AI=11 后，AI=0/4/8/10 正向定向测试和特殊/宠物排除测试均通过。
 
+### 2026-08-15 — 半月多目标测试必须展开范围广播接收者矩阵
+
+- Symptom: AI=76 HellSlasher 半月测试按每个目标固定四包断言，目标 2 实际收到其他三个受击者的范围 `ObjectStruck`/`DamageIndicator` 广播后失败。
+- Root cause: 把每个 action 的私有 `Struck`/`HealthChanged` 与对所有附近玩家重复投递的公共包合并成了单目标 transcript，未先按受击者和观察者展开顺序。
+- Prevention: 多目标范围攻击先列出 action 顺序、每个受击者的私有包和每个观察者的公共包，再按接收者矩阵生成期望；不能对观察者复用目标自身的四包序列。
+- Verification: 修正后将分别断言四个受击目标的 HP/私有包，以及目标 2/未命中观察者收到的完整公共广播序列，并重跑 AI=76 定向测试。
+
 ### 2026-08-15 — 跨仓库源码检索参数复发时必须作废混合输出
 
 - Symptom: 核对 AI=112/76 时在 Legacy workdir 的 `rg` 命令中附带了 Go 的 `cmd/crystal-server` 路径；Legacy 查询有结果，但 Go 部分以路径不存在退出，不能作为证据。
