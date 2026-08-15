@@ -1604,3 +1604,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为减少往返而复用上一调用的仓库路径，未把“每个编排 cell 只绑定一个已核验根目录”落实为机械约束。
 - Prevention: 每个工具编排只允许一个仓库根目录；切换前新建独立调用，先执行 `git rev-parse --show-toplevel`，再让命令参数只包含当前仓库的相对路径。跨仓库比较只使用两次独立调用的成功输出。
 - Verification: 本轮错误查询均发生在只读阶段且两仓库源码/C# 状态未变化；纠正后 Legacy 与 Go 分别核验根目录，迁移实现和门禁只采用单仓库输出。
+
+### 2026-08-15 — 跨仓库初始状态读取仍不得并行混编
+
+- Symptom: 本轮开始时再次把 Legacy lessons/状态和 Go 状态放进同一个 `Promise.all`，虽然命令均为只读且没有文件变化，但违反了已建立的单仓库编排边界。
+- Root cause: 把“状态检查彼此独立”误当成“可以跨仓库并行”，没有在工具编排提交前逐项核对每个调用的绝对 `workdir`。
+- Prevention: 跨仓库任务的第一轮也必须按仓库拆成独立工具调用；一个编排 cell 中所有 nested command 只能使用同一个、先由 `git rev-parse --show-toplevel` 核验的根目录。需要并行时只并行同一仓库的查询，切换仓库必须开始新的 cell。
+- Verification: 本次混合编排只执行了读取，Legacy/Go 源码与 C# 均无新增变化；后续矩阵和 Go 源码查询已在独立的 Go 调用完成，收口门禁将继续按仓库分别执行。
