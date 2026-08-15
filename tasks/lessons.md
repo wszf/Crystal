@@ -1576,3 +1576,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 直接调用 world 的多连接强制迁移后立即向两个无缓冲 pipe 投递，测试只启动了读 goroutine，没有确认两条 session loop 已完成上一阶段处理。
 - Prevention: 多连接 transcript 在直接触发世界通知前，为每个连接发送并读取 KeepAlive barrier；net.Pipe 的固定包数读取必须同时具备读 goroutine 和 handler-ready barrier，不能依靠调度偶然性。
 - Verification: 加入双方 barrier 后该测试普通运行 5 次、race 运行 3 次及全仓 `go test -race ./...` 均通过。
+
+### 2026-08-14 — Route 初始动作测试必须覆盖 Legacy 的绕行随机分支
+
+- Symptom: route 测试第一次 tick 仍处于 Legacy 初始 `ActionTime` 时，注入源只接受 `Next(1000)`，却收到 `Next(2)` 调用而失败。
+- Root cause: `MoveTo` 在直接 `Walk` 因动作冷却失败后，Legacy 仍会选择顺/逆时针绕行方向；测试只建模成功移动路径，遗漏了失败路径的随机调用。
+- Prevention: 新增移动随机行为时先按 `MoveTo` 的“直行失败 → 随机侧向尝试”完整列出所有 roll bound，并让确定性测试源对每个边界显式返回值；不要让冷却门禁短路随机分支的验证。
+- Verification: 测试注入源覆盖 `Next(1000)` 与 `Next(2)` 后，再验证初始冷却、route 移动、waypoint 等待和无效点重试。
+
+### 2026-08-14 — Go 工作目录中不得使用 Legacy 相对源码路径（再次强化）
+
+- Symptom: 在 Go 根目录执行 Legacy `Server/...` 只读检索时，命令因路径不存在失败；没有写入，但输出不能用于语义判断。
+- Root cause: route 可观察性核对切换仓库后复用了上一调用的相对路径，违反了命令参数单仓库边界。
+- Prevention: 每次跨仓库查询都拆成独立工具调用，先核对 `git rev-parse --show-toplevel`，再只使用当前根目录下的相对路径；错误输出不得作为实现依据。
+- Verification: 本次失败发生在读取阶段且工作树无变化；后续 Legacy 与 Go 查询分别核对根目录后再继续。
+
+### 2026-08-14 — 移动可见性矩阵 fixture 必须同时保存旧坐标与新坐标
+
+- Symptom: route 可见性测试预期离开范围/进入范围的 `ObjectRemove` 与 `ObjectMonster`，实际所有接收者只收到 `ObjectWalk`。
+- Root cause: 测试调用通知投影时仍把 monster 保留在旧坐标，距离差没有跨越 16 格边界；断言场景没有真正表达移动事件。
+- Prevention: 构造移动通知 fixture 时显式传入 `oldX/oldY`，并保证待投影对象的坐标已经是 `newX/newY`；先逐接收者计算 old/new 可见性，再断言包序。
+- Verification: 将 monster 新坐标设为 17、旧坐标设为 16 后，矩阵得到 leaving=`ObjectRemove`、staying=`ObjectWalk`、entering=`ObjectMonster`→`ObjectWalk`。
