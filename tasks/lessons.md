@@ -1647,6 +1647,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 依据 Legacy 怪物统计概念推断 Go 运行实体必然保存 MC 字段，没有先读取当前 `worldMonster` 的完整字段和定义统计读取 helper。
 - Prevention: 新增 AI 分支引用攻击属性前先核对当前实体结构及 materialize/统计访问路径；缺少字段时复用定义值 helper 或在同一批次完整贯通字段，随后立即运行受影响包仅编译门禁。
 - Verification: 修正 MC 读取边界后，将以 `go test ./cmd/crystal-server -run '^$' -count=1` 和 AI=66 双分支定向测试确认编译及行为均恢复绿色。
+- Strengthening after recurrence: AI=92 FlameSpear 再次把 MC 当成 `worldMonster` 运行字段，说明新增分支的所有攻击属性（包括 MC/SC）都必须同时核对已有生产 helper 的定义统计读取；包级编译失败时不得继续写测试或文档。
+- Verification after recurrence: 本次错误在仅编译门禁捕获且未运行行为测试；改用 `monsterStatValue(info, statMinMC/statMaxMC)` 后，受影响包仅编译恢复绿色。
 
 ### 2026-08-15 — Monster AI opt-in 排除 fixture 必须避开已支持 AI 值
 
