@@ -1650,3 +1650,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 扩展支持集合时没有同步检查负向 fixture，测试使用了刚刚变成生产路径的 AI 值。
 - Prevention: 每次新增 AI/协议分支后，检索所有 `excludes`/opt-in 负向测试并将样本改为明确仍未迁移的值；同时保留一条正向测试锁定新值已启用，避免负向断言掩盖实际行为。
 - Verification: fixture 改为 AI=11 后，AI=0/4/8/10 正向定向测试和特殊/宠物排除测试均通过。
+
+### 2026-08-15 — 跨仓库源码检索参数复发时必须作废混合输出
+
+- Symptom: 核对 AI=112/76 时在 Legacy workdir 的 `rg` 命令中附带了 Go 的 `cmd/crystal-server` 路径；Legacy 查询有结果，但 Go 部分以路径不存在退出，不能作为证据。
+- Root cause: 为并列比较而在同一 shell 中复用两个仓库的相对路径，未执行命令参数的单仓库 allowlist 检查。
+- Prevention: 每个源码证据调用只能包含当前 workdir 的路径；Legacy 与 Go 必须使用不同的独立工具调用，任一退出码 2 的混合输出全部作废，不得据此决定实现。
+- Verification: 本次命令只读且无文件变化；后续将分别在 Legacy 根目录读取 C#，再在 Go 根目录读取 Go 协议/实体，提交前继续做两仓库 C# 零变化检查。
