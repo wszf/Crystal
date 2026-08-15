@@ -1625,6 +1625,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 没有先读取实际长行就假定其内容可用缩写匹配；Markdown 矩阵的整行字段不允许把省略号当作通配符。
 - Prevention: 长行文档修改先用当前仓库的 `sed`/精确检索读取真实上下文，再做最小完整行替换；补丁失败后重新读取并确认文件未变，禁止凭失败输出继续判断。
 - Verification: 失败补丁未产生写入；随后读取实际 P5 行并用完整上下文更新 AI=4 说明，`git diff --check` 将在提交前验证格式。
+- Strengthening after recurrence: 本批再次把不完整上下文用于 AI=29 矩阵更新，补丁仍在校验阶段失败；以后每次长行更新必须先读取包含前后完整句子的固定行块，并只替换该实际块，禁止手写任何省略号或猜测尾句。
+- Verification after strengthening: 第二次失败补丁没有写入；随后读取 `sed -n '108,132p'` 的真实 note，按完整上下文修正重复句并加入 AI=29 说明，Go 文档 diff 检查保持通过。
 
 ### 2026-08-15 — Monster AI opt-in 排除 fixture 必须避开已支持 AI 值
 
