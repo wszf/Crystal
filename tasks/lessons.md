@@ -1746,3 +1746,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 爆炸实现只在玩家循环中添加 poison，未把 `CompleteDeath` 对每个成功 `Attacked` 的 Monster/宠物目标的 poison 分支迁移过来。
 - Prevention: 迁移多态范围攻击时先按 `FindAllTargets` 的目标种类展开伤害、毒和包副作用矩阵；玩家与宠物怪物必须分别断言 HP、poison 类型和后续状态包。
 - Verification: 将在 HellBomb 回归中锁定玩家与宠物均受 AC 伤害并获得对应 poison，野生怪物仍不受击，随后运行定向与全量门禁。
+
+### 2026-08-15 — AI=101 测试必须复用当前 Monster stat 标识符
+
+- Symptom: AncientBringer 初版 Go 测试使用不存在的 `monsterStatMinMC`、`monsterStatMaxMC` 等名称，包级编译在行为测试前失败。
+- Root cause: 测试夹具按 Legacy 统计概念猜测 Go 常量名，没有先读取当前 `worlddata`/monster AI 使用的完整 stat 标识符。
+- Prevention: 新增怪物夹具前先在整个 Go package 检索生产声明和现有用法，逐项复用真实 `statMinMC`/`statMaxMC` 等标识符；首次 patch 后立即运行 `go test ./cmd/crystal-server -run '^$' -count=1`。
+- Verification: AncientBringer 夹具改用当前 stat 常量后，包级编译、AI=101 定向测试和服务端整包测试均通过。
+
+### 2026-08-15 — AI=101 对照检索的仓库路径必须分开
+
+- Symptom: Go 仓库的 AncientBringer 只读查询命令曾混入 Legacy `Server/...` 路径；命令以路径不存在结束，同一调用的其他输出也不能作为语义证据。
+- Root cause: 为并列比较而在 Go workdir 复用了 Legacy 相对路径，没有执行单仓库参数 allowlist 检查。
+- Prevention: Legacy 与 Go 的根目录核验、源码读取和状态检查必须使用独立工具调用；Go 命令只允许 Go 相对路径，任何退出码 2 的混合输出全部作废并在新的 Legacy 调用重跑。
+- Verification: 本次错误只发生在读取阶段且无文件写入；后续分别核验两个根目录，AI=101 实现与测试只采用单仓库成功输出，C# 零差异门禁保持为空。
