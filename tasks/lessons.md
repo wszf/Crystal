@@ -1627,6 +1627,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 失败补丁未产生写入；随后读取实际 P5 行并用完整上下文更新 AI=4 说明，`git diff --check` 将在提交前验证格式。
 - Strengthening after recurrence: 本批再次把不完整上下文用于 AI=29 矩阵更新，补丁仍在校验阶段失败；以后每次长行更新必须先读取包含前后完整句子的固定行块，并只替换该实际块，禁止手写任何省略号或猜测尾句。
 - Verification after strengthening: 第二次失败补丁没有写入；随后读取 `sed -n '108,132p'` 的真实 note，按完整上下文修正重复句并加入 AI=29 说明，Go 文档 diff 检查保持通过。
+- Strengthening after second recurrence: AI=100 更新虽使用了真实上下文，仍把被匹配的保留句再次复制进 replacement，产生重复文本；以后采用“删除旧句再插入新句”的最小补丁，应用后必须立即 `sed` 复读目标块并检查相邻句不重复。
+- Verification after second strengthening: 重复句在提交前已被移除，AI=100 note 的实际块复读正确；Go 定向测试继续通过，文档 diff 检查将在门禁中复核。
 
 ### 2026-08-15 — Monster AI opt-in 排除 fixture 必须避开已支持 AI 值
 
