@@ -682,6 +682,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 领域 helper 要么只返回不可变结果并在内部完成 map 提交，要么明确命名/文档化 detached contract；任何修改返回实体后都必须在同一锁边界显式写回权威 map，并增加后续 tick/重载断言。
 - Verification: AI=97 测试已在死亡回调后显式写回 knight，再验证 despawn 不进入普通 respawn；定向、全包和 race 门禁通过。
 
+### 2026-08-15 — AI 测试夹具必须复用精确 stat 名称、锁语义和随机公式
+
+- Symptom: AI=98 定向测试先因把玩家 stat 的 `statMinMAC`/`statMinMC` 写成不存在的 `monsterStat...` 常量而无法编译；修正后又在持有 `world.mu` 时调用会再次加锁的 `enableMonsterAI`，测试超时；最后按单次 DC 随机直觉断言炸弹/地震伤害，未覆盖 Legacy HellLord 地震的嵌套 `Random.Next(Random.Next(min,max))`。
+- Root cause: 新夹具没有先读取当前包的精确常量和锁边界，并把 Legacy 的随机调用序列/嵌套范围压缩成了看似等价的单次 roll。
+- Prevention: 新测试先检索声明和完整 helper 签名；持锁区只直接写字段，锁外调用加锁 helper；迁移随机 AI 时逐次列出调用顺序、闭区间/开区间和嵌套 roll，并用计数确定性源验证最终 wire/HP。
+- Verification: HellLord/HellKnight 定向测试现可在 30 秒门禁内完成，覆盖 600ms 动作、延迟召唤、地震、阶段免伤和炸弹 10 秒/500ms 生命周期；包级编译与定向回归通过。
+
 ## Entry format
 
 ```markdown
@@ -1707,3 +1714,35 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 多段延迟动作测试按每次命中复用首次命中的包模板，遗漏了 Legacy `MonsterStruckReadyAt` 的 500ms 节流边界。
 - Prevention: 多命中 transcript 先按每个命中时刻与目标的 `MonsterStruckReadyAt` 计算私有/广播包，再分别生成目标和观察者矩阵；后续命中不能默认追加 `Struck`/`ObjectStruck`。
 - Verification: 修正 AI=96 第二次命中期望为 `DamageIndicator -> HealthChanged`（观察者仅 `DamageIndicator`）后，FlameQueen 定向测试通过。
+
+### 2026-08-15 — 混合仓库只读命令的全部输出必须作废
+
+- Symptom: AI=98 复核时在 Legacy 根目录的只读命令末尾误带 Go 路径，命令以路径不存在结束；虽然没有写入，但同一调用的输出不能作为证据。
+- Root cause: 读取 Legacy 方向函数后复用了 Go 文件路径，没有在执行前逐项检查命令参数是否只属于当前仓库。
+- Prevention: 每个源码证据调用只保留当前仓库的已验证相对路径；发现另一侧路径或退出码 2 时，整条输出作废，并在新的、单独核验根目录调用中重跑。
+- Verification: 本次错误发生在读取阶段且两仓库工作树无源码变化；后续方向与 Go helper 核对将拆成独立调用，提交前继续执行 C# 零变化检查。
+
+### 2026-08-15 — Go 查询不得携带 Legacy 路径参数
+
+- Symptom: AI=98 复核时在 Go workdir 的只读命令中再次附带 `Server/MirObjects/...`，Legacy 路径不存在导致命令失败；同一调用的其他输出也不能作为证据。
+- Root cause: 为并列读取 Legacy 实现而复用了跨仓库路径参数，没有在工具调用边界执行当前仓库路径 allowlist 检查。
+- Prevention: 每个 Go 查询只使用 Go 仓库内的相对路径；需要 Legacy 对照时先结束 Go 调用，再以新的、已核验 Legacy 根目录调用读取，禁止在同一 shell、Promise 或参数列表混放路径。
+- Verification: 本次错误只发生在读取阶段且没有写入；后续会分别核验两个仓库根目录并仅采用单仓库成功输出，批次结束继续执行双仓库 C# 差异/未跟踪检查。
+- Strengthening after recurrence: 本批后续的 Go 命令再次附带 Legacy `Server/...` 路径，说明仅检查 workdir 不足；执行前必须逐项检查命令中的每个路径和 glob，只允许当前仓库前缀，混合调用的全部输出一律作废。
+- Verification after recurrence: 第二次错误仍停留在读取阶段且无写入；后续改为先单独核验 Legacy 根目录读取 C#，再新建 Go 调用读取 Go 结构，继续以双仓库零 C# 差异作为批次门禁。
+- Strengthening after second recurrence: 本轮为读取 Hero 对照时第三次把 Legacy `Server/...` 放进 Go 调用；跨仓库比较必须按“一个调用只读一个仓库”的顺序执行，不能在 Go 命令中预留任何 Legacy 路径，即使只是同一问题的对照查询。
+- Verification after second recurrence: 本次调用仍在读取阶段失败且没有写入；后续先以独立 Legacy 调用读取 C#，结束后再以独立 Go 调用读取 Hero 结构，混合输出不再用于实现判断。
+
+### 2026-08-15 — 新增战斗 fixture 写入 ItemStats 前必须初始化 map
+
+- Symptom: HellBomb AC/敏捷回归在行为阶段 panic，原因是向 `player.Stats` 写入高敏捷值时 map 为 nil。
+- Root cause: fixture 只填了结构体标量字段，未沿生产角色初始化路径创建可写的 `protocol.ItemStats` map。
+- Prevention: 新增战斗属性边界前显式用 map literal 初始化 `ItemStats`，并先运行定向测试而不是只依赖包级编译。
+- Verification: 修正后将复跑 HellLord/HellBomb 定向测试，确认无 panic、AC 命中和敏捷负例均由实际行为断言覆盖。
+
+### 2026-08-15 — HellBomb poison 必须覆盖所有可攻击目标种类
+
+- Symptom: HellBomb 宠物目标已按 AC 扣血，但没有收到 Legacy `PoisonTarget` 对应的 Frozen 状态；玩家路径通过、宠物路径缺失。
+- Root cause: 爆炸实现只在玩家循环中添加 poison，未把 `CompleteDeath` 对每个成功 `Attacked` 的 Monster/宠物目标的 poison 分支迁移过来。
+- Prevention: 迁移多态范围攻击时先按 `FindAllTargets` 的目标种类展开伤害、毒和包副作用矩阵；玩家与宠物怪物必须分别断言 HP、poison 类型和后续状态包。
+- Verification: 将在 HellBomb 回归中锁定玩家与宠物均受 AC 伤害并获得对应 poison，野生怪物仍不受击，随后运行定向与全量门禁。
