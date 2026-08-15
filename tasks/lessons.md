@@ -1855,3 +1855,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy `ProcessTarget` 在投射物命中后仍会继续执行；攻击冷却尚未结束时，目标仍在 `ViewRange` 内但 `CanAttack` 为假，于是怪物按正常路径移动。
 - Prevention: 延迟攻击测试必须分别投影“命中处理”和同一 tick 后续 AI 处理；不要因为命中动作刚完成就假设该 tick 不再产生移动、转向或其他 AI 副作用。
 - Verification: 远程 transcript 补上末尾 `ObjectWalk`，近战、远程、同格远程和离开视野移动用例均通过。
+
+### 2026-08-15 — Go AI 距离常量必须匹配 int32 几何运算
+
+- Symptom: AI=108 MudZombie 首次包级编译因 `distance > legacyMudZombieLineDistance` 的 `int32`/`int` 比较失败。
+- Root cause: 新增距离常量显式声明为 `int`，而世界坐标和 `maxInt32` 结果使用 `int32`；Go 不允许这两个不同的具体类型直接比较。
+- Prevention: 几何阈值优先使用无类型常量，或在声明处与坐标运算统一为 `int32`；新增 AI 后立即执行包级编译，不把类型错误留到全量门禁。
+- Verification: 将 MudZombie 线距离改为无类型常量后，包级编译和四个 MudZombie 定向测试通过。
+
+### 2026-08-15 — 同一 tick 的 AI 移动先于 poison tick transcript
+
+- Symptom: AI=108 命中测试把 poison 的 `HealthChanged/DamageIndicator/Poisoned` 放在 `ObjectWalk` 前，实际接收顺序为 `Chat → ObjectWalk → HealthChanged → DamageIndicator → Poisoned`。
+- Root cause: `world.tick` 先解析怪物延迟动作并运行怪物 AI，再在后续阶段处理刚加入的 poison；按领域语义分组而非按调度顺序断言，遗漏了跨阶段交错。
+- Prevention: 延迟命中 transcript 必须按 `tick` 的实际阶段展开：动作 → AI → poison；新增状态效果后先记录同一 tick 内所有接收者包，再写期望序列。
+- Verification: 修正 MudZombie 近战/远程 transcript 后，定向测试和包级编译均通过。
+
+### 2026-08-15 — net.Pipe bootstrap helper 返回前必须同步 post-bootstrap 副作用
+
+- Symptom: AI=108 全仓门禁偶发/复现失败 `TestSessionRequiredGroupEnforcementOnMemberLeave`，预 enforcement barrier 读到 `ServerObjectRemove` 而不是 `ServerKeepAlive`。
+- Root cause: `startGameBootstrapForTest` 在 `GuildBuffList` 后返回，但服务端仍可能执行一次性的 required-group enforcement；测试此时手工把玩家移入受限地图，未完成的启动检查便把玩家异步移出并抢先写包。
+- Prevention: bootstrap transcript 的最后一个业务包不等于 session 已进入稳定 game loop；凡是随后手工修改 world 在线状态的测试，先对每条 net.Pipe 连接发送 KeepAlive 并消费响应，作为 post-bootstrap barrier。
+- Verification: 在 required-group fixture 的 world 投影前增加 leader/member 两个 KeepAlive barrier 后，定向测试、服务端整包、全仓普通/race、vet 和 build 均通过。
