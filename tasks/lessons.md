@@ -1562,3 +1562,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: binary reader 会在计数声明与剩余字节明显不匹配时提前返回结构化容量错误，而不是继续读到 EOF；fixture 形状变化使该合法错误路径变得可达。
 - Prevention: 截断数据库测试断言错误类别（EOF 或计数无法容纳），不要绑定单一读取深度的错误文本；每次扩展 fixture 后运行完整 exporter 包测试。
 - Verification: 断言同时覆盖两种截断错误后，`go test ./internal/legacyworld -count=1` 通过。
+
+### 2026-08-14 — 导入全局计时器后必须重算未保存重生组的下一 tick
+
+- Symptom: 世界先按默认计时器创建重生组，再导入 Legacy `CurrentTickcounter` 时，未匹配 `RespawnSave` 的组仍保留默认基准的 `NextSpawnTick`，可能在启动后立即重生。
+- Root cause: 加载顺序把静态组构造与计时器覆盖分开，却只对有保存记录的组应用了新计时器。
+- Prevention: 配置计时器后，保存记录匹配组使用持久化 `NextSpawnTick`，其余 tick 组统一以导入的当前计数器加 `RespawnTicks` 重算；用非零导入计数器测试无保存记录路径。
+- Verification: Go 重启/持久化测试锁定初始 `CurrentTickcounter=7` 时未保存组的下一 tick 为 9，随后全仓普通/race 门禁通过。
+
+### 2026-08-14 — 多连接 net.Pipe 世界通知前要建立会话就绪屏障
+
+- Symptom: 全仓 race 门禁中 `TestSessionRequiredGroupEnforcementOnMemberLeave` 偶发在固定包数读取后因 `io: read/write on closed pipe` 超时；增加日志延迟后可通过，说明通知写入早于会话转换回调就绪。
+- Root cause: 直接调用 world 的多连接强制迁移后立即向两个无缓冲 pipe 投递，测试只启动了读 goroutine，没有确认两条 session loop 已完成上一阶段处理。
+- Prevention: 多连接 transcript 在直接触发世界通知前，为每个连接发送并读取 KeepAlive barrier；net.Pipe 的固定包数读取必须同时具备读 goroutine 和 handler-ready barrier，不能依靠调度偶然性。
+- Verification: 加入双方 barrier 后该测试普通运行 5 次、race 运行 3 次及全仓 `go test -race ./...` 均通过。
