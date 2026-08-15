@@ -1684,3 +1684,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after recurrence: 本次误带 `cmd/crystal-server` 的查询只在读取阶段返回路径不存在且没有写入；后续实现判断将作废该输出，并只采用单仓库调用的成功结果。
 - Strengthening after second recurrence: 即使 Go 命令主体只读取 Go 源码，末尾追加 Legacy 统计或 C# 路径仍会让整条证据调用混合并失效；执行前必须逐项检查命令参数是否只包含当前仓库的已验证前缀，发现另一侧路径立即拆到新的 functions.exec cell。
 - Verification after second recurrence: 本次 Go 只读查询因附带 Legacy 路径返回不存在，输出未用于实现判断且没有写入；后续已按单仓库调用重新核对统计字段，继续迁移前保持该边界。
+
+### 2026-08-15 — 多次命中 transcript 必须应用 Struck 冷却
+
+- Symptom: AI=96 FlameQueen 的第二个 50ms 间隔范围命中已正确扣血，但测试错误期望再次收到 `ObjectStruck`；实际目标和观察者只收到 `DamageIndicator`，目标另收到 `HealthChanged`。
+- Root cause: 多段延迟动作测试按每次命中复用首次命中的包模板，遗漏了 Legacy `MonsterStruckReadyAt` 的 500ms 节流边界。
+- Prevention: 多命中 transcript 先按每个命中时刻与目标的 `MonsterStruckReadyAt` 计算私有/广播包，再分别生成目标和观察者矩阵；后续命中不能默认追加 `Struck`/`ObjectStruck`。
+- Verification: 修正 AI=96 第二次命中期望为 `DamageIndicator -> HealthChanged`（观察者仅 `DamageIndicator`）后，FlameQueen 定向测试通过。
