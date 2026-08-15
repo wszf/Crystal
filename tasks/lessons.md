@@ -1459,6 +1459,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 确定性 synthetic tick 与生产后台 ticker 同时驱动同一世界，且把 handler 中间包误当成请求完成信号；`net.Pipe` 的包到达只证明该次写入完成，不证明后续领域逻辑已结束。
 - Prevention: 需要手工时间轴的会话测试在状态创建前停止该 world 的测试 ticker，并确认可能已选中的空 tick 返回；读取入口中间包后再发送并消费 `KeepAlive`，用后续请求作为所属会话完成屏障，再检查共享状态或断言没有广播。
 - Verification: 后台 ticker 隔离后，三会话 FrostCrunch transcript 稳定锁定伤害、两条 Chat、Slow/Frozen 广播、Frozen 拒绝以及逐步清除；Frozen 攻击后的 KeepAlive 屏障确认方向和动作队列均未变化。
+- Strengthening after recurrence: 毒状态的 `Elapsed` 按实际处理事件次数递增，不会因一次 synthetic tick 的墙上时间跨越而补齐多个周期；到期测试必须按递增且严格晚于 `TickAt` 的每个 tick 逐步驱动，再单独执行清除广播阶段。
+- Verification after recurrence: AI=95 FlameAssassin 首次到期测试把 8 秒跳跃误当成 8 次处理，仅得到 `Elapsed=2`；改为逐秒、递增纳秒边界的 8 次 tick 后，Slow 到期与 `Poisoned/ObjectPoisoned(None)` 顺序通过。
 
 ### 2026-08-14 — 状态门禁必须收窄到原版 capability 边界
 
