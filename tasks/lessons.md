@@ -1630,6 +1630,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Strengthening after second recurrence: AI=100 更新虽使用了真实上下文，仍把被匹配的保留句再次复制进 replacement，产生重复文本；以后采用“删除旧句再插入新句”的最小补丁，应用后必须立即 `sed` 复读目标块并检查相邻句不重复。
 - Verification after second strengthening: 重复句在提交前已被移除，AI=100 note 的实际块复读正确；Go 定向测试继续通过，文档 diff 检查将在门禁中复核。
 
+### 2026-08-15 — SandWorm 测试新增变量必须实际参与断言
+
+- Symptom: SandWorm 定向测试新增 `impact` 变量后，Go 包级编译因 declared and not used 失败，行为测试尚未运行。
+- Root cause: 为记录延迟命中结果引入了局部变量，但后续断言仍直接读取通知切片，没有把变量接入验证路径。
+- Prevention: 新增测试局部变量后立即确认其用于断言、返回值或日志；先运行 `go test ./cmd/crystal-server -run '^$' -count=1`，编译绿色后再运行定向行为测试。
+- Verification: 删除未使用变量后，后续将以包级编译、SandWorm 定向测试和完整 Go 门禁确认该测试实际执行并保持绿色。
+
 ### 2026-08-15 — Monster AI opt-in 排除 fixture 必须避开已支持 AI 值
 
 - Symptom: 新增 AI=8 后，既有“opt-in 后特殊 AI 不运行”测试把样本仍设为 AI=8，收到 `ObjectWalk` 而失败。
