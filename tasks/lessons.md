@@ -1966,3 +1966,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 本次错误调用仅在读取阶段失败且两个工作树无源码写入；后续 Legacy/Go 查询拆分执行，迁移实现只采用重新取得的独立输出。
 - Strengthening after recurrence: 本轮一次 Go 只读命令又手写成重复的仓库根目录，进程启动前即被拒绝；即使只是读取，也不能凭记忆拼接跨仓库绝对路径。
 - Verification after strengthening: 错误命令没有启动、没有输出可用证据或文件变化；随后重新核对 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 并只采用正确根目录的查询结果。
+
+### 2026-08-15 — CatShaman 测试随机夹具必须覆盖伤害与状态门禁的全部上界
+
+- Symptom: AI=118 CatShaman 定向测试在红毒分支执行到 MC 伤害取值的 `Next(10)` 时失败；修复后又把命中同 tick 已执行的 Red poison 首跳误期望为 `Elapsed=0`。
+- Root cause: 确定性 `monsterAIRoll` 夹具只列出了分支和部分旧调用的上界，且测试把延迟动作完成时刻与该 tick 后续 poison 调度边界混为一谈。
+- Prevention: 新增 AI 测试先记录完整随机调用序列（分支、伤害、抗性、chance、毒值），夹具必须为每个实际上界提供确定值；延迟命中 transcript 同时投影命中、同 tick 移动和状态首跳，再断言 `Elapsed` 与包序。
+- Verification: 加入 `Next(10)` 的固定返回并将 Red poison 的首跳期望改为 `Elapsed=1` 后，包级编译和全部 CatShaman 定向测试通过。
+
+### 2026-08-15 — 跨仓库证据读取必须使用独立根目录与路径 allowlist
+
+- Symptom: 一次 Go 工作目录的只读命令误带 Legacy `Server/...` glob，shell 仅返回路径不存在；没有写入，但该次混合输出不能作为迁移语义证据。
+- Root cause: 跨仓库对照时复用了上一仓库的相对路径参数，没有把工作目录、根目录校验和源码路径作为同一调用的单仓库边界。
+- Prevention: Legacy 与 Go 的根目录核验、源码读取和写入必须拆成独立工具调用；每次先执行 `git rev-parse --show-toplevel`，命令参数只允许当前仓库路径，出现混合路径或非零读取结果时整体丢弃输出并重跑。
+- Verification: 错误调用只发生在读取阶段且两个工作树无 C# 变化；随后用独立根目录调用重新获取对照证据，AI=118 实现与矩阵判断未使用错误输出。
