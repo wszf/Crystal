@@ -1883,3 +1883,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 手工复制已知 Go 根目录时重复了目录片段，没有在工具调用前重新核对完整绝对路径。
 - Prevention: 每次 Go 工具调用都直接使用已验证的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，并在切换或写入前单独执行 `git rev-parse --show-toplevel`/目标存在性检查；失败调用的输出不作为证据。
 - Verification: 错误命令未启动且没有文件变化；随后恢复到正确根目录，继续使用单仓库调用完成 AI=109 门禁与提交前核对。
+
+### 2026-08-15 — AI 攻击属性必须复用 worldMonster 的定义统计边界
+
+- Symptom: AI=111 WhiteMammoth 初版包级编译失败，代码直接访问不存在的 `worldMonster.MinMC/MaxMC` 字段，行为测试尚未运行。
+- Root cause: 按 Legacy 统计概念假设运行实体保存 MC 标量，未先核对 Go `worldMonster` 的实际字段和现有 `monsterStatValue` 读取路径。
+- Prevention: 新增 AI 分支引用 MC/SC 等属性前先读取实体结构及 materialize/统计 helper；缺少运行字段时统一从 `monster.Info` 用真实 stat ID 读取，并在首次 patch 后立即运行受影响包的仅编译门禁。
+- Verification: 编译错误在行为测试前被捕获且未写入其他文件；修复后将用包级编译与 WhiteMammoth 定向测试确认统计读取和三条攻击分支。
+
+### 2026-08-15 — WhiteMammoth PoisonTarget 的 chance=0 只做一次抗性检定
+
+- Symptom: WhiteMammoth stomp 初版动作把 `PoisonTarget(..., 0, ...)` 迁移为两次抗性检定，和 Legacy 的可观察抵抗概率不一致。
+- Root cause: 沿用了其他已迁移怪物动作的双检定字段，没有逐行读取 WhiteMammoth 的 `PoisonTarget` 调用及其单次 `PoisonResistWeight` 门禁。
+- Prevention: 每个新 AI 的毒效果都要独立展开 chance、抗性检定次数、值计算顺序和状态包；不能从相邻 AI 复用默认次数。
+- Verification: WhiteMammoth 动作断言固定 `PoisonResistChecks=1`，并用抗性 roll 计数测试确认 stomp 只消费一次抵抗检定。
+
+### 2026-08-15 — Go AI 定向测试的随机上界重叠必须按调用阶段断言
+
+- Symptom: WhiteMammoth 抗性回归测试的 switch 同时声明了 `case 10` 和 `case poisonResistWeight`，包级编译在行为测试前失败。
+- Root cause: 测试把同一个随机上界用于分支和抗性阶段，却试图用常量 case 区分调用语义。
+- Prevention: 随机上界相同时按已知调用顺序或阶段计数记录消费，不要在 switch 中重复声明等值 case；新增测试后立即运行包级仅编译门禁。
+- Verification: 测试改为统计 `poisonResistWeight` 的实际调用次数，包级编译和 WhiteMammoth 四条定向测试均通过。
