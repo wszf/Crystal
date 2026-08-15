@@ -1846,3 +1846,12 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试 fixture 返回的怪物值在该用例只需通过 `world.monsters` 的权威副本验证，却仍绑定了局部变量。
 - Prevention: 新测试完成后立即执行包级编译；不需要的多返回值显式使用 `_`，避免保留误导性局部状态。
 - Verification: 将该返回值改为 `_` 后，`go test ./cmd/crystal-server -run '^$'`、DeathCrawler 定向测试、全仓普通/race、vet 和 build 均通过。
+- Strengthening after recurrence: AI=107 远程测试又在首次包级编译中绑定了未使用的 `impact`；新增测试的编译检查必须覆盖每个新建局部变量，未用于断言的变量应立即删除或纳入可观察结果断言。
+- Verification after strengthening: 为 `impact` 增加远程命中包序断言后，包级编译和四个 BurningZombie 定向测试均通过。
+
+### 2026-08-15 — BurningZombie 延迟命中 transcript 必须包含攻击后的移动
+
+- Symptom: AI=107 远程命中健康状态正确，但接收者实际收到 `[Struck, ObjectStruck, DamageIndicator, HealthChanged, ObjectWalk]`，测试只期待前四个包而失败。
+- Root cause: Legacy `ProcessTarget` 在投射物命中后仍会继续执行；攻击冷却尚未结束时，目标仍在 `ViewRange` 内但 `CanAttack` 为假，于是怪物按正常路径移动。
+- Prevention: 延迟攻击测试必须分别投影“命中处理”和同一 tick 后续 AI 处理；不要因为命中动作刚完成就假设该 tick 不再产生移动、转向或其他 AI 副作用。
+- Verification: 远程 transcript 补上末尾 `ObjectWalk`，近战、远程、同格远程和离开视野移动用例均通过。
