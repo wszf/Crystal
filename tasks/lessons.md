@@ -1804,3 +1804,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 重构调用返回值后只更新了主要行为路径，没有按新的 `notification.Recipient.ObjectID` 语义逐处复核旧变量。
 - Prevention: 重构测试的返回结构或身份来源时，立即搜索旧标识符并逐段复读所有断言；随后先运行受影响包的 `go test ... -run '^$'`，再运行行为测试。
 - Verification: 残留引用在包级编译阶段被捕获并清理；DemonGuard/经验定向测试及服务端整包编译随后通过。
+
+### 2026-08-15 — AI=105 测试字面量必须先过包级编译
+
+- Symptom: KingGuard 测试新增 `Stats` 复合字面量时遗漏尾逗号，包级测试在执行行为前直接语法失败。
+- Root cause: 连续扩展 fixture 与 transcript 时没有在首次完成复合字面量后立即运行编译门禁。
+- Prevention: 每次新增或改写多行 Go 复合字面量后先执行 `gofmt` 与 `go test ./cmd/crystal-server -run '^$' -count=1`，再继续增加行为断言。
+- Verification: 补齐逗号后包级编译恢复通过，KingGuard 定向测试及服务端整包普通测试均通过。
+
+### 2026-08-15 — 跨仓库对照命令必须拒绝另一仓库路径
+
+- Symptom: Go 根目录的一次只读命令误带 Legacy `Server/...` 路径；该路径错误使整条输出不能作为迁移语义证据。
+- Root cause: 对照 Legacy 的源码检索时没有把命令参数限制为当前 Go 仓库，复用了上一侧的相对路径。
+- Prevention: 每次切换仓库都用独立调用核验 `git rev-parse --show-toplevel`，命令只允许当前根目录下的路径；混合调用的所有输出全部作废并重跑。
+- Verification: 错误调用只发生在读取阶段且无写入；随后以独立 Legacy/Go 调用完成 AI=105 对照，C# 工作区无变化。
