@@ -1635,6 +1635,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after second strengthening: 重复句在提交前已被移除，AI=100 note 的实际块复读正确；Go 定向测试继续通过，文档 diff 检查将在门禁中复核。
 - Strengthening after third recurrence: AI=65 更新第一次仍按视觉换行猜测物理行边界，导致完整上下文匹配失败；长 Markdown 补丁前必须用 `sed -n l` 确认实际行边界，并优先锚定已读取的短、唯一连续句。
 - Verification after third strengthening: 失败补丁未产生写入；随后按 `sed`/`sed -n l` 的真实行块成功加入 AI=65 说明，Go 文档 `git diff --check` 与全量门禁通过。
+- Strengthening after fourth recurrence: 即使目标段落已复读，替换上下文中的标点或斜杠差异也会使 Markdown 补丁整块拒绝；应用前必须逐字复制实际行，补丁失败后重新读取目标段，禁止凭近似文案重试。
+- Verification after fourth strengthening: 本批 AI=94 矩阵首次补丁因把实际 `HP/私有包` 写成近似标点而拒绝，未产生写入；重新检索真实行后按精确上下文追加 lessons，Go 文档随后通过差异检查。
 
 ### 2026-08-15 — SandWorm 测试新增变量必须实际参与断言
 
@@ -1667,6 +1669,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把每个 action 的私有 `Struck`/`HealthChanged` 与对所有附近玩家重复投递的公共包合并成了单目标 transcript，未先按受击者和观察者展开顺序。
 - Prevention: 多目标范围攻击先列出 action 顺序、每个受击者的私有包和每个观察者的公共包，再按接收者矩阵生成期望；不能对观察者复用目标自身的四包序列。
 - Verification: 修正后将分别断言四个受击目标的 HP/私有包，以及目标 2/未命中观察者收到的完整公共广播序列，并重跑 AI=76 定向测试。
+- Strengthening after recurrence: AI=94 FlameScythe 再次证明，多目标 action 按顺序投递时，目标自身的私有包在接收者 transcript 中可能处于第一项、中间或末尾；测试必须按每个 action 顺序分别生成目标/观察者期望，不能把同一“私有四包 + 公共包”模板复用给所有受击者。
+- Verification after recurrence: AI=94 首次定向测试因把目标 3 的末尾私有包误放在开头而失败，按 target/hidden/ally 三种接收位置拆分期望后通过；MagicResist 排除者的三组公共包也保持独立断言。
 
 ### 2026-08-15 — 跨仓库源码检索参数复发时必须作废混合输出
 
@@ -1676,3 +1680,5 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 本次命令只读且无文件变化；后续将分别在 Legacy 根目录读取 C#，再在 Go 根目录读取 Go 协议/实体，提交前继续做两仓库 C# 零变化检查。
 - Strengthening after recurrence: 即使当前调用的工作目录是 Legacy，命令末尾追加 Go 的相对路径仍会制造混合输出；读取命令的路径参数必须在提交前逐项通过当前仓库 allowlist，发现另一侧路径立即拆到新的、已核验根目录调用。
 - Verification after recurrence: 本次误带 `cmd/crystal-server` 的查询只在读取阶段返回路径不存在且没有写入；后续实现判断将作废该输出，并只采用单仓库调用的成功结果。
+- Strengthening after second recurrence: 即使 Go 命令主体只读取 Go 源码，末尾追加 Legacy 统计或 C# 路径仍会让整条证据调用混合并失效；执行前必须逐项检查命令参数是否只包含当前仓库的已验证前缀，发现另一侧路径立即拆到新的 functions.exec cell。
+- Verification after second recurrence: 本次 Go 只读查询因附带 Legacy 路径返回不存在，输出未用于实现判断且没有写入；后续已按单仓库调用重新核对统计字段，继续迁移前保持该边界。
