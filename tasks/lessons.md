@@ -516,6 +516,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 长期多批次 `go test`/race 构建缓存累积，门禁前未检查临时卷余量。
 - Prevention: 大批次全量/race 门禁前用 `df -h` 和 `du -sh $(go env GOCACHE)` 检查空间；不足时仅执行 `go clean -cache -testcache` 清理可重建缓存，不删除项目或用户数据。
 - Verification: 清理后数据卷恢复约 25 GiB，关系双会话测试重新编译并通过。
+- Strengthening after recurrence: 本批普通测试先通过，但随后 `go test -race ./...` 因 Go build cache 达到约 12 GiB、系统临时卷仅剩约 303 MiB 而在构建阶段失败；门禁前必须同时检查可用空间、Go cache 和临时构建目录，不能只在历史失败后清理一次。
+- Verification after recurrence: 仅执行 `go clean -cache -testcache` 后可用空间恢复约 12 GiB、Go cache 降至 8 KiB；重新运行 `go test -race ./...`、`go vet ./...` 和 `go build ./...` 均以退出码 0 完成。
 
 ### 2026-08-12 — 新增 bootstrap 包必须同步所有 transcript fixture
 
@@ -1754,6 +1756,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 每个新 AI 建立近战/远程的 payload、伤害统计、防御类型、延迟、毒状态和命中重验表；只有 C# 明确存在的分支才迁移，未设置的 wire 字段保留零值，并用独立 fixture 锁定每条路径。
 - Verification: AI=103 定向测试覆盖近战 MAC/Red poison、远程 500ms MC/MAC 无毒、零值 range Type、延迟安全区重验和攻击冷却期间移动；包级编译与服务端回归通过。
 
+### 2026-08-15 — Go 源码查询不得夹带 Legacy 路径（再次强化）
+
+- Symptom: AI=104 对照读取时，Go 工作目录的同一条只读命令误带 `Server/MirObjects/Monsters/ZumaMonster.cs`，命令在读取阶段报路径不存在；没有写入，但该调用的其他输出不能作为证据。
+- Root cause: 为并列读取 Legacy 行为而复用了跨仓库相对路径，没有在 `functions.exec` cell 内执行当前仓库路径 allowlist 检查。
+- Prevention: Go cell 只允许 `cmd/`、`internal/`、`docs/`、`README.md` 等 Go 路径；Legacy 对照必须在结束 Go 调用后以新的、已核验 Legacy 根目录调用读取，混合调用的全部输出一律作废。
+- Verification: 错误调用未产生文件变化；随后分别在 Legacy 根目录读取 `ZumaMonster`/`DemonGuard`，再在 Go 根目录读取 `worldMonster`/复活路径，后续实现只采用独立调用的成功输出。
+
 ### 2026-08-15 — AI=101 测试必须复用当前 Monster stat 标识符
 
 - Symptom: AncientBringer 初版 Go 测试使用不存在的 `monsterStatMinMC`、`monsterStatMaxMC` 等名称，包级编译在行为测试前失败。
@@ -1774,3 +1783,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为并列比较而在 Go workdir 复用了 Legacy 相对路径，没有执行单仓库参数 allowlist 检查。
 - Prevention: Legacy 与 Go 的根目录核验、源码读取和状态检查必须使用独立工具调用；Go 命令只允许 Go 相对路径，任何退出码 2 的混合输出全部作废并在新的 Legacy 调用重跑。
 - Verification: 本次错误只发生在读取阶段且无文件写入；后续分别核验两个根目录，AI=101 实现与测试只采用单仓库成功输出，C# 零差异门禁保持为空。
+
+### 2026-08-15 — 失败的跨仓库只读命令不得采用任何部分输出
+
+- Symptom: Legacy 读取命令末尾误带 Go 的 `cmd/crystal-server/groups.go`，命令以路径不存在结束；此前成功打印的 Legacy 片段与后续输出不能组成完整证据。
+- Root cause: 为并列读取两侧实现而在同一 shell 参数中混用了两个仓库的相对路径，未在执行前逐项检查当前 workdir 的路径 allowlist。
+- Prevention: 每个源码证据调用只允许一个已核验仓库的路径；发现另一侧路径或退出码 2 时，整条调用输出全部作废，并在新的独立调用中重跑所需证据。
+- Verification: 本次调用发生在只读阶段且没有文件写入；后续 Legacy 与 Go 查询已拆成独立调用，迁移实现不采用混合命令的任何输出。
+
+### 2026-08-15 — AI=104 收尾 patch 必须先验证目标仓库路径
+
+- Symptom: 收尾 DemonGuard 经验测试时，一次 patch 使用了错误的 Go 仓库路径，工具在校验阶段拒绝，目标源码没有变化。
+- Root cause: 依赖记忆手写同级迁移仓库路径，没有在写入前复用已核验的 `git rev-parse --show-toplevel` 和目标文件存在性。
+- Prevention: 每次跨仓库修改前先独立核对完整绝对根目录和目标文件；patch 失败后重新读取实际文件与状态，不把工具返回当成部分落盘。
+- Verification: 错误 patch 未产生文件变化；改用已核验的 `Crystal.GoServer` 绝对路径后，main 测试修改、gofmt、定向测试和包级编译均通过。
+
+### 2026-08-15 — 重构后的测试 transcript 必须清理残留 objectID 引用
+
+- Symptom: DemonGuard 经验测试从直接实体调用改为通知 transcript 后，包级编译发现旧的局部 `objectID` 引用仍残留在断言中。
+- Root cause: 重构调用返回值后只更新了主要行为路径，没有按新的 `notification.Recipient.ObjectID` 语义逐处复核旧变量。
+- Prevention: 重构测试的返回结构或身份来源时，立即搜索旧标识符并逐段复读所有断言；随后先运行受影响包的 `go test ... -run '^$'`，再运行行为测试。
+- Verification: 残留引用在包级编译阶段被捕获并清理；DemonGuard/经验定向测试及服务端整包编译随后通过。
