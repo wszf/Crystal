@@ -1904,3 +1904,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试把同一个随机上界用于分支和抗性阶段，却试图用常量 case 区分调用语义。
 - Prevention: 随机上界相同时按已知调用顺序或阶段计数记录消费，不要在 switch 中重复声明等值 case；新增测试后立即运行包级仅编译门禁。
 - Verification: 测试改为统计 `poisonResistWeight` 的实际调用次数，包级编译和 WhiteMammoth 四条定向测试均通过。
+
+### 2026-08-15 — AI=113 对照必须在根目录核验后拒绝跨仓库路径
+
+- Symptom: 读取 ArcherGuard 的 Go 侧字段时，工具输出的仓库根目录与预期不符，命令还夹带了 Legacy `Server/...` 路径；该输出不能作为语义证据。
+- Root cause: 跨仓库只读调用没有把 `git rev-parse --show-toplevel` 的结果和本次 `workdir` 绑定校验，且复用了另一侧的相对路径模式。
+- Prevention: 每次对照先单独调用并核对期望根目录；随后每条命令只使用当前仓库的相对路径，Legacy/Go 读取必须是两个独立调用，根目录异常时丢弃全部输出。
+- Verification: 错误调用只发生在读取阶段且未产生文件变化；后续 ArcherGuard 对照改用独立、已核验的 Legacy 与 Go 调用。
+
+### 2026-08-15 — ArcherGuard 定向 fixture 必须初始化运行态防御与 HP 投影
+
+- Symptom: AI=113 首次定向测试命中后得到 20 点伤害而不是扣除 2 点 AC，且无效投射物用例的 `Character.HP` 仍为零。
+- Root cause: fixture 只填了协议 `Stats`，没有填伤害路径实际读取的 `worldPlayer.MinAC/MaxAC`，也没有同步初始化 `SelectInfo.HP`。
+- Prevention: 构造战斗实体时同时核对生产读取字段和协议持久投影；命中、未命中和失效动作都分别断言运行 HP 与 `Character.HP`。
+- Verification: 补齐 `MinAC/MaxAC` 和初始 HP 后，ArcherGuard 的命中、PK 门禁、越界静止、失效重验与 NoFight 红名路径定向测试通过。
+
+### 2026-08-15 — Guard 的攻击方向门禁必须与 AI 攻击门禁分开迁移
+
+- Symptom: ArcherGuard 已能按 Legacy 规则攻击红名玩家，但 Go 玩家攻击公共入口仍可能把 AI=113 当作普通可攻击怪物。
+- Root cause: 只迁移了 `PlayerObject.IsAttackTarget(MonsterObject)` 的 PK 门禁，遗漏了 `Guard.IsAttackTarget` 对玩家和怪物攻击者恒为 `false` 的独立覆盖。
+- Prevention: 迁移同一对象的双向战斗语义时，分别检查“对象主动攻击目标”和“玩家/宠物主动攻击对象”两套入口；特殊 AI 的攻击资格不能推导出其可被攻击资格。
+- Verification: `playerCanAttackMonsterLocked` 现明确拒绝 AI=113，ArcherGuard 定向测试同时覆盖主动攻击和玩家近战入口，均确认玩家攻击不造成伤害。
