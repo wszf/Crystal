@@ -1637,6 +1637,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 新增测试局部变量后立即确认其用于断言、返回值或日志；先运行 `go test ./cmd/crystal-server -run '^$' -count=1`，编译绿色后再运行定向行为测试。
 - Verification: 删除未使用变量后，后续将以包级编译、SandWorm 定向测试和完整 Go 门禁确认该测试实际执行并保持绿色。
 
+### 2026-08-15 — Monster AI 新增攻击属性必须先核对实体字段
+
+- Symptom: AI=66 CrazyManworm 分支初版直接访问 `worldMonster.MinMC/MaxMC`，包级编译报字段不存在，行为测试尚未运行。
+- Root cause: 依据 Legacy 怪物统计概念推断 Go 运行实体必然保存 MC 字段，没有先读取当前 `worldMonster` 的完整字段和定义统计读取 helper。
+- Prevention: 新增 AI 分支引用攻击属性前先核对当前实体结构及 materialize/统计访问路径；缺少字段时复用定义值 helper 或在同一批次完整贯通字段，随后立即运行受影响包仅编译门禁。
+- Verification: 修正 MC 读取边界后，将以 `go test ./cmd/crystal-server -run '^$' -count=1` 和 AI=66 双分支定向测试确认编译及行为均恢复绿色。
+
 ### 2026-08-15 — Monster AI opt-in 排除 fixture 必须避开已支持 AI 值
 
 - Symptom: 新增 AI=8 后，既有“opt-in 后特殊 AI 不运行”测试把样本仍设为 AI=8，收到 `ObjectWalk` 而失败。
