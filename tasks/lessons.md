@@ -591,6 +591,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 拆分后 retired 状态、双 MailID、会话测试和文档均正确落盘，`git diff --check` 与全量 Go 门禁通过。
 - Strengthening after recurrence: P11 收尾曾把 fishing、EquipSlotItem 和 awakening 三个独立修正放入一个 patch，最后一个 main.go hunk 漂移导致整块拒绝。即使改动属于同一审查批次，也必须按单文件、单语义提交 patch；被拒绝后先确认前面 hunk 均未应用，再逐项重做并立即跑最小定向测试。
 - Second strengthening after recurrence: 终端或普通 `sed` 输出的视觉换行不代表文件中的物理行边界；长段落 patch 前先用 `sed -n l` 核对行首和续行，再选择真实存在的短锚点。文档也必须按单文件 patch，避免一个错误行首让其他文件的正确 hunk 一并回滚。本次 Conquest 文档补丁确认无部分写入后按 README、迁移矩阵分别重做，并以 diff 复核落点。
+- Strengthening after third recurrence: AI=93 代码插入第一次使用了错误的函数锚点，补丁在校验阶段拒绝；新增函数前必须从当前文件重新读取精确声明，并把同一语义插入拆成可验证的单 hunk。
+- Verification after third recurrence: 失败补丁没有部分写入；改用实际 `monsterAIAxeSkeletonAttackLocked` 声明后成功插入，包级编译、FlameMage 定向及全量门禁均通过。
 
 ### 2026-08-12 — 买回数量测试必须区分堆叠上限与当前存量
 
