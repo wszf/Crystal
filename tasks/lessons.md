@@ -1911,6 +1911,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 跨仓库只读调用没有把 `git rev-parse --show-toplevel` 的结果和本次 `workdir` 绑定校验，且复用了另一侧的相对路径模式。
 - Prevention: 每次对照先单独调用并核对期望根目录；随后每条命令只使用当前仓库的相对路径，Legacy/Go 读取必须是两个独立调用，根目录异常时丢弃全部输出。
 - Verification: 错误调用只发生在读取阶段且未产生文件变化；后续 ArcherGuard 对照改用独立、已核验的 Legacy 与 Go 调用。
+- Strengthening after recurrence: 本轮读取 Go 的 monster visibility helper 时仍把 Legacy `Server/...` 路径放进 Go 命令，虽只返回路径不存在且未写入，但再次证明源码读取也必须执行单仓库参数 allowlist；不要在同一调用中附带另一侧的对照路径。
+- Verification after strengthening: 丢弃混合命令的全部输出，随后用独立 Legacy/Go 调用重新核对 Mandrill 基类与 Go damage/visibility 路径；两仓库状态均保持预期。
 
 ### 2026-08-15 — ArcherGuard 定向 fixture 必须初始化运行态防御与 HP 投影
 
@@ -1925,3 +1927,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只迁移了 `PlayerObject.IsAttackTarget(MonsterObject)` 的 PK 门禁，遗漏了 `Guard.IsAttackTarget` 对玩家和怪物攻击者恒为 `false` 的独立覆盖。
 - Prevention: 迁移同一对象的双向战斗语义时，分别检查“对象主动攻击目标”和“玩家/宠物主动攻击对象”两套入口；特殊 AI 的攻击资格不能推导出其可被攻击资格。
 - Verification: `playerCanAttackMonsterLocked` 现明确拒绝 AI=113，ArcherGuard 定向测试同时覆盖主动攻击和玩家近战入口，均确认玩家攻击不造成伤害。
+
+### 2026-08-15 — Mandrill 反应测试必须断言受击后的权威 HP
+
+- Symptom: AI=114 heavy-hit teleport 测试已正确验证 effect-7 可见性和目标切换，但初版把 Mandrill 的 HP 期望写成受击前的 100，定向测试实际得到 90 后失败。
+- Root cause: 测试只关注 teleport 副作用，未把同一 `attackMonster` 调用的伤害写入与 teleport 一起投影到权威怪物快照。
+- Prevention: 多副作用战斗测试先列出调用顺序和每个权威实体的最终状态，再分别断言伤害、目标、位置和 packet transcript；不能用 teleport 成功推断 HP 未变化。
+- Verification: 将断言修正为受击后的 HP=90 后，Mandrill DC close attack 与 effect-7 teleport 两个定向用例均通过。
