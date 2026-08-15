@@ -1747,6 +1747,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 迁移多态范围攻击时先按 `FindAllTargets` 的目标种类展开伤害、毒和包副作用矩阵；玩家与宠物怪物必须分别断言 HP、poison 类型和后续状态包。
 - Verification: 将在 HellBomb 回归中锁定玩家与宠物均受 AC 伤害并获得对应 poison，野生怪物仍不受击，随后运行定向与全量门禁。
 
+### 2026-08-15 — 相邻 Monster AI 不能按名称复用状态分支
+
+- Symptom: AI=103 ElementGuard 与 AI=102 IceGuard 都是八格近远混合攻击，若直接复制 IceGuard，会错误发送 Type=1 火击或 Slow/Frozen，并遗漏 ElementGuard 近战独有的 Red poison。
+- Root cause: 依据相邻 AI 的攻击形状推断完整效果，没有逐个读取 Legacy 的 `Attack`、`CompleteAttack` 和 `CompleteRangeAttack`；同样的 MAC 防御和延迟不代表状态、payload Type 或随机门相同。
+- Prevention: 每个新 AI 建立近战/远程的 payload、伤害统计、防御类型、延迟、毒状态和命中重验表；只有 C# 明确存在的分支才迁移，未设置的 wire 字段保留零值，并用独立 fixture 锁定每条路径。
+- Verification: AI=103 定向测试覆盖近战 MAC/Red poison、远程 500ms MC/MAC 无毒、零值 range Type、延迟安全区重验和攻击冷却期间移动；包级编译与服务端回归通过。
+
 ### 2026-08-15 — AI=101 测试必须复用当前 Monster stat 标识符
 
 - Symptom: AncientBringer 初版 Go 测试使用不存在的 `monsterStatMinMC`、`monsterStatMaxMC` 等名称，包级编译在行为测试前失败。
