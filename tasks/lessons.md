@@ -668,6 +668,20 @@ Record project-specific corrections and failure-prevention patterns here.
 - Strengthening after immediate recurrence: 即使 workdir 已正确固定，命令参数仍可能把另一仓库的路径追加到同一调用；参数 allowlist 必须在执行前逐项检查，Go 调用禁止出现 `Server/`、`Shared/`、`Client/`，Legacy 调用禁止出现 `cmd/`、`internal/`、Go 文档路径。
 - Verification after strengthening: 本次混合命令只在读取阶段失败，没有写入；后续恢复时将 Legacy 与 Go 查询放入不同的独立工具调用，任何退出码 2 的结果不参与实现判断。
 
+### 2026-08-15 — 跨仓库状态查询不得放入同一并行编排
+
+- Symptom: 本批恢复时把 Legacy 与 Go 的 status/diff 查询放入同一个 `Promise.all`；查询本身只读且没有写入，但违反了已建立的仓库边界规则，增加了把错误工作目录结果混作证据的风险。
+- Root cause: 只按工具调用延迟做并行化，没有把跨仓库隔离视为每个调用都必须独立核验的约束。
+- Prevention: Legacy 与 Go 的根目录核验、源码读取、状态检查和写入全部使用独立工具调用；每次调用只允许当前仓库的路径参数，并在结果中核对 `git rev-parse --show-toplevel`，禁止把两侧命令放进同一 `Promise.all`。
+- Verification: 本次混合查询未产生文件变化；改进后的后续读取按仓库串行执行，并分别核对根目录与工作树状态。
+
+### 2026-08-15 — 召唤 helper 返回值必须明确绑定语义
+
+- Symptom: AI=97 定向测试首次通过召唤 helper 返回的 `worldMonster` 副本调用死亡逻辑，但副本的 `Dead`/`DespawnAt` 更新没有自动写回 `world.monsters`，后续 tick 仍把世界中的实体当作存活对象。
+- Root cause: helper 同时返回“刚创建的快照”和持锁 world map 中的实体，调用者没有意识到返回值是 detached value，而 Go struct 不提供引用式回写。
+- Prevention: 领域 helper 要么只返回不可变结果并在内部完成 map 提交，要么明确命名/文档化 detached contract；任何修改返回实体后都必须在同一锁边界显式写回权威 map，并增加后续 tick/重载断言。
+- Verification: AI=97 测试已在死亡回调后显式写回 knight，再验证 despawn 不进入普通 respawn；定向、全包和 race 门禁通过。
+
 ## Entry format
 
 ```markdown
@@ -1639,6 +1653,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after third strengthening: 失败补丁未产生写入；随后按 `sed`/`sed -n l` 的真实行块成功加入 AI=65 说明，Go 文档 `git diff --check` 与全量门禁通过。
 - Strengthening after fourth recurrence: 即使目标段落已复读，替换上下文中的标点或斜杠差异也会使 Markdown 补丁整块拒绝；应用前必须逐字复制实际行，补丁失败后重新读取目标段，禁止凭近似文案重试。
 - Verification after fourth strengthening: 本批 AI=94 矩阵首次补丁因把实际 `HP/私有包` 写成近似标点而拒绝，未产生写入；重新检索真实行后按精确上下文追加 lessons，Go 文档随后通过差异检查。
+- Strengthening after fifth recurrence: AI=97 矩阵更新再次因把视觉折行和近似句子当作完整上下文而拒绝；以后长段落只在 `sed -n l` 确认物理行后，以已读取的短唯一句插入，禁止把相邻保留句复制进 replacement。
+- Verification after fifth recurrence: 失败补丁未写入；随后按真实 `packet matrices are covered.` 行重新插入 AI=97 说明，Go 文档 `git diff --check` 和全量门禁通过。
 
 ### 2026-08-15 — SandWorm 测试新增变量必须实际参与断言
 
