@@ -1876,3 +1876,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `startGameBootstrapForTest` 在 `GuildBuffList` 后返回，但服务端仍可能执行一次性的 required-group enforcement；测试此时手工把玩家移入受限地图，未完成的启动检查便把玩家异步移出并抢先写包。
 - Prevention: bootstrap transcript 的最后一个业务包不等于 session 已进入稳定 game loop；凡是随后手工修改 world 在线状态的测试，先对每条 net.Pipe 连接发送 KeepAlive 并消费响应，作为 post-bootstrap barrier。
 - Verification: 在 required-group fixture 的 world 投影前增加 leader/member 两个 KeepAlive barrier 后，定向测试、服务端整包、全仓普通/race、vet 和 build 均通过。
+
+### 2026-08-15 — 每次 Go 工具调用必须复核完整仓库根目录
+
+- Symptom: 本轮恢复 AI=109 时，一次 Go 命令误用了 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer.GoServer`，进程在启动前因目录不存在而失败。
+- Root cause: 手工复制已知 Go 根目录时重复了目录片段，没有在工具调用前重新核对完整绝对路径。
+- Prevention: 每次 Go 工具调用都直接使用已验证的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，并在切换或写入前单独执行 `git rev-parse --show-toplevel`/目标存在性检查；失败调用的输出不作为证据。
+- Verification: 错误命令未启动且没有文件变化；随后恢复到正确根目录，继续使用单仓库调用完成 AI=109 门禁与提交前核对。
