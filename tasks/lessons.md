@@ -1754,6 +1754,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 新增怪物夹具前先在整个 Go package 检索生产声明和现有用法，逐项复用真实 `statMinMC`/`statMaxMC` 等标识符；首次 patch 后立即运行 `go test ./cmd/crystal-server -run '^$' -count=1`。
 - Verification: AncientBringer 夹具改用当前 stat 常量后，包级编译、AI=101 定向测试和服务端整包测试均通过。
 
+### 2026-08-15 — 混合怪物 AI 必须拆分攻击冷却与移动准入
+
+- Symptom: AI=102 IceGuard 在攻击冷却期间被通用 `monsterCanAttack` 门禁提前返回，无法复现 Legacy 仍可追击移动的行为；延迟冰击若只在排队时校验目标，还会在目标进入安全区后错误造成伤害。
+- Root cause: 把“当前不能发起攻击”误当成“当前不能处理目标移动”，并把排队时的目标资格当成延迟命中时的最终资格；Slow/Frozen 又需要两个独立概率门和各自的可观察状态包。
+- Prevention: 对混合近战/远程 AI 先执行目标有效性和移动分支，再在真正攻击提交点检查攻击冷却；所有延迟动作在 impact tick 重验攻击者、目标、地图、安全区和存活状态；复合状态按 Legacy 顺序分别建模和投递。
+- Verification: AI=102 定向测试锁定相邻 `ObjectAttack`/MAC 防御、远程 500ms `ObjectRangeAttack`、Type=0/1 分支、冷却期间 `ObjectWalk`、安全区重验及 Slow/Frozen 观察者 transcript；服务端整包测试通过。
+
 ### 2026-08-15 — AI=101 对照检索的仓库路径必须分开
 
 - Symptom: Go 仓库的 AncientBringer 只读查询命令曾混入 Legacy `Server/...` 路径；命令以路径不存在结束，同一调用的其他输出也不能作为语义证据。
