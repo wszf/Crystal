@@ -1957,3 +1957,12 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把 `LineAttack(damage, 2, 300)` 当成只攻击中间目标，且按每次命中都发完整 Struck 包，遗漏了 Legacy 的距离 1/2 全线扫描与 `MonsterStruckReadyAt` 500ms 门禁。
 - Prevention: 迁移线/扇形动作时逐距离展开所有有效格（包括原锁定目标），再按接收者和同 tick 的 struck 冷却状态生成公开/私有包；不能按“每个目标四包”简化多次命中。
 - Verification: BlackHammerCat 测试现锁定 MC 原目标、距离 1 与距离 2 DC actions，以及两个接收者的广播/冷却包序，定向测试通过。
+
+### 2026-08-15 — 跨仓库只读命令的输出必须整体作废
+
+- Symptom: Legacy 只读命令末尾误带 Go 仓库路径，shell 返回路径不存在；没有写入源码，但该次混合输出不能作为对照证据。
+- Root cause: 读取 Legacy 源码后在同一调用中继续拼接 Go 相对路径，违反了单次命令只服务一个仓库的边界。
+- Prevention: 每条命令只使用当前已核验仓库的路径；跨仓库对照必须在新的独立调用中先核对 `git rev-parse --show-toplevel`，任一混合路径或非零读取结果出现时，丢弃整条输出并重跑。
+- Verification: 本次错误调用仅在读取阶段失败且两个工作树无源码写入；后续 Legacy/Go 查询拆分执行，迁移实现只采用重新取得的独立输出。
+- Strengthening after recurrence: 本轮一次 Go 只读命令又手写成重复的仓库根目录，进程启动前即被拒绝；即使只是读取，也不能凭记忆拼接跨仓库绝对路径。
+- Verification after strengthening: 错误命令没有启动、没有输出可用证据或文件变化；随后重新核对 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 并只采用正确根目录的查询结果。
