@@ -2,6 +2,34 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-14 — net.Pipe fixture assignments must pass vet
+
+- Symptom: `go vet ./...` rejected the Poisoning/Purification session fixture's `caster.MP, caster.MaxMP = caster.MaxMP, caster.MaxMP` as a self-assignment.
+- Root cause: the fixture used a two-field tuple assignment even though only the runtime MP needed to be restored to the already-existing MaxMP value.
+- Prevention: use the narrowest single-field assignment in test fixtures and run `go vet ./...` after adding or changing session setup code.
+- Verification: changing it to `caster.MP = caster.MaxMP` made `go vet ./...` pass before the batch gates continued.
+
+### 2026-08-14 — Go 工作目录中不得携带 Legacy 相对路径
+
+- Symptom: 在 Go 仓库只读核对时把 `Server/...` 的 Legacy 检索路径放进同一命令，命令只返回路径不存在，未产生写入，但输出不能作为语义判断依据。
+- Root cause: 切换仓库后仍复用了上一阶段的相对路径模式，没有让每个 shell 调用的参数只属于当前 `workdir`。
+- Prevention: 跨仓库检索必须拆成独立调用；每次调用先核对 `git rev-parse --show-toplevel`，随后只使用该仓库的相对路径，禁止在 Go 命令中出现 Legacy 路径字面量。
+- Verification: 本次错误调用在读取阶段失败且两个工作树无新增改动；后续 Legacy 与 Go 查询分开执行，判断只采用各自仓库的输出。
+
+### 2026-08-14 — Legacy shell 也不得夹带 Go 路径
+
+- Symptom: Legacy 只读命令末尾继续检索 `cmd/crystal-server/...`，该部分只返回路径不存在，没有写入，但违反了单仓库调用边界。
+- Root cause: 在同一 shell 中完成源码读取和另一仓库对照，忽略了“每次命令参数只属于当前根目录”的约束。
+- Prevention: Legacy 命令结束后必须终止调用；任何 Go 对照都在新的调用中先核对 Go 根目录，再使用 Go 相对路径，禁止用分号或同一编排串接两仓库路径。
+- Verification: 本次 Go 路径错误发生在读取阶段且工作树未变化；随后将 Legacy/Go 查询拆为两个独立调用，并分别核对根目录。
+
+### 2026-08-14 — 工具调用前必须复核完整绝对工作目录
+
+- Symptom: 一次 Go 只读命令把已知根目录手工重复拼接，工具在进程启动前因目录不存在而拒绝执行，没有产生文件变化。
+- Root cause: 复制路径时未重新核对完整绝对路径，依赖记忆而不是当前仓库的根目录检查。
+- Prevention: 每次工具调用都使用已验证的完整 `/Users/.../Crystal.GoServer` 工作目录；切换前先单独执行 `git rev-parse --show-toplevel`，失败时不继续读取或补丁。
+- Verification: 错误调用在启动阶段失败且 Go/Legacy 工作树状态未变；随后恢复正确根目录并仅采用成功调用的源码输出。
+
 ### 2026-08-14 — 无属性 Buff 不应触发派生生命/魔法刷新
 
 - Symptom: Hiding/MassHiding 的纯状态 Buff 没有任何 stat modifier，却产生了不相关的派生 HP/MP 刷新或额外状态包。
@@ -626,6 +654,15 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 手算时漏加了幸运项的 5% 和基础成功率的 20%，测试断言没有逐项列出中间结果。
 - Prevention: 写强化概率断言前固定列出材料、矿石、幸运、基础四项及最终减项；涉及整数除法和边界材料时逐项核算后再运行测试。
 - Verification: 修正期望为 94 后，Refine 定向测试通过；后续继续执行全量 Go 测试与竞态验证。
+
+### 2026-08-14 — 跨仓库证据读取必须禁止参数层混入另一侧路径
+
+- Symptom: 一次 Go 仓库只读检索在命令尾部混入 Legacy `Server/Shared` 路径，因目标不存在退出；该输出不能作为证据。
+- Root cause: 命令编排时只复核了 workdir，没有在执行前逐项检查所有路径参数属于同一仓库。
+- Prevention: 每个源码证据调用固定一个仓库根目录和该仓库已由 `rg --files` 确认的相对路径 allowlist；跨仓库读取必须使用新的独立工具调用，任何退出码 2 的混合命令结果立即作废。
+- Verification: 本次错误命令未写入文件；后续 Legacy 与 Go 查询分别在各自绝对根目录重跑，修改前继续执行双仓库 status 与 C# 零差异检查。
+- Strengthening after immediate recurrence: 即使 workdir 已正确固定，命令参数仍可能把另一仓库的路径追加到同一调用；参数 allowlist 必须在执行前逐项检查，Go 调用禁止出现 `Server/`、`Shared/`、`Client/`，Legacy 调用禁止出现 `cmd/`、`internal/`、Go 文档路径。
+- Verification after strengthening: 本次混合命令只在读取阶段失败，没有写入；后续恢复时将 Legacy 与 Go 查询放入不同的独立工具调用，任何退出码 2 的结果不参与实现判断。
 
 ## Entry format
 
@@ -1482,9 +1519,46 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 网络 transcript 只在与登录 bootstrap 一致的 MaxHP/MaxMP 范围内修改运行时字段；若必须手工推进 ticker，先设置读取屏障并在断言失败前关闭会话，避免把 cleanup 后的后台日志当作首要根因。
 - Verification: MP 改为当前 MaxMP 后，`HealthChanged → DeleteItem → UserLocation → Magic → AddBuff` 顺序和 JSON 物品/Buff 状态均稳定通过。
 
+### 2026-08-14 — 跨仓库只读命令的工作目录必须与路径参数同仓库
+
+- Symptom: 继续 P5 前的只读探查在 Go 工作目录读取 Legacy 的 `tasks/lessons.md`，命令仅返回文件不存在，但没有得到预期源码证据。
+- Root cause: 只核对了调用目标仓库，没有同时检查命令参数中的相对路径属于哪个仓库，导致 Legacy 文件路径被错误地带入 Go 调用。
+- Prevention: 每条跨仓库命令只使用当前仓库的相对路径；读取 Legacy lessons 与 Go 源码必须拆成两个独立调用，并在调用前后分别核对 `git rev-parse --show-toplevel`。失败的只读输出不得作为实现依据。
+- Verification: 该命令在写入前失败且两个工作树均无源码变化；后续将 Legacy lessons 与 Go 源码查询拆开，并重新核对两仓库状态。
+
 ### 2026-08-15 — 嵌套魔法分支修改后必须立即做语法门禁
 
 - Symptom: 支援魔法分支初版漏掉嵌套 `if` 的闭合括号，包级编译在后续函数定义处才报告 `expected '('`。
 - Root cause: 在已有长 `if/else if` 链中一次性插入两层局部逻辑，没有先验证嵌套边界。
 - Prevention: 长分支新增后立即用 `gofmt` 和 `go test <affected-package> -run '^$' -count=1`；对每个局部 `if` 先明确闭合范围，再加入行为断言。
 - Verification: 修正闭合边界后包级编译、支援魔法定向世界测试和真实 net.Pipe transcript 均通过。
+
+### 2026-08-14 — 跨仓库初始核对不得放入同一并行编排
+
+- Symptom: 本轮开始时把 Legacy lessons、Legacy 状态和 Go 状态/文件清单放进同一个 Promise.all，虽然只是只读且未产生代码写入，但违反了项目要求的跨仓库调用边界。
+- Root cause: 为减少往返而把不同仓库的独立证据查询视为可安全并行的任务，没有执行“每个 functions.exec cell 固定一个仓库”的机械检查。
+- Prevention: 跨仓库任务的每个工具编排 cell 只允许一个已核验的绝对仓库根目录；需要比较时先完成一个仓库的根目录/状态/证据读取，再在新的独立 cell 切换另一仓库。禁止在同一 Promise.all、命令或路径变量中混放两侧。
+- Verification: 当前并行调用只做了读取，没有 .cs 或源码写入；后续已先完整读取 Legacy lessons，并将 Legacy/Go 核对拆为独立调用，继续迁移前再执行 C# 零差异门禁。
+- Strengthening after recurrence: 本轮虽已知该规则，仍把 Legacy 与 Go 的状态查询放入同一个 `Promise.all`；以后任何跨仓库任务的首个 cell 也必须只绑定一个绝对根目录，不能以“全部只读”或降低延迟为例外。执行前逐项检查编排中的每个调用，发现第二个仓库立即拆到下一 cell。
+- Verification after strengthening: 本次混合查询只产生读取输出，未写入 C# 或源码；已重新独立读取 Legacy lessons，并在后续调用中只使用 Go 根目录，未采用混合调用的路径证据。
+
+### 2026-08-14 — 新增会话测试变量必须避免跨阶段类型复用
+
+- Symptom: Poisoning/Purification 会话测试包级编译失败，把 StoredMagic 结果赋给了前面用于协议 MagicResult 的同名局部变量，随后访问不存在的 Experience 字段。
+- Root cause: 在一个长 transcript 中复用了语义相近但类型不同的变量名，没有在新增阶段前核对当前作用域已有声明。
+- Prevention: 每个协议阶段使用带领域后缀的唯一变量名（例如 purifyPacket、storedPurify），新增测试后先执行受影响包的仅编译门禁，再运行行为测试。
+- Verification: 本次失败发生在测试编译阶段且未运行服务端；修复后将用包级编译和 Poisoning/Purification 定向测试分别验证。
+
+### 2026-08-14 — Legacy 定宽整数进入领域类型必须显式转换
+
+- Symptom: `RespawnTickOption.UserCount` 为 `int`，读取 Legacy `int32` 后直接赋值导致受影响包编译失败。
+- Root cause: 二进制定宽字段进入 Go 领域模型时遗漏了显式窄/宽类型边界。
+- Prevention: 读取 Legacy 整数先落到同宽临时变量，再显式转换到领域类型；新增解析字段后立即执行受影响包的编译门禁。
+- Verification: 改为 `value.Options[index].UserCount = int(userCount)` 后，`internal/worlddata`、`internal/legacyworld`、`internal/config` 和 `cmd/crystal-server` 包级测试通过。
+
+### 2026-08-14 — 扩展二进制 fixture 后截断测试要接受结构化 EOF
+
+- Symptom: 为 RespawnSave 增加多条定宽记录后，截断数据库回归先得到 `count ... cannot fit`，旧断言只接受 `unexpected end of file`。
+- Root cause: binary reader 会在计数声明与剩余字节明显不匹配时提前返回结构化容量错误，而不是继续读到 EOF；fixture 形状变化使该合法错误路径变得可达。
+- Prevention: 截断数据库测试断言错误类别（EOF 或计数无法容纳），不要绑定单一读取深度的错误文本；每次扩展 fixture 后运行完整 exporter 包测试。
+- Verification: 断言同时覆盖两种截断错误后，`go test ./internal/legacyworld -count=1` 通过。
