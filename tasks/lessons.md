@@ -1666,3 +1666,5 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为并列比较而在同一 shell 中复用两个仓库的相对路径，未执行命令参数的单仓库 allowlist 检查。
 - Prevention: 每个源码证据调用只能包含当前 workdir 的路径；Legacy 与 Go 必须使用不同的独立工具调用，任一退出码 2 的混合输出全部作废，不得据此决定实现。
 - Verification: 本次命令只读且无文件变化；后续将分别在 Legacy 根目录读取 C#，再在 Go 根目录读取 Go 协议/实体，提交前继续做两仓库 C# 零变化检查。
+- Strengthening after recurrence: 即使当前调用的工作目录是 Legacy，命令末尾追加 Go 的相对路径仍会制造混合输出；读取命令的路径参数必须在提交前逐项通过当前仓库 allowlist，发现另一侧路径立即拆到新的、已核验根目录调用。
+- Verification after recurrence: 本次误带 `cmd/crystal-server` 的查询只在读取阶段返回路径不存在且没有写入；后续实现判断将作废该输出，并只采用单仓库调用的成功结果。
