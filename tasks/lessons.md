@@ -1611,3 +1611,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把“状态检查彼此独立”误当成“可以跨仓库并行”，没有在工具编排提交前逐项核对每个调用的绝对 `workdir`。
 - Prevention: 跨仓库任务的第一轮也必须按仓库拆成独立工具调用；一个编排 cell 中所有 nested command 只能使用同一个、先由 `git rev-parse --show-toplevel` 核验的根目录。需要并行时只并行同一仓库的查询，切换仓库必须开始新的 cell。
 - Verification: 本次混合编排只执行了读取，Legacy/Go 源码与 C# 均无新增变化；后续矩阵和 Go 源码查询已在独立的 Go 调用完成，收口门禁将继续按仓库分别执行。
+
+### 2026-08-15 — Monster AI 距离环 fixture 不得让观察者抢占目标
+
+- Symptom: AI=4 SpittingSpider 定向测试预期攻击距离 2 的目标，却排入了距离 1 的观察者，导致延迟动作目标和预期时间均不符。
+- Root cause: Legacy `FindTarget` 按距离环扫描，测试把可观察连接放在更近格子，观察者本身也满足普通玩家目标门禁。
+- Prevention: 构造搜索/目标选择 fixture 时先列出所有在线玩家的距离环顺序；观察者应放在目标之后的环、设为安全区，或显式验证它不会成为合法目标，同时保持仍在数据可见范围内以覆盖通知矩阵。
+- Verification: 将观察者移到目标之后的远环后，AI=4 的 `ObjectAttack`、400ms 直线命中、伤害/Green poison 状态和 observer 包序定向测试通过。
+
+### 2026-08-15 — 长 Markdown 行补丁必须使用已读取的完整上下文
+
+- Symptom: 更新 P5 矩阵时使用了带省略号的占位行作为 `apply_patch` 上下文，补丁校验失败，没有修改文件。
+- Root cause: 没有先读取实际长行就假定其内容可用缩写匹配；Markdown 矩阵的整行字段不允许把省略号当作通配符。
+- Prevention: 长行文档修改先用当前仓库的 `sed`/精确检索读取真实上下文，再做最小完整行替换；补丁失败后重新读取并确认文件未变，禁止凭失败输出继续判断。
+- Verification: 失败补丁未产生写入；随后读取实际 P5 行并用完整上下文更新 AI=4 说明，`git diff --check` 将在提交前验证格式。
