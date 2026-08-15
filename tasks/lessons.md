@@ -1913,6 +1913,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 错误调用只发生在读取阶段且未产生文件变化；后续 ArcherGuard 对照改用独立、已核验的 Legacy 与 Go 调用。
 - Strengthening after recurrence: 本轮读取 Go 的 monster visibility helper 时仍把 Legacy `Server/...` 路径放进 Go 命令，虽只返回路径不存在且未写入，但再次证明源码读取也必须执行单仓库参数 allowlist；不要在同一调用中附带另一侧的对照路径。
 - Verification after strengthening: 丢弃混合命令的全部输出，随后用独立 Legacy/Go 调用重新核对 Mandrill 基类与 Go damage/visibility 路径；两仓库状态均保持预期。
+- Strengthening after second recurrence: 本轮 SandSnail 对照时再次在 Go 根目录执行了 Legacy `Server/...` 检索；即使命令只读失败，也必须把“当前 workdir + 所有路径参数”作为同一 allowlist 审核，禁止为了连续比较而复用上一仓库的路径模式。
+- Verification after second strengthening: 该调用无写入且输出已作废；随后先在 Legacy 根目录独立读取 `PoisonTarget`/`HalfmoonAttack`，再在 Go 根目录独立读取 poison/action resolver，未再使用混合输出。
 
 ### 2026-08-15 — ArcherGuard 定向 fixture 必须初始化运行态防御与 HP 投影
 
@@ -1934,3 +1936,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试只关注 teleport 副作用，未把同一 `attackMonster` 调用的伤害写入与 teleport 一起投影到权威怪物快照。
 - Prevention: 多副作用战斗测试先列出调用顺序和每个权威实体的最终状态，再分别断言伤害、目标、位置和 packet transcript；不能用 teleport 成功推断 HP 未变化。
 - Verification: 将断言修正为受击后的 HP=90 后，Mandrill DC close attack 与 effect-7 teleport 两个定向用例均通过。
+
+### 2026-08-15 — SandSnail 区域毒伤测试必须包含同 tick 的首跳
+
+- Symptom: SandSnail MAC 区域命中测试把邻近玩家的最终 HP 期望为 78，实际为 75。
+- Root cause: 区域 MAC 命中先造成 20 点伤害，随后同一 `tick` 的 poison 阶段立即按当前 Go poison 调度再造成 5 点首跳，测试只计算了第一段。
+- Prevention: 带毒的延迟区域动作必须把“命中伤害 → AddPoison/Chat → 同 tick poison 首跳”全部纳入最终 HP 和包序推导，不能只按 action.Damage 计算。
+- Verification: 断言修正为 HP=75，并锁定 Chat、HealthChanged、DamageIndicator、Poisoned 顺序；SandSnail 定向测试通过。
+
+### 2026-08-15 — Halfmoon 多目标 transcript 必须计入跨目标广播
+
+- Symptom: SandSnail Halfmoon 两个相邻目标都受伤，但第一个目标的包序出现额外 `ObjectStruck`/`DamageIndicator`，初版只按自身命中四包断言失败。
+- Root cause: 每个目标的 `ObjectStruck` 和 `DamageIndicator` 都广播给范围内其他目标；按目标分别命中而不是按接收者矩阵推导，遗漏了另一目标的公开包。
+- Prevention: 扇形/区域多目标动作先按“动作顺序 × 接收者”展开 transcript，再断言每条连接的私有 `Struck/HealthChanged` 与公开广播包；不要复用单目标包序。
+- Verification: Halfmoon 测试现分别锁定先命中邻居再命中主目标时两个接收者的重复公开包，HP 和 packet transcript 均通过。
