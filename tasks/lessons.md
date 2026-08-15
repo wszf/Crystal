@@ -1625,3 +1625,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 没有先读取实际长行就假定其内容可用缩写匹配；Markdown 矩阵的整行字段不允许把省略号当作通配符。
 - Prevention: 长行文档修改先用当前仓库的 `sed`/精确检索读取真实上下文，再做最小完整行替换；补丁失败后重新读取并确认文件未变，禁止凭失败输出继续判断。
 - Verification: 失败补丁未产生写入；随后读取实际 P5 行并用完整上下文更新 AI=4 说明，`git diff --check` 将在提交前验证格式。
+
+### 2026-08-15 — Monster AI opt-in 排除 fixture 必须避开已支持 AI 值
+
+- Symptom: 新增 AI=8 后，既有“opt-in 后特殊 AI 不运行”测试把样本仍设为 AI=8，收到 `ObjectWalk` 而失败。
+- Root cause: 扩展支持集合时没有同步检查负向 fixture，测试使用了刚刚变成生产路径的 AI 值。
+- Prevention: 每次新增 AI/协议分支后，检索所有 `excludes`/opt-in 负向测试并将样本改为明确仍未迁移的值；同时保留一条正向测试锁定新值已启用，避免负向断言掩盖实际行为。
+- Verification: fixture 改为 AI=11 后，AI=0/4/8/10 正向定向测试和特殊/宠物排除测试均通过。
