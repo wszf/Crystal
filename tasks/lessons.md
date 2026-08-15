@@ -306,6 +306,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 创建 helper 在调用链中重新读取墙上时间，测试 fixture 也隐式依赖默认名称匹配，随机/时间/配置三类输入没有全部显式化。
 - Prevention: 所有 tick 驱动的过期、随机和生产逻辑把同一个 `now`、roll 与配置名称封装进不可变上下文向下传递；带时效标记的物品 fixture 显式设置对应配置名，不依赖默认模糊匹配。
 - Verification: 自动黑石使用 tick 的 `now` 计算 `[2h]` 到期，测试显式调用 `setIntelligentCreatureSettings`，确定性 `CreateDropItem` 与时效测试通过。
+- Strengthening after recurrence: FlameSpear FearTime 定向 fixture 把外层断言时间与 helper 内部初始化时间错开，导致预期的 fear-move 分支实际进入远程攻击；同一测试的状态时间、触发时间和断言时间必须由一个明确的 `base` 派生，不能靠相近的 Unix 秒值。
+- Verification after recurrence: 失败 transcript 只产生错误断言、没有源码写入；将 fear-move 使用 helper 同一 `base` 后，包级编译和 FlameSpear 定向测试通过。
 
 ### 2026-08-13 — 通知测试 helper 不得隐式提交所有副作用
 
