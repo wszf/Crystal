@@ -1636,6 +1636,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为记录延迟命中结果引入了局部变量，但后续断言仍直接读取通知切片，没有把变量接入验证路径。
 - Prevention: 新增测试局部变量后立即确认其用于断言、返回值或日志；先运行 `go test ./cmd/crystal-server -run '^$' -count=1`，编译绿色后再运行定向行为测试。
 - Verification: 删除未使用变量后，后续将以包级编译、SandWorm 定向测试和完整 Go 门禁确认该测试实际执行并保持绿色。
+- Strengthening after recurrence: AI=77 HellPirate 测试再次声明未使用的 `impact`，说明仅在测试结束前检查不足；新增每个分支的结果变量后，必须在同一 patch 中写入 HP、packet ID 或 payload 断言，并在继续扩展测试前运行仅编译门禁。
+- Verification after strengthening: 本次复发在 `go test ./cmd/crystal-server -run '^$' -count=1` 阶段被捕获，修正前未执行行为测试；后续修复后将再次运行包级编译和 AI=77 定向测试。
 
 ### 2026-08-15 — Monster AI 新增攻击属性必须先核对实体字段
 
