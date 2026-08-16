@@ -2501,3 +2501,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为降低往返延迟，把两个只读查询误认为可以共享编排，未把每个工具调用绑定到唯一仓库根目录。
 - Prevention: 跨仓库状态、源码读取、测试、格式化和写入都使用独立工具调用；每次调用只允许当前仓库路径，并在返回后核对 `git rev-parse --show-toplevel`。
 - Verification: 本次编排未产生源码变化；后续 OmaBlest 测试、矩阵更新和提交将按仓库逐一执行，C# 零变化检查也分仓库完成。
+
+### 2026-08-17 — Halfmoon 多目标 transcript 必须区分自身包与范围广播
+
+- Symptom: AI=146 Halfmoon 定向测试把某个玩家 recipient 收到的完整 impact 包序固定为自身四包，但四个相邻目标都在 16 格通知范围内，实际还包含其他目标的 `ObjectStruck`/伤害/生命广播。
+- Root cause: 把单目标会话 transcript 的通知假设复用到多目标世界夹具，没有先按通知范围和每个命中目标拆分观察者可见包。
+- Prevention: 多目标攻击断言先锁定动作目标顺序和各目标权威 HP，再只检查 recipient 必须存在的自身包，或为隔离观察者/按 object ID 过滤范围广播；不要把完整 recipient 列表当成单目标序列。
+- Verification: 修正后 AI=146 四格 Halfmoon 世界测试验证了 PreviousDir 顺序、四个目标 HP 和隐藏目标命中；单目标 `net.Pipe` transcript 继续验证完整四包顺序。
+
+### 2026-08-17 — Legacy 对照检索中的每个路径都必须先由文件清单核验
+
+- Symptom: AI=146 基线读取命令附带了不存在的 `Server/MirEnvir/Settings.cs`，命令以非零状态结束，整条输出不能作为源码证据。
+- Root cause: 依据目录习惯猜测 Settings 文件位置，没有先用当前仓库的 `rg --files` 清单确认目标。
+- Prevention: Legacy 对照只使用已存在的精确路径；新增路径先在独立调用执行 `rg --files`/`test -f`，任一读取非零时作废全部输出并重新运行。
+- Verification: 该命令只读且没有文件变化；OmaSlasher 的有效基线仅采用此前成功读取的 `MapObject.GetAttackPower` 与 `MonsterObject.HalfmoonAttack` 内容。
