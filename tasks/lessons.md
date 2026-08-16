@@ -2494,3 +2494,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 切换仓库后复用了上一侧的相对路径，没有把工作目录和所有路径参数作为同一个单仓库调用契约核验。
 - Prevention: 每次切换仓库先独立核对 `git rev-parse --show-toplevel`，随后命令参数只使用当前仓库已确认存在的路径；出现混合路径或非零读取结果时整体作废并在新的独立调用重跑。
 - Verification: 该调用只读且两仓库均无文件变化；后续 OmaBlest 的 Legacy/Go 源码读取将按独立工具调用和路径清单执行。
+
+### 2026-08-17 — 跨仓库状态核对不得放入同一个并行工具编排
+
+- Symptom: 本轮恢复时把 Legacy lessons/status 与 Go status 放入同一个 `Promise.all`；查询没有写入，但违反了单仓库调用边界。
+- Root cause: 为降低往返延迟，把两个只读查询误认为可以共享编排，未把每个工具调用绑定到唯一仓库根目录。
+- Prevention: 跨仓库状态、源码读取、测试、格式化和写入都使用独立工具调用；每次调用只允许当前仓库路径，并在返回后核对 `git rev-parse --show-toplevel`。
+- Verification: 本次编排未产生源码变化；后续 OmaBlest 测试、矩阵更新和提交将按仓库逐一执行，C# 零变化检查也分仓库完成。
