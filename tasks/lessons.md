@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — DigOut 发现探测不能复用隐藏状态攻击门禁
+
+- Symptom: Armadillo/ArmadilloElder 的隐藏状态如果直接调用普通怪物目标门禁，`FindNearby(3)` 会把攻击者自身的 `Visible=false` 当成拒绝条件，导致附近玩家永远不能触发 `ObjectMonster`/`ObjectShow` reveal。
+- Root cause: Legacy 的“发现附近目标”和“已显示后允许攻击/移动”是两个阶段；迁移时只复用了后者的 `IsAttackTarget` 投影，遗漏了发现阶段应忽略攻击者自身隐藏标志。
+- Prevention: 对 DigOut 的 discovery probe 使用仅在探测期间将 `DigOutVisible` 投影为 true 的副本，保留玩家安全区、NoFight、死亡和目标隐藏/CoolEye/等级门禁；普通 AI 和真正攻击路径继续使用原始隐藏门禁。
+- Verification: Armadillo world transcript 通过了初始隐藏、3 格发现和 `ObjectMonster -> ObjectShow` 顺序；真实 `net.Pipe` 登录 transcript 确认隐藏对象不在 bootstrap 中，手动 tick 后只收到 reveal 两包。
+
 ### 2026-08-15 — 只读对照命令的工作目录与路径必须同仓库
 
 - Symptom: 一次 Legacy 读取命令使用了 Go 的 `cmd/crystal-server/monster_ai.go` 路径，只返回路径不存在；没有写入，但不能把该命令的输出用于行为判断。
