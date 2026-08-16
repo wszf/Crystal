@@ -2165,3 +2165,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 停止 world ticker 不会停止 session 主循环在每轮读包前执行的 `world.tick(time.Now())`；注入即时到期的 AI 状态后，该维护 tick 可能先消费 Rage 并生成/发送岩石。
 - Prevention: bootstrap 后停止后台 ticker，并发送 KeepAlive 读完响应确认会话已完成同步；注入状态时把 transcript 的 `base` 放到实时会话时钟之后，保证会话维护 tick 只能看到尚未到期的动作，再用人工时间推进完整生命周期。
 - Verification: TucsonGeneral rage transcript 普通定向通过，race 连续 10 次通过；随后 GasToad/TucsonGeneral 定向普通/race、服务端整包普通/race 均通过。
+
+### 2026-08-15 — Mantis 定向 transcript 必须包含同 tick 的旁观者状态包和目标 AC 随机值
+
+- Symptom: AI=133 Mantis 定向测试先遗漏了 Dazed 首跳后旁观者收到的 `ServerObjectPoisoned`，并把 Monster 目标用 `Next(3)=0` 的 AC/伤害场景期望为 89 HP，实际为 90。
+- Root cause: 完整 `world.tick` 在 AI 施毒后同一 tick 继续处理零时刻毒物，并按接收者广播毒包；测试又把 `monsterAIPowerLocked(10,12)` 的确定性 roll=0 误按包含上界 11 计算，而该调用得到 10。
+- Prevention: AI transcript 按 tick 阶段和接收者矩阵生成包序；每个确定性随机源先列出调用上界及返回值，再逐项计算伤害、AC 和最终 HP，不能复用相邻用例的期望。
+- Verification: 修正观察者包序为 `ObjectAttack -> ObjectEffect -> ServerObjectPoisoned`，Monster 目标期望为 90，并移除 300ms 命中阶段重复的 `ServerPoisoned` 期望；随后重新运行 Mantis 定向测试确认。
+
+### 2026-08-15 — 新增 session transcript helper 必须先检查整个 Go package
+
+- Symptom: AI=133 Mantis 真实会话测试首次包级编译因新增的 `packetIDs` helper 与现有 `awakening_test.go` 同包 helper 重名而失败。
+- Root cause: 新测试只按当前文件判断辅助函数是否可用，没有检索 `cmd/crystal-server` 的整个 `main` test package；Go 的 `*_test.go` 文件共享同一 package 命名空间。
+- Prevention: 新增测试 helper 前先用 `rg` 搜索整个 package 的声明与调用，优先复用现有 helper；新增后先运行 `go test ./cmd/crystal-server -run '^$' -count=1`，再运行行为 transcript。
+- Verification: 删除重复 helper、复用现有 `packetIDs` 后，Mantis 会话测试进入运行阶段；随后用包级编译和定向 transcript 验证。
