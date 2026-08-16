@@ -1967,6 +1967,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Strengthening after recurrence: 本轮一次 Go 只读命令又手写成重复的仓库根目录，进程启动前即被拒绝；即使只是读取，也不能凭记忆拼接跨仓库绝对路径。
 - Verification after strengthening: 错误命令没有启动、没有输出可用证据或文件变化；随后重新核对 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 并只采用正确根目录的查询结果。
 
+### 2026-08-15 — 跨仓库 shell 调用中的尾部路径错误会使整段证据失效
+
+- Symptom: Legacy 根目录的一次只读命令在完成 C# 源码读取后又追加了 Go `cmd/crystal-server` glob，shell 因路径不存在退出；前面的 Legacy 输出也不能继续作为该次调用的证据。
+- Root cause: 把两个仓库的连续对照塞进同一个 shell 调用，未在参数层执行单仓库 allowlist。
+- Prevention: 一个工具调用只允许一个已核验仓库的工作目录和路径字面量；跨仓库读取必须结束当前调用后再切换根目录，任何尾部非零错误都整体丢弃并重跑。
+- Verification: 该调用只读失败且无文件写入；随后以独立 Legacy 与 Go 调用重新读取 Jar1/运行时路径，AI=119 判断只采用重跑结果，C# 差异保持为空。
+
 ### 2026-08-15 — CatShaman 测试随机夹具必须覆盖伤害与状态门禁的全部上界
 
 - Symptom: AI=118 CatShaman 定向测试在红毒分支执行到 MC 伤害取值的 `Next(10)` 时失败；修复后又把命中同 tick 已执行的 Red poison 首跳误期望为 `Elapsed=0`。
