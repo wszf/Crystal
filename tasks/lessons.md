@@ -16,6 +16,20 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 每次 Go 工具调用先在独立调用中核对完整根目录和目标文件存在性；后续 `workdir` 只使用该返回值，禁止手写拼接。启动失败的调用整体作废，不据其错误文本推断源码状态。
 - Verification: 本次命令在进程创建前失败且没有文件变化；随后在正确的 `Crystal.GoServer` 根目录重新读取并完成 ElephantMan session 测试。
 
+### 2026-08-15 — Legacy 检索不得使用未核验的 shell glob
+
+- Symptom: 查找 AI=139 时把不存在的 `Server/MirObjects/Mob*.cs` glob 交给 zsh，命令在展开阶段失败；没有源码写入，失败调用的部分输出无效。
+- Root cause: 依赖文件名习惯追加 glob，没有先用当前仓库的 `rg --files` 确认目录和匹配文件。
+- Prevention: Legacy 检索只使用已验证的相对路径；需要模式匹配时使用 `rg --files -g` 先取得精确清单，或让 `rg` 自己处理 pattern，禁止让 shell 展开未核验的 glob。出现 shell 非零读取错误时整体作废输出。
+- Verification: 失败命令未启动源码读取且工作树无变化；随后只在已核验的 `Server/MirObjects` 路径中重跑 AI=139 检索并取得 StoneGolem 基线。
+
+### 2026-08-15 — Legacy 对照路径不得带入 Go 工作目录（AI=139 复发）
+
+- Symptom: 读取 StoneGolem 继承的 `FindTarget` 时把 Legacy `Server/MirObjects/MonsterObject.cs` 路径放进 Go 根目录，命令返回路径不存在；没有写入，混合调用输出全部无效。
+- Root cause: 在同一迁移分析中切换对照侧时复用了上一仓库的相对路径，没有把工作目录与路径参数作为一个不可拆分的单仓库调用。
+- Prevention: Legacy 源码读取必须在独立、已核验的 Legacy 根目录调用中完成；Go 调用参数只允许 Go 路径。任一混合或非零读取调用整体作废，禁止采用其余部分输出。
+- Verification: 失败命令未启动源码读取且两个工作树无源码变化；后续将在 Legacy 独立调用重新获取 `FindTarget`，再以独立 Go 调用读取对应运行时 helper。
+
 ### 2026-08-15 — 跨仓库只读调用的路径边界仍需逐调用核验
 
 - Symptom: ElephantMan 对照期间两次只读检索把错误仓库路径带入命令：一次工作目录拼错，另一次在 Go 根目录检索了 Legacy `Server/...` 路径；命令均在读取阶段失败，没有源码写入。
