@@ -2,12 +2,21 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — Legacy 对照路径不得放入 Go 工作目录
+
+- Symptom: 一次只读命令在 Go 根目录检索 `Server/MirObjects/HumanObject.cs`，因路径不存在失败；没有产生写入，输出不能用于判断。
+- Root cause: 对照 Legacy 与 Go 的命令参数复用了另一仓库的相对路径，未让工作目录和路径集合保持同仓库。
+- Prevention: 每个仓库读取先在独立调用核对 `git rev-parse --show-toplevel`，随后只使用该仓库相对路径；跨仓库对照必须拆成新的调用。
+- Verification: 失败命令只发生在读取阶段，Go 与 Legacy 工作树无源码变化；后续 AI=137 判断仅使用已核对仓库的输出。
+- Strengthening after recurrence: 即使只是补充对照，Go 调用中也不得出现 `Server/...` 路径；需要读取 Legacy 文件时必须先结束 Go 调用，再独立核对 Legacy 根目录后执行。
+- Verification after recurrence: 本次命令在 Go 根目录只返回 Legacy 路径不存在，未产生写入；后续不使用该输出，并将 Legacy 对照拆为独立调用。
+
 ### 2026-08-15 — net.Pipe 手工 tick 前必须冻结 session loop 的 AI 时间线
 
-- Symptom: 服务端整包一次运行中，既有 Armadillo session transcript 收到空 reveal；该测试单独运行及连续 10 次运行均通过。
-- Root cause: `stopPoisonSessionTicker` 只停止后台 ticker，连接 session 的读循环仍会独立调用 `world.tick(time.Now)`；它可能在测试手工 tick 前消费一次性的 DigOut reveal。
-- Prevention: 真实会话夹具在启动手工时钟前把 AI/search/action 时间置于未来，或显式暂停 AI；停止 ticker 不等于停止连接级 runtime tick，不能把两者当作同一时钟。
-- Verification: Armadillo 定向 transcript 单独及 `-count=10` 连续通过；本次 AI=136 session 也采用未来时钟、关闭 lights 和显式暂停 AI 后稳定通过。
+- Symptom: 服务端整包 race 门禁再次出现 Armadillo session transcript 空 reveal（期望 `ObjectMonster -> ObjectShow`，实际为空）；普通单测仍可能通过。
+- Root cause: `stopPoisonSessionTicker` 只停止后台 ticker，连接 session 的读循环仍会独立调用 `world.tick(time.Now)`；夹具仍以实时 `base` 驱动，race 调度下它先消费一次性的 DigOut reveal。
+- Prevention: 真实会话夹具在启动手工时钟前把 AI/search/action 时间置于未来；对一次性 discovery gate 还要把 `DigOutCheckAt` 设为“人工首 tick 前、实时维护 tick 后”，并固定 `setLightClock`，或显式暂停 AI。停止 ticker 不等于停止连接级 runtime tick，不能把两者当作同一时钟。
+- Verification: Armadillo 定向 transcript 普通与 `-count=10`、race `-count=10` 均通过；随后将重跑完整普通/race 门禁。
 
 ### 2026-08-15 — 跨仓库补丁目标与检索参数必须再次核验
 
@@ -2310,3 +2319,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 试图在一条 shell 命令中同时做 Go 实现读取和 C# 对照，违反了单仓库调用边界。
 - Prevention: 一条工具调用的 `workdir`、检索模式和文件路径必须属于同一仓库；跨仓库对照拆为两次独立调用，并分别核对根目录。
 - Verification: 错误命令只读、没有文件变化；后续只采用 Go 当前根目录中的输出，Legacy 对照另行执行。
+
+### 2026-08-17 — RhinoPriest session 与多目标 transcript 夹具必须隔离派生状态和独立 AI
+
+- Symptom: AI=137 RhinoPriest session transcript 在减益命中后多收到一个 `ServerHealthChanged`；新增夹具还曾引用不存在的 `monsterStatMinMAC/MaxMAC`、遗漏 `worlddata` import，并把相邻 `(1,0)` 目标误判为远程；宠物/Hero 回归初版又发生 nil 宠物解引用，Hero 额外产生自身攻击包。
+- Root cause: `StatsInitialized=true` 的真实会话在 DC/MC/SC 减益后会按角色等级刷新派生 MaxHP，人工 100 HP 超过新手上限；Monster stat 常量和 import 未先从当前 Go package 核对；RhinoPriest 的同格/相邻分支边界与 Legacy 显式距离判断未逐项列出；Hero runtime 与 Monster AI 会在同一 `world.tick` 独立推进，而双目标表中另一分支的指针为 nil。
+- Prevention: session fixture 保留真实 stat refresh，但把合成角色等级提高到足以容纳人工 HP，并固定光照/时间；新增测试先用当前 package 的符号检索和包级编译门禁；按 Chebyshev 距离逐项标注近战、同格和远程；多目标测试先按 kind 选择非 nil ID，并把 Hero `ActionReadyAt` 置于人工时钟之后，避免无关 AI transcript 污染。
+- Verification: RhinoPriest 世界攻击、毒物、减益、宠物 Monster、Hero 和真实 `net.Pipe` transcript 均通过；失败夹具修正后重新运行定向测试，完整门禁将在本批次末执行。
