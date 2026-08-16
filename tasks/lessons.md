@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — GasToad 多目标毒物写回必须先提交 value-map 伤害副本
+
+- Symptom: GasToad Type 2 对宠物的直接伤害已生效，但同一延迟结算后的 Green poison 列表为空、宠物只少了 10 点 HP。
+- Root cause: Go `world.monsters` 是 value map；伤害函数修改局部副本后，毒物 helper 从 map 取出并写回了带毒副本，调用方随后又用未带毒的旧伤害副本覆盖了 map。
+- Prevention: 延迟多目标处理每次修改 value-map 实体后，先写回权威 map，再调用会再次读取/写回的状态 helper；若还需保存，必须从 map 回读而不是提交旧副本。
+- Verification: GasToad Type 2 world transcript 对 Player、Monster 宠物和 Hero 的 HP/Green poison/Elapsed 均稳定通过；全量测试前的定向回归已确认宠物从 100→83 且保留毒物。
+
+### 2026-08-15 — Monster AI 毒伤测试要分离即时绿毒 tick 与派生防御字段
+
+- Symptom: GasToad 定向测试把 Type 2 玩家伤害期望为 90，实际同一 world tick 已为 83；Type 1 高 AC 用例仍掉血，重验用例还遗漏了内层 `Random.Next(2)`。
+- Root cause: Go tick 在延迟命中后紧接着处理零 `TickAt` 的 Green poison；玩家伤害使用 `worldPlayer.MinAC/MaxAC` 派生字段而不是仅使用 `Stats` map；Type 0 分支仍按 Legacy 顺序消费 `Next(7)`、`Next(2)`。
+- Prevention: 测试分别计算动作伤害与同 tick 毒伤，fixture 同时初始化权威派生 AC 字段和 Stats，确定性 roll 表覆盖每个可达分支的排他上界。
+- Verification: GasToad ordinary/type1/type2、吸收伤害仍施 Paralysis、延迟目标重验及 net.Pipe transcript 均通过。
+
 ### 2026-08-15 — net.Pipe AI transcript 必须显式隔离认证与后台 ticker 状态
 
 - Symptom: AI=131 会话夹具先因账号/角色名超出 15 字符限制登录失败，随后默认登录 HP 只有 18，后台 ticker 还抢先消费了 AI 的 3000ms 搜索随机数。
@@ -2137,3 +2151,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 复制检索参数时没有先确认当前仓库的文件清单，把另一版本/旧目录结构当成 Legacy 路径继续使用。
 - Prevention: 检索前先用当前仓库的 `rg --files`/已核对路径确认目标存在；命令出现不存在路径或非零退出时整体作废并在新调用中重跑，不混用其余输出。
 - Verification: 该命令只读且未改变文件；后续 AI=131 对照仅采用当前 Legacy 根目录中实际存在的源文件结果。
+
+### 2026-08-15 — Go 门禁命令不得携带 Legacy 相对路径
+
+- Symptom: 本批次在 Go 根目录读取门禁前误用了 Legacy `tasks/lessons.md`，命令在读取阶段因路径不存在失败；没有写入，但该调用的任何其他输出都不能作为证据。
+- Root cause: 跨仓库切换后沿用了上一调用的相对路径，没有让工作目录、根目录校验和命令参数保持单仓库一致。
+- Prevention: 执行 Go 命令前先在独立调用中核对 Go `git rev-parse --show-toplevel`；Go 调用只允许 Go 仓库路径，Legacy 经验或源码必须在新的 Legacy 调用中读取，失败调用整体作废。
+- Verification: 错误命令未启动写入且工作树无变化；随后在核对后的 Legacy 根目录补记本课经验，并在核对后的 Go 根目录完成 diff、测试和构建门禁。
+
+### 2026-08-15 — 在线 AI transcript 的人工时钟必须领先会话维护 tick
+
+- Symptom: TucsonGeneral 真实 `net.Pipe` transcript 在 race 下偶发没有 15 个岩石 spawn 通知，手工 `world.tick` 返回空结果；普通模式也可重复复现。
+- Root cause: 停止 world ticker 不会停止 session 主循环在每轮读包前执行的 `world.tick(time.Now())`；注入即时到期的 AI 状态后，该维护 tick 可能先消费 Rage 并生成/发送岩石。
+- Prevention: bootstrap 后停止后台 ticker，并发送 KeepAlive 读完响应确认会话已完成同步；注入状态时把 transcript 的 `base` 放到实时会话时钟之后，保证会话维护 tick 只能看到尚未到期的动作，再用人工时间推进完整生命周期。
+- Verification: TucsonGeneral rage transcript 普通定向通过，race 连续 10 次通过；随后 GasToad/TucsonGeneral 定向普通/race、服务端整包普通/race 均通过。
