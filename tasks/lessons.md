@@ -2015,3 +2015,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试只按攻击者面向目标的普通方向推导 payload，没有单独核对同格输入的旧版方向函数哨兵。
 - Prevention: 协议 payload 测试覆盖同格、相邻和远距时逐 case 计算方向；同格不可从相邻方向复用期望值。
 - Verification: 同格 case 改为 Direction=0 后，SeedingsGeneral 边界定向测试验证 same-cell 与 adjacent-fallback 均通过。
+
+### 2026-08-15 — RestlessJar 测试夹具需匹配协议索引类型并清理未用 transcript
+
+- Symptom: AI=122 RestlessJar 首次包级仅编译同时报告 `uint32` 到 `SelectInfo.Index` 的类型不匹配，以及 Spin/Tornado 未使用的 `impact` 变量。
+- Root cause: 通用玩家 helper 复用了运行时 ObjectID 类型，没有按协议结构的 `int32` 字段转换；多余的 tick 结果也未在复制测试后清理。
+- Prevention: 构造协议夹具时逐字段核对底层类型，新增测试立即运行包级仅编译；只验证实体状态时直接调用 tick，不保留未使用返回值。
+- Verification: 修正索引为 `int32(id)` 并删除未使用绑定后，重新执行仅编译门禁确认 RestlessJar 行为测试可构建。
+
+### 2026-08-15 — RestlessJar Stomp 推退方向必须按攻击者到目标逐点计算
+
+- Symptom: AI=122 Stomp 测试把位于攻击者正北的邻居期望为对角线 `(2,1)`，实际 Legacy-compatible push 到 `(1,1)`，定向测试失败。
+- Root cause: 只按“远离攻击者”的直觉估算坐标，未使用 `DirectionFromPoint(CurrentLocation, target.CurrentLocation)` 的正交方向。
+- Prevention: 推退测试先固定攻击者/目标坐标和方向哨兵，再用一步 `movePoint` 推导目标位置与反向朝向；正交、对角和同格分别覆盖。
+- Verification: 将正北邻居期望修正为 `(1,1)`/Direction=4 后，RestlessJar 定向测试继续验证。
+
+### 2026-08-15 — RestlessJar 多目标 Stomp transcript 必须包含先前目标的公开推退包
+
+- Symptom: Stomp 状态已正确，但主目标 packet 断言只列自身命中的五包；实际先命中的邻居向主目标广播了 `ObjectStruck`、`DamageIndicator`、`ObjectPushed`，随后才是主目标自己的命中和 `Pushed`。
+- Root cause: 按目标拆分了私有包，遗漏了每个区域目标动作对同一范围内接收者的公开广播和顺序。
+- Prevention: 多目标伤害/推退先按目标处理顺序建立接收者矩阵，再分别断言主目标、邻居和旁观者的公开/私有包序。
+- Verification: transcript 增加邻居的三条公开包后，RestlessJar Stomp 定向测试继续验证完整顺序。
+
+### 2026-08-16 — 在线 session transcript 必须过滤允许插入的 TimeOfDay 包
+
+- Symptom: 全仓普通测试中 `TestCraftSessionRejectsDeadFarWrongPageAndUnknownRecipe/out_of_range` 在第 3 次走路读取到 `ServerTimeOfDay`（ID 61）而非 `ServerUserLocation`；单独运行因时钟落点不同未复现。
+- Root cause: 在线 session 的全局时钟 ticker 可在任意请求响应之间插入时间通知，测试 reader 把异步允许包当成了本次 walk 响应。
+- Prevention: 有在线 ticker 的 transcript reader 对明确允许的 `ServerTimeOfDay` 循环过滤，再继续等待目标响应；其他包仍立即失败，禁止用固定 sleep 或忽略所有异常包掩盖协议错误。
+- Verification: 将 Craft 距离移动、NPC 移除和 ignored-request reader 改为只过滤 TimeOfDay 后，单测重复与全仓普通/race 门禁验证插入通知不再造成假失败。
