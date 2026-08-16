@@ -2515,3 +2515,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 依据目录习惯猜测 Settings 文件位置，没有先用当前仓库的 `rg --files` 清单确认目标。
 - Prevention: Legacy 对照只使用已存在的精确路径；新增路径先在独立调用执行 `rg --files`/`test -f`，任一读取非零时作废全部输出并重新运行。
 - Verification: 该命令只读且没有文件变化；OmaSlasher 的有效基线仅采用此前成功读取的 `MapObject.GetAttackPower` 与 `MonsterObject.HalfmoonAttack` 内容。
+
+### 2026-08-17 — AI=147 开始前的 Legacy 命令不得携带 Go 文档路径
+
+- Symptom: AI=147 开始前的一次 Legacy 只读命令末尾误带了 Go 专属 `docs/migration-matrix.md` 路径；命令以路径不存在结束，不能把同一调用的其他输出当作完整证据。
+- Root cause: 切换仓库时复用了 Go 侧文档路径，没有按当前 Legacy 根目录的文件清单逐项核对命令参数。
+- Prevention: Legacy 与 Go 的源码、文档和状态读取必须拆成独立工具调用；每次调用先核对 `git rev-parse --show-toplevel`，参数只允许当前仓库已确认存在的路径，任一非零读取结果整体作废并重跑。
+- Verification: 该调用只读且没有文件写入；后续 AI=147 将在独立核验的 Go 根目录读取矩阵和实现，提交前继续分别执行两仓库 C# 零变化检查。
