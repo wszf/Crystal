@@ -258,6 +258,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Symptom: 一次 Go 仓库只读检索命令仍带有 Legacy `Server/...` 路径；命令只返回路径不存在，没有写入，但其输出不能作为语义判断依据。
 - Root cause: 查询多个对照点时复用了上一条 Legacy 命令的路径字面量，没有把当前 `workdir` 与命令参数作为单仓库边界一起校验。
 - Prevention: 每次跨仓库读取必须拆成独立调用，先执行并核对当前仓库的 `git rev-parse --show-toplevel`，随后命令参数只使用当前仓库相对路径；另一仓库必须在新的调用中读取。
+
+### 2026-08-15 — AI=136 研究期间 Go 命令不得混入 Legacy 路径
+
+- Symptom: AI=136 研究期间两次 Go 仓库只读命令混入了 Legacy `Server/...` 路径；命令返回路径不存在，未产生写入，但输出不能用于行为判断。
+- Root cause: 在跨仓库对照时复用了上一条 Legacy 命令的相对路径，没有把当前 `workdir` 与命令参数作为同一仓库边界重新核验。
+- Prevention: 每次切换仓库先独立执行并核对 `git rev-parse --show-toplevel`，随后命令参数只使用该仓库的相对路径；Legacy 与 Go 读取必须拆成独立调用。
+- Verification: 错误命令均在只读阶段失败且两个工作树无文件变化；后续先核验 Go 根目录，再只使用 Go 路径读取 AI=136 相关代码。
 - Verification: 本次错误命令在读取阶段失败且两个工作树无源码变化；记录后继续实现前已恢复为单仓库调用，并将错误输出排除在判断之外。
 
 - Strengthening after recurrence: 工具调用的绝对 `workdir` 也必须逐字使用最近一次 `git rev-parse` 的结果；少一段目录会在进程启动前失败，不能用错误文本替代根目录核验。
