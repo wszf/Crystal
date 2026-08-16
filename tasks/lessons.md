@@ -15,6 +15,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 复制完整绝对路径时手工重复了仓库目录，没有在新调用中重新核对工作目录。
 - Prevention: 每次切换仓库都先单独运行 `git rev-parse --show-toplevel`；随后调用只使用该次返回的根目录，禁止凭记忆或拼接路径继续执行。
 - Verification: 本次错误命令在进程创建前被拒绝且没有文件变化；随后重新核对 Legacy 根目录并只在正确仓库记录本 lesson。
+- Strengthening after recurrence: 本轮在 Legacy 根目录读取状态后又把 Go 专属的 `docs/migration-matrix.md` 作为相对路径检索，命令以路径不存在退出；即使文档路径名称看似通用，也必须先按仓库实际文件清单确认归属，不能把失败命令的其他输出当作证据。
+- Verification after recurrence: 该调用只读且没有文件变化；随后先独立核验 Go 根目录，再从 Go 仓库读取迁移矩阵，错误输出未用于 AI=130 判断。
 
 ### 2026-08-15 — DigOut 发现探测不能复用隐藏状态攻击门禁
 
@@ -2107,3 +2109,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只把“命令参数不混用”理解为 shell 层约束，遗漏了工具编排层的并行调用也可能让 workdir、结果和后续判断发生错配。
 - Prevention: 跨仓库核验、读取和写入都按仓库分成独立工具调用；每次调用只核对一个根目录，返回后再开始另一个仓库，禁止用 `Promise.all`/并行编排混放两侧命令。
 - Verification: 本次调用无文件变化；后续 AI=128/129 的 Legacy 对照、Go 实现、测试和 C# 检查均按独立调用执行，判断只采用根目录与命令参数一致的结果。
+
+### 2026-08-15 — AI=130 CannibalTentacles 测试必须区分完整 tick 的后续 AI 副作用
+
+- Symptom: CannibalTentacles 攻击命中测试只断言命中伤害包，但完整 `world.tick` 在 resolver 后继续执行怪物 AI，额外产生 `ObjectWalk`，导致 transcript 断言失败。
+- Root cause: 混淆了隔离攻击动作解析器与完整世界 tick 的可观察阶段；命中处理完成不代表同一 tick 已结束。
+- Prevention: 测试完整 tick 时按实际调度顺序把命中后的移动、毒伤和其他 AI 通知纳入接收者 transcript；若只验证 resolver，则直接调用隔离入口并明确不覆盖后续 tick 副作用。
+- Verification: 补入命中后的移动包并按 map 中的权威实体断言后，AI=130 CannibalTentacles 定向测试通过。
