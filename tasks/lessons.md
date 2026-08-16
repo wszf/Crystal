@@ -2282,3 +2282,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 停止维护 ticker 不会停止每个连接的请求维护循环；测试把共享 AI 配置当成本地字段，并把人工基准时间设在墙钟当前时刻。
 - Prevention: 所有在线 session 的共享 AI 注入通过持有 `world.mu` 的 helper 完成，AI 开关写入同样加锁；人工 transcript 时钟至少领先墙钟一小时，避免连接循环抢先处理未来动作。
 - Verification: FlyingStatue/GasToad session 在 `go test -race` 下连续 10 次通过；随后将重跑全量 race 门禁。
+
+### 2026-08-16 — Legacy 对照检索不得夹带 Go 路径
+
+- Symptom: 读取 Legacy RhinoPriest 基线时，同一条命令末尾误带了 Go 的 `docs/migration-matrix.md` 和 `cmd/crystal-server` 路径；Legacy 源码读取成功，但 Go 路径部分只返回不存在，不能作为判断依据。
+- Root cause: 在完成 Legacy 检索后复用了下一仓库的相对路径，未把每个命令限制为单一仓库参数集合。
+- Prevention: 跨仓库检索拆成独立调用；每次切换前先执行并核对 `git rev-parse --show-toplevel`，当前调用只使用该仓库路径，另一仓库必须在新的调用中读取。
+- Verification: 错误调用只读且没有工作树变化；后续 RhinoPriest 与 Go 矩阵读取将分别在核验后的根目录执行。
+
+### 2026-08-16 — Go 读取命令必须重新核验 workdir
+
+- Symptom: 读取 RhinoPriest 对应 Go damage helper 时把 Go 相对路径放在 Legacy 根目录执行，命令返回路径不存在；该输出不能用于实现判断。
+- Root cause: 切换回 Go 仓库时复用了 Legacy 的绝对工作目录，没有在新调用中先打印并核对 Go 的 `git rev-parse --show-toplevel`。
+- Prevention: 每次仓库切换都拆成独立调用：先用目标绝对根目录执行 `git rev-parse --show-toplevel`，成功后再只用该仓库的相对路径读取或编辑。
+- Verification: 错误调用只读、无文件变化；后续 Go 代码查询将在核验后的 `Crystal.GoServer` 根目录独立执行。
+
+### 2026-08-16 — Legacy 对照路径必须先确认存在
+
+- Symptom: RhinoPriest 对照检索附带了不存在的 Legacy `Envir` 路径，shell 返回路径错误；同命令中已成功读取的 `Server/MirDatabase/BuffInfo.cs` 仍有效，但错误段不能作为证据。
+- Root cause: 按仓库习惯猜测了目录名，没有先用当前仓库文件清单核对真实基线路径。
+- Prevention: Legacy 只读命令只使用已由 `rg --files`/`test -e` 确认存在的路径；不存在的对照目录先停止检索，不把同一命令的其他失败输出混入判断。
+- Verification: 该调用只读且工作树无变化；后续只引用已核验的 `Server/...` 文件。
+
+### 2026-08-16 — Go shell 参数不得混入 Legacy 路径
+
+- Symptom: 在 Go 根目录读取 buff helper 时，命令末尾误带了 Legacy `Server/MirObjects/...` 路径；Go 文件输出有效，Legacy 路径部分仅返回不存在。
+- Root cause: 试图在一条 shell 命令中同时做 Go 实现读取和 C# 对照，违反了单仓库调用边界。
+- Prevention: 一条工具调用的 `workdir`、检索模式和文件路径必须属于同一仓库；跨仓库对照拆为两次独立调用，并分别核对根目录。
+- Verification: 错误命令只读、没有文件变化；后续只采用 Go 当前根目录中的输出，Legacy 对照另行执行。
