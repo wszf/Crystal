@@ -1967,6 +1967,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Strengthening after recurrence: 本轮一次 Go 只读命令又手写成重复的仓库根目录，进程启动前即被拒绝；即使只是读取，也不能凭记忆拼接跨仓库绝对路径。
 - Verification after strengthening: 错误命令没有启动、没有输出可用证据或文件变化；随后重新核对 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 并只采用正确根目录的查询结果。
 
+### 2026-08-15 — Jar2 MC 测试必须沿用 Info 统计而非假设运行字段
+
+- Symptom: AI=120 Jar2 测试夹具首次包级编译访问不存在的 `worldMonster.MinMC/MaxMC` 字段，行为测试尚未执行。
+- Root cause: 只核对了 Legacy 的 MC 概念，没有先复用 Go 运行时实际的 `monster.Info` 统计读取边界。
+- Prevention: 新 AI 引用 MC/SC/DC 前先读取 `worldMonster` 结构与 `monsterStatValue` helper；测试夹具只初始化生产路径真实读取的字段，并在新增复合夹具后立即运行包级仅编译门禁。
+- Verification: 删除不存在的 MC 运行字段、保留 Info 的 MinMC/MaxMC 后，包级编译和全部 Jar2 定向测试通过。
+
 ### 2026-08-15 — 跨仓库 shell 调用中的尾部路径错误会使整段证据失效
 
 - Symptom: Legacy 根目录的一次只读命令在完成 C# 源码读取后又追加了 Go `cmd/crystal-server` glob，shell 因路径不存在退出；前面的 Legacy 输出也不能继续作为该次调用的证据。
