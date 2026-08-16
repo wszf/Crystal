@@ -102,6 +102,22 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification after seventh strengthening: 本次 Legacy shell 中误带的 Go glob 只返回 shell 的未匹配错误，没有写入或 C# 变化；后续实现判断不使用该输出，并恢复为单仓库调用。
 - Strengthening after eighth recurrence: 即使前一条规则已要求单仓库命令，工具编排仍可能在参数层把另一仓库的绝对路径带入当前调用；跨仓库任务必须把“根目录核验、源码读取、写入”拆成独立调用，并在每次返回后核对根目录，禁止复用上一调用的路径变量。
 - Verification after eighth strengthening: 本轮错误的跨仓库查询只在读取阶段返回路径不存在且没有文件写入；随后用两个独立的绝对根目录调用完成判断，Go 改动与 Legacy lessons 均落在预期仓库，C# 状态未变。
+- Strengthening after ninth recurrence: 用户指定的当前目录是 Legacy 根目录时，Go 测试/检索调用仍可能沿用该目录；执行任何 Go 命令前必须先在独立调用中打印并核对 Go 仓库的 `git rev-parse --show-toplevel`，随后才使用 Go 相对路径，不能仅凭“上一批次已知根目录”继续。
+- Verification after ninth strengthening: 本轮在 Legacy 根目录运行 Go 命令只返回无 module/路径不存在且无写入；随后切换到已核对的 Go 根目录，Tucson 定向测试、net.Pipe transcript 和 Go 代码读取均来自正确仓库。
+
+### 2026-08-15 — Tucson map value fixture 必须回读权威实体
+
+- Symptom: Tucson Mage WideLine 已排入 Monster 目标并实际产生伤害，但测试检查插入 map 前保留的 `worldMonster` 副本，误报 HP 仍为 100。
+- Root cause: Go 的 `world.monsters` 是 value map；延迟命中 resolver 修改并回写 map 中的副本，不会更新测试中之前保存的局部值。
+- Prevention: 对 value map 中的延迟实体，命中后必须从 `world.monsters[id]` 回读再断言；指针 map（如 players）和 value map 不得共用断言方式。
+- Verification: 断言改为读取 `world.monsters[monsterID].HP`，Tucson world 与真实 net.Pipe transcript 均稳定确认 MC=20、AC=0 的命中后 HP=80。
+
+### 2026-08-15 — 协议 helper 名称必须先从 Go 定义核对
+
+- Symptom: Tucson net.Pipe transcript 首次编译使用不存在的 `protocol.ParseObjectAttackPayload`，包测试在实现行为验证前失败。
+- Root cause: 看到请求侧 `ParseAttackPayload` 后按对称命名猜测服务端对象包 parser，未先检索协议包实际导出 API。
+- Prevention: 新增 transcript 的每个 parser/helper 先用 `rg` 在当前 Go `internal/protocol` 定义中核对；若无 parser，直接与已核对的 wire builder 比较完整 payload，并立即运行包级最小编译。
+- Verification: 改为比较 `ObjectAttackPayload(ObjectAttackInfo{...})` 的完整字节序列，`go test ./cmd/crystal-server -run TestSessionTucsonMageNormalAttackTranscript` 通过。
 
 ### 2026-08-14 — UserMagic 冷却必须在世界快照中转换为剩余时间
 
