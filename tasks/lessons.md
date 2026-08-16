@@ -1994,3 +1994,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 跨仓库对照时复用了上一仓库的相对路径参数，没有把工作目录、根目录校验和源码路径作为同一调用的单仓库边界。
 - Prevention: Legacy 与 Go 的根目录核验、源码读取和写入必须拆成独立工具调用；每次先执行 `git rev-parse --show-toplevel`，命令参数只允许当前仓库路径，出现混合路径或非零读取结果时整体丢弃输出并重跑。
 - Verification: 错误调用只发生在读取阶段且两个工作树无 C# 变化；随后用独立根目录调用重新获取对照证据，AI=118 实现与矩阵判断未使用错误输出。
+
+### 2026-08-15 — 新 AI 测试必须在仅编译门禁下清理临时变量
+
+- Symptom: AI=121 SeedingsGeneral 定向测试首次包级仅编译因声明但未使用的 `impact` 变量失败，行为测试尚未执行。
+- Root cause: 从多目标 transcript 测试复制了结果变量，但该断言只需要检查实体状态，没有同步删掉变量。
+- Prevention: 新增测试后立即运行 `go test ./cmd/crystal-server -run '^$' -count=1`；若只读最终状态，直接调用 tick 而不绑定未使用结果，或对结果做明确包序断言。
+- Verification: 删除未使用绑定后重新执行包级仅编译，随后运行 SeedingsGeneral 定向测试确认修复覆盖实际行为。
+
+### 2026-08-15 — AOE 测试必须区分受伤状态与旁观者公开包
+
+- Symptom: AI=121 SeedingsGeneral 定向测试把 Echo poison 误期望为额外移动/生命包，并把 Stomp 区域外玩家误期望为零包；实际 transcript 分别只含当前 Slow poison 包，以及区域内动作对旁观者广播的公开受击/中毒包。
+- Root cause: 沿用了另一个 AI 的 poison 副作用包序，且把“区域外不扣 HP”错误简化成“区域外不接收广播”。
+- Prevention: 新增多目标动作时先以实际 Go notify 路径取得完整接收者矩阵，分别断言每个实体的 HP/毒状态和每条连接的公开包；不同毒类型不能直接复用其他 AI 的包序期望。
+- Verification: 将断言改为当前 SeedingsGeneral transcript，并保留区域外 HP/毒状态不变的语义断言后，重新运行定向测试验证。
+
+### 2026-08-15 — 同格攻击 transcript 必须使用 Direction=0 哨兵
+
+- Symptom: AI=121 同格远程边界测试把方向期望写成相邻目标的 2，实际 `DirectionFromPoint` wire 值为 0。
+- Root cause: 测试只按攻击者面向目标的普通方向推导 payload，没有单独核对同格输入的旧版方向函数哨兵。
+- Prevention: 协议 payload 测试覆盖同格、相邻和远距时逐 case 计算方向；同格不可从相邻方向复用期望值。
+- Verification: 同格 case 改为 Direction=0 后，SeedingsGeneral 边界定向测试验证 same-cell 与 adjacent-fallback 均通过。
