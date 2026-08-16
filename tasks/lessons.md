@@ -2,6 +2,27 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — 跨仓库状态核对不得放入同一并行编排（再次强化）
+
+- Symptom: 本轮恢复时再次把 Legacy 与 Go 的 status/diff 查询放进同一个 `Promise.all`；查询只读且没有源码写入，但违反了单仓库调用边界，不能保证后续不会把两侧结果混作证据。
+- Root cause: 为降低往返延迟，把“两个命令互不写入”误当成“可以共享一次工具编排”；没有把每个 `functions.exec` cell 绑定到唯一仓库根目录。
+- Prevention: 跨仓库的根目录核验、状态检查、源码读取、格式化、测试和写入都按仓库使用独立工具调用；每次调用只允许当前仓库的路径参数，并在返回后核对 `git rev-parse --show-toplevel`。禁止在同一个 `Promise.all`、shell 或路径变量中混放两侧。
+- Verification: 本次并行查询没有产生文件变化；后续 Legacy lessons 完整读取已在单独调用完成，后续 Go 测试与文档操作将只在独立核验的 Go 根目录调用中执行。
+
+### 2026-08-15 — 已核验 Go 根目录不得手工重复拼接
+
+- Symptom: ElephantMan session 对照期间一次只读命令把已核验的 Go 根目录手工重复成不存在的路径，进程未启动，不能使用其输出作为源码证据。
+- Root cause: 复制完整绝对工作目录时凭记忆重复了仓库名，没有在新调用中直接复用最近一次 `git rev-parse --show-toplevel` 的结果。
+- Prevention: 每次 Go 工具调用先在独立调用中核对完整根目录和目标文件存在性；后续 `workdir` 只使用该返回值，禁止手写拼接。启动失败的调用整体作废，不据其错误文本推断源码状态。
+- Verification: 本次命令在进程创建前失败且没有文件变化；随后在正确的 `Crystal.GoServer` 根目录重新读取并完成 ElephantMan session 测试。
+
+### 2026-08-15 — 跨仓库只读调用的路径边界仍需逐调用核验
+
+- Symptom: ElephantMan 对照期间两次只读检索把错误仓库路径带入命令：一次工作目录拼错，另一次在 Go 根目录检索了 Legacy `Server/...` 路径；命令均在读取阶段失败，没有源码写入。
+- Root cause: 复用上一条调用的路径片段时，没有把当前仓库根目录和相对路径作为同一组重新核对。
+- Prevention: 每次跨仓库调用先独立执行 `git rev-parse --show-toplevel`，成功后命令参数只允许出现当前仓库相对路径；切换仓库必须结束当前调用，不能把另一仓库路径放入同一 shell 或编排。
+- Verification: 两次失败命令均未启动/未写入；后续 Legacy 与 Go 查询拆分并分别核对根目录，迁移判断只使用成功调用的输出。
+
 ### 2026-08-15 — Legacy 对照路径不得放入 Go 工作目录
 
 - Symptom: 一次只读命令在 Go 根目录检索 `Server/MirObjects/HumanObject.cs`，因路径不存在失败；没有产生写入，输出不能用于判断。
