@@ -2382,3 +2382,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 停止后台 ticker 只等待 ticker goroutine 退出，仍保留 `lightsEnabled`；人工到期时间与墙钟光照区间不同，在线世界会把全局光照变化插入精确 transcript。
 - Prevention: 停止维护 ticker 后，在每个使用人工时间轴的在线 fixture 中用 `setLightClock` 固定一个稳定时刻，再驱动 synthetic tick；不能把 ticker 停止当成光照副作用关闭。
 - Verification: SwiftFeet 定向普通/race、Go 全量 `go test -race ./...`、`go vet ./...` 与 `go build ./...` 均通过，且没有额外 TimeOfDay 包。
+
+### 2026-08-17 — EarthGolem 对照命令的仓库路径必须机械隔离
+
+- Symptom: AI=140 对照期间两次只读命令把另一仓库路径追加到当前命令（先在 Legacy 命令尾部带 Go 路径，后在 Go 命令中带 Legacy `Server/...` 路径）；读取阶段失败，不能使用同一调用的任何输出作为语义证据。
+- Root cause: 为并列读取 C# 基线、Go 实现和迁移矩阵而复用了上一侧的相对路径，没有把 `workdir` 与全部路径参数作为一个不可拆分的单仓库调用契约。
+- Prevention: 每次读取或写入前先在独立调用中核对 `git rev-parse --show-toplevel`，再逐项检查命令参数只属于当前仓库；Legacy 与 Go 必须使用不同的 `functions.exec` cell，任一混合路径或非零读取结果都整体作废并重跑。
+- Verification: 两次错误调用均只读、没有 C# 或 Go 源码写入；EarthGolem 的 C#、Go 和矩阵证据随后分别在已核验根目录独立读取，后续测试与补丁只作用于 Go 仓库。
+
+### 2026-08-17 — EarthGolem fixture 必须先核对运行时字段并隔离 Hero tick
+
+- Symptom: AI=140 首次包级编译使用了不存在的 Monster MAC stat 名称和 `worldMonster/worldHero` 未定义的冷却字段；修正后 Hero 失效目标测试又收到运行时自动传回 owner 位置的对象包。
+- Root cause: 测试夹具按 Legacy/其他实体的字段直觉拼接，没有先读取当前 Go struct 与 stat 常量；把 Hero 改图作为唯一失效条件，却遗漏 `tickHeroesLocked` 会在 owner 与 Hero 不同地图时自动 teleport。
+- Prevention: 新增夹具先检索当前 package 的精确常量、struct 字段和 map key 语义并执行包级编译；失效目标 transcript 要隔离无关实体 tick（同步 owner 状态或冻结/移除独立运行实体），再断言目标失效无攻击包。
+- Verification: EarthGolem Player/Monster/Hero 世界测试及真实 session transcript 均通过，包级 `go test -run '^$'` 先于行为测试通过。
+
+### 2026-08-17 — 特殊石化门禁必须覆盖每个玩家攻击入口
+
+- Symptom: EarthGolem 石化后普通玩家攻击已被拒绝，但区域攻击入口仍返回可攻击，能力门禁回归失败。
+- Root cause: 只在单目标 `playerCanAttackMonsterLocked` 迁移了石化条件，遗漏独立的 `playerCanAreaAttackMonsterLocked` 分支。
+- Prevention: 迁移不可攻击状态时建立入口矩阵，至少覆盖单体、区域、魔法、宠物/Hero、毒/Buff、推退和移动/怪物 AI；每个入口都用同一状态 fixture 断言拒绝且不产生副作用。
+- Verification: EarthGolem 石化世界测试现覆盖单体/区域/移动/攻击/毒/Buff/推退门禁，并在服务端整包测试中通过。
+
+### 2026-08-17 — 生命周期代码修改前必须复读精确物理行
+
+- Symptom: 修改 EarthGolem Pile 生命周期时曾凭摘要怀疑生成分支缺少 `continue`，准备的补丁与当前源码不符；精确复读后确认分支已有 `continue`，补丁未应用。
+- Root cause: 依赖前一轮分析记忆，没有在生命周期分支修改前用带行号/不可歧义的读取重新核对实际控制流。
+- Prevention: 修改 spawn/impact/expiry 状态机前先复读完整分支的精确物理行（包括条件、状态写入和 `continue`/`return`），再用最小 hunk 修改；补丁失败或上下文不符时不据工具输出推断源码状态。
+- Verification: EarthGolem Pile 的 spawn、首次/重复命中、过期移除和 ordered transcript 均通过，生产状态机未引入重复处理。
