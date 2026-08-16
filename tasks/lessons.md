@@ -2522,3 +2522,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 切换仓库时复用了 Go 侧文档路径，没有按当前 Legacy 根目录的文件清单逐项核对命令参数。
 - Prevention: Legacy 与 Go 的源码、文档和状态读取必须拆成独立工具调用；每次调用先核对 `git rev-parse --show-toplevel`，参数只允许当前仓库已确认存在的路径，任一非零读取结果整体作废并重跑。
 - Verification: 该调用只读且没有文件写入；后续 AI=147 将在独立核验的 Go 根目录读取矩阵和实现，提交前继续分别执行两仓库 C# 零变化检查。
+
+### 2026-08-17 — AI=147 固定随机边界、目标投影和 session 时钟必须分别锁定
+
+- Symptom: OmaMage 首次定向测试把固定 DC/MC 区间期望成大于 1 的随机上界；Player 目标的延迟动作使用协议兼容的 `TargetKind=0` 后未还原，导致命中静默丢弃；真实 session 重复运行还可能在手工 tick 外消费一次 AI fallback 抽样。
+- Root cause: Legacy `GetAttackPower(min,max)` 对相等区间仍调用 `Random.Next(1)`；内部目标 kind 与线上的 Player 默认值没有在 resolver 边界归一化；停止 world ticker 不代表测试期间所有 session 调度都已冻结，且回调中直接 `Fatal` 会把后台抽样误报为业务失败。
+- Prevention: 迁移固定区间时保留 unit-bound 随机调用；所有延迟动作 resolver 先把 `TargetKind=0` 还原为 Player，并用 delayed-hit 测试覆盖；真实 session 将 AI/search/action 时间置于手工时钟之后，随机回调只做同步记录并断言业务阶段的稳定序列，不在异步回调中终止测试。
+- Verification: OmaMage 世界测试覆盖固定攻击边界、CanFly/冷却移动、延迟重验、Player/Monster/Hero 与两次独立毒物抽样；`net.Pipe` transcript 普通和重复 10 次、全量 `go test ./...`、`go test -race ./...`、`go vet ./...`、`go build ./...` 均通过。
