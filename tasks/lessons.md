@@ -2,6 +2,16 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — 只读对照命令的工作目录与路径必须同仓库
+
+- Symptom: 一次 Legacy 读取命令使用了 Go 的 `cmd/crystal-server/monster_ai.go` 路径，只返回路径不存在；没有写入，但不能把该命令的输出用于行为判断。
+- Root cause: 在准备 Legacy/Go 对照时复用了上一条命令的路径片段，没有把 `workdir` 与相对路径作为不可分割的一组重新核对。
+- Prevention: 每次跨仓库读取先单独执行并核对 `git rev-parse --show-toplevel`，随后命令只出现当前仓库的相对路径；另一仓库必须在新的调用中读取。
+- Verification: 本次错误命令在读取阶段失败且工作树无变化；后续先在 Go 根目录独立读取 AI 代码，Legacy 对照命令仅使用 `Server/...` 路径。
+
+- Strengthening after recurrence: 跨仓库补丁目标也必须在调用前用完整绝对路径核验；少拼一段目录的目标会在 apply 阶段失败，不能依赖工具错误文本代替路径检查。
+- Verification after recurrence: 本次 Go 测试期望补丁因缺少 `me_work` 目录在写入前被拒绝；随后将所有目标固定为已核验的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer/...` 路径。
+
 ### 2026-08-14 — net.Pipe fixture assignments must pass vet
 
 - Symptom: `go vet ./...` rejected the Poisoning/Purification session fixture's `caster.MP, caster.MaxMP = caster.MaxMP, caster.MaxMP` as a self-assignment.
