@@ -2445,3 +2445,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: bootstrap、session 维护 tick 和攻击动作共享同一个确定性随机源，测试在连接尚未稳定前就安装了只覆盖攻击阶段的 roll 表。
 - Prevention: bootstrap 阶段保留宽松随机源；完成 bootstrap 并用 KeepAlive barrier 同步后，停止维护 ticker，再安装攻击专用随机源和人工时钟，避免初始化消费混入攻击序列。
 - Verification: TucsonMage 定向测试连续 5 次通过，随后服务端整包、全仓普通/race、vet 和 build 门禁均通过。
+
+### 2026-08-17 — Legacy 只读命令末尾不得夹带 Go 路径
+
+- Symptom: PeacockSpider 对照读取时，Legacy 命令末尾误带了 Go 的 `cmd/crystal-server/monster_ai.go` 路径；命令以路径不存在结束，不能使用同一调用的任何输出作为证据。
+- Root cause: 切换仓库后复用了上一侧的相对路径，未在命令参数层执行单仓库 allowlist 检查。
+- Prevention: 每个源码证据调用只使用当前已核验根目录下的路径；跨仓库对照必须结束当前调用，再在新的、独立核验的 Go/Legacy 工具调用中读取，任一非零读取结果整体作废。
+- Verification: 该调用只读且没有文件写入；后续将分别在 Legacy 与 Go 根目录重跑 PeacockSpider 对照，提交前继续执行 C# 零变化门禁。
+
+### 2026-08-17 — PeacockSpider cooldown must stop target movement
+
+- Symptom: The first PeacockSpider ranged `net.Pipe` transcript received an extra `ObjectWalk` during the delayed projectile impact, and the deterministic roll fixture unexpectedly reached the movement fallback bound.
+- Root cause: The migrated specialized `ProcessTarget` path treated `!CanAttack` as permission to chase; Legacy returns immediately during ActionTime/AttackTime recovery before evaluating attack range or movement.
+- Prevention: For every delayed monster AI, model the `Target == null || !CanAttack` early return before the attack-range/movement branch; add a transcript assertion that the cooldown tick emits no movement packet and does not consume movement rolls.
+- Verification: PeacockSpider's cooldown/session test now passes with only the ranged packet at generation and the ordered damage/paralysis packets at impact; the full `cmd/crystal-server` suite passes.
+
+### 2026-08-17 — PeacockSpider fixtures must use the package's stat identifiers
+
+- Symptom: The first PeacockSpider test fixture failed to compile because it used nonexistent `monsterStatMinMAC`/`monsterStatMinMC`/`monsterStatMinSC` identifiers.
+- Root cause: The fixture copied the DC-specific `monsterStat*` naming pattern instead of checking the current Go package's shared `statMinMAC`/`statMinMC`/`statMinSC` constants.
+- Prevention: Before adding a migrated monster fixture, search the current Go package for each stat constant and run `gofmt` plus `go test ./cmd/crystal-server -run '^$' -count=1` immediately after the first patch.
+- Verification: The fixture now uses the authoritative shared stat constants; package compilation, PeacockSpider tests, and the full server test suite pass.
