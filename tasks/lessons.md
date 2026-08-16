@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — 延迟毒伤必须区分挂入列表与当前状态广播
+
+- Symptom: TucsonEgg 爆炸定向测试第一次得到 1 点额外 HP 损失；设置毒伤时间后，测试又把尚未到处理时刻的 `CurrentPoison` 当成未施毒。
+- Root cause: Go 的零值 `TickAt` 会在同一世界 tick 立即处理 Green poison；修复后 Legacy-compatible poison 先进入列表，`CurrentPoison`/状态包要等下一次到期处理。测试混用了两个时序边界。
+- Prevention: 所有延迟毒伤构造时显式设置 `TickAt = now + Tick`；命中时断言毒列表、到期时再断言伤害与状态包，不能用 `CurrentPoison` 替代挂入列表。
+- Verification: TucsonEgg 爆炸现保持初始固定伤害、只新增 Green poison 列表；AI=128/129 定向测试和新增真实 SwampWarrior `net.Pipe` transcript 均通过。
+
+### 2026-08-15 — 跨仓库命令中的工作目录必须逐字核验
+
+- Symptom: 一次 Go 只读核对把已知根目录误拼成不存在的重复路径，命令未启动，不能使用其输出判断代码状态。
+- Root cause: 复制完整绝对路径时手工重复了仓库目录，没有在新调用中重新核对工作目录。
+- Prevention: 每次切换仓库都先单独运行 `git rev-parse --show-toplevel`；随后调用只使用该次返回的根目录，禁止凭记忆或拼接路径继续执行。
+- Verification: 本次错误命令在进程创建前被拒绝且没有文件变化；随后重新核对 Legacy 根目录并只在正确仓库记录本 lesson。
+
 ### 2026-08-15 — DigOut 发现探测不能复用隐藏状态攻击门禁
 
 - Symptom: Armadillo/ArmadilloElder 的隐藏状态如果直接调用普通怪物目标门禁，`FindNearby(3)` 会把攻击者自身的 `Visible=false` 当成拒绝条件，导致附近玩家永远不能触发 `ObjectMonster`/`ObjectShow` reveal。
@@ -2086,3 +2100,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 切换仓库后复用了上一调用的路径参数，没有把绝对 `workdir`、根目录校验和相对路径 allowlist 绑定为一个不可拆分的调用契约。
 - Prevention: 跨仓库读取/写入拆成独立工具调用；每次先核对 `git rev-parse --show-toplevel`，命令参数只允许当前仓库路径，出现混合路径或非零结果时整体丢弃并重跑。
 - Verification: 两次错误调用均在读取/启动阶段失败且两个工作树无源码变化；随后按 Legacy、Go 分开的已核验根目录重新读取，后续实现和测试未使用错误输出。
+
+### 2026-08-16 — 跨仓库工具编排也必须保持调用隔离
+
+- Symptom: 本轮只读状态核对把 Legacy 与 Go 两个仓库的命令放进同一个并行工具编排；没有写入，但调用边界不再能由每个结果单独证明。
+- Root cause: 只把“命令参数不混用”理解为 shell 层约束，遗漏了工具编排层的并行调用也可能让 workdir、结果和后续判断发生错配。
+- Prevention: 跨仓库核验、读取和写入都按仓库分成独立工具调用；每次调用只核对一个根目录，返回后再开始另一个仓库，禁止用 `Promise.all`/并行编排混放两侧命令。
+- Verification: 本次调用无文件变化；后续 AI=128/129 的 Legacy 对照、Go 实现、测试和 C# 检查均按独立调用执行，判断只采用根目录与命令参数一致的结果。
