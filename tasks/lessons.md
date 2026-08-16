@@ -269,6 +269,8 @@ Record project-specific corrections and failure-prevention patterns here.
 
 - Strengthening after recurrence: 工具调用的绝对 `workdir` 也必须逐字使用最近一次 `git rev-parse` 的结果；少一段目录会在进程启动前失败，不能用错误文本替代根目录核验。
 - Verification after recurrence: 本次拼写错误的工作目录在进程创建前被拒绝且无文件变化；随后先独立核对 Legacy 根目录，再继续只读对照。
+- Strengthening after second recurrence: 即使当前 `workdir` 已是 Go 根目录，命令参数也不得包含 Legacy `Server/...` 路径；跨仓库对照必须拆为独立调用，并在命令返回前不复用另一仓库的路径变量。
+- Verification after second recurrence: 本次 Go 只读检索仅因混入 Legacy 路径返回不存在，未产生文件变化；随后切回 Legacy 追加本 lesson，后续实现调用将只使用 Go 相对路径。
 
 ### 2026-08-15 — AI=135 定向夹具必须覆盖冷却期移动与真实方向
 
