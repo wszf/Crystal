@@ -2495,12 +2495,12 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 每次切换仓库先独立核对 `git rev-parse --show-toplevel`，随后命令参数只使用当前仓库已确认存在的路径；出现混合路径或非零读取结果时整体作废并在新的独立调用重跑。
 - Verification: 该调用只读且两仓库均无文件变化；后续 OmaBlest 的 Legacy/Go 源码读取将按独立工具调用和路径清单执行。
 
-### 2026-08-17 — 跨仓库状态核对不得放入同一个并行工具编排
+### 2026-08-17 — 跨仓库状态与源码核对不得放入同一个并行工具编排
 
-- Symptom: 本轮恢复时把 Legacy lessons/status 与 Go status 放入同一个 `Promise.all`；查询没有写入，但违反了单仓库调用边界。
-- Root cause: 为降低往返延迟，把两个只读查询误认为可以共享编排，未把每个工具调用绑定到唯一仓库根目录。
-- Prevention: 跨仓库状态、源码读取、测试、格式化和写入都使用独立工具调用；每次调用只允许当前仓库路径，并在返回后核对 `git rev-parse --show-toplevel`。
-- Verification: 本次编排未产生源码变化；后续 OmaBlest 测试、矩阵更新和提交将按仓库逐一执行，C# 零变化检查也分仓库完成。
+- Symptom: 本轮恢复时把 Legacy lessons/status 与 Go status 放入同一个 `Promise.all`；随后 AI=148 对照又把 Legacy C#、Go 实现和迁移矩阵读取放入同一个并行编排。查询没有写入，但两次都违反了单仓库调用边界，混合调用的输出不能作为后续证据。
+- Root cause: 为降低往返延迟，把不同仓库的只读查询误认为可以共享编排，未把每个工具调用绑定到唯一仓库根目录。
+- Prevention: 跨仓库状态、源码、矩阵、测试、格式化和写入都使用独立工具调用；每个 cell 只允许一个仓库路径，先核对 `git rev-parse --show-toplevel`，返回后再串行切换另一仓库。
+- Verification: 两次并行编排均未产生文件变化；AI=148 的 Legacy/Go 证据随后按独立调用重读，后续测试、矩阵更新和提交继续按仓库串行执行。
 
 ### 2026-08-17 — Halfmoon 多目标 transcript 必须区分自身包与范围广播
 
@@ -2529,3 +2529,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy `GetAttackPower(min,max)` 对相等区间仍调用 `Random.Next(1)`；内部目标 kind 与线上的 Player 默认值没有在 resolver 边界归一化；停止 world ticker 不代表测试期间所有 session 调度都已冻结，且回调中直接 `Fatal` 会把后台抽样误报为业务失败。
 - Prevention: 迁移固定区间时保留 unit-bound 随机调用；所有延迟动作 resolver 先把 `TargetKind=0` 还原为 Player，并用 delayed-hit 测试覆盖；真实 session 将 AI/search/action 时间置于手工时钟之后，随机回调只做同步记录并断言业务阶段的稳定序列，不在异步回调中终止测试。
 - Verification: OmaMage 世界测试覆盖固定攻击边界、CanFly/冷却移动、延迟重验、Player/Monster/Hero 与两次独立毒物抽样；`net.Pipe` transcript 普通和重复 10 次、全量 `go test ./...`、`go test -race ./...`、`go vet ./...`、`go build ./...` 均通过。
+
+### 2026-08-17 — AI=148 夹具必须遵循 Go 坐标类型与真实距离分支
+
+- Symptom: OmaWitchDoctor 初次定向测试在 `gofmt` 前由 `int` 坐标传入 `int32` 字段而编译失败；修正后又把距离 1 的对角目标误标成远程，并在非直线延迟 tick 误断言“无通知”，遗漏了专用 `ProcessTarget` 的冷却追击 `ObjectWalk`。
+- Root cause: 测试夹具按字面量直觉推导坐标和“远程=非相邻方向”，没有先核对 Go struct 的精确类型，也没有按 Legacy `CurrentLocation == Target` 或 `!InRange(...,1)` 的 Chebyshev 距离条件建分支表。
+- Prevention: 新增坐标夹具先显式声明 `int32`；攻击矩阵用距离 0、1、>1 分别覆盖同格、近战和远程，再单独标注直线/非直线；延迟 tick 必须继续执行一次完整 AI 流程，把冷却期间的移动/无移动作为包级断言。
+- Verification: AI=148 测试改用 `int32` 坐标、距离 2/3 的直线远程和距离 2/1 的非直线场景；世界测试、`net.Pipe` transcript 及普通/race 定向门禁均通过。
