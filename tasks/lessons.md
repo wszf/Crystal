@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — net.Pipe AI transcript 必须显式隔离认证与后台 ticker 状态
+
+- Symptom: AI=131 会话夹具先因账号/角色名超出 15 字符限制登录失败，随后默认登录 HP 只有 18，后台 ticker 还抢先消费了 AI 的 3000ms 搜索随机数。
+- Root cause: 测试把领域名称和登录体力当成无约束值，并在服务启动前没有冻结已加载怪物的 AI 初始化/时间状态。
+- Prevention: 真实会话 fixture 使用认证正则允许的短标识；bootstrap 后读取实际协议 MP，再显式设置 world 权威 HP；启动服务前将怪物初始化并把搜索/动作时间置于未来，停止 ticker 后才注入确定性目标和时钟。
+- Verification: TucsonGeneral Rage transcript 现稳定锁定登录后的 Rage、15 个岩石、两次命中和移除包序，连续定向运行通过。
+
+### 2026-08-15 — TucsonGeneral 岩石值必须保留 Random.Next 的排他上界
+
+- Symptom: AI=131 岩石生命周期夹具把 15 个岩石的首跳/次跳生命分别期望为 850/700，定向测试实际得到 835。
+- Root cause: Legacy 使用 `Random.Next(minDC, maxDC)`，上界排他；固定值 11 时每个岩石造成 11 点伤害，不能按包含 12 的区间计算。
+- Prevention: 迁移随机区间时先核对调用 API 的上下界语义；岩石测试按 `15*11` 明确计算累计伤害，并单独覆盖边界值。
+- Verification: 修正期望为 835/670 后重新运行 AI=131 定向测试，并在完整普通/race、vet、build 门禁中确认。
+
 ### 2026-08-15 — 延迟毒伤必须区分挂入列表与当前状态广播
 
 - Symptom: TucsonEgg 爆炸定向测试第一次得到 1 点额外 HP 损失；设置毒伤时间后，测试又把尚未到处理时刻的 `CurrentPoison` 当成未施毒。
@@ -2116,3 +2130,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 混淆了隔离攻击动作解析器与完整世界 tick 的可观察阶段；命中处理完成不代表同一 tick 已结束。
 - Prevention: 测试完整 tick 时按实际调度顺序把命中后的移动、毒伤和其他 AI 通知纳入接收者 transcript；若只验证 resolver，则直接调用隔离入口并明确不覆盖后续 tick 副作用。
 - Verification: 补入命中后的移动包并按 map 中的权威实体断言后，AI=130 CannibalTentacles 定向测试通过。
+
+### 2026-08-16 — Legacy 检索命令中的不存在路径会使整条输出失效
+
+- Symptom: 本轮 Legacy 对照命令尾部误带不存在的 `Shared/Packets.cs` 和 `Server/Packets` 路径；该调用的检索结果不能作为迁移判断依据。
+- Root cause: 复制检索参数时没有先确认当前仓库的文件清单，把另一版本/旧目录结构当成 Legacy 路径继续使用。
+- Prevention: 检索前先用当前仓库的 `rg --files`/已核对路径确认目标存在；命令出现不存在路径或非零退出时整体作废并在新调用中重跑，不混用其余输出。
+- Verification: 该命令只读且未改变文件；后续 AI=131 对照仅采用当前 Legacy 根目录中实际存在的源文件结果。
