@@ -2487,3 +2487,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只按“有效命中后施毒”的概括迁移，没有沿两个不同 `DelayedAction`/完成函数核对 poison 标志；测试断言把“目标已死亡”与“命中后死亡”混为一类。
 - Prevention: 每个 AI 先建立动作构造参数到完成 resolver 的逐分支表，只有 Legacy 明确传入 poison 标志的路径才添加状态；重验 fixture 同时记录 mutation 后的预期 HP 与是否发生伤害，不能固定复用初始生命值断言。
 - Verification: AI=144 近战世界测试锁定 AC/Agility 伤害且无 Green poison，远程世界与 `net.Pipe` transcript 锁定 Green poison 首跳和 `Elapsed=1`；地图/安全区/死亡重验测试修正后全部通过。
+
+### 2026-08-17 — AI=145 分析时 Go 工作目录不得携带 Legacy 路径
+
+- Symptom: AI=145 对照期间一次只读命令在 Go 工作目录中附带了 Legacy `Server/...` 路径；命令没有写入文件，但读取失败，整条输出不能作为证据。
+- Root cause: 切换仓库后复用了上一侧的相对路径，没有把工作目录和所有路径参数作为同一个单仓库调用契约核验。
+- Prevention: 每次切换仓库先独立核对 `git rev-parse --show-toplevel`，随后命令参数只使用当前仓库已确认存在的路径；出现混合路径或非零读取结果时整体作废并在新的独立调用重跑。
+- Verification: 该调用只读且两仓库均无文件变化；后续 OmaBlest 的 Legacy/Go 源码读取将按独立工具调用和路径清单执行。
