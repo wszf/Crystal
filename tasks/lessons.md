@@ -2466,3 +2466,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: The fixture copied the DC-specific `monsterStat*` naming pattern instead of checking the current Go package's shared `statMinMAC`/`statMinMC`/`statMinSC` constants.
 - Prevention: Before adding a migrated monster fixture, search the current Go package for each stat constant and run `gofmt` plus `go test ./cmd/crystal-server -run '^$' -count=1` immediately after the first patch.
 - Verification: The fixture now uses the authoritative shared stat constants; package compilation, PeacockSpider tests, and the full server test suite pass.
+
+### 2026-08-17 — 跨仓库只读命令必须先核验每个路径
+
+- Symptom: AI=144 研究期间一次 Legacy 命令末尾误带 Go 源码路径，另一次 Go 命令引用了不存在的测试文件；两条命令均在读取阶段失败，不能使用同一调用的任何部分输出作为证据。
+- Root cause: 为连续读取对照代码而复用了上一仓库的路径参数，并凭文件名猜测 Go 测试文件存在，没有在执行前按当前仓库的 `rg --files` 清单核验全部路径。
+- Prevention: 每个 `functions.exec` cell 只绑定一个已核验仓库根目录；命令中的每个文件、目录和 glob 都必须来自该仓库的实际清单，出现混合路径、猜测路径或非零读取结果时整条输出作废并在新的独立调用重跑。
+- Verification: 两次失败调用均无文件写入；后续 AI=144 对照与实现读取将按 Legacy/Go 独立 cell 和已存在路径执行。
+
+### 2026-08-17 — AI session transcript 的共享 world 读取必须持锁
+
+- Symptom: AI=144 真实 `net.Pipe` transcript 在 `go test -race` 下读取 `world.monsterAttackActions[0]` 时报告与连接维护 tick 的数据竞态；普通测试未暴露问题。
+- Root cause: 停止后台 ticker 不会停止连接 session loop 的维护 tick；夹具只在写入共享 AI 状态时持锁，却无锁读取仍由 session loop 访问的 world slice。
+- Prevention: 在线 transcript 对共享 world 的每次读取都经过 `world.mu` 快照，写入也保持同一锁；KeepAlive 只提供会话阶段屏障，不等价于停止连接级 tick。
+- Verification: action due/count 断言改为锁内快照后，AI=144 session race 定向测试连续 5 次通过，普通 transcript 仍锁定完整包序。
+
+### 2026-08-17 — OmaCannibal 近战与远程毒物分支必须按 DelayedAction 形状区分
+
+- Symptom: AI=144 初版 resolver 在近战 DC 命中后也加入 Green poison；Legacy 只有带 `poison=true` 的 `CompleteRangeAttack` 远程路径施毒。新增死亡重验夹具还把预先设为 0 的 HP 误断言为初始 100，造成一次定向测试失败。
+- Root cause: 只按“有效命中后施毒”的概括迁移，没有沿两个不同 `DelayedAction`/完成函数核对 poison 标志；测试断言把“目标已死亡”与“命中后死亡”混为一类。
+- Prevention: 每个 AI 先建立动作构造参数到完成 resolver 的逐分支表，只有 Legacy 明确传入 poison 标志的路径才添加状态；重验 fixture 同时记录 mutation 后的预期 HP 与是否发生伤害，不能固定复用初始生命值断言。
+- Verification: AI=144 近战世界测试锁定 AC/Agility 伤害且无 Green poison，远程世界与 `net.Pipe` transcript 锁定 Green poison 首跳和 `Elapsed=1`；地图/安全区/死亡重验测试修正后全部通过。
