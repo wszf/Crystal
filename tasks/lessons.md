@@ -12,6 +12,9 @@ Record project-specific corrections and failure-prevention patterns here.
 - Strengthening after recurrence: 跨仓库补丁目标也必须在调用前用完整绝对路径核验；少拼一段目录的目标会在 apply 阶段失败，不能依赖工具错误文本代替路径检查。
 - Verification after recurrence: 本次 Go 测试期望补丁因缺少 `me_work` 目录在写入前被拒绝；随后将所有目标固定为已核验的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer/...` 路径。
 
+- Strengthening after second recurrence: 已核验的仓库根目录不能手工重复或变形；每次新工具调用仍先使用不带源码路径的 `git rev-parse --show-toplevel`，成功后才读取文件。
+- Verification after second recurrence: 本次错误的 `Crystal.GoServer.GoServer` 工作目录在进程启动前失败且无文件变化；后续调用恢复为完整单一 Go 根目录。
+
 ### 2026-08-14 — net.Pipe fixture assignments must pass vet
 
 - Symptom: `go vet ./...` rejected the Poisoning/Purification session fixture's `caster.MP, caster.MaxMP = caster.MaxMP, caster.MaxMP` as a self-assignment.
