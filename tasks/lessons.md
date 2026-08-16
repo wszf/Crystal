@@ -2,6 +2,34 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — net.Pipe 手工 tick 前必须冻结 session loop 的 AI 时间线
+
+- Symptom: 服务端整包一次运行中，既有 Armadillo session transcript 收到空 reveal；该测试单独运行及连续 10 次运行均通过。
+- Root cause: `stopPoisonSessionTicker` 只停止后台 ticker，连接 session 的读循环仍会独立调用 `world.tick(time.Now)`；它可能在测试手工 tick 前消费一次性的 DigOut reveal。
+- Prevention: 真实会话夹具在启动手工时钟前把 AI/search/action 时间置于未来，或显式暂停 AI；停止 ticker 不等于停止连接级 runtime tick，不能把两者当作同一时钟。
+- Verification: Armadillo 定向 transcript 单独及 `-count=10` 连续通过；本次 AI=136 session 也采用未来时钟、关闭 lights 和显式暂停 AI 后稳定通过。
+
+### 2026-08-15 — 跨仓库补丁目标与检索参数必须再次核验
+
+- Symptom: AI=136 工作中一次 apply patch 手工重复了 Go 仓库目录，另一次 Go 只读命令夹带了 Legacy `Server/...` 路径；命令未产生源码写入，但其失败输出不可用于判断。
+- Root cause: 复用上一调用的绝对路径/对照路径，没有在新调用前把 `git rev-parse --show-toplevel`、工作目录和参数重新作为单仓库集合核对。
+- Prevention: 每次切换仓库先独立打印根目录；随后源码检索和补丁参数只出现当前仓库路径，补丁前对每个绝对目标执行存在性核验，禁止凭记忆拼接目录。
+- Verification: 错误调用均在读取/补丁验证阶段停止且工作树无新增目标文件；之后仅在核验后的 Go 根目录完成 AI=136 修改。
+
+### 2026-08-15 — FlyingStatue 生命周期 transcript 要隔离下一次 AI 与 owner 清理
+
+- Symptom: AI=136 定向测试第一次在 1100ms 命中同时收到第二个 `ObjectAttack`；龙卷风过期断言漏掉了 Slow 清除的 `ObjectPoisoned`；删除默认玩家后宠物用例没有产生龙卷风。
+- Root cause: fixture 的 `AttackSpeed=1000` 早于远程命中，world tick 会继续运行 AI；移除 tornado owner 后同一 tick 的 poison processor 会广播状态清除；删除预置玩家后没有把攻击者的缓存目标改为宠物。
+- Prevention: 生命周期测试使用足够大的攻击间隔或暂停 AI loop，断言包括 owner 消失引起的 poison 状态包；修改目标 population 后同步更新 `MonsterAITargetID/Kind`，不能保留已删除实体的缓存目标。
+- Verification: AI=136 world transcript 现稳定覆盖近战、9 个 tornado 的 spawn/impact/9 个 remove、Slow 清除及宠物命中，定向测试通过。
+
+### 2026-08-15 — FlyingStatue 目标扫描的嵌套循环必须先通过包级编译
+
+- Symptom: AI=136 首次 `gofmt`/包级编译在 `flying_statue.go` 约第 163 行报告缺少逗号和操作数，功能代码尚未进入行为测试。
+- Root cause: 目标扫描补丁调整缩进时遗漏了 `for x`/`for y`/`for distance` 的闭合层级，且候选目标语句脱离了 `for x` 体。
+- Prevention: 新增多层坐标扫描后立即用 `gofmt` 和 `go test <package> -run '^$'` 做语法/包级编译门禁，再开始编写行为断言；检查每层循环的缩进和闭合数。
+- Verification: 补回循环闭合、格式化后 `go test ./cmd/crystal-server -run '^$'` 通过。
+
 ### 2026-08-15 — StoningStatue 的 Random.Next(1) 也必须保留在后续 Dazed 随机流中
 
 - Symptom: AI=135 等界防御回归实际只记录了魔抗与 Dazed 抽样，缺少敏捷/防御的 bound=1；初始期望序列失败。
@@ -2247,3 +2275,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 新增光照副作用后，旧会话夹具仍用 `time.Now().Add(time.Hour)` 作为人工推进时钟，当前小时变化可能跨越 Legacy 光照区间。
 - Prevention: 每个使用人工 `base` 的在线会话夹具都必须在停止维护 ticker 后注入固定 `setLightClock`；整包回归不能只验证新功能的 session 测试。
 - Verification: 将 Mantis/Tucson 受影响夹具同步固定光照后，先重跑各自 transcript，再重跑服务端整包普通、race、vet 和 build 门禁。
+
+### 2026-08-16 — race 会话夹具的共享 AI 配置必须在 world.mu 下更新
+
+- Symptom: `go test -race ./...` 检测到 FlyingStatue/GasToad session 测试直接改写 `monsterAIEnabled`/`monsterAIRoll`，后台连接循环同时在 `world.tick` 中读取；GasToad 在 race 变慢时还会让后台 tick 先消费一次性攻击。
+- Root cause: 停止维护 ticker 不会停止每个连接的请求维护循环；测试把共享 AI 配置当成本地字段，并把人工基准时间设在墙钟当前时刻。
+- Prevention: 所有在线 session 的共享 AI 注入通过持有 `world.mu` 的 helper 完成，AI 开关写入同样加锁；人工 transcript 时钟至少领先墙钟一小时，避免连接循环抢先处理未来动作。
+- Verification: FlyingStatue/GasToad session 在 `go test -race` 下连续 10 次通过；随后将重跑全量 race 门禁。
