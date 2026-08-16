@@ -2410,3 +2410,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 依赖前一轮分析记忆，没有在生命周期分支修改前用带行号/不可歧义的读取重新核对实际控制流。
 - Prevention: 修改 spawn/impact/expiry 状态机前先复读完整分支的精确物理行（包括条件、状态写入和 `continue`/`return`），再用最小 hunk 修改；补丁失败或上下文不符时不据工具输出推断源码状态。
 - Verification: EarthGolem Pile 的 spawn、首次/重复命中、过期移除和 ordered transcript 均通过，生产状态机未引入重复处理。
+
+### 2026-08-17 — Go 仓库绝对路径重复时必须立即作废调用
+
+- Symptom: AI=141 开始前一次只读命令把 Go 根目录手写成重复的 `.../me_work/me_work/Crystal.GoServer`，进程未启动，不能使用其输出作为源码或状态证据。
+- Root cause: 从 Legacy 切换到同级 Go 仓库时凭记忆拼接绝对路径，没有先复用独立 `git rev-parse --show-toplevel` 返回的完整根目录。
+- Prevention: 每次 Go 工具调用先在独立调用中核对 `git rev-parse --show-toplevel` 和目标存在性，后续只使用该调用返回的根目录；启动失败的调用整体作废，不据错误文本推断文件状态。
+- Verification: 本次命令在进程创建前失败且没有文件变化；后续 AI=141 的 Go 读取、补丁、测试和提交将只使用核验后的 `Crystal.GoServer` 根目录。
+
+### 2026-08-17 — TreeGuardian 测试必须锁定防御公式、Hero 基础敏捷和 value-map 回写
+
+- Symptom: AI=141 首次定向断言把 AC/MAC 伤害按直觉算错；Hero 夹具遗漏等级基础敏捷的 `Random.Next(16)`；真实 session 第二次攻击因未回写 `world.monsters` 的 value 副本而没有产生攻击包。
+- Root cause: 测试只看攻击力和手工 AC，没有沿实际 Player/Monster/Hero 命中路径计算防御；没有从 Hero class/level 的基础属性推导随机边界；修改 detached `worldMonster` 后把 map 当成引用容器使用。
+- Prevention: 每个 AI 分支先分别固定攻击随机源、战斗随机源和目标层防御/敏捷公式；Hero transcript 覆盖其实际基础 stat roll；修改 `world.monsters` 中的实体后立即显式写回，并在下一 tick 从权威 map 回读状态。
+- Verification: TreeGuardian 四分支/Fullmoon 世界测试、真实 `net.Pipe` 攻击与失效目标 transcript 均通过；普通/race 全仓测试、vet、build 和 diff 检查均通过。
