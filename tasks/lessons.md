@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-15 — StoningStatue 的 Random.Next(1) 也必须保留在后续 Dazed 随机流中
+
+- Symptom: AI=135 等界防御回归实际只记录了魔抗与 Dazed 抽样，缺少敏捷/防御的 bound=1；初始期望序列失败。
+- Root cause: Go 通用 `monsterAIRollLocked(1)` 为不可变结果直接返回，StoningStatue 的 MACAgility 敏捷和 `GetDefencePower(min,max)` 两次 Legacy `Random.Next(1)` 因此没有调用注入随机源。
+- Prevention: 对 StoningStatue 的敏捷与防御路径使用保留 unit-bound 调用的专用 helper；通用 AI helper 仍维持既有无效分支语义。
+- Verification: 等界 pet AOE 回归现在稳定记录 `[10, 1, 1, 5, 3, 10, 2]`，并确认 HP、Dazed duration/value 与毒物写回正确。
+
+### 2026-08-15 — Go 仓库命令的绝对路径需避免手工重复目录
+
+- Symptom: 一次只读 `sed`/`rg` 调用把 Go 根目录重复写成不存在的路径，命令未启动，不能使用其输出判断 stat 常量。
+- Root cause: 切换到已核验 Go 根目录后复制路径时又手工拼接了 `me_work` 目录。
+- Prevention: 每次 Go 工具调用先在独立调用中执行 `git rev-parse --show-toplevel`；随后只使用该调用返回根目录下的相对路径，禁止凭记忆拼接绝对路径。
+- Verification: 错误调用在进程创建前被拒绝且无文件变化；随后在正确 Go 根目录读取常量并完成回归修复。
+
 ### 2026-08-15 — GasToad 多目标毒物写回必须先提交 value-map 伤害副本
 
 - Symptom: GasToad Type 2 对宠物的直接伤害已生效，但同一延迟结算后的 Green poison 列表为空、宠物只少了 10 点 HP。
@@ -238,6 +252,23 @@ Record project-specific corrections and failure-prevention patterns here.
 - Symptom: Siege 在修复时使用 Gate 方向公式，但初始加载和普通受击只按 Wall/默认方向处理，导致同一资产在修复前后显示不一致。
 - Root cause: 依据数据库列表名 `Siege` 推断运行类型，忽略 Legacy `ConquestGuildSiegeInfo.Spawn` 实际严格创建 AI 72 `Gate` 并调用 `CheckDirection`。
 - Prevention: 迁移多态资产时沿 Spawn 的实际构造类型决定运行行为；列表分类只决定持久字段和 NPC 动作，方向、受击和对象投影应复用真实实例类型的公式。
+
+### 2026-08-15 — 跨仓库检索参数不得携带另一仓库路径（AI=135 复发）
+
+- Symptom: 一次 Go 仓库只读检索命令仍带有 Legacy `Server/...` 路径；命令只返回路径不存在，没有写入，但其输出不能作为语义判断依据。
+- Root cause: 查询多个对照点时复用了上一条 Legacy 命令的路径字面量，没有把当前 `workdir` 与命令参数作为单仓库边界一起校验。
+- Prevention: 每次跨仓库读取必须拆成独立调用，先执行并核对当前仓库的 `git rev-parse --show-toplevel`，随后命令参数只使用当前仓库相对路径；另一仓库必须在新的调用中读取。
+- Verification: 本次错误命令在读取阶段失败且两个工作树无源码变化；记录后继续实现前已恢复为单仓库调用，并将错误输出排除在判断之外。
+
+- Strengthening after recurrence: 工具调用的绝对 `workdir` 也必须逐字使用最近一次 `git rev-parse` 的结果；少一段目录会在进程启动前失败，不能用错误文本替代根目录核验。
+- Verification after recurrence: 本次拼写错误的工作目录在进程创建前被拒绝且无文件变化；随后先独立核对 Legacy 根目录，再继续只读对照。
+
+### 2026-08-15 — AI=135 定向夹具必须覆盖冷却期移动与真实方向
+
+- Symptom: StoningStatue 线攻击在首个 550ms 命中后，测试因 AI 冷却期进入移动回退而遗漏 `Random.Next(2)`；type=1 会话夹具还把相邻目标的 `Direction` 期望成了 0。
+- Root cause: 只按攻击 admission/impact 设计时序，没有把每次 world tick 继续执行的 `ProcessAI` 冷却期移动路径纳入确定性 roll 表；协议期望按手写直觉填写，未从攻击者/目标坐标计算方向。
+- Prevention: AI transcript 的固定随机源覆盖攻击后可达的冷却/移动分支；所有 `ObjectAttack` 方向期望由 `DirectionFromPoint` 的坐标输入生成，并同时校验实际 payload。
+- Verification: AI=135 world line/area tests 与真实 `net.Pipe` type=1 transcript 连续通过，包含首格/次格延迟、冷却期移动 roll 和相邻方向 payload。
 - Verification: Siege 加载、受击方向刷新现使用 Gate 的 midpoint-to-even 公式，并由独立方向与 `ObjectTurn` 回归测试覆盖。
 
 ### 2026-08-13 — 权威状态 fixture 必须先完成领域种子再做 JSON 重载
