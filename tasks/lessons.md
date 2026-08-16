@@ -2179,3 +2179,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 新测试只按当前文件判断辅助函数是否可用，没有检索 `cmd/crystal-server` 的整个 `main` test package；Go 的 `*_test.go` 文件共享同一 package 命名空间。
 - Prevention: 新增测试 helper 前先用 `rg` 搜索整个 package 的声明与调用，优先复用现有 helper；新增后先运行 `go test ./cmd/crystal-server -run '^$' -count=1`，再运行行为 transcript。
 - Verification: 删除重复 helper、复用现有 `packetIDs` 后，Mantis 会话测试进入运行阶段；随后用包级编译和定向 transcript 验证。
+
+### 2026-08-15 — AssassinBird 测试复合字面量必须先通过语法门禁
+
+- Symptom: 新增 AI=134 测试夹具执行 `gofmt` 时在 `Stats` 切片闭合处报告 `missing ',' before newline in composite literal`，行为测试尚未运行。
+- Root cause: 多行 `worlddata.MonsterInfo` 复合字面量的最后一个切片元素后遗漏了 trailing comma，长测试 patch 没有在首次落盘后立即做语法门禁。
+- Prevention: 新增或改写多行 Go 复合字面量后立即运行 `gofmt` 和受影响包的 `go test ... -run '^$'`；切片/映射闭合行逐项核对逗号与层级，再继续增加行为断言。
+- Verification: 该错误在 `gofmt` 阶段被捕获且未运行服务端测试；补齐逗号后将重新执行包级编译和 AssassinBird 定向测试。
+
+### 2026-08-15 — AssassinBird session 随机源必须避开 AI 初始化
+
+- Symptom: AI=134 真实 `net.Pipe` transcript 在 bootstrap 阶段先消费 `Random.Next(3000)`，确定性夹具把它当作攻击分支而失败，随后 pipe 被关闭。
+- Root cause: 测试在服务启动前安装了只允许攻击阶段上界的 `monsterAIRoll`；后台维护 tick/AI 初始化仍会先读取初始化搜索延迟和 CoolEye 随机值。
+- Prevention: session fixture 启动前不注入攻击专用随机源；完成 bootstrap、停止 ticker 并用 KeepAlive barrier 同步后，再初始化确定性目标/时间并安装只覆盖实际攻击调用序列的随机源。初始化阶段若必须运行，使用非断言默认源。
+- Verification: 失败发生在 bootstrap fixture、业务 transcript 尚未执行；调整随机源安装边界后将先运行包级编译，再重复 AssassinBird session transcript。
+
+### 2026-08-16 — 人工 session 时钟必须固定全局光照状态
+
+- Symptom: AssassinBird 真实 `net.Pipe` transcript 在攻击 tick 多收到一个 ID 61 (`ServerTimeOfDay`)，精确包序断言失败。
+- Root cause: 测试把人工 `base` 设置为实时后一小时，跨过了 `lightSettingAt` 的小时边界；在线 world 的全局光照更新因此在战斗通知前广播了状态包。
+- Prevention: 只要 session transcript 使用与实时维护 tick 不同的人工时钟，就在注入 `base` 后调用 `setLightClock` 固定同一光照值，再驱动 world tick；不能假设停止后台 ticker 会关闭在线光照副作用。
+- Verification: 固定光照时钟后，AssassinBird session transcript 的通知 ID 和完整 payload 连续通过，包级编译保持通过。
+
+### 2026-08-16 — 全量会话回归必须覆盖旧 transcript 的光照时钟稳定性
+
+- Symptom: 服务端整包普通测试在 Mantis 和 Tucson transcript 中分别收到额外的 `ServerTimeOfDay`，虽然领域行为未变，精确包序仍失败。
+- Root cause: 新增光照副作用后，旧会话夹具仍用 `time.Now().Add(time.Hour)` 作为人工推进时钟，当前小时变化可能跨越 Legacy 光照区间。
+- Prevention: 每个使用人工 `base` 的在线会话夹具都必须在停止维护 ticker 后注入固定 `setLightClock`；整包回归不能只验证新功能的 session 测试。
+- Verification: 将 Mantis/Tucson 受影响夹具同步固定光照后，先重跑各自 transcript，再重跑服务端整包普通、race、vet 和 build 门禁。
