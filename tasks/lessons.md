@@ -2424,3 +2424,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试只看攻击力和手工 AC，没有沿实际 Player/Monster/Hero 命中路径计算防御；没有从 Hero class/level 的基础属性推导随机边界；修改 detached `worldMonster` 后把 map 当成引用容器使用。
 - Prevention: 每个 AI 分支先分别固定攻击随机源、战斗随机源和目标层防御/敏捷公式；Hero transcript 覆盖其实际基础 stat roll；修改 `world.monsters` 中的实体后立即显式写回，并在下一 tick 从权威 map 回读状态。
 - Verification: TreeGuardian 四分支/Fullmoon 世界测试、真实 `net.Pipe` 攻击与失效目标 transcript 均通过；普通/race 全仓测试、vet、build 和 diff 检查均通过。
+
+### 2026-08-17 — Go 仓库根目录重复时必须作废启动失败调用
+
+- Symptom: AI=141 开始前一次命令把 Go 根目录写成 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer.GoServer`，进程在启动前失败，不能提供源码或状态证据。
+- Root cause: 从 Legacy 切换到同级 Go 仓库时手工重复拼接了仓库名，没有直接复用独立 `git rev-parse --show-toplevel` 的结果。
+- Prevention: 每次 Go 工具调用先独立核验根目录和目标存在性，后续只使用该调用返回的完整路径；启动失败的调用整体作废，不能根据错误文本推断状态。
+- Verification: 错误调用未启动且没有文件变化；随后以核验后的 `Crystal.GoServer` 根目录完成 AI=141 的读取、测试和提交准备。
+
+### 2026-08-17 — TreeQueen transcript 必须按真实 recipient 与对象生命周期验收
+
+- Symptom: AI=142 初始定向测试使用了错误的 recipient ID，并假定对象在 spawn tick 就完成后续命中/移除，导致 transcript 与实际通知和生命周期不符。
+- Root cause: 测试按 fixture 中的猜测身份和单次 tick 推导网络行为，没有先确认真实接收者，也没有把召唤、延迟命中和过期移除拆成实际世界 tick。
+- Prevention: 多对象 transcript 先从在线连接和通知接收者矩阵确定 recipient，再按每个对象的 spawn/impact/expiry 时刻逐 tick 断言；value-map 实体状态从权威 world map 回读。
+- Verification: TreeQueen 世界测试和真实 `net.Pipe` transcript 已按实际 recipient、目标投影和有序生命周期修正并通过，普通/race/vet/build 门禁保持绿色。
+
+### 2026-08-17 — TucsonMage bootstrap 完成后再注入攻击随机源
+
+- Symptom: TucsonMage session fixture 的攻击随机源可能在 bootstrap 阶段先被 `Next(3000)` 消费，导致后续攻击 transcript 的随机序列漂移。
+- Root cause: bootstrap、session 维护 tick 和攻击动作共享同一个确定性随机源，测试在连接尚未稳定前就安装了只覆盖攻击阶段的 roll 表。
+- Prevention: bootstrap 阶段保留宽松随机源；完成 bootstrap 并用 KeepAlive barrier 同步后，停止维护 ticker，再安装攻击专用随机源和人工时钟，避免初始化消费混入攻击序列。
+- Verification: TucsonMage 定向测试连续 5 次通过，随后服务端整包、全仓普通/race、vet 和 build 门禁均通过。
