@@ -2361,3 +2361,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `StatsInitialized=true` 的真实会话在 DC/MC/SC 减益后会按角色等级刷新派生 MaxHP，人工 100 HP 超过新手上限；Monster stat 常量和 import 未先从当前 Go package 核对；RhinoPriest 的同格/相邻分支边界与 Legacy 显式距离判断未逐项列出；Hero runtime 与 Monster AI 会在同一 `world.tick` 独立推进，而双目标表中另一分支的指针为 nil。
 - Prevention: session fixture 保留真实 stat refresh，但把合成角色等级提高到足以容纳人工 HP，并固定光照/时间；新增测试先用当前 package 的符号检索和包级编译门禁；按 Chebyshev 距离逐项标注近战、同格和远程；多目标测试先按 kind 选择非 nil ID，并把 Hero `ActionReadyAt` 置于人工时钟之后，避免无关 AI transcript 污染。
 - Verification: RhinoPriest 世界攻击、毒物、减益、宠物 Monster、Hero 和真实 `net.Pipe` transcript 均通过；失败夹具修正后重新运行定向测试，完整门禁将在本批次末执行。
+
+### 2026-08-17 — 跨仓库初始查询仍必须按工具调用隔离
+
+- Symptom: 本批恢复时又把 Legacy 与 Go 的初始状态查询放入同一个 `Promise.all`；查询没有写入文件，但不能由每个结果独立证明其仓库边界。
+- Root cause: 将“都是只读查询”误当成可以跨仓库并行，忽略了工具编排层同样可能混淆 workdir、输出和后续判断。
+- Prevention: 每个 `functions.exec` cell 只绑定一个先经 `git rev-parse --show-toplevel` 核验的仓库根目录；Legacy 与 Go 的状态、源码、测试和写入按独立调用串行切换，禁止用 `Promise.all` 混放两侧。
+- Verification: 混合查询未产生文件变化；后续 lessons、Go 状态、测试和提交前门禁均按独立仓库调用完成。
+
+### 2026-08-17 — StoneGolem 的三格中心、值 map 和目标投影必须分别锁定
+
+- Symptom: AI=139 若只按攻击距离推导 Quake 中心、复用 `world.monsters` 的旧副本，或用 nil Hero 夹具，可能出现中心错位、Monster HP 未持久化或测试未真正覆盖 Hero 投影；攻击冷却期还可能错误追加移动包。
+- Root cause: Legacy 使用 `PointMove(CurrentLocation, Direction, 3)` 生成中心；Go Monster 表是 value map；Hero 运行实体与 owner-keyed 表、非空 `StoredHero` 是分开的契约；`ProcessTarget` 在 `!CanAttack` 时提前返回，不能把冷却期当作移动回退。
+- Prevention: 逐步执行三次 `PointMove`；每次修改 Monster 后写回并从权威 map 回读；Hero fixture 同时设置 owner map key、runtime ObjectID 和非 nil Hero；测试把冷却期“无移动”作为独立可观察边界，并按 Player/Monster/Hero 分开生成命中矩阵。
+- Verification: AI=139 世界测试覆盖 25 个有效 Quake、value-map HP 回读、Hero 非命中/单目标攻击、延迟重验和冷却期；真实 `net.Pipe` transcript 锁定中心 ObjectSpell、HP 与 25 个有序移除包。
+
+### 2026-08-17 — race 下人工 session 时间轴必须冻结光照时钟
+
+- Symptom: SwiftFeet 到期的合成 `world.tick` 在 race 下收到 `ServerTimeOfDay`（ID 61）而不是预期的 `ServerRemoveBuff`，单个领域状态本身没有错误。
+- Root cause: 停止后台 ticker 只等待 ticker goroutine 退出，仍保留 `lightsEnabled`；人工到期时间与墙钟光照区间不同，在线世界会把全局光照变化插入精确 transcript。
+- Prevention: 停止维护 ticker 后，在每个使用人工时间轴的在线 fixture 中用 `setLightClock` 固定一个稳定时刻，再驱动 synthetic tick；不能把 ticker 停止当成光照副作用关闭。
+- Verification: SwiftFeet 定向普通/race、Go 全量 `go test -race ./...`、`go vet ./...` 与 `go build ./...` 均通过，且没有额外 TimeOfDay 包。
