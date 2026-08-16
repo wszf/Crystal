@@ -2056,3 +2056,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 在线 session 的全局时钟 ticker 可在任意请求响应之间插入时间通知，测试 reader 把异步允许包当成了本次 walk 响应。
 - Prevention: 有在线 ticker 的 transcript reader 对明确允许的 `ServerTimeOfDay` 循环过滤，再继续等待目标响应；其他包仍立即失败，禁止用固定 sleep 或忽略所有异常包掩盖协议错误。
 - Verification: 将 Craft 距离移动、NPC 移除和 ignored-request reader 改为只过滤 TimeOfDay 后，单测重复与全仓普通/race 门禁验证插入通知不再造成假失败。
+
+### 2026-08-15 — 本批次两次路径边界复发仍须整体作废错误证据
+
+- Symptom: 本批次一次 Go 命令误带 Legacy 路径，另一次 Legacy 命令误带 Go 路径；两次均只读失败、未产生写入，但输出不能用于迁移判断。
+- Root cause: 切换仓库后复用了上一调用的路径参数，没有把绝对 `workdir`、根目录校验和相对路径 allowlist 绑定为一个不可拆分的调用契约。
+- Prevention: 跨仓库读取/写入拆成独立工具调用；每次先核对 `git rev-parse --show-toplevel`，命令参数只允许当前仓库路径，出现混合路径或非零结果时整体丢弃并重跑。
+- Verification: 两次错误调用均在读取/启动阶段失败且两个工作树无源码变化；随后按 Legacy、Go 分开的已核验根目录重新读取，后续实现和测试未使用错误输出。
