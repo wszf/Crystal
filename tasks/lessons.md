@@ -2,6 +2,27 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — Go 工作目录绝对路径不得重复拼接
+
+- Symptom: 一次 Go 只读检索把已核验根目录重复成 `.../me_work/me_work/Crystal.GoServer`，进程未启动，输出不能作为源码证据。
+- Root cause: 复制绝对工作目录时凭记忆再次拼接父目录，没有直接复用最近一次 `git rev-parse --show-toplevel` 结果。
+- Prevention: 每次 Go 工具调用前先独立核对 `git rev-parse --show-toplevel`；后续 `workdir` 只使用该返回值，禁止手工追加仓库路径。启动失败的读取调用整体作废。
+- Verification: 本次调用在进程创建阶段失败且未写入；后续将先在单独调用中核对 Go 根目录，再执行纯 Go 路径检索。
+
+### 2026-08-17 — Go 读取前必须核对精确文件清单
+
+- Symptom: 一次 Go 只读检索凭记忆加入不存在的 `monsters.go`、`visibility.go`，`rg` 返回路径错误；该调用的其他输出不能作为源码证据。
+- Root cause: 先按概念猜文件名再检索，没有用当前仓库的 `rg --files` 确认目标文件。
+- Prevention: 读取前先在同一 Go 根目录用 `rg --files` 列出精确候选；后续命令只使用已存在的路径或让 `rg` 在已确认目录内处理 glob。任一非零读取命令整体作废。
+- Verification: 本次调用未写入；后续将改用已确认的 `main.go`、`monster_ai.go` 及 `rg --files` 返回的实际文件。
+
+### 2026-08-17 — 工具编排失败不得作为源码证据
+
+- Symptom: 一次只读对照编排把 `exec_command` 拼写成不存在的工具函数，调用在执行前失败且没有任何源码输出。
+- Root cause: 手写工具名时没有沿用已确认的工具接口，也没有先做最小调用验证。
+- Prevention: 工具编排只使用已声明的 `tools.exec_command`/`tools.apply_patch` 等名称；脚本失败时整条调用作废，不从错误文本推断代码内容。
+- Verification: 本次失败发生在脚本执行阶段、无文件变化；后续继续使用已核验工具接口和独立仓库调用。
+
 ### 2026-08-17 — 真实会话维护 tick 可能消费冷却期移动随机数
 
 - Symptom: 全量 race 暴露 `TestSessionOmaWitchDoctorRangeTranscript` 偶发把攻击阶段的随机序列记录为 `[2, 11]` 而不是 `[11]`；堆栈显示连接读循环的实时 `world.tick` 在手工未来时钟之前执行了 OmaWitchDoctor 的 `MoveTo`，即使 `CanMove` 尚未到期仍先消费 `Random.Next(2)`。
@@ -2652,3 +2673,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把 `world.monsters` 当成指针 map 使用，未先复制实体到局部变量。
 - Prevention: 修改 Monster value-map 实体时先取局部副本，完成所有字段变更后通过同一 ObjectID 写回；延迟状态断言也从权威 map 回读。
 - Verification: 改为回读/修改/写回后，AI=151 CaveStatue world 与真实 `net.Pipe` 定向测试通过。
+
+### 2026-08-17 — 跨仓库并行编排仍不得混合证据
+
+- Symptom: AI=153 恢复时再次把 Legacy 与 Go 的状态/文档检索放进同一个并行编排；调用只读且没有源码变化，但违反了项目规定的单仓库证据边界。
+- Root cause: 把“命令互不写入”误当成“可以共享一次工具调用”，没有让每个编排 cell 绑定唯一仓库根目录。
+- Prevention: Legacy lessons、Legacy 状态/源码与 Go 状态/源码必须分别调用；每次切换前独立核对 `git rev-parse --show-toplevel`，混合调用输出整体作废。
+- Verification: 本次混合调用未产生文件变化；之后 CreeperPlant 对照、Go 实现、测试和矩阵更新均在独立仓库调用中完成。
+
+### 2026-08-17 — Go 检索不得引用未存在的概念文件名
+
+- Symptom: AI=153 对 Go 运行时辅助函数的检索误带不存在的 `cmd/crystal-server/session.go`，命令返回路径错误；没有写入，整条检索输出不能作为源码证据。
+- Root cause: 按概念猜测文件名并追加到 shell 参数，没有先用 `rg --files` 确认实际文件清单。
+- Prevention: 读取前先列出当前 Go 目录的精确文件；后续只使用已存在的路径或让 `rg --glob` 处理模式，任一非零读取命令整体作废并重跑。
+- Verification: 重跑时只读取已核验的 `world.go`、`main.go`、`armadillo.go` 与测试文件，CreeperPlant 行为判断只采用成功调用输出。
+
+### 2026-08-17 — AssassinBird session 必须在服务启动前冻结 AI 初始化
+
+- Symptom: Go 包级全量回归中 `TestSessionAssassinBirdPushTranscript` 偶发收到注入回调不允许的 `Random.Next(3000)`，随后 transcript 以 EOF 失败；单独运行可通过。
+- Root cause: 服务启动前未把 AssassinBird 的 `MonsterAIInitialized` 和 search/action/move/attack 时间置于未来，连接维护 tick 可能在测试安装随机回调后执行首次 AI 初始化。
+- Prevention: 真实 `net.Pipe` 夹具在启动服务前先设置 `MonsterAIInitialized=true` 并把所有 AI 时间置于未来；手工时钟和业务状态只在 bootstrap 后注入，停止 ticker 不视为停止连接维护 tick。
+- Verification: 修复后 AssassinBird transcript 连续 10 次通过，CreeperPlant transcript 普通/race 回归通过，随后 `go test ./cmd/crystal-server -count=1` 全包通过。
