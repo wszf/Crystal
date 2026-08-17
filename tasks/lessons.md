@@ -2828,3 +2828,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只按技能名称概括了 AI 效果，没有分别展开 Thunder/MassThunder 的范围比较、Fullmoon 的每目标推退通知和 `Teleport` 对缓存目标字段的同步；真实会话还可能被后台维护 tick 抢先消费。
 - Prevention: 新 AI 测试先建立坐标半径/目标种类矩阵，再按每个目标的私有与观察者包序断言；推退必须验证坐标、方向和 `ObjectPushed`；传送改变实体人口后同步 `MonsterAITargetID/Kind`，真实 `net.Pipe` transcript 在手工 tick 前冻结初始化、搜索和动作时间并用 KeepAlive 屏障。
 - Verification: DarkCaptain world 测试覆盖 Player、owned Monster/Hero、半径边界、Thunder/MassThunder、Orb、Line/Fullmoon、传送、延迟伤害和 Slave 清理；authenticated `net.Pipe` transcript 与包级定向回归通过，修复后的传送后弱目标选择测试确认缓存目标已同步。
+
+### 2026-08-17 — Go 命令的仓库根目录必须直接复用核验结果
+
+- Symptom: 一次 BlueSoul Go 命令误用了重复目录 `Crystal.GoServer.GoServer`，进程未启动；该调用没有产生源码证据。
+- Root cause: 复制绝对工作目录时凭记忆再次拼接 Go 仓库名，没有直接使用最近一次 `git rev-parse --show-toplevel` 返回值。
+- Prevention: 每次 Go 工具调用先在独立调用中核验 `git rev-parse --show-toplevel`，随后 `workdir` 只使用该返回值，命令参数只允许当前 Go 仓库路径；进程启动失败时整条调用作废。
+- Verification: 失败调用未写入文件；BlueSoul 的矩阵、格式化和测试均在重新核验的 `Crystal.GoServer` 根目录完成。
+
+### 2026-08-17 — BlueSoul Hero 夹具必须物化 Legacy 等级敏捷
+
+- Symptom: BlueSoul Hero 防御测试最初遗漏了 Hero level-20 materialized agility，实际防御随机上界为 `16`，导致按 `1` 配置的确定性测试夹具与 Legacy 行为不一致。
+- Root cause: 只初始化了 Hero 的基础坐标/HP 与零值防御字段，没有按客户端可观察的等级物化属性复核 MAC+Agility 防御计算。
+- Prevention: 为 Player、owned Monster、Hero 分别从 materialized stats 推导防御随机上界；新增/修改 Hero 夹具后先记录每次 `Random.Next(bound)` 的真实 bound，再断言 MAC、Agility 和伤害路径。
+- Verification: 修正 Hero level-20 materialized agility 夹具后，BlueSoul 定向 world/session 测试通过，并锁定实际 `bound=16`。
