@@ -2899,6 +2899,34 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 跨仓库对照拆成独立调用；每次切换先核对 `git rev-parse --show-toplevel`，Legacy 命令只使用已核验的 `Server/`、`Shared/`、`tasks/` 路径，Go 路径必须在新的 Go 调用读取；任一非零读取调用整体作废。
 - Verification: 该调用只读、未产生 C# 或 Go 变化；后续 KingHydrax 设置与实现证据将分别在两个已核验根目录重读。
 
+### 2026-08-17 — ScalyBeast 延迟攻击的 admission/impact 随机流必须分阶段断言
+
+- Symptom: ScalyBeast 普通攻击的 Player 用例通过，但 owned Monster/Hero 用例在延迟命中阶段实际消费 `monsterAIRoll` 的 `bound=10`、`bound=1`，测试只允许 admission 的 `[3,11]` 而误报失败。
+- Root cause: 同一 world tick transcript 复用了攻击选择/伤害随机 callback；Player 防御走 `combatRoll`，Monster/Hero 的 MAC 防御走 `monsterAIRoll`，且二者都发生在 admission 之后。
+- Prevention: 先断言 admission 的 `[3,11]`，再按 Player/Monster/Hero 的真实防御入口分别断言 impact 随机流；回调必须覆盖整个可达阶段而不是只覆盖首个 tick。
+- Verification: AI=167 普通 Player/owned-Monster/Hero 世界测试现分别锁定 `[3,11]`、`[3,11,10,1]` 和 Player 的 `combatRoll [10,1]`；普通及 `-race -count=10` 定向回归通过。
+
+### 2026-08-17 — ScalyBeast AOE fixture 必须把 owner 移出有效目标半径
+
+- Symptom: Stomp 的 Hero fixture 在攻击者半径 2 内同时放置 owner，impact 阶段 owner 也成为合法 Player 目标，污染了随机流和 HP/通知断言。
+- Root cause: AOE 的合法目标集合包含 owner 本身；测试只关注 Hero 目标，没有按 Legacy `FindAllTargets(2, CurrentLocation)` 展开夹具中的所有在线实体。
+- Prevention: 多目标范围测试先列出所有 Player/owned Monster/Hero 的坐标与目标门禁，再将非目标 owner/观察者移到半径外；目标数量变化后重新核对随机调用和接收者 transcript。
+- Verification: owner fixture 已移到 `(15,10)`，Stomp Player/owned-Monster/Hero 测试现锁定完整随机流（包括 Hero 物化敏捷的 `bound=16`）并稳定通过。
+
+### 2026-08-17 — ScalyBeast Type 0 延迟重验不能新增距离门禁
+
+- Symptom: 用 Stomp 测试“同地图远距离目标仍命中”时，目标离开半径 2 后当然不会被 AOE 扫描，HP 未变化，错误地把测试失败归因于延迟重验距离规则。
+- Root cause: Legacy Type 0 `CompleteAttack` 直接对已捕获且仍有效的 target 调用 `Attacked`；AOE Stomp 则另行调用当前位置的 `FindAllTargets`，两条命中路径不能混用。
+- Prevention: 延迟重验无距离门禁必须使用 Type 0 direct-hit fixture，并只验证目标存在、可攻击、同地图和节点有效；Stomp 单独验证当前位置半径扫描。
+- Verification: 回归已改为 Type 0、同地图但移到远处且置于安全区的目标，仍收到 MAC 命中并保持无 Paralysis；定向普通/race 回归通过。
+
+### 2026-08-17 — 跨仓库同一工具调用的隔离规则复发后必须强化
+
+- Symptom: 本批恢复前的状态/对照流程再次出现把 Legacy 与 Go 查询放进同一工具编排的情况；虽然只读，但不能由单次结果独立证明仓库边界。
+- Root cause: 为降低往返延迟，把两个仓库的状态、源码和矩阵查询当作可并行的独立任务，忽略了每个工具调用必须绑定唯一根目录的项目约束。
+- Prevention: Legacy lessons/C# 状态、Go 源码/测试/矩阵及各自 Git 操作全部拆成独立调用；每次先核对当前仓库 `git rev-parse --show-toplevel`，参数只允许当前仓库路径，禁止在 shell、Promise 或路径变量中混放两侧。
+- Verification: 混合调用的输出不再作为证据；本批后续 Legacy 与 Go 的读取、补丁、测试和 C# 零差异检查均按独立根目录串行完成。
+
 ### 2026-08-17 — 跨仓库状态读取再次不得放入同一编排
 
 - Symptom: 本轮恢复时把 Legacy lessons/status 与 Go lessons/status 查询放入同一个 `Promise.all`；Go 的不存在文件错误使该读取调用的全部输出不能作为证据，且违反了仓库隔离边界。
@@ -2989,3 +3017,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 将“两个仓库都只是迁移记录”误认为可以共享一次工具调用，忽略了本项目将 C# 基线和 Go 实现定义为独立仓库。
 - Prevention: Legacy lessons、C# 状态检查、Go 源码/测试/矩阵和 Git 提交全部使用独立调用；每次先核对本次 workdir 的 `git rev-parse --show-toplevel`，参数只包含当前仓库路径。
 - Verification: 本批次 Legacy 仅新增 lessons，Go 仅修改 AI=166 实现/测试/矩阵；后续分别执行 C# 差异与未跟踪检查确认无 C# 变化。
+
+### 2026-08-17 — AI=167 对照读取失败时立即丢弃混合调用证据
+
+- Symptom: AI=167 研究期间一次 Go 根目录读取命令误带 Legacy `Server/MirObjects/MonsterObject.cs` 路径，命令返回路径不存在；没有文件写入。
+- Root cause: 为核对 `GetAttackPower` 时复用了上一条 Legacy 相对路径，没有把 workdir 与参数集合绑定到同一仓库。
+- Prevention: 跨仓库读取先结束当前调用；每个新调用先独立执行 `git rev-parse --show-toplevel`，参数只允许当前仓库已核验路径，失败调用的其他输出一律不作为源码证据。
+- Verification: 本次混合调用在读取阶段失败且两个工作树无变更；后续将分别在 Legacy 与 Go 根目录重读 AI=167 所需片段。
