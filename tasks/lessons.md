@@ -3124,3 +3124,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 夹具沿用了 Player/owned-Monster 的防御随机假设，没有读取 Hero 装备派生的 `Agility+1=16`；ManTree 测试信息的 `MinMC=MaxMC=20`，完整半径一列表和后续 ProcessAI 清锁行为也未按运行时状态核对。
 - Prevention: 每个 AI transcript 分别记录 admission/impact 随机上界，按实际 materialized Hero stats、完整目标列表和测试 MonsterInfo 的 DC/MC/SC 设置建立期望；延迟目标删除同时断言结算跳过及后续 AI 锁状态。
 - Verification: AI=174 ManTree 世界/认证 transcript、包级普通测试和 `go test -race ./cmd/crystal-server -run 'ManTree' -count=10` 均通过；全仓普通/race、vet、build 也通过。
+
+### 2026-08-18 — AI=175 对照读取继续保持两个仓库隔离
+
+- Symptom: AI=175 对照阶段再次把 Legacy 与 Go 路径放入同一只读调用；读取阶段失败，不能使用该调用的任何部分输出作为源码证据。
+- Root cause: 为连续比较基线、Go 实现和迁移矩阵而复用了上一侧的路径参数，没有把每次工具调用绑定到唯一仓库根目录。
+- Prevention: 跨仓库对照先结束当前调用；每个新调用先核对 `git rev-parse --show-toplevel` 和当前仓库文件清单，参数只允许该仓库路径，混合路径或非零读取结果整体作废并重跑。
+- Verification: 失败调用没有写入文件；Legacy/Go 证据随后在独立、已核验的根目录调用中重读，AI=175 实现和测试只采用成功调用的输出。
+
+### 2026-08-18 — 复杂 patch 编排必须先做字符串与闭合标记检查
+
+- Symptom: AI=175 会话测试的一次复杂 patch 因 JavaScript 字符串语法错误未执行，目标文件没有变化。
+- Root cause: 多行 patch 内容与编排脚本共用一层引号/转义，未在调用前确认每个字符串和 `*** End Patch` 标记已闭合。
+- Prevention: 复杂 patch 优先拆成单文件小 hunk，使用普通字符串数组或直接 patch；调用前检查字符串闭合、hunk 首字符和 Begin/End 标记，失败后先复读目标文件与状态。
+- Verification: 失败调用无文件副作用；改用闭合的 patch 字符串重做后，AI=175 定向普通/race transcript 与 Go 包级回归通过。
