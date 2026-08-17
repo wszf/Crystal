@@ -2961,3 +2961,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为连续查看继承 AI、Buff 和 Go 运行时 helper，复用了另一仓库的路径参数，没有把一次工具调用绑定到单一已核验根目录。
 - Prevention: 先在当前仓库独立核对 `git rev-parse --show-toplevel` 和文件清单；该调用只读取当前仓库。切换另一仓库必须新建调用并重新核对，失败调用整体作废。
 - Verification: 本次混合读取没有写入 C# 或 Go 文件；后续 HornedArcher Legacy 基线与 Go 实现分别在独立根目录调用中重读。
+
+### 2026-08-17 — AI=166 FloatingRock 延迟死亡重验不得新增距离门禁
+
+- Symptom: FloatingRock 延迟死亡测试最初把目标移出攻击距离并期望命中被取消，但 Legacy `CompleteDeath` 仍会在目标存在、可攻击、同地图且 Node 有效时结算。
+- Root cause: 将普通 AI 的攻击范围门禁错误复用到死亡后的 `FindAllTargets`/延迟 AC 路径；两条 Legacy 路径的重验条件不同。
+- Prevention: 为每个延迟动作列出 admission 与 impact 的独立条件；死亡 AC 只按 Legacy 实际检查存在、攻击资格、地图和实体状态，不额外推导距离条件。
+- Verification: 将回归夹具改为跨地图重验后，Player/owned-Monster/Hero 世界测试和认证 FloatingRock 转录均通过，跨距离但同地图目标不再作为错误拒绝证据。
+
+### 2026-08-17 — AI=166 FloatingRock 必须保留所有 `Next(1)` 随机消耗
+
+- Symptom: FloatingRock Player 延迟 AC 首次只记录死亡 DC 的一个 `bound=1`，实际 Legacy 还会在 plain-AC 防御阶段消费一个 `Next(1)`；Hero/owned-Monster 路径同样有可观察 unit-bound 抽样。
+- Root cause: 通用 Go AI roll helper 为 unit bound 直接返回常量，抹掉了 Legacy `Random.Next(1)` 的 callback/RNG 消耗。
+- Prevention: 对迁移中可被 transcript 观察的 DC/AC 防御随机流使用保留 unit-bound 的 helper，并按 admission、死亡 DC、impact AC 分阶段断言边界序列。
+- Verification: FloatingRock Player/owned-Monster/Hero 世界测试及 authenticated `net.Pipe` transcript 稳定记录 `[1]` 死亡 DC 与 `[1]` impact AC；定向测试通过。
+
+### 2026-08-17 — AI=166 FloatingRock Fisher–Yates 必须先计入自身候选
+
+- Symptom: 认证生成转录首次将随机序列期望为 `[3, 11, 11]`，实际先出现 `bound=2`；附近列表同时包含 FloatingRock 自身和可克隆怪物。
+- Root cause: 按“非 AI=166 有效候选数”估算洗牌次数，遗漏 Legacy 先收集所有附近怪物、洗牌后才跳过 AI=166 的顺序。
+- Prevention: 随机 transcript 按原始候选列表长度计算 Fisher–Yates 消耗，再单独建模跳过候选和克隆门禁；不能在过滤前提前删除自身。
+- Verification: 认证 FloatingRock 转录现锁定 `[2, 3, 11, 11]`，并验证生成包序与父怪 Slave 登记。
+
+### 2026-08-17 — AI=166 跨仓库读取与提交必须继续完全隔离
+
+- Symptom: 本批次需要同时更新 Go 矩阵和 Legacy lessons；若在同一 shell/编排中混入两侧路径，任一失败会使另一侧的只读输出失去证据边界。
+- Root cause: 将“两个仓库都只是迁移记录”误认为可以共享一次工具调用，忽略了本项目将 C# 基线和 Go 实现定义为独立仓库。
+- Prevention: Legacy lessons、C# 状态检查、Go 源码/测试/矩阵和 Git 提交全部使用独立调用；每次先核对本次 workdir 的 `git rev-parse --show-toplevel`，参数只包含当前仓库路径。
+- Verification: 本批次 Legacy 仅新增 lessons，Go 仅修改 AI=166 实现/测试/矩阵；后续分别执行 C# 差异与未跟踪检查确认无 C# 变化。
