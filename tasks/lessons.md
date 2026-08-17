@@ -3380,3 +3380,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 手工重输绝对 workdir，没有复用本轮已审计的仓库根路径。
 - Prevention: 双仓最终检查先在各自已知 workdir 执行 `git rev-parse --show-toplevel`，确认根路径后再读取状态和 C# 变更；任何非零命令输出全部作废。
 - Verification: 从 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 重跑，确认仅 `tasks/lessons.md` 修改、diff check 通过且三项 C# 检查均为空。
+
+### 2026-08-18 — IceCrystalSoldier transcript 必须使用项目方向、值拷贝和重入语义
+
+- Symptom: AI=191 初版定向测试把水平攻击方向写成字面量 0，读取 map 中 owned-Monster 的局部值而误判 HP 未变化，并遗漏了 Type 1 延迟命中后同一 tick 再次进入 AI 的随机消费；MAC 固定范围的 `Next(1)` 也被误写成了 `Next(4)`。
+- Root cause: 把协议方向 ordinal 当作几何方向编号，忽略 `world.monsters` 按值存储，以及 Legacy Type 1 分支不更新 ActionTime/AttackTime/ShockTime；同时把 `Random.Next(max-min+1)` 的 inclusive 区间误当成最大值本身。
+- Prevention: transcript payload 一律由 `directionFromPoints` 生成；修改 map Monster 后从 map 重新读取断言；为不更新冷却的延迟动作验证 impact tick 的 AI 重入；固定防御区间按 `max-min+1` 记录随机 bound。
+- Verification: AI=191 世界测试和 authenticated `net.Pipe` transcript 已验证方向、当前范围中心、Player/owned-Monster/Hero MAC 伤害、Type 1 重入及 `[1]` 防御抽样，定向测试通过。
