@@ -2719,3 +2719,46 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 夹具在停止 world ticker 后仍使用墙钟当前时刻，且没有 post-bootstrap KeepAlive 屏障；连接 session loop 的维护 `world.tick(time.Now())` 可以先消费已到期的 SwampWarrior 动作，测试随后再手工 tick 时动作已被取走。
 - Prevention: 真实 AI transcript 在服务启动前将实体初始化和 search/action/move/attack 时间置于未来；bootstrap 后先停止 ticker 并消费 KeepAlive，再把人工 `base` 放到墙钟之后、固定 `setLightClock`，最后注入手工动作状态。
 - Verification: 修正夹具后 `TestSessionSwampWarriorRangeAttackTranscript` 的 race 定向测试连续 10 次通过；随后全仓普通测试、全仓 race、`go vet ./...` 和 `go build ./...` 均通过。
+
+### 2026-08-17 — Legacy 只读命令不得追加 Go 路径
+
+- Symptom: 上一轮一次 Legacy 只读命令在完成源码读取后误追加了 Go 的 `cmd/crystal-server/ancient_bringer.go`，命令在读取阶段失败；没有文件写入，整条输出不能作为证据。
+- Root cause: 为连续对照而复用了另一仓库的相对路径，没有在调用参数层执行单仓库路径 allowlist。
+- Prevention: Legacy 调用只使用已核验的 `Server/`、`Shared/`、`Client/`、`tasks/` 路径；Go 对照必须在新的、先核验根目录的独立调用中读取，任一非零混合调用整体作废。
+- Verification: 该调用未产生文件变化；本批已先完整读取 lessons，后续 Go/Legacy 读取、测试和写入将按独立仓库调用执行。
+
+### 2026-08-17 — Go patch 锚点必须先由当前源码核验
+
+- Symptom: AI=155 初次 Go patch 使用了不存在的 `monsterAIAxeSkeletonProcessTargetLocked` 函数锚点，patch 失败且没有写入源码。
+- Root cause: 按 Legacy 类型名推测 Go 的 dispatch 函数名，没有先读取当前 Go 文件确认精确锚点。
+- Prevention: 修改前先在目标仓库独立核对 `git rev-parse --show-toplevel`，再用 `rg -n`/精确源码读取确认函数签名；每个 patch 只使用已核验的上下文，失败后先重新读取再重试。
+- Verification: 失败 patch 未改变 Go 工作树；随后使用实际的 `processMonsterAICoreLocked`/`monsterAIAvengingSpiritAttackLocked` 锚点完成接入，包级编译将在行为测试前验证。
+
+### 2026-08-17 — 跨仓库失败读取的全部输出必须作废
+
+- Symptom: AI=155 随机边界核对的一条 Legacy 命令误带了 Go 的 `cmd/crystal-server` 路径并以路径不存在失败；没有源码写入，因此该调用中随后成功打印的 Legacy 片段也不能作证。
+- Root cause: 为连续查找 Legacy `MaxLuck` 与 Go AI 常量而在同一调用复用了另一仓库的路径，违反单仓库命令边界。
+- Prevention: 每个读取调用只绑定一个已核验仓库根目录和路径 allowlist；需要对照时结束当前调用，再新建调用核验另一仓库，任一混合路径或非零状态立即作废整条输出。
+- Verification: 失败调用未改变两个工作树；随后已在独立 Legacy 调用确认 `MaxLuck=10`，后续 Go 读取将另行执行。
+
+- Strengthening after recurrence: 后续 Legacy 对照命令又在尾部混入 Go 的 `cmd/crystal-server/poison.go`，即使前面的 C# 输出成功，该混合调用也必须全部作废。
+- Prevention: 执行前逐项扫描命令字符串：Legacy cell 只允许 `Server/`、`Shared/`、`Client/`、`tasks/` 路径，Go cell 只允许 `cmd/`、`internal/`、`docs/`；跨仓库读取必须由两个独立 cell 串行完成。
+- Verification after recurrence: 本次调用无文件写入；之后将分别重新核对 Legacy 的 C# poison 实现和 Go 的 poison helper，后续判断只采用各自成功调用的输出。
+
+- Strengthening after recurrence: 随后一次 Go 工作目录中的读取又误带 Legacy `Server/MirObjects/HeroObject.cs`；该调用也必须整体作废，不能采用同一调用中成功输出的 Go 片段。
+- Prevention: 工具调用前先把 `workdir` 与每个路径逐项标记为同一仓库；Go cell 禁止出现 `Server/`、`Shared/`、`Client/`，Legacy cell 禁止出现 `cmd/`、`internal/`、`docs/`，并在执行后检查退出码。
+- Verification after recurrence: 该调用只读且未改变工作树；AI=155 当前实现与测试不依赖该失败输出，后续只使用已完成的独立 Go 测试结果。
+
+### 2026-08-17 — AI=155 transcript 必须初始化继承的 FearTime，并计入同 tick 绿毒首跳
+
+- Symptom: AvengingSpirit 夹具未设置未来的 FearTime，首个手工 tick 正确执行了继承的 fear/walk 分支而没有攻击；远程攻击期望只计算直接伤害，却漏掉同一 tick 立即处理的 Green poison 首跳。
+- Root cause: 测试 fixture 只配置了 AvengingSpirit 自身的 action 状态，没有冻结 inherited AxeSkeleton fear 状态；断言把“命中时挂入毒物”和“零 TickAt 毒物在当前 tick 结算”混成了单一伤害。
+- Prevention: 所有特殊 AI transcript 在启动手工时钟前显式把继承 AI 的 FearTime/搜索/动作时间置于未来；命中断言分别核对直接伤害、毒物列表和到期结算，零 TickAt Green poison 必须纳入同 tick HP/状态包期望。
+- Verification: 修正 fixture 和伤害期望后，AvengingSpirit world/session 定向测试通过，包级空测试编译也通过。
+
+### 2026-08-17 — race 门禁前检查可重建缓存空间
+
+- Symptom: AI=155 首次全仓 `go test -race ./...` 在链接主服务测试二进制前因 `no space left on device` 失败，未执行到测试断言。
+- Root cause: 主机数据卷仅剩约 186 MiB，累积的 Go build/test cache 占用了可回收空间。
+- Prevention: 将编译/测试链接失败先分类为环境资源错误；在代码诊断前读取 `df -h`，仅清理可由 Go 重新生成的 build/test cache，再重跑同一 race 命令。
+- Verification: 清理后可用空间恢复到约 6.1 GiB，`go test -race ./...` 完整通过；普通测试、vet 和 build 也均通过。
