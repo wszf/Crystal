@@ -3215,3 +3215,35 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: The migrated Legacy poison path applies the successful Green poison value immediately during the same impact tick, so the 7-point SC poison is included in the observable HP change.
 - Prevention: For every successful ranged poison AI, derive the impact HP from the full `damage + immediate poison` pipeline and assert poison type/value/duration/tick separately; do not assume poison waits for the next world tick.
 - Verification: BlackTortoise ranged and post-launch wall tests now expect HP 75, assert the 7/5/1000 Green poison, and pass the targeted world/session test suite.
+
+### 2026-08-18 — Go 读取调用混入 Legacy 路径时必须立即作废
+
+- Symptom: DragonWarrior 对照期间一次 Go workdir 读取命令误带 Legacy `Server/...` 路径，命令因路径不存在失败；没有产生写入。
+- Root cause: 连续读取 C# 基线和 Go poison helper 时复用了另一仓库的相对路径，没有在调用参数层执行单仓库 allowlist。
+- Prevention: Go 调用只允许已核验的 Go 仓库路径；Legacy 对照必须另起独立调用，任一混合路径或非零读取调用的全部输出都不得作为证据。
+- Verification: 失败调用未改变工作树；后续 Go 读取将重新核对 `git rev-parse --show-toplevel` 后只读取 `cmd/`、`internal/`、`docs/` 路径。
+
+- Strengthening after recurrence: DragonWarrior 防御 helper 核对时又在 Go workdir 混入 Legacy `Server/...` glob，zsh 在读取前失败；该调用的全部输出继续作废。
+- Prevention strengthening: 执行 Go 命令前逐项扫描命令字符串，禁止任何 `Server/`、`Shared/`、`Client/` 路径或未核验 glob；跨仓库基线必须改用独立 Legacy 调用。
+- Verification after recurrence: 失败命令未产生文件变化；本批后续判断不采用该调用输出。
+
+### 2026-08-18 — DragonWarrior 新 AI 必须核对方法接收者
+
+- Symptom: DragonWarrior 首次包级编译失败，新增文件把 `elephantManAttackPowerLocked` 当作包级函数调用，Go 报 `undefined`；行为测试尚未执行。
+- Root cause: 读取了该 helper 的签名，却遗漏了它属于 `gameWorld` 的方法接收者，在新 AI 文件中凭函数名复制调用。
+- Prevention: 新 AI 接入现有 helper 前同时记录完整签名和接收者；新增文件完成后立即运行 `gofmt` 与 `go test ./cmd/crystal-server -run '^$' -count=1`。
+- Verification: 三处调用已改为 `w.elephantManAttackPowerLocked`，格式化后的包级编译通过。
+
+### 2026-08-18 — DragonWarrior 延迟 Player 动作必须归一化 TargetKind
+
+- Symptom: DragonWarrior 首次行为测试中 Player 的普通/半月/Shield Bash 延迟动作均没有伤害，Hero 投影还因实际防御抽样出现 `bound=16` 失败。
+- Root cause: 延迟动作沿用 Legacy/Go 的 Player `TargetKind=0` 编码，但新 resolver 直接将 0 传给多态目标查找；Hero fixture 未计入物化装备敏捷。
+- Prevention: 所有延迟 resolver 进入多态查找前将 `TargetKind=0` 显式映射为 Player；Player/owned-Monster/Hero fixture 分别记录真实防御随机上界，包括 Hero materialized agility。
+- Verification: resolver 已完成 Player kind 归一化，Hero callback 纳入 `bound=16`；DragonWarrior 普通、Halfmoon、Shield Bash、等级门禁和三类投影定向测试通过。
+
+### 2026-08-18 — DragonWarrior session 账号夹具必须遵守认证长度
+
+- Symptom: DragonWarrior authenticated `net.Pipe` transcript 在 bootstrap 前收到登录失败 payload `[1]`，AI 行为尚未执行。
+- Root cause: 新 session 使用了超出认证账号长度约束的 `dragonwarriornet`，误把业务登录失败当成服务/AI问题。
+- Prevention: 新增 session 夹具先复用已通过的短账号命名模式，并在进入 AI 状态注入前确认 `ServerLoginSuccess`。
+- Verification: 改用 `dragonnet` 后 authenticated Shield Bash transcript 通过。
