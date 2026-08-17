@@ -3138,3 +3138,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 多行 patch 内容与编排脚本共用一层引号/转义，未在调用前确认每个字符串和 `*** End Patch` 标记已闭合。
 - Prevention: 复杂 patch 优先拆成单文件小 hunk，使用普通字符串数组或直接 patch；调用前检查字符串闭合、hunk 首字符和 Begin/End 标记，失败后先复读目标文件与状态。
 - Verification: 失败调用无文件副作用；改用闭合的 patch 字符串重做后，AI=175 定向普通/race transcript 与 Go 包级回归通过。
+
+### 2026-08-18 — AI=177 首次测试新增 import 必须立即确认实际使用
+
+- Symptom: FrozenKnight 首次包级编译因新增的 `reflect` import 尚未被测试断言使用而失败，行为测试尚未运行。
+- Root cause: 先写了预留的完整 transcript 依赖，后补断言，未在每个 patch 后检查 package 级 import 使用情况。
+- Prevention: 新增标准库依赖后立即用 `rg` 检查实际引用，并运行 `gofmt` 与 `go test ./cmd/crystal-server -run '^$' -count=1`，编译绿色后再扩展行为断言。
+- Verification: `reflect.DeepEqual` 接入 FrozenKnight Shock 接收者包序断言后，包级编译与普通/race 定向测试通过。
+
+### 2026-08-18 — AI=177 unified diff 上下文必须保留闭合行标记
+
+- Symptom: FrozenKnight 远程测试的一次 patch 因 unified diff 末尾闭合行缺少上下文前导空格被拒绝，文件没有部分写入。
+- Root cause: 手写 patch 时把源码闭合行当成普通文本，遗漏了 apply_patch 所需的上下文标记。
+- Prevention: 每个 hunk 提交前逐行检查首字符：上下文为空格、新增为 `+`、删除为 `-`；失败后先复读目标文件和 diff，再拆成短 hunk 重做。
+- Verification: 小 hunk 重做后目标测试文件只包含预期修改，`gofmt` 和包级编译通过。
+
+### 2026-08-18 — AI=177 Hero 防御随机流必须按物化属性记录
+
+- Symptom: FrozenKnight Hero 投影测试初稿只允许 `bound=1`，真实 AC+Agility 路径还消费了 `bound=16`，导致确定性随机 transcript 失败。
+- Root cause: 测试按手写零敏捷假设构造 Hero，没有从 level/class/equipment 的 materialized stats 复核防御上界。
+- Prevention: Player、owned-Monster、Hero 分别读取生产命中的实际防御字段和敏捷派生值，先列出每次 `Random.Next(bound)` 再设置 callback；新增投影夹具后立即跑包级编译和定向测试。
+- Verification: Hero callback 纳入真实 `bound=16` 后，FrozenKnight Player/Monster/Hero 世界测试及 race 定向回归通过。
+
+### 2026-08-18 — AI=177 JavaScript patch 编排失败不得作为源码状态
+
+- Symptom: 一次 FrozenKnight patch 编排因 JavaScript 字符串语法错误在执行前失败，未调用写入工具。
+- Root cause: 多行 patch 与编排脚本共用引号层，未先验证字符串闭合和 Begin/End 标记。
+- Prevention: 复杂 patch 优先拆为单文件小 hunk；执行前逐项检查字符串闭合、每行 hunk 标记和 `*** End Patch`，脚本失败后不据错误文本推断源码状态。
+- Verification: 改用语法完整的独立 patch 后，FrozenKnight 源码与测试成功落盘，随后包级编译和定向普通/race 测试通过。
+
+### 2026-08-18 — AI=177 Shock 边界 transcript 必须包含搜索与颜色刷新阶段
+
+- Symptom: FrozenKnight Shock 边界测试先清空目标并期望零通知；完整 tick 实际先执行 Legacy 搜索，并因 ShockTime 变化向可见 Player 发送 `ObjectColourChanged`，测试失败。
+- Root cause: 把 `ProcessTarget` 的 Shock 清锁与 `Process` 前置搜索/`RefreshNameColour` 合并成了单阶段，并遗漏了目标/观察者接收者矩阵；实现还需要保留“可攻击能力门禁后，非攻击范围 Shock 清锁”的顺序。
+- Prevention: AI transcript 按完整 tick 阶段建模：目标重验/搜索、颜色刷新、攻击或移动门禁、再处理延迟动作；Shock 测试预置有效目标、显式固定搜索时间，并逐接收者断言颜色包与清锁状态。
+- Verification: FrozenKnight 局部门禁按 Legacy `CanAttack`（Shock 在范围分支后处理）修正后，普通测试、`go test -race ./cmd/crystal-server -run 'FrozenKnight' -count=10` 均通过。
