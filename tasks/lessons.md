@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — Go 只读调用不得混入 Legacy 相对路径（AI=171）
+
+- Symptom: AI=171 对照读取时在 Go 根目录追加了 Legacy 的 `Shared/Enums.cs` 路径；命令在读取阶段失败，不能把同一调用的其他输出当作源码证据。
+- Root cause: 为连续查看 Buff 枚举而复用了另一仓库的相对路径，没有把工作目录与参数集合绑定为单一仓库。
+- Prevention: 每次工具调用只使用当前已核验根目录下的路径；切换仓库必须结束调用、重新执行 `git rev-parse --show-toplevel`，失败调用的全部读取输出作废。
+- Verification: 本次命令未写入文件；后续 Legacy 的 Buff 枚举与 Go 的实现读取将拆成两个独立、纯仓库调用。
+
 ### 2026-08-17 — BoulderSpirit 会话必须冻结无时间门禁 AI 的维护 tick
 
 - Symptom: BoulderSpirit 认证 `net.Pipe` 转录普通运行通过，但 `-race -count=10` 偶发在手工 admission 前已经收到延迟 AC 命中包；连接维护循环抢先完成了 300ms action。
@@ -43,6 +50,22 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 复制绝对工作目录时手工拼接了仓库路径，没有直接使用最近一次 `git rev-parse --show-toplevel` 结果。
 - Prevention: 每次 Go 工具调用先独立核验根目录和目标文件；后续 `workdir` 只使用该返回根目录，禁止手工追加目录，失败读取整体作废。
 - Verification: 两次失败调用均未写入；随后在独立核验的 `Crystal.GoServer` 根目录重新读取 ElephantMan/目标辅助代码。
+- Strengthening after recurrence: 本批一次 `apply_patch` 仍因手工构造的绝对目标未与当前 `git rev-parse --show-toplevel` 逐字一致而在写入前失败；补丁目标必须先用当前根目录和 `test -f` 核对，再执行写入。
+- Verification after recurrence: 失败补丁未产生文件变化；重新核对 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 后只修改已存在的会话测试文件，定向普通/race 回归通过。
+
+### 2026-08-17 — HornedCommander 阶段转录必须保留前置阶段状态（AI=171）
+
+- Symptom: AI=171 会话把生命降到 9% 后只期望 Shield 的一个从属实体，实际先收到 Boulder 阶段创建的多个从属实体，Shield 断言在包序读取前失败。
+- Root cause: `processHornedCommanderLocked` 按 Legacy 顺序先处理未完成的 Boulder 阶段，再处理 10% Shield；测试只设置了生命值，没有声明已完成的前置阶段。
+- Prevention: 阶段隔离 transcript 必须显式 seed 已核对的前置状态；另以独立 world/session 用例覆盖完整阶段转移，不能按目标阶段名称跳过更早的阈值分支。
+- Verification: 会话夹具标记 `StartedBoulderWalk/BouldersCalled` 后，普通攻击与延迟命中以及 Shield `ObjectAttack -> AddBuff -> ObjectMonster -> ObjectHealth` 包序和免疫状态均通过，`-race -count=10` 稳定通过。
+
+### 2026-08-17 — 新增 MonsterSettings 字段必须同步默认值断言（AI=171）
+
+- Symptom: 全仓 Go 测试在服务端回归通过后，`internal/worlddata` 的默认设置测试因新增 Commander 两个名称字段而失败。
+- Root cause: 生产默认结构已扩展，但旧的完整结构体字面量断言没有同步新增字段；包级定向测试未覆盖该独立内部包。
+- Prevention: 新增持久化/配置结构字段时，检索所有默认值、JSON 兼容和导出断言，并在批次门禁运行 `go test ./...`，不能只运行受影响服务端包。
+- Verification: 默认断言补齐 `HornedCommanderMob/BombMob` 后，`go test ./...`、`go vet ./...` 和 `go build ./...` 全部通过。
 
 ### 2026-08-17 — AI=164 初次编译必须先核对桥接类型与 helper 签名
 
