@@ -2,6 +2,17 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — Legacy 只读命令也不得夹带 Go 路径
+
+- Symptom: DarkOmaKing 对照命令在 Legacy 根目录中追加了 `cmd/crystal-server/...` 路径；该部分读取失败，整条命令的输出不能作为证据。
+- Root cause: 为了连续读取对照实现，复用了另一仓库的相对路径，没有把命令参数和工作目录作为同一仓库边界检查。
+- Prevention: 每条跨仓库命令只允许当前根目录的路径字面量；切换仓库必须结束当前调用，先独立核对 `git rev-parse --show-toplevel`，再读取另一侧。
+- Verification: 失败命令未产生文件变化；后续 DarkOmaKing 对照将拆为 Legacy 与 Go 两个独立调用，且只使用成功核对后的输出。
+- Strengthening after recurrence: 即使 Go 文件只是作为后续实现参考，也不能出现在 Legacy shell 的参数中；当前仓库源码读取完成后必须结束调用，再新建已核验 Go 根目录的读取调用。
+- Verification after recurrence: 本次混合命令未产生写入；其输出未用于实现判断，后续仅采用前一条成功的 Legacy DarkOmaKing 片段和独立 Go 源码读取结果。
+- Strengthening after second recurrence: Go 根目录的命令也不得包含 `Server/...` 等 Legacy 路径，即使命令主体还包含合法的 Go 检索；跨仓库对照必须拆成两次调用，失败的一侧不污染另一侧证据。
+- Verification after second recurrence: 本次 Go 调用中的 Legacy 路径只在读取阶段失败且没有写入；后续 DarkOmaKing 实现只使用此前成功的 Legacy片段和新的纯 Go 调用。
+
 ### 2026-08-15 — 跨仓库状态核对不得放入同一并行编排（再次强化）
 
 - Symptom: 本轮恢复时再次把 Legacy 与 Go 的 status/diff 查询放进同一个 `Promise.all`；查询只读且没有源码写入，但违反了单仓库调用边界，不能保证后续不会把两侧结果混作证据。
@@ -227,6 +238,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Strengthening after fifth recurrence: 命令参数本身也必须单仓库化；即使 `workdir` 正确，`rg`/`sed` 的路径模式不得包含另一仓库的目录。先完成当前仓库检索，再在新调用切换根目录。
 - Verification after fifth strengthening: 本次 Go 调用中的 Legacy 路径模式只返回不存在且无写入；后续不再把跨仓库路径放入同一命令，源码判断仅使用当前仓库结果。
 - Strengthening after sixth recurrence: 即使命令主体只读，单仓库调用中也不得在 Legacy 根目录拼接或检索 Go 路径；每次切换仓库前重新执行 `git rev-parse --show-toplevel`，并让命令参数只包含当前根目录下的相对路径。
+
+### 2026-08-17 — Legacy 对照命令不得夹带 Go shell 模式
+
+- Symptom: 读取 Legacy `MonsterObject.cs` 时把 Go 的 `cmd/crystal-server/*.go` 模式放进同一 shell；zsh 在展开阶段失败，整条命令输出不能作为证据。
+- Root cause: 为了同时查看两个实现，混用了当前仓库的工作目录和另一仓库的相对模式，没有把 shell 参数作为单仓库边界检查。
+- Prevention: Legacy 调用只允许 `Server/...` 路径和已存在的 Legacy 文件；Go 源码必须在结束该调用后，单独核验 Go 根目录再读取。禁止在任一 shell、并行编排或路径变量中混放两侧模式。
+- Verification: 失败调用未产生文件变化，输出未用于实现判断；后续将分别在已核验的 Legacy 与 Go 根目录重跑所需片段。
 - Verification after sixth strengthening: 本次错误的 Legacy 调用只在读取阶段返回 Go 路径不存在，没有写入；随后改为先独立核验 Go 根目录再查询，迁移判断未使用错误输出。
 - Strengthening after seventh recurrence: Legacy 根目录下的检索命令即使只是比较 Go 侧已有符号，也不得包含任何 Go 路径或 glob；先结束 Legacy 只读核对，再以新的、单独核验根目录的 Go 调用继续，禁止在同一 shell 中跨边界。
 - Verification after seventh strengthening: 本次 Legacy shell 中误带的 Go glob 只返回 shell 的未匹配错误，没有写入或 C# 变化；后续实现判断不使用该输出，并恢复为单仓库调用。
@@ -2571,3 +2589,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Go 的普通 `tickMonsterAILocked` 明确把 `PetOwnerID` monster 交给 ordinary-pet pipeline；Legacy AI=149 的常见 SpawnRandom bead 是无 Master 的 summoned monster。直接测试 master 分支时必须调用 PowerBead processor，或使用真实无 owner bead。
 - Prevention: session/生产路径使用无 `PetOwnerID` 的 AI=149 bead；仅验证 owner/PetMode 边界时在持有 world 状态的夹具中直接调用 `processPowerBeadLocked` 并写回 authoritative map。
 - Verification: Effect 1 清理、PetMode matrix 和真实无 owner `net.Pipe` transcript 均按对应调度路径通过。
+
+### 2026-08-17 — Go 文档读取必须使用核验后的 Go 工作目录
+
+- Symptom: 读取迁移矩阵时把 Go 的 `docs/migration-matrix.md` 路径放在 Legacy 工作目录，命令只读失败，不能把该调用输出作为证据。
+- Root cause: 切换仓库后手工复用了上一侧的工作目录，没有把目标绝对根目录与路径参数作为不可拆分的单仓库调用。
+- Prevention: 读取 Go 文档或源码前先在独立调用核对 Go 的 `git rev-parse --show-toplevel`；随后只使用 Go 仓库已确认存在的路径，失败调用整体作废。
+- Verification: 错误调用未产生文件变化；随后在核验后的 Go 根目录成功读取迁移矩阵。
+
+### 2026-08-17 — AI=150 恢复时的跨仓库路径错误必须整体作废
+
+- Symptom: 恢复 DarkOmaKing 前的三次只读命令分别使用了未核验的 Legacy shell glob、在 Go 工作目录带入了 Legacy `Server/...` 路径、以及再次带入了 Legacy Fullmoon 对照路径；命令没有写入源码，但这些调用的输出不能作为证据。
+- Root cause: 迁移分析切换仓库时沿用了上一调用的 glob/相对路径，没有把 `workdir`、根目录核验和参数 allowlist 作为不可拆分的单仓库边界。
+- Prevention: 每个调用先独立执行并核对 `git rev-parse --show-toplevel`；Legacy 先用 `rg --files` 得到精确文件清单，Go 调用参数禁止出现 `Server/`、`Shared/`、`Client/`，Legacy 调用参数禁止出现 `cmd/`、`internal/`、Go 文档或 Fullmoon 路径。任何 shell 展开失败、路径不存在或退出码非零的只读调用整体作废，不能采用其中另一部分输出。
+- Verification: 三次失败调用均发生在读取阶段且两个工作树无源码变化；随后分别在核验后的 Legacy 与 Go 根目录读取 DarkOmaKing 基线、Go AI 调度和 Fullmoon 参考实现，后续实现只采用成功调用的输出。
+
+### 2026-08-17 — AI=150 Legacy 对照调用混入 Go 根目录必须整体作废
+
+- Symptom: 继续读取 DarkOmaKing 的 Go 辅助代码时，把 Legacy `Server/MirObjects/...` 路径放进了 Go 工作目录；命令只读失败，没有源码写入，因此该调用的所有输出均不能作为证据。
+- Root cause: 连续读取 Go/Legacy 对照时复用了上一侧的相对路径，没有把工作目录、根目录核验和参数 allowlist 作为不可拆分的单仓库边界。
+- Prevention: 每个 `functions.exec` cell 只绑定一个已核验仓库；Go 调用参数不得出现 `Server/`、`Shared/`，Legacy 调用参数不得出现 `cmd/`、`internal/`。切换仓库必须结束当前调用、重新核对 `git rev-parse --show-toplevel`，任一混合路径或非零读取调用整体作废。
+- Verification: 本次调用在 Go 根目录读取阶段以 Legacy 路径不存在结束且无文件变化；后续 DarkOmaKing 对照将拆为 Legacy 独立调用与 Go 独立调用，并只采用各自成功输出。
+
+### 2026-08-17 — AI=150 测试夹具必须使用 worldHero 的实际冷却字段
+
+- Symptom: DarkOmaKing MassThunder 定向测试首次编译失败，夹具给 `worldHero` 设置了不存在的 `AttackReadyAt` 字段。
+- Root cause: 参照玩家/其他实体的攻击冷却命名构造 Hero fixture，没有先核对 `worldHero` 的实际结构；该类型只暴露 `ActionReadyAt`。
+- Prevention: 新增实体夹具赋值前先用当前 Go 类型定义和现有测试检索确认字段名；先执行 `gofmt` 与包级编译，再进入行为断言，避免把编译错误混入功能失败。
+- Verification: 删除无效字段并保留 `ActionReadyAt` 冻结 Hero AI 后，`go test ./cmd/crystal-server -run 'DarkOmaKing' -count=1` 通过，随后真实 `net.Pipe` transcript 也通过。
