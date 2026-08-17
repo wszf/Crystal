@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-18 — AI=179 新施加毒物必须在命中 tick 发布状态包
+
+- Symptom: SnowWolf 认证会话的魔法命中收到了伤害和两条中毒聊天，但缺少同一 tick 的 `ServerPoisoned`。
+- Root cause: Go fixture 给新建 poison 预填了 `TickAt = impact + 2s`；Legacy `ApplyPoison` 后的对象处理会在命中 tick 立即计算并广播当前毒状态。
+- Prevention: 新施加的 monster-AI poison 保持 `TickAt` 零值，仅设置持续 tick；让统一 poison processor 在命中 tick 处理状态发布，后续 tick 才递增持续时间。
+- Verification: 修正后 AI=179 world/session 定向测试通过，认证包序恢复为伤害、两条中毒聊天、`ServerPoisoned(Slow|Frozen)`。
+
 ### 2026-08-17 — Go 只读调用不得混入 Legacy 相对路径（AI=171）
 
 - Symptom: AI=171 对照读取时在 Go 根目录追加了 Legacy 的 `Shared/Enums.cs` 路径；命令在读取阶段失败，不能把同一调用的其他输出当作源码证据。
