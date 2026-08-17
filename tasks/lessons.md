@@ -2919,3 +2919,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 按攻击动作的直觉复用了发射方向，并假定坐标生成必然有效，没有分别核对 `ObjectStruck` serializer 的目标字段和 `TeleportTarget` 每次尝试的 ValidPoint 门禁。
 - Prevention: transcript 逐包从 payload 定义确认字段来源；Type 1 随机 fixture 明确覆盖“首轮有效”和“四轮均无效”两条路径，按每轮两个 `Next(9)` 计算消费。
 - Verification: 测试现锁定目标方向、Type 1 首轮成功的 `Next(5), Next(9), Next(9)`，以及四轮失败的九次上界序列；HornedMage 普通/race 重复测试通过。
+
+### 2026-08-17 — AI=164 对照读取继续保持两个仓库完全隔离
+
+- Symptom: HornedArcher 对照期间曾把 Go 路径与 Legacy 路径放进同一读取编排；调用未产生写入，但混合调用的输出不能作为源码证据。
+- Root cause: 为连续查看继承 AI、Buff 和 Go 运行时 helper，复用了另一仓库的路径参数，没有把一次工具调用绑定到单一已核验根目录。
+- Prevention: 先在当前仓库独立核对 `git rev-parse --show-toplevel` 和文件清单；该调用只读取当前仓库。切换另一仓库必须新建调用并重新核对，失败调用整体作废。
+- Verification: 本次混合读取没有写入 C# 或 Go 文件；后续 HornedArcher Legacy 基线与 Go 实现分别在独立根目录调用中重读。
