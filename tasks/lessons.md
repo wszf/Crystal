@@ -2762,3 +2762,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 主机数据卷仅剩约 186 MiB，累积的 Go build/test cache 占用了可回收空间。
 - Prevention: 将编译/测试链接失败先分类为环境资源错误；在代码诊断前读取 `df -h`，仅清理可由 Go 重新生成的 build/test cache，再重跑同一 race 命令。
 - Verification: 清理后可用空间恢复到约 6.1 GiB，`go test -race ./...` 完整通过；普通测试、vet 和 build 也均通过。
+
+### 2026-08-17 — AI=156 fixture 必须保留排他随机上界并避免状态重声明
+
+- Symptom: AvengingWarrior 远程 fixture 将 MC `Next(2)=0` 的结果误期望为最大值 21（实际为 20）；补充移动断言时又在同一作用域用 `:=` 重声明 `state`，包测试编译失败。
+- Root cause: 没有按 Legacy `Random.Next(min,max)` 的排他上界配置固定回调，且没有区分首次声明与后续赋值。
+- Prevention: 每个固定随机回调先列出 `bound → returned value → expected stat`，覆盖最小/最大边界；Go fixture 中已存在的实体副本一律使用 `=` 回写，修改后立即跑包级编译。
+- Verification: 修正 MC 回调为 `Next(2)=1`、改用 `state = ...` 后，AI=156 定向 world/session 测试和包级编译均通过。
+
+### 2026-08-17 — AI=156 Red poison session 断言以真实包序为准
+
+- Symptom: AvengingWarrior 真实 `net.Pipe` transcript 首次把 Red poison 命中期望为包含 `ObjectWalk`，实际通知序列为 `Struck/ObjectStruck/DamageIndicator/HealthChanged/Chat/Poisoned`，断言失败并关闭连接。
+- Root cause: 复用了 Green poison/其他 AI 的状态包假设，没有先按该 Red poison 处理路径核对客户端可观察包序。
+- Prevention: 新增 AI 的 session 夹具先记录完整 recipient-specific packet IDs，再只断言 Legacy 对应路径实际产生的包；不同 poison 类型不得复用额外状态包期望。
+- Verification: 移除错误的 `ObjectWalk` 期望后，AvengingWarrior session transcript 通过，race 重复 10 次通过。
