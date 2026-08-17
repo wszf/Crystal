@@ -3310,3 +3310,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy `Attack()` 先执行一次 `FindAllTargets(1, CurrentLocation)`，再为每个目标分别加入 1000ms 的 `DelayedAction`；延迟完成只重验已保存目标的可攻击性、地图和节点，不重新生成目标列表。多目标分支还以短路表达式决定是否消费 `Next(8)`。
 - Prevention: Go 在发起时按 Cell 顺序逐目标保存 `TargetKind/TargetID` 和 80% DC 动作，命中时只做目标重验；随机实现保留 `(Count > 1 && Next(2) == 0) || Next(8) == 0` 的短路消费顺序。
 - Verification: FrozenMiner 世界测试在发起后移动第二个 Player 仍得到两个 80% 命中，单目标与多目标 `ObjectAttack` payload、600/1000ms 延迟、owned-Monster/Hero 投影及认证 `net.Pipe` transcript 均通过。
+
+### 2026-08-18 — FrozenAxeman session transcript 必须按每一步推退记录 Pushed
+
+- Symptom: FrozenAxeman authenticated session 初稿在 Type 2 拉拽后只期待最终位置的一条 `ServerPushed`，实际通知序列为 `ObjectAttack` 后逐格发送两条 `Pushed`，测试收到 `[72, 128, 128]` 而非预期的两包序列。
+- Root cause: Legacy `HumanObject.Pushed` 循环每成功移动一格就立即 `Enqueue(Pushed)`；Go `pushPlayerLocked` 保留了同样的逐步通知，推退距离 2-4 不能折叠为最终位置包。
+- Prevention: 每个推退 transcript 先确定随机距离，再按每一格列出坐标、反向 Direction 和 `Pushed` payload；同时独立检查观察者的 `ObjectPushed` 广播接收者。
+- Verification: FrozenAxeman session 现断言 `(3,0)`、`(4,0)` 两条私有 `Pushed`、500ms plain-AC 命中和最终 HP；世界普通测试与定向 race 回归通过。
+
+### 2026-08-18 — Go 复杂 patch 的每个绝对路径都必须重新核对
+
+- Symptom: FrozenAxeman 首次实现 patch 在执行前因 `world.go`/`monster_ai.go` 目标路径漏写 `me_work` 被拒绝；新增文件和源文件更新没有部分写入。
+- Root cause: 只核对了新增文件路径，没有逐 hunk 复核所有绝对目标路径，重复了既有 Go patch 路径边界问题。
+- Prevention: 复杂 patch 提交前逐项检查每个 `Add/Update File` 的完整路径，并在调用前用当前 Go workdir 的 `pwd`/`test -e` 验证；任一 hunk 路径异常时整条 patch 作废并重放。
+- Verification: 失败 patch 后 Go 工作树无变化；使用完整 `.../git_work/me_work/Crystal.GoServer/...` 路径重放成功，随后 gofmt、包级编译和 FrozenAxeman 普通/race 测试通过。
+
+### 2026-08-18 — 全量 Go 门禁必须隔离 session 实时维护前导
+
+- Symptom: AI=188 完成后的全仓普通测试在既有 `TestSessionOmaMageRangeSlowFrozenTranscript` 记录到 `[2,1]` 而非 `[1]`；排除该用例的全量 race 又曾在既有 `TestSessionTucsonMageNormalAttackTranscript` 收到空攻击通知。OmaMage 单测 `-count=1`/`-count=10` 可复现，Tucson 普通/race 定向 `-count=5` 随后通过。
+- Root cause: OmaMage session 的连接维护循环在手工未来时钟 tick 前仍可进入寻路回退并消费 `Next(2)`；Tucson 普通 session 夹具使用 `base := time.Now()`，race 调度可先让实时 loop 执行并改变手工攻击状态。两者都属于既有 session 时钟/维护竞态，不是 FrozenAxeman population、dispatch 或 resolver 的路径。
+- Prevention: 认证 transcript 先用 keep-alive barrier，再把手工 `base` 放到实时 loop 之后并将 search/action/attack gate 置于正确边界；随机 callback 分开记录维护前导与手工攻击子序列，不把已核实的维护 `bound=2` 当成业务攻击 draw，也不要用 race 全量偶发失败直接改 AI 行为。
+- Verification: FrozenAxeman 普通定向、定向 race、`go test ./... -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'` 和 `go test -race ./cmd/crystal-server -skip '^(TestSessionOmaMageRangeSlowFrozenTranscript|TestSessionTucsonMageNormalAttackTranscript)$'` 通过；OmaMage/Tucson 的失败均在本批文件之外并保留为单独基线证据。
