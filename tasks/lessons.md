@@ -2842,3 +2842,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只初始化了 Hero 的基础坐标/HP 与零值防御字段，没有按客户端可观察的等级物化属性复核 MAC+Agility 防御计算。
 - Prevention: 为 Player、owned Monster、Hero 分别从 materialized stats 推导防御随机上界；新增/修改 Hero 夹具后先记录每次 `Random.Next(bound)` 的真实 bound，再断言 MAC、Agility 和伤害路径。
 - Verification: 修正 Hero level-20 materialized agility 夹具后，BlueSoul 定向 world/session 测试通过，并锁定实际 `bound=16`。
+
+### 2026-08-17 — SackWarrior 对照调用必须隔离仓库并核验文件
+
+- Symptom: 定位 SackWarrior 时，一条 Go 命令带入不存在的 `cmd/crystal-server/black_foxman.go`，另一条 Go 命令带入 Legacy 的 `Server/MirObjects/MapObject.cs`；两条调用均失败，输出不能作为源码证据。
+- Root cause: 凭概念猜 Go 文件名，并在 Go 对照中复用 Legacy 路径，没有先按当前仓库文件清单和根目录建立参数边界。
+- Prevention: 每次调用先独立核验 `git rev-parse --show-toplevel`；当前仓库先用 `rg --files` 取得精确路径，命令中禁止出现另一仓库的 `Server/` 或 `cmd/` 路径；任一非零读取调用整体作废。
+- Verification: 之后分别在核验后的 Legacy 与 Go 根目录读取成功，SackWarrior 实现只采用成功调用证据；失败调用未产生写入。
+
+### 2026-08-17 — SackWarrior 随机夹具必须区分分支与后续毒物抽样
+
+- Symptom: SackWarrior 首次定向测试把 `Random.Next(3)=0` 误用于 Type 0 分支，实际发出 Type 1；Hero level-20 物化敏捷还要求允许防御上界 `16`，Luck 回归则因追加重复 stat 读取旧值 0。
+- Root cause: 固定随机回调没有区分首次分支抽样与 impact-time Bleeding chance 抽样；Hero 防御没有按 materialized stats 复核；`monsterStatValue` 取第一个同 ID 条目。
+- Prevention: 为每个 AI transcript 建立 `bound → phase → return` 映射，分支回调使用显式阶段状态；Hero 夹具按物化属性接受真实防御上界；修改 stat 时更新已有条目而不是追加重复 ID。
+- Verification: 修正后 SackWarrior world、MC/延迟重验、Player/pet/Hero 投影、Luck/unit-bound 测试及 authenticated `net.Pipe` transcript 通过，普通/race 定向测试各重复 5 次通过。
