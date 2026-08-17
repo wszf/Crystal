@@ -3247,3 +3247,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 新 session 使用了超出认证账号长度约束的 `dragonwarriornet`，误把业务登录失败当成服务/AI问题。
 - Prevention: 新增 session 夹具先复用已通过的短账号命名模式，并在进入 AI 状态注入前确认 `ServerLoginSuccess`。
 - Verification: 改用 `dragonnet` 后 authenticated Shield Bash transcript 通过。
+
+### 2026-08-18 — Kirin 迁移前必须核对实际 Go 包布局
+
+- Symptom: Kirin 对照期间一次只读调用访问了不存在的 Go `internal/world/` 路径，读取失败且没有产生写入。
+- Root cause: 先按预想的目录结构拼接路径，没有从 Go 仓库根目录核对实际文件布局；实现包实际位于 `cmd/crystal-server`。
+- Prevention: 路径定向读取前先在目标仓库执行根目录确认和 `rg --files` 文件定位；失败读取的全部输出作废，不据此判断源码状态。
+- Verification: 重新从 Go 仓库根目录定位并读取 `cmd/crystal-server` 的 world/AI 文件，随后包级编译与 Kirin 定向测试通过。
+
+### 2026-08-18 — Kirin 分支测试必须按 Legacy 随机消费顺序建模
+
+- Symptom: Kirin close-range 测试初稿期望 Type 0，却实际进入了 Type 2 分支，固定随机 transcript 失败。
+- Root cause: `ProcessTarget` 在进入 `Attack` 前先消费一次 1/5 range gate；攻击分支还分别消费 DC/MC 和后续类型 gate，初稿漏记了这些调用顺序。
+- Prevention: 为每个 AI 分支先列出完整 `Next(bound)` 序列，再设置 callback 并用 ObjectAttack 类型验证分支；不要只按最终攻击类型猜测随机流。
+- Verification: Kirin Type 0/Type 1/Type 2 世界测试以 `[5,1,5,1]` 和完整 MC/移动回退序列固定后通过。
+
+### 2026-08-18 — Kirin 同 tick Slow 断言必须遵循 Go tick 阶段顺序
+
+- Symptom: Kirin IceThrust 测试初稿期望新施加 Slow 的 elapsed 为 0 且 TickAt 未设置，实际断言失败。
+- Root cause: Go world tick 在 AI 动作后同一 tick 执行 `tickPoisonsLocked`，新 Slow 会立即完成一次 tick 并发出 `ServerPoisoned`。
+- Prevention: 新增即时中毒 AI 时先核对 world tick 阶段，再同时断言 elapsed、TickAt、CurrentPoison 和当 tick 的状态包。
+- Verification: Kirin Player/Monster 世界测试及 session transcript 均断言 elapsed=1、TickAt 为基准时间后一秒、CurrentPoison=Slow，并通过普通/race 定向测试。
+
+### 2026-08-18 — Kirin session 随机 transcript 必须容纳认证后的实时前导消费
+
+- Symptom: Kirin `net.Pipe` session transcript 预期的随机序列前出现了额外 `Next(2)`，严格全序断言失败。
+- Root cause: 认证 session 的实时 world loop 在手动推进未来时钟前先运行了移动阻挡回退，消费了 Legacy 不属于目标攻击断言的随机数。
+- Prevention: 用互斥保护随机 callback，并把目标攻击序列作为保序子序列匹配；同时保留网络包和最终状态的精确断言。
+- Verification: Kirin authenticated session 普通测试与 `-race` 重复测试均通过，包含实时前导消费。
+
+### 2026-08-18 — Kirin Player 中毒模型必须包含 monster-caster 二次抗性检查
+
+- Symptom: Kirin Player IceThrust 的初始模型只安排了一次 poison resistance 抽样，无法解释 `ApplyPoison` 路径中的完整随机流。
+- Root cause: 对照 C# 时只看到了 Kirin 的显式抗性/几率门，没有继续核对 `HumanObject.ApplyPoison` 对 Monster caster 的第二次抗性检查。
+- Prevention: 迁移每个 poison effect 时同时读取施法者调用点与目标 `ApplyPoison` 实现，按目标 Race 明确列出所有 resistance/chance gate。
+- Verification: Go Player fixture 固定并验证 `[10,5,10]`，owned-Monster fixture 验证 `[10,5,5]`；两类测试及 race 定向回归通过。
