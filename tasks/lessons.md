@@ -3331,3 +3331,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: OmaMage session 的连接维护循环在手工未来时钟 tick 前仍可进入寻路回退并消费 `Next(2)`；Tucson 普通 session 夹具使用 `base := time.Now()`，race 调度可先让实时 loop 执行并改变手工攻击状态。两者都属于既有 session 时钟/维护竞态，不是 FrozenAxeman population、dispatch 或 resolver 的路径。
 - Prevention: 认证 transcript 先用 keep-alive barrier，再把手工 `base` 放到实时 loop 之后并将 search/action/attack gate 置于正确边界；随机 callback 分开记录维护前导与手工攻击子序列，不把已核实的维护 `bound=2` 当成业务攻击 draw，也不要用 race 全量偶发失败直接改 AI 行为。
 - Verification: FrozenAxeman 普通定向、定向 race、`go test ./... -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'` 和 `go test -race ./cmd/crystal-server -skip '^(TestSessionOmaMageRangeSlowFrozenTranscript|TestSessionTucsonMageNormalAttackTranscript)$'` 通过；OmaMage/Tucson 的失败均在本批文件之外并保留为单独基线证据。
+
+### 2026-08-18 — Legacy 对照函数路径必须先由文件清单确认
+
+- Symptom: FrozenMagician 对照时一次读取了不存在的 `Server/MirEnvir/Functions.cs`，命令非零退出；该输出不能作为源码证据。
+- Root cause: 按 namespace/目录名称猜测文件位置，实际实现位于 `Shared/Functions/Functions.cs`。
+- Prevention: 读取具体源码前先在目标仓库执行 `rg --files` 定位，再只读取清单返回的精确路径；任何非零读取结果全部作废。
+- Verification: 重新定位并读取 `Shared/Functions/Functions.cs`，确认 `InRange` 是包含同格的 Chebyshev 距离，并据此通过 FrozenMagician 几何测试。
+
+### 2026-08-18 — AI 随机 callback 必须隔离目标分支与生命周期前导
+
+- Symptom: FrozenMagician owned-Hero 世界测试在伤害完成后收到未预期的 `bound=16`；认证 session 初稿又因 bound=2 返回值让 AI 走了移动包而不是首次远程包。
+- Root cause: 测试把同一 `world.tick` 中英雄生命周期/实时维护的随机消费误当成 FrozenMagician 分支序列，并把 bound=2 同时当作有状态的首次远程门和移动回退门。
+- Prevention: 只对本 AI 的关键 bound=1/2/3 子序列做精确断言；无关生命周期 bound 允许合法值；session 对无状态边界使用不会破坏业务前导的返回值，并以接收者 packet/最终状态作为权威断言。
+- Verification: FrozenMagician 世界、owned-Hero、range 延迟和 authenticated `net.Pipe` transcript targeted tests 通过，重复执行不再出现错误 packet 或随机 callback 失败。
+
+### 2026-08-18 — 矩阵 patch 必须锚定当前文件的完整段落
+
+- Symptom: FrozenMagician 矩阵首次 patch 因上下文把同一行错误拼接，apply_patch 拒绝，未产生部分写入。
+- Root cause: 依据截断输出手工重构上下文，而不是使用当前文件的连续原文。
+- Prevention: patch 前先读取目标段落的连续行，保持原有换行和标点，只追加最小 hunk；失败 patch 后重新读取确认工作树未改变。
+- Verification: 使用连续的 AI=188 段落重放矩阵 patch 成功，随后矩阵 diff 仅包含 AI=189 条目。
