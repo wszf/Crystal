@@ -2856,3 +2856,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 固定随机回调没有区分首次分支抽样与 impact-time Bleeding chance 抽样；Hero 防御没有按 materialized stats 复核；`monsterStatValue` 取第一个同 ID 条目。
 - Prevention: 为每个 AI transcript 建立 `bound → phase → return` 映射，分支回调使用显式阶段状态；Hero 夹具按物化属性接受真实防御上界；修改 stat 时更新已有条目而不是追加重复 ID。
 - Verification: 修正后 SackWarrior world、MC/延迟重验、Player/pet/Hero 投影、Luck/unit-bound 测试及 authenticated `net.Pipe` transcript 通过，普通/race 定向测试各重复 5 次通过。
+
+### 2026-08-17 — KingHydrax 对照读取不得混入 Go 路径
+
+- Symptom: KingHydrax Legacy 对照命令末尾误带 Go 的 `internal/legacyworld/settings.go`，因当前仓库不存在该路径退出；命令没有写入，整条输出不能作为源码证据。
+- Root cause: 为连续读取 C# 设置和 Go 导入器，复用了另一仓库的相对路径，没有把工作目录与全部参数作为单仓库调用边界。
+- Prevention: 跨仓库对照拆成独立调用；每次切换先核对 `git rev-parse --show-toplevel`，Legacy 命令只使用已核验的 `Server/`、`Shared/`、`tasks/` 路径，Go 路径必须在新的 Go 调用读取；任一非零读取调用整体作废。
+- Verification: 该调用只读、未产生 C# 或 Go 变化；后续 KingHydrax 设置与实现证据将分别在两个已核验根目录重读。
+
+### 2026-08-17 — 跨仓库状态读取再次不得放入同一编排
+
+- Symptom: 本轮恢复时把 Legacy lessons/status 与 Go lessons/status 查询放入同一个 `Promise.all`；Go 的不存在文件错误使该读取调用的全部输出不能作为证据，且违反了仓库隔离边界。
+- Root cause: 为了同时恢复上下文，把两个仓库的只读调用当成互不相关的任务；没有让一次工具编排只绑定一个已核验仓库根目录。
+- Prevention: 跨仓库的 lessons、根目录、状态、源码、测试和写入都必须拆成独立调用；先在当前仓库核对 `git rev-parse --show-toplevel` 与文件清单，再使用该仓库路径，失败调用整体作废。
+- Verification: 本次调用没有写入源码；随后已在独立 Go 调用中核对 `Crystal.GoServer` 根目录及 lessons 文件清单，后续 KingHydrax 操作按仓库逐次执行。
+
+### 2026-08-17 — Legacy 读取命令不得追加 Go 检索路径（再次强化）
+
+- Symptom: 本轮重读 Legacy `CanFly` 时在命令末尾追加了 Go 的 `cmd/crystal-server` 检索路径；当前仓库不存在该路径，读取调用失败，因此整条输出作废。
+- Root cause: 读取 C# 基线后试图在同一命令继续确认 Go helper，未把跨仓库切换当作新的调用边界。
+- Prevention: Legacy 调用的参数只允许当前仓库已核验的 `Server/`、`Shared/`、`Client/`、`tasks/` 路径；Go 侧必须另起调用并先核对根目录。任一非零读取调用整体不得作为证据。
+- Verification: 该调用只读且未改变文件；后续已拆分为纯 Legacy 重读，再切换到独立 Go 调用。
+
+### 2026-08-17 — KingHydrax session transcript 必须隔离维护随机流与毒物 chance
+
+- Symptom: 真实认证 `net.Pipe` 测试在攻击包交付期间偶发记录冷却移动的额外 `bound=2`，并因复用 Type 1 分支返回值使 Green poison chance 失败；结算后读取已移除的延迟动作还会阻塞/失效。
+- Root cause: 连接维护循环会在手工攻击与结算之间继续执行 `world.tick(time.Now)`，KingHydrax 冷却移动会消费 `Next(2)`；测试把所有 `bound=2` 都返回为 Type 1 成功值，并在 delayed action 已结算后才检查队列。
+- Prevention: session fixture 用有状态随机回调区分首次 Type 1 选择与后续 poison/movement `bound=2`；在 `world.tick` 返回后立即截取手工攻击的随机流，额外调用只允许维护 `bound=2`，并在 impact 前验证 queued action。
+- Verification: Green-poison transcript 单测通过，KingHydrax 普通定向回归重复 10 次、race 定向回归重复 5 次均通过；结算包序和首个延迟毒物 tick 均稳定。
+
+### 2026-08-17 — Go patch 锚点与仓库路径必须在调用前核验
+
+- Symptom: KingHydrax 会话与迁移矩阵补丁曾使用不存在的上下文锚点而被 `apply_patch` 拒绝；此前同批还出现过把 Go 目标路径写错到仓库根目录的失败尝试，均未写入。
+- Root cause: 依据记忆拼接文件/函数位置，没有在补丁前重新读取当前文件的精确上下文，并把跨仓库路径边界当成可复用字符串。
+- Prevention: 每次补丁先独立核对当前仓库的 `git rev-parse --show-toplevel`，再用 `rg -n`/`sed` 取得实际锚点；绝对目标路径逐项确认存在，失败补丁的其他输出不得作为证据。
+- Verification: 失败补丁均无文件变化；随后使用当前 `king_hydrax_session_test.go` 与 `docs/migration-matrix.md` 的精确锚点完成修改，格式化及 KingHydrax 普通/race 定向测试通过。
