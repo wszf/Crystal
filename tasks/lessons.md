@@ -3089,3 +3089,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 新批次先复制了 Player/Monster 的成功推退断言，没有把 `HumanObject.Pushed` 的“即使零步也写入 500ms ActionTime”边界逐目标核对；测试夹具扩展后未立即清理未使用变量。
 - Prevention: 对 Player、owned-Monster、Hero 分别检查成功、阻挡、等级门禁的包序、位置和 readiness；新增表格夹具后立即运行 gofmt 与包级编译，删除不参与断言的局部值。
 - Verification: Go `pushHeroLocked` 现在在成功和首格阻挡后均写入 `ActionReadyAt=now+500ms`；WereTiger 世界测试、认证 net.Pipe transcript、普通/race 定向重复测试均通过。
+
+### 2026-08-17 — AI=173 TurtleGrass 批次必须保持路径边界并先编译夹具
+
+- Symptom: TurtleGrass 首次多文件补丁因绝对路径漏写 `me_work` 在写入前失败；随后定向测试首次编译又把 `addMonsterPoisonLocked` 当作包级函数调用，导致 Go 测试无法构建。
+- Root cause: 跨仓库补丁没有重新核对完整根路径；新增测试夹具只按函数名检索，未确认毒门禁实际是 `gameWorld` 方法。
+- Prevention: 每次补丁前独立核对 `git rev-parse --show-toplevel` 并使用完整绝对目标路径；新测试调用现有 helper 前先读取声明签名，完成补丁后立即运行 `gofmt` 和定向包级编译。
+- Verification: 后续仅在 `Crystal.GoServer` 写入 Go 实现/测试，Legacy 只追加本 lesson；`go test ./cmd/crystal-server -run 'TurtleGrass|turtleGrass'` 与整包 `go test ./cmd/crystal-server` 均通过。
+
+### 2026-08-17 — AI=162 KingHydrax 额外 `bound=2` 必须先与 HEAD 基线区分
+
+- Symptom: TurtleGrass 批次的全量 Go 测试偶发 `TestSessionKingHydraxGreenPoisonTranscript` 得到 `[2 2 11]` 而不是 `[2 11]`；该失败也在 detached HEAD `e671359` 的同一测试中复现。
+- Root cause: 认证连接循环在手工 `world.tick` 前后仍执行实时维护 tick；KingHydrax 不能攻击时进入 Legacy 寻路回退并消费 `Random.Next(2)`，而 transcript callback 记录了这次与手工攻击混在一起的抽样。当前 TurtleGrass 变更没有修改 AI=162 代码或该测试。
+- Prevention: 遇到全量回归时先在当前 HEAD 的干净 worktree 重跑同一用例；若基线同样失败，不修改 AI 行为或直接放宽 wire 期望值。测试 callback 要把手工攻击阶段与连接维护阶段分开记录，并允许人工 tick 前后已核实的 `bound=2`。
+- Verification: 当前工作树 `-count=10` 失败 2 次，detached HEAD `e671359` `-count=10` 失败 3 次；完成随机流分阶段和手工攻击后缀断言后，该用例普通 `-count=50`、相关 TurtleGrass/KingHydrax race `-count=10` 及全仓普通/race 门禁均通过。
+
+### 2026-08-17 — 跨仓库状态检查也必须按调用隔离
+
+- Symptom: 本轮恢复时曾把 Legacy 与 Go 的 status/diff 查询放进同一个 `Promise.all`；命令只读且没有文件变化，但违反了迁移仓库的证据边界。
+- Root cause: 为减少工具往返，把“查询互不写入”错误等同于“可以共享一次编排”，没有让每个工具调用绑定单一仓库根目录。
+- Prevention: Legacy 与 Go 的根目录核验、状态检查、源码读取、测试、格式化和提交都分别启动调用；一次调用的 `workdir` 与路径参数只允许来自同一仓库，任何混合输出不作为实现证据。
+- Verification: 本次并行查询未产生文件变化；之后的 HEAD 基线复现和 TurtleGrass源码检查均使用纯 Go 调用，Legacy lessons 仅在本仓库独立补丁中更新。
