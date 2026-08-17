@@ -2694,3 +2694,28 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 服务启动前未把 AssassinBird 的 `MonsterAIInitialized` 和 search/action/move/attack 时间置于未来，连接维护 tick 可能在测试安装随机回调后执行首次 AI 初始化。
 - Prevention: 真实 `net.Pipe` 夹具在启动服务前先设置 `MonsterAIInitialized=true` 并把所有 AI 时间置于未来；手工时钟和业务状态只在 bootstrap 后注入，停止 ticker 不视为停止连接维护 tick。
 - Verification: 修复后 AssassinBird transcript 连续 10 次通过，CreeperPlant transcript 普通/race 回归通过，随后 `go test ./cmd/crystal-server -count=1` 全包通过。
+
+### 2026-08-17 — Go 只读调用误带 Legacy 路径时必须整体作废
+
+- Symptom: Go 根目录的一次只读命令误带了 Legacy `Server/MirObjects/...` 路径，命令因路径不存在失败；没有写入，但该调用不能提供可用源码证据。
+- Root cause: 对照 Legacy 基线时复用了上一侧的相对路径，没有在执行前检查当前 Go 调用的路径 allowlist。
+- Prevention: 每个 `functions.exec` cell 只允许当前已核验仓库的路径；Go 调用禁止出现 `Server/`、`Shared/`、`Client/`，跨仓库对照必须结束当前调用后新建独立调用，任一非零读取结果整体作废。
+- Verification: 本次命令在读取阶段失败且两个工作树没有源码写入；后续 Nadz 对照将先独立核验 Legacy 根目录，再只在 Go 根目录读取 Go 文件。
+
+- Strengthening after recurrence: 后续 Go 只读命令再次在参数末尾带入 Legacy `Server/...` 路径，导致命令以路径不存在结束；即使 Go 片段成功打印，整条混合调用的输出也必须全部作废。
+- Verification after recurrence: 本次调用只读、未产生任何文件变化；之后将先结束 Go 调用，再以独立 Legacy cell 读取 C#，并重新核验 Go 根目录后只读取 Go 路径。
+
+- Strengthening after recurrence: Nadz 对照读取再次在 Go 工作目录混入 Legacy `Server/...` 参数，命令在读取阶段失败；失败调用的其他输出同样不得继续作为证据。
+- Prevention: 在每次 Go 读取前先检查命令参数只包含 Go 仓库已列出的路径；Legacy 对照必须另起独立调用，且跨仓库调用出现非零状态时立即作废整条输出。
+- Verification: 本次调用没有写入任何文件；后续 Nadz 基线与 Go 源码将分别在各自已核验根目录重读。
+
+- Strengthening after recurrence: 同一 Nadz 源码核对流程再次在 Go 调用中携带 `Server/...` 参数并失败；即使前置 Go 片段成功，也不得采用该混合调用的任何输出。
+- Prevention: 执行前逐项检查 `cmd` 字符串和 `workdir`：Go 调用只准出现 `cmd/`、`internal/`、`docs/` 等已核验 Go 路径；Legacy 文件必须在后续独立 Legacy 调用读取。
+- Verification: 该调用未产生写入；后续已将读取动作拆分，并以非零退出作为整条调用作废条件。
+
+### 2026-08-17 — SwampWarrior session 人工时钟必须隔离连接维护 tick
+
+- Symptom: 全仓 `go test -race ./...` 偶发在 `TestSessionSwampWarriorRangeAttackTranscript` 看到空的手工攻击通知；普通运行或单独测试可能通过。
+- Root cause: 夹具在停止 world ticker 后仍使用墙钟当前时刻，且没有 post-bootstrap KeepAlive 屏障；连接 session loop 的维护 `world.tick(time.Now())` 可以先消费已到期的 SwampWarrior 动作，测试随后再手工 tick 时动作已被取走。
+- Prevention: 真实 AI transcript 在服务启动前将实体初始化和 search/action/move/attack 时间置于未来；bootstrap 后先停止 ticker 并消费 KeepAlive，再把人工 `base` 放到墙钟之后、固定 `setLightClock`，最后注入手工动作状态。
+- Verification: 修正夹具后 `TestSessionSwampWarriorRangeAttackTranscript` 的 race 定向测试连续 10 次通过；随后全仓普通测试、全仓 race、`go vet ./...` 和 `go build ./...` 均通过。
