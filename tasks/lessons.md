@@ -16,6 +16,13 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 读取前先在同一 Go 根目录用 `rg --files` 列出精确候选；后续命令只使用已存在的路径或让 `rg` 在已确认目录内处理 glob。任一非零读取命令整体作废。
 - Verification: 本次调用未写入；后续将改用已确认的 `main.go`、`monster_ai.go` 及 `rg --files` 返回的实际文件。
 
+### 2026-08-17 — 跨仓库 Legacy 对照调用必须完全隔离
+
+- Symptom: DarkCaptain 对照命令在 Legacy 根目录中夹带 Go 路径和未核验 Go glob，shell 展开失败；该调用的 Legacy 输出不能作为源码证据。
+- Root cause: 为连续读取两侧实现，把另一个仓库的参数复用到当前 shell，没有把命令失败视为整条证据失效。
+- Prevention: 每次工具调用只使用当前 `git rev-parse --show-toplevel` 对应仓库的路径；切换仓库必须结束调用并重新核验根目录，禁止跨仓库路径或 shell glob 混入。
+- Verification: 失败调用未产生写入；随后以纯 Legacy 调用重新读取 `DarkCaptain.cs`、`MonsterObject.cs`，迁移判断只采用成功调用的输出。
+
 ### 2026-08-17 — 工具编排失败不得作为源码证据
 
 - Symptom: 一次只读对照编排把 `exec_command` 拼写成不存在的工具函数，调用在执行前失败且没有任何源码输出。
