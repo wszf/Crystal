@@ -2,6 +2,27 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — AI=164 初次编译必须先核对桥接类型与 helper 签名
+
+- Symptom: HornedArcher 首次包级编译同时报告 `ViewRange` 的 `byte` 到 `int32` 不匹配，以及 Monster friendly helper 的调用参数错误。
+- Root cause: 新 AI 代码沿用了概念上的数值类型和相邻 AI 的 helper 形状，没有以当前 Go 结构定义逐项核对。
+- Prevention: 新增 AI 先读取实际字段/helper 签名，完成最小 patch 后立即运行 `gofmt` 与 `go test ./cmd/crystal-server -run '^$'`。
+- Verification: 将 `ViewRange` 显式转换为 `int32` 并修正 helper 调用后，包级编译通过，随后 AI=164 定向测试通过。
+
+### 2026-08-17 — AI=164 行为夹具必须隔离普通 AI 初始化与实际 Hero 防御抽样
+
+- Symptom: HornedArcher 定向测试第一次分别出现未预期的 `Random.Next(3000)` 和 Hero 防御路径的 `bound=16`，导致确定性上界断言失败。
+- Root cause: world tick 会初始化夹具中的普通 AI=0 友军并消费其搜索随机数；Hero 的 `heroEquipmentStats` 还会带入等级/职业基础敏捷，不能按手写零值假设断言。
+- Prevention: transcript 中将非目标普通怪物预先标记为 initialized 并把 AI 时间置于未来；Player/Monster/Hero projection 按实际 materialized/equipment stats 记录每个随机上界。
+- Verification: 友军初始化状态修正且 Hero `bound=16` 纳入排他随机流后，AI=164 普通测试、`-race -count=10` 和 authenticated `net.Pipe` transcript 全部通过。
+
+### 2026-08-17 — Legacy 对照读取失败时整条命令证据作废
+
+- Symptom: 一次 Legacy 对照命令末尾夹带了不存在的 Go 路径，读取阶段失败；该调用没有写入，前面的 Legacy 输出也不能继续作为实现证据。
+- Root cause: 为连续查看两侧代码复用了另一仓库的相对路径，没有把工作目录与参数集合绑定到单一仓库。
+- Prevention: 跨仓库对照拆成独立调用；每次先核对 `git rev-parse --show-toplevel`，命令参数只出现当前仓库路径，任一非零读取整体作废。
+- Verification: 失败调用未改变工作树；随后在单独核验的 Legacy/Go 根目录分别重读，AI=164 判断只采用成功调用输出。
+
 ### 2026-08-17 — DarkCaptain 对照读取仍须保持单仓库参数
 
 - Symptom: 一次 Legacy 只读命令在 `Crystal` 根目录夹带了 Go 的 `cmd/crystal-server/world.go`，读取在路径解析阶段失败；该调用没有写入，输出不能作为源码证据。
