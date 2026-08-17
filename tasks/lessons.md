@@ -2783,3 +2783,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为连续读取两侧实现，复用了另一仓库的相对路径，没有把每次调用的工作目录和参数限制为同一仓库。
 - Prevention: 每次 Legacy/Go 对照拆成独立调用；Legacy 命令只允许 `Server/`、`Shared/`、`Client/`、`tasks/` 等已核验路径，Go 命令只允许 Go 仓库路径。失败的读取调用整体作废，不采用其余输出。
 - Verification: 失败调用发生在 zsh glob 展开阶段且未产生文件变化；之后在独立核验的两个仓库中分别重新读取 AxePlant 基线和 Go 实现，AI=157 定向测试通过。
+
+### 2026-08-17 — apply_patch 编排的结束标记必须保持 JavaScript 字符串完整
+
+- Symptom: WoodBox 补丁的一次 `functions.exec` 编排因 JavaScript 结束标记引号不匹配而在执行前失败；没有产生文件写入。
+- Root cause: 手写多行 patch 字符串时把结束标记放进了未闭合的字符串，未先检查调用脚本的语法边界。
+- Prevention: 使用 `const patch = "..."` 时逐项核对开头/结尾引号，结束标记必须位于字符串外；脚本失败时整条调用作废，不把错误文本当作源码证据。
+- Verification: 失败调用未启动 patch 且工作树无变化；随后使用语法完整的独立 `apply_patch` 调用完成 WoodBox 测试修改。
+
+### 2026-08-17 — 新增 AI 常量前必须搜索全包声明
+
+- Symptom: WoodBox 初次接入时 `woodBoxMonsterAI` 重复声明，Go 包编译失败；修复后 WoodBox 定向测试通过。
+- Root cause: 新 AI 常量补丁没有先搜索现有常量声明，导致把已存在的标识符再次加入常量区。
+- Prevention: 新增 AI/协议常量前先用 `rg -n` 在 Go 包内搜索完整标识符，确认唯一声明位置；随后立即运行 `gofmt` 和 `go test ./cmd/crystal-server -run '^$'`，包级编译通过后再写行为测试。
+- Verification: 删除重复声明并格式化后，包级空测试和 `TestWoodBox` 定向测试均通过。
