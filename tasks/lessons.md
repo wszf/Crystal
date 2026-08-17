@@ -2776,3 +2776,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 复用了 Green poison/其他 AI 的状态包假设，没有先按该 Red poison 处理路径核对客户端可观察包序。
 - Prevention: 新增 AI 的 session 夹具先记录完整 recipient-specific packet IDs，再只断言 Legacy 对应路径实际产生的包；不同 poison 类型不得复用额外状态包期望。
 - Verification: 移除错误的 `ObjectWalk` 期望后，AvengingWarrior session transcript 通过，race 重复 10 次通过。
+
+### 2026-08-17 — Legacy 对照命令不得夹带 Go 路径（AI=157）
+
+- Symptom: 对照 AxePlant 时在 Legacy 根目录的 shell 命令误带 Go 的 `cmd/crystal-server/*.go` 路径，zsh 因未匹配 glob 失败；该调用没有写入，整条输出不能作为源码证据。
+- Root cause: 为连续读取两侧实现，复用了另一仓库的相对路径，没有把每次调用的工作目录和参数限制为同一仓库。
+- Prevention: 每次 Legacy/Go 对照拆成独立调用；Legacy 命令只允许 `Server/`、`Shared/`、`Client/`、`tasks/` 等已核验路径，Go 命令只允许 Go 仓库路径。失败的读取调用整体作废，不采用其余输出。
+- Verification: 失败调用发生在 zsh glob 展开阶段且未产生文件变化；之后在独立核验的两个仓库中分别重新读取 AxePlant 基线和 Go 实现，AI=157 定向测试通过。
