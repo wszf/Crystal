@@ -2,6 +2,20 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — BoulderSpirit 会话必须冻结无时间门禁 AI 的维护 tick
+
+- Symptom: BoulderSpirit 认证 `net.Pipe` 转录普通运行通过，但 `-race -count=10` 偶发在手工 admission 前已经收到延迟 AC 命中包；连接维护循环抢先完成了 300ms action。
+- Root cause: 停止共享 world ticker 不会停止 `serveWithConfig` 每次等待客户端帧前执行的 `world.tick(time.Now)`；BoulderSpirit 覆盖了 Legacy `ProcessAI`，没有可把实体置于未来的普通 Action/Search 时间门禁。
+- Prevention: 真实会话中先让维护 AI 关闭，再在持有 world 锁时直接驱动已核对的 Boulder admission 和 `tickMonsterAttackActionsLocked` resolver；通知仍通过认证连接投递，禁止依赖 KeepAlive 响应推断下一次维护 tick 已阻塞。
+- Verification: BoulderSpirit world/session 定向测试与 `go test -race ./cmd/crystal-server -run 'BoulderSpirit' -count=10` 均通过，包序稳定为即时 `ObjectDied` 后 300ms 的 `Struck/ObjectStruck/DamageIndicator/HealthChanged`。
+
+### 2026-08-17 — Go 检索先核对精确文件和根目录再使用 shell 参数
+
+- Symptom: BoulderSpirit 调试时一次命令把未核验的 `cmd/crystal-server/session*.go` 交给 zsh，另一次把 Go 根目录重复成 `Crystal.GoServer.GoServer`；两次读取均在启动/展开阶段失败，不能提供源码证据。
+- Root cause: 凭概念文件名和记忆中的绝对路径构造查询，没有先用当前 Go 仓库的 `rg --files` 与独立 `git rev-parse --show-toplevel` 建立参数边界。
+- Prevention: 每次 Go 工具调用先独立核对精确根目录；目标文件先由 `rg --files` 列出，模式交给 `rg --glob` 而不是 zsh 裸展开，失败调用的其他输出整体作废。
+- Verification: 后续只在核验后的 `Crystal.GoServer` 根目录读取 `main.go`、`world.go` 和已列出的 Go 文件，BoulderSpirit 运行时接线、测试和 race 门禁均来自成功调用。
+
 ### 2026-08-17 — 对照读取不得在 Legacy 命令中混入 Go 路径（再次强化）
 
 - Symptom: HornedSorceror 对照命令在 Legacy 根目录追加了 Go `cmd/crystal-server/...` 路径，读取阶段失败；该调用没有写入，整条输出作废。
