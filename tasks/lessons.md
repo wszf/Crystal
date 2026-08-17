@@ -3024,3 +3024,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为核对 `GetAttackPower` 时复用了上一条 Legacy 相对路径，没有把 workdir 与参数集合绑定到同一仓库。
 - Prevention: 跨仓库读取先结束当前调用；每个新调用先独立执行 `git rev-parse --show-toplevel`，参数只允许当前仓库已核验路径，失败调用的其他输出一律不作为源码证据。
 - Verification: 本次混合调用在读取阶段失败且两个工作树无变更；后续将分别在 Legacy 与 Go 根目录重读 AI=167 所需片段。
+
+### 2026-08-17 — AI=168 WereTiger 推退必须复核 Hero 的失败路径副作用
+
+- Symptom: WereTiger Go 行为测试初次编译因夹具声明了未使用的 target ID 失败；对照推退 helper 时还发现 Hero 首格被阻挡没有设置 action lock。
+- Root cause: 新批次先复制了 Player/Monster 的成功推退断言，没有把 `HumanObject.Pushed` 的“即使零步也写入 500ms ActionTime”边界逐目标核对；测试夹具扩展后未立即清理未使用变量。
+- Prevention: 对 Player、owned-Monster、Hero 分别检查成功、阻挡、等级门禁的包序、位置和 readiness；新增表格夹具后立即运行 gofmt 与包级编译，删除不参与断言的局部值。
+- Verification: Go `pushHeroLocked` 现在在成功和首格阻挡后均写入 `ActionReadyAt=now+500ms`；WereTiger 世界测试、认证 net.Pipe transcript、普通/race 定向重复测试均通过。
