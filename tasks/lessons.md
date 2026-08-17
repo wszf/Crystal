@@ -3346,9 +3346,37 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 只对本 AI 的关键 bound=1/2/3 子序列做精确断言；无关生命周期 bound 允许合法值；session 对无状态边界使用不会破坏业务前导的返回值，并以接收者 packet/最终状态作为权威断言。
 - Verification: FrozenMagician 世界、owned-Hero、range 延迟和 authenticated `net.Pipe` transcript targeted tests 通过，重复执行不再出现错误 packet 或随机 callback 失败。
 
-### 2026-08-18 — 矩阵 patch 必须锚定当前文件的完整段落
+### 2026-08-18 — 矩阵 patch 必须锚定当前文件的完整段落并优先最小插入
 
-- Symptom: FrozenMagician 矩阵首次 patch 因上下文把同一行错误拼接，apply_patch 拒绝，未产生部分写入。
-- Root cause: 依据截断输出手工重构上下文，而不是使用当前文件的连续原文。
-- Prevention: patch 前先读取目标段落的连续行，保持原有换行和标点，只追加最小 hunk；失败 patch 后重新读取确认工作树未改变。
-- Verification: 使用连续的 AI=188 段落重放矩阵 patch 成功，随后矩阵 diff 仅包含 AI=189 条目。
+- Symptom: FrozenMagician 矩阵首次 patch 因上下文把同一行错误拼接而拒绝；SnowYeti 矩阵 patch 又因把较长的 AI=189 段落重新拼入 hunk 而拒绝，均未产生部分写入。
+- Root cause: 没有把已读取的连续原文压缩为稳定的最小插入锚点，长上下文中混入了新旧段落边界。
+- Prevention: patch 前先读取目标段落的连续行；矩阵追加优先锚定下一个稳定标题（如 `## P8`）做最小插入，保持原有换行和标点；失败 patch 后重新读取确认工作树未改变。
+- Verification: FrozenMagician 以连续段落重放成功，SnowYeti 以 `## P8` 最小锚点重放成功，矩阵最终只追加对应 AI 条目。
+
+### 2026-08-18 — SnowYeti 复杂 patch 必须把动作分发归属核对到实际文件
+
+- Symptom: SnowYeti 首次生产 patch 把 `worldMonsterAttackAction` 的动作分发 hunk 放进了 `world.go`，apply_patch 拒绝，未产生部分写入。
+- Root cause: 只按数据结构定义文件推断分发位置，没有用连续上下文确认 resolver dispatch 实际位于 `monster_ai.go`。
+- Prevention: 复杂 patch 前逐 hunk 用 `rg` 核对符号实际所在文件和连续上下文；路径不匹配时整条 patch 作废，不假设会部分应用。
+- Verification: Go 工作树在失败后无变化；改用 `monster_ai.go` 的实际分发段重放成功，随后 SnowYeti 包级编译通过。
+
+### 2026-08-18 — SnowYeti 固定 DC 伤害必须保留 Random.Next(1)
+
+- Symptom: SnowYeti 近战/远程随机 transcript 初稿只记录了分支 `Next(5)`，没有出现 Legacy 固定 DC 的 `Next(1)`。
+- Root cause: 共享 Go `monsterAIPowerLocked` 为 `Min==Max` 直接返回，省略了 Legacy `GetAttackPower` 的 unit-bound 消费。
+- Prevention: 迁移固定范围攻击力时使用保留 unit-bound 的 helper，并在 callback 中验证 `Next(1)` 位于分支选择之后。
+- Verification: SnowYeti 近战序列固定为 `[5,1]`，远程发起序列固定为 `[5,1,2]`，定向普通测试通过。
+
+### 2026-08-18 — SnowYeti 远程命中前必须建模每个 tick 的 MoveTo 回退
+
+- Symptom: SnowYeti 远程命中测试在预期 `[5,1,2,10,3,10]` 后实际多消费一个 `Next(2)`，严格 transcript 失败。
+- Root cause: Legacy SnowYeti 在远程 action lock 期间仍执行 `MoveTo`；攻击冷却阻挡 Walk 后，MoveTo 每个 ProcessTarget tick 仍消费无偏回退随机数。
+- Prevention: 记录发起 tick 与命中 tick 的完整 ProcessTarget 前导；不要把 ActionTime 阻挡误判为没有 AI 随机消费。
+- Verification: 远程序列更新为 `[5,1,2,10,3,10,2]`，世界测试、owned-Monster/Hero 测试和认证 session transcript 均通过。
+
+### 2026-08-18 — 双仓最终门禁必须复核真实仓库根路径
+
+- Symptom: SnowYeti 最终 Legacy 状态检查误用了重复的 `Dropbox` 路径，进程未启动；该命令输出不能作为状态证据。
+- Root cause: 手工重输绝对 workdir，没有复用本轮已审计的仓库根路径。
+- Prevention: 双仓最终检查先在各自已知 workdir 执行 `git rev-parse --show-toplevel`，确认根路径后再读取状态和 C# 变更；任何非零命令输出全部作废。
+- Verification: 从 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 重跑，确认仅 `tasks/lessons.md` 修改、diff check 通过且三项 C# 检查均为空。
