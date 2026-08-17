@@ -3303,3 +3303,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 根据语义自行猜测移动 payload 类型，没有先搜索项目已有的统一 `ObjectMovementPayload` 编码 helper。
 - Prevention: 新增 transcript 前先用 `rg` 定位同类 session 测试和协议构造函数，复用现有 helper，不按包名臆造 API。
 - Verification: 改用 `protocol.ObjectMovementPayload` 后 IcePhantom authenticated session transcript 通过。
+
+### 2026-08-18 — FrozenMiner 范围攻击必须在发起时固定目标动作
+
+- Symptom: 若把 FrozenMiner 的范围分支实现为命中时重新扫描一格范围，目标在 1000ms 内移动或新进入范围会改变 Legacy 可观察的受击集合与伤害顺序。
+- Root cause: Legacy `Attack()` 先执行一次 `FindAllTargets(1, CurrentLocation)`，再为每个目标分别加入 1000ms 的 `DelayedAction`；延迟完成只重验已保存目标的可攻击性、地图和节点，不重新生成目标列表。多目标分支还以短路表达式决定是否消费 `Next(8)`。
+- Prevention: Go 在发起时按 Cell 顺序逐目标保存 `TargetKind/TargetID` 和 80% DC 动作，命中时只做目标重验；随机实现保留 `(Count > 1 && Next(2) == 0) || Next(8) == 0` 的短路消费顺序。
+- Verification: FrozenMiner 世界测试在发起后移动第二个 Player 仍得到两个 80% 命中，单目标与多目标 `ObjectAttack` payload、600/1000ms 延迟、owned-Monster/Hero 投影及认证 `net.Pipe` transcript 均通过。
