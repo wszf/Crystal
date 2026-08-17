@@ -2,6 +2,27 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — 对照读取不得在 Legacy 命令中混入 Go 路径（再次强化）
+
+- Symptom: HornedSorceror 对照命令在 Legacy 根目录追加了 Go `cmd/crystal-server/...` 路径，读取阶段失败；该调用没有写入，整条输出作废。
+- Root cause: 连续读取两侧实现时复用了另一仓库的相对路径，没有把工作目录与参数集合绑定到同一仓库。
+- Prevention: 每次工具调用只使用当前已核验根目录下的路径；切换仓库必须结束调用、重新核验根目录，再执行另一侧读取。
+- Verification: 失败调用未改变工作树；后续 HornedSorceror 对照将拆成 Legacy 与 Go 两个纯仓库调用。
+
+### 2026-08-17 — 延迟 AI 动作的持久状态必须写回权威怪物副本
+
+- Symptom: HornedSorceror Charged Stomp 的延迟伤害已从动作队列移除，但怪物仍保持 `Immune`，后续玩家攻击持续被拒绝。
+- Root cause: 解析器按值接收延迟动作的攻击者；清除免疫只改了局部副本，调用方随后把旧的免疫副本写回世界。
+- Prevention: 延迟动作若改变攻击者持久状态，必须在 map 写回前修改调用方的权威副本，或改用指针/显式返回值；测试同时断言状态清除和伤害结果。
+- Verification: AI=169 Player/owned-Monster/Hero Stomp transcript 在普通与全量 Go 测试中均确认免疫清除、50 点伤害和后续状态。
+
+### 2026-08-17 — AI=169 生命周期夹具必须隔离维护移动与第二次冷却动作
+
+- Symptom: HornedSorceror 定向 transcript 在预期攻击之外消费了 `Random.Next(2)`，龙卷风过期 tick 还会合法生成第二批 25 个单元。
+- Root cause: world tick 在冷却/动作门禁期间仍尝试移动方向抽样；15 秒龙卷风冷却在 17 秒生命周期断言前已到期。
+- Prevention: 确定性 callback 允许已解释的维护 `bound=2`；生命周期测试在初始施法后冻结 Action/Attack 时间，避免第二次 AI 动作污染目标生命周期。
+- Verification: AI=169 world transcript 与 authenticated `net.Pipe` transcript 普通测试通过，`-race -count=10` 作为批次门禁复核。
+
 ### 2026-08-17 — Go 根目录复用不得手工重复拼接
 
 - Symptom: HornedWarrior 对照期间两次 Go 只读命令把已核验根目录重复成不存在的路径，进程未启动，输出不能作为源码证据。
