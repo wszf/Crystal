@@ -2,6 +2,27 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-18 — AI=181 Player 目标持久种类与动作编码不同
+
+- Symptom: WaterDragon session reveal 断言把 Player 的 `MonsterAITargetKind` 写成 0，实际搜索后持久状态为 `ancientBringerPlayerTarget (1)`。
+- Root cause: Player 只有写入延迟攻击动作时才映射为 Legacy 的默认 kind 0；世界目标状态仍保存统一目标枚举 1。
+- Prevention: 分别断言持久目标字段与 `worldMonsterAttackAction.TargetKind`；不要用协议/动作的默认 Player 编码推断 AI 状态枚举。
+- Verification: 修正 transcript 后，reveal 状态断言继续确认 kind=1，后续近战 action 使用 kind=0 并按预期命中。
+
+### 2026-08-18 — AI=181 Green 毒物命中 tick 要计入即时伤害
+
+- Symptom: WaterDragon 远程延迟命中测试把目标 HP 只按 20 点 MC 伤害计算，实际命中 tick 后为 73，少于预期的 80。
+- Root cause: Green poison 使用 `TickAt` 零值，统一 poison processor 会在同一 impact tick 发布状态并施加首跳毒伤；测试只断言了主攻击伤害。
+- Prevention: 绿色毒物的命中断言分离主攻击与首跳毒伤，并同时检查毒物类型、持续时间、tick 和状态包；只有非伤害控制毒物才按纯主攻击伤害计算。
+- Verification: WaterDragon 远程测试改为断言 20 点 MC 加 7 点首跳毒伤，毒物仍保持 5 秒、1 秒 tick。
+
+### 2026-08-18 — AI=181 距离延迟测试必须从夹具坐标推导
+
+- Symptom: WaterDragon 远程动作夹具把 `(2,2)` 到 `(6,2)` 当成 3 格，先写成 650ms 期望，实际 Legacy 距离延迟为 700ms。
+- Root cause: 测试期望手工填写了距离常量，没有从攻击者与目标的 Chebyshev 坐标计算出 `max(|dx|,|dy|)`。
+- Prevention: 延迟动作测试先由夹具坐标计算距离，再用 `distance*50ms + projectileDelay` 生成期望；攻击 payload 与动作 Due 必须共享同一距离变量。
+- Verification: 修正为 4 格后，WaterDragon 近战/远程定向测试通过并同时确认 payload、冷却和延迟命中。
+
 ### 2026-08-18 — AI=180 测试夹具必须复现 MaxHP、配置名和对象 ID 状态
 
 - Symptom: SnowWolfKing 定向测试把 HP=65/45/20 判成错误攻击阶段，低血量召唤断言看到了父对象自身，死亡测试还因手工子对象触发普通 AI 初始化而消费了 `Next(3000)`，最后把空动作 slice 错判为非空 pending 状态。
