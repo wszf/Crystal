@@ -2891,3 +2891,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 依据记忆拼接文件/函数位置，没有在补丁前重新读取当前文件的精确上下文，并把跨仓库路径边界当成可复用字符串。
 - Prevention: 每次补丁先独立核对当前仓库的 `git rev-parse --show-toplevel`，再用 `rg -n`/`sed` 取得实际锚点；绝对目标路径逐项确认存在，失败补丁的其他输出不得作为证据。
 - Verification: 失败补丁均无文件变化；随后使用当前 `king_hydrax_session_test.go` 与 `docs/migration-matrix.md` 的精确锚点完成修改，格式化及 KingHydrax 普通/race 定向测试通过。
+
+### 2026-08-17 — AI=163 Go 读取命令不得追加 Legacy 路径
+
+- Symptom: HornedMage 对照期间一次 Go 读取命令末尾误带 Legacy `Server/...` 路径，读取返回非零；该调用的 Go 输出也不能作为源码证据。
+- Root cause: 为连续比较两侧实现而复用了上一仓库的相对路径，没有把 `workdir` 与全部路径参数作为单仓库契约检查。
+- Prevention: 每个读取调用先独立核对 `git rev-parse --show-toplevel`，命令参数只允许当前仓库已确认存在的路径；任一混合路径或非零读取结果整体作废并在新调用重跑。
+- Verification: 失败调用未产生写入；HornedMage 的 Legacy/Go 证据随后分别在核验后的根目录重读，后续实现未使用混合输出。
+
+### 2026-08-17 — 工具编排字符串失败不得作为 AI=163 证据
+
+- Symptom: 一次 `functions.exec` JavaScript 编排因字符串引号错误在执行前失败，没有运行工具或写入文件。
+- Root cause: 手写多行字符串时没有先核对引号和结束边界，把编排语法错误误当成可继续处理的工具结果。
+- Prevention: 复杂补丁/读取编排优先使用普通字符串或独立工具调用；执行前检查字符串闭合，脚本失败时整条调用作废，不从错误文本推断源码状态。
+- Verification: 该失败调用没有副作用；后续 HornedMage 操作改用已声明的工具接口和独立调用，并通过包级编译及定向测试。
+
+### 2026-08-17 — 新增 Monster AI 必须同时接入 population 白名单
+
+- Symptom: AI=163 HornedMage 已有常量、dispatch 和处理函数，但世界 tick 没有产生任何攻击包；包级编译无法发现该运行时遗漏。
+- Root cause: 只把 AI 接入处理 dispatch，遗漏了 `monsterAICommonPopulation` 的调度白名单，实体因此在进入处理函数前被过滤。
+- Prevention: 新增 AI 时建立“常量 → common population → process dispatch → delayed-action resolver”四点接线清单，并在行为测试前至少验证一次真实 `world.tick` 能进入分支。
+- Verification: 将 AI=163 加入 population 白名单后，HornedMage 世界近战/远程/传送、Player/宠物/Hero 投影和认证会话测试均产生预期动作；普通重复测试与 race 定向测试通过。
+
+### 2026-08-17 — HornedMage transcript 要按 Legacy payload 的目标字段断言
+
+- Symptom: HornedMage 初版测试把 `ObjectStruck` 的 Direction 写成攻击者方向，实际 wire payload 使用受击对象的方向；Type 1 测试还把第一次无效传送的随机消耗误算成一次。
+- Root cause: 按攻击动作的直觉复用了发射方向，并假定坐标生成必然有效，没有分别核对 `ObjectStruck` serializer 的目标字段和 `TeleportTarget` 每次尝试的 ValidPoint 门禁。
+- Prevention: transcript 逐包从 payload 定义确认字段来源；Type 1 随机 fixture 明确覆盖“首轮有效”和“四轮均无效”两条路径，按每轮两个 `Next(9)` 计算消费。
+- Verification: 测试现锁定目标方向、Type 1 首轮成功的 `Next(5), Next(9), Next(9)`，以及四轮失败的九次上界序列；HornedMage 普通/race 重复测试通过。
