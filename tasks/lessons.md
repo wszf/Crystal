@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-18 — AI=180 测试夹具必须复现 MaxHP、配置名和对象 ID 状态
+
+- Symptom: SnowWolfKing 定向测试把 HP=65/45/20 判成错误攻击阶段，低血量召唤断言看到了父对象自身，死亡测试还因手工子对象触发普通 AI 初始化而消费了 `Next(3000)`，最后把空动作 slice 错判为非空 pending 状态。
+- Root cause: 夹具沿用了 SnowWolf 的 `MaxHP=200`，没有设置 `SnowWolfKingMob` 的精确名称，直接写入对象 map 却未推进 `nextObjectID`，也没有冻结手工奴仆的 AI 门禁；Go tick 保留了空的非 nil slice。
+- Prevention: 阶段测试显式设置与断言对应的 `MaxHP`，配置驱动的召唤先注册精确名称，手工插入对象后推进 `nextObjectID` 并设置维护时间，队列断言使用 `len` 而不是 nil slice 身份。
+- Verification: 修正夹具后 AI=180 world/session 定向测试通过，攻击阶段、三只召唤、500ms 死亡爆炸和奴仆转宠均稳定复现。
+
 ### 2026-08-18 — AI=179 新施加毒物必须在命中 tick 发布状态包
 
 - Symptom: SnowWolf 认证会话的魔法命中收到了伤害和两条中毒聊天，但缺少同一 tick 的 `ServerPoisoned`。
