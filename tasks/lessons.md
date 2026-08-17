@@ -3110,3 +3110,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为减少工具往返，把“查询互不写入”错误等同于“可以共享一次编排”，没有让每个工具调用绑定单一仓库根目录。
 - Prevention: Legacy 与 Go 的根目录核验、状态检查、源码读取、测试、格式化和提交都分别启动调用；一次调用的 `workdir` 与路径参数只允许来自同一仓库，任何混合输出不作为实现证据。
 - Verification: 本次并行查询未产生文件变化；之后的 HEAD 基线复现和 TurtleGrass源码检查均使用纯 Go 调用，Legacy lessons 仅在本仓库独立补丁中更新。
+
+### 2026-08-17 — ManTree 对照读取不得在 Go workdir 混入 Legacy 路径
+
+- Symptom: AI=174 研究时一条 Go workdir 只读命令同时带入 `Server/MirObjects/...` 与 `cmd/crystal-server/...`，Legacy 路径解析失败；命令未写入，整条输出作废。
+- Root cause: 连续读取 C# `IsAttackTarget` 与 Go helper 时复用了两侧相对路径，没有把工具调用与单一仓库根目录绑定。
+- Prevention: 跨仓库对照必须先结束当前调用；每次新调用先核对 `git rev-parse --show-toplevel` 和当前仓库文件清单，参数只允许该仓库路径，失败调用的其余输出不得作为证据。
+- Verification: 失败调用未改变任何文件；随后 Legacy 与 Go 目标读取已拆成两个纯仓库调用，后续 AI=174 补丁和测试继续按同一边界执行。
+
+### 2026-08-17 — ManTree 夹具必须按实际目标属性和动作伤害复核随机流
+
+- Symptom: AI=174 定向测试初次把 Hero 防御抽样限制为 `bound=1`、Boulder 目标抽样限制为两个目标，并把移动中心用例的 MC 伤害写成 10；删除延迟目标后还错误地期待目标锁保留，导致测试失败。
+- Root cause: 夹具沿用了 Player/owned-Monster 的防御随机假设，没有读取 Hero 装备派生的 `Agility+1=16`；ManTree 测试信息的 `MinMC=MaxMC=20`，完整半径一列表和后续 ProcessAI 清锁行为也未按运行时状态核对。
+- Prevention: 每个 AI transcript 分别记录 admission/impact 随机上界，按实际 materialized Hero stats、完整目标列表和测试 MonsterInfo 的 DC/MC/SC 设置建立期望；延迟目标删除同时断言结算跳过及后续 AI 锁状态。
+- Verification: AI=174 ManTree 世界/认证 transcript、包级普通测试和 `go test -race ./cmd/crystal-server -run 'ManTree' -count=10` 均通过；全仓普通/race、vet、build 也通过。
