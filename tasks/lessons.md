@@ -2617,3 +2617,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 参照玩家/其他实体的攻击冷却命名构造 Hero fixture，没有先核对 `worldHero` 的实际结构；该类型只暴露 `ActionReadyAt`。
 - Prevention: 新增实体夹具赋值前先用当前 Go 类型定义和现有测试检索确认字段名；先执行 `gofmt` 与包级编译，再进入行为断言，避免把编译错误混入功能失败。
 - Verification: 删除无效字段并保留 `ActionReadyAt` 冻结 Hero AI 后，`go test ./cmd/crystal-server -run 'DarkOmaKing' -count=1` 通过，随后真实 `net.Pipe` transcript 也通过。
+
+### 2026-08-17 — 跨仓库读取失败的输出不得继续用于 AI=151 判断
+
+- Symptom: AI=151 方向核对的一条 Go 命令混入了 Legacy `Shared/Enums.cs` 路径并以路径不存在失败；同一调用的其他输出也不能作为证据。
+- Root cause: 为确认旧版方向枚举，把 Legacy 相对路径追加到 Go 工作目录，违反了单仓库命令边界。
+- Prevention: Go 调用参数只允许 Go 仓库路径；Legacy 对照必须结束当前调用后重新核对 Legacy 根目录，任何混合路径或非零只读调用整体作废。
+- Verification: 失败命令只读且没有文件变化；随后仅使用独立 Go 的 `directionFromPoints` 输出和独立 Legacy `CaveStatue.cs` 基线完成 AI=151 实现。
+
+### 2026-08-17 — AI=151 value-map 实体必须回读后写回
+
+- Symptom: CaveStatue session 夹具首次包级编译失败，直接给 `world.monsters[1].Route` 和 `RouteMoveReadyAt` 赋值；Go map value 不能对索引表达式的字段赋值。
+- Root cause: 把 `world.monsters` 当成指针 map 使用，未先复制实体到局部变量。
+- Prevention: 修改 Monster value-map 实体时先取局部副本，完成所有字段变更后通过同一 ObjectID 写回；延迟状态断言也从权威 map 回读。
+- Verification: 改为回读/修改/写回后，AI=151 CaveStatue world 与真实 `net.Pipe` 定向测试通过。
