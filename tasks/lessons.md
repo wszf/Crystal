@@ -2,12 +2,26 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — Go 根目录复用不得手工重复拼接
+
+- Symptom: HornedWarrior 对照期间两次 Go 只读命令把已核验根目录重复成不存在的路径，进程未启动，输出不能作为源码证据。
+- Root cause: 复制绝对工作目录时手工拼接了仓库路径，没有直接使用最近一次 `git rev-parse --show-toplevel` 结果。
+- Prevention: 每次 Go 工具调用先独立核验根目录和目标文件；后续 `workdir` 只使用该返回根目录，禁止手工追加目录，失败读取整体作废。
+- Verification: 两次失败调用均未写入；随后在独立核验的 `Crystal.GoServer` 根目录重新读取 ElephantMan/目标辅助代码。
+
 ### 2026-08-17 — AI=164 初次编译必须先核对桥接类型与 helper 签名
 
 - Symptom: HornedArcher 首次包级编译同时报告 `ViewRange` 的 `byte` 到 `int32` 不匹配，以及 Monster friendly helper 的调用参数错误。
 - Root cause: 新 AI 代码沿用了概念上的数值类型和相邻 AI 的 helper 形状，没有以当前 Go 结构定义逐项核对。
 - Prevention: 新增 AI 先读取实际字段/helper 签名，完成最小 patch 后立即运行 `gofmt` 与 `go test ./cmd/crystal-server -run '^$'`。
 - Verification: 将 `ViewRange` 显式转换为 `int32` 并修正 helper 调用后，包级编译通过，随后 AI=164 定向测试通过。
+
+### 2026-08-17 — AI=165 transcript 随机 callback 必须覆盖延迟伤害阶段
+
+- Symptom: HornedWarrior WideLine admission 已正确消费 DC 的 `bound=11`，但测试把后续 Monster/Hero 延迟 AC+Agility 防御的 `bound=1/16` 误报为 admission 失败。
+- Root cause: 同一 world tick 夹具复用了一个只允许攻击阶段上界的随机 callback；`world.tick` 在后续手工 impact tick 仍会调用同一 callback。
+- Prevention: 先断言 admission tick 结束时的精确随机序列，再让 callback 显式允许该 transcript 后续可达的防御上界，并分别断言每个阶段的行为结果。
+- Verification: AI=165 WideLine Player/owned-Monster/Hero 延迟命中测试与 authenticated `net.Pipe` transcript 在普通和 `-race -count=10` 门禁中通过。
 
 ### 2026-08-17 — AI=164 行为夹具必须隔离普通 AI 初始化与实际 Hero 防御抽样
 
