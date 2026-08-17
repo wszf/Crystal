@@ -2,6 +2,27 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — 真实会话维护 tick 可能消费冷却期移动随机数
+
+- Symptom: 全量 race 暴露 `TestSessionOmaWitchDoctorRangeTranscript` 偶发把攻击阶段的随机序列记录为 `[2, 11]` 而不是 `[11]`；堆栈显示连接读循环的实时 `world.tick` 在手工未来时钟之前执行了 OmaWitchDoctor 的 `MoveTo`，即使 `CanMove` 尚未到期仍先消费 `Random.Next(2)`。
+- Root cause: 停止 world ticker 不会停止连接级维护 tick；仅把 AI 时间字段设到未来不能阻止 Legacy `MoveTo` 在不可移动时尝试随机方向。
+- Prevention: net.Pipe transcript 把维护 tick 与手工 tick 的随机流分开统计，只对手工动作的排他上界断言，并允许已核实的维护 `bound=2`；需要完全隔离时在设置目标前保持目标为空，不能把停止后台 ticker 当成停止所有 runtime tick。
+- Verification: 夹具改为校验唯一的手工攻击 `bound=11`，同时只允许维护 `bound=2`；OmaWitchDoctor 定向 race 重复测试和后续全量 race 门禁通过。
+
+### 2026-08-17 — Go 只读检索不得使用未核验 shell glob
+
+- Symptom: 本轮 Go 读取命令把不存在的 `cmd/crystal-server/session*.go` 交给 zsh，命令在展开阶段失败；该调用的其他输出未作为证据。
+- Root cause: 依赖文件名模式而没有先确认目录内容，违反了 shell 参数和当前仓库边界的逐项核验。
+- Prevention: Go 检索使用 `rg --files`/`rg --glob` 让检索器处理模式，禁止让 zsh 展开未核验 glob；任一非零读取命令整体作废并重跑。
+- Verification: 失败调用未写入文件；后续仅使用独立根目录核验后的 `rg --glob '*.go'` 输出。
+
+### 2026-08-17 — AI=152 读取证据与测试夹具必须隔离
+
+- Symptom: 本轮一次跨仓库读取命令把 Legacy `Shared/Enums.cs` 与 Go glob 放在同一调用，读取失败；PlagueCrab 冷却期测试还发现攻击范围内不可攻击时错误产生 `ObjectWalk`，投影夹具则把宠物/英雄的 MAC+Agility 随机上界误假设为攻击阶段的 `bound=1`。
+- Root cause: 对照命令没有保持单仓库参数边界；AI 测试只覆盖了攻击 admission，没有覆盖攻击后继续运行的冷却分支；投影目标的真实防御属性没有从 fixture 的 materialized stats 复核。
+- Prevention: 失败的跨仓库读取输出整体作废；每个 AI transcript 都要覆盖攻击后冷却 tick，并在攻击范围内不可攻击时断言无移动；Player/Monster/Hero 投影测试按真实 MAC、Agility、MagicResist 随机调用顺序配置 callback，不把不同阶段的上界混用。
+- Verification: 后续 PlagueCrab processor 在冷却期直接返回，session transcript 只消费攻击阶段 `bound=1`；投影测试允许并验证实际 `bound=16` 防御抽样，普通/race 定向测试均通过，Legacy 与 Go 命令已拆分为独立调用。
+
 ### 2026-08-17 — Legacy 只读命令也不得夹带 Go 路径
 
 - Symptom: DarkOmaKing 对照命令在 Legacy 根目录中追加了 `cmd/crystal-server/...` 路径；该部分读取失败，整条命令的输出不能作为证据。
