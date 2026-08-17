@@ -3208,3 +3208,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把 `ProcessTarget` 的 Shock 清锁与 `Process` 前置搜索/`RefreshNameColour` 合并成了单阶段，并遗漏了目标/观察者接收者矩阵；实现还需要保留“可攻击能力门禁后，非攻击范围 Shock 清锁”的顺序。
 - Prevention: AI transcript 按完整 tick 阶段建模：目标重验/搜索、颜色刷新、攻击或移动门禁、再处理延迟动作；Shock 测试预置有效目标、显式固定搜索时间，并逐接收者断言颜色包与清锁状态。
 - Verification: FrozenKnight 局部门禁按 Legacy `CanAttack`（Shock 在范围分支后处理）修正后，普通测试、`go test -race ./cmd/crystal-server -run 'FrozenKnight' -count=10` 均通过。
+
+### 2026-08-18 — AI=182 BlackTortoise ranged fixture must include same-tick poison
+
+- Symptom: The first BlackTortoise ranged transcript expected HP 78 after a 20-point MC hit against 2 MAC; the actual HP was 75 and the test failed.
+- Root cause: The migrated Legacy poison path applies the successful Green poison value immediately during the same impact tick, so the 7-point SC poison is included in the observable HP change.
+- Prevention: For every successful ranged poison AI, derive the impact HP from the full `damage + immediate poison` pipeline and assert poison type/value/duration/tick separately; do not assume poison waits for the next world tick.
+- Verification: BlackTortoise ranged and post-launch wall tests now expect HP 75, assert the 7/5/1000 Green poison, and pass the targeted world/session test suite.
