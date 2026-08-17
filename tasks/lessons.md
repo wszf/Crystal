@@ -2,6 +2,23 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-17 — DarkCaptain 对照读取仍须保持单仓库参数
+
+- Symptom: 一次 Legacy 只读命令在 `Crystal` 根目录夹带了 Go 的 `cmd/crystal-server/world.go`，读取在路径解析阶段失败；该调用没有写入，输出不能作为源码证据。
+- Root cause: 为了连续查看 Go 的 `killMonsterLocked`，复用了另一仓库的相对路径，没有把工作目录与命令参数作为不可拆分的单仓库集合。
+- Prevention: 当前仓库读取完成后必须结束调用；切换仓库先独立执行并核对 `git rev-parse --show-toplevel`，新调用的路径参数只允许当前仓库文件。失败调用整体作废。
+- Verification: 本次失败调用未产生源码变化；后续 DarkCaptain Legacy 与 Go 片段将分成两次已核验根目录的调用。
+
+- Strengthening after recurrence: 即使 Legacy 片段已经成功读出，命令末尾也不得追加 Go 文件；必须在切换根目录后重新核验，并让整条命令只包含当前仓库路径。
+- Verification after recurrence: 本次混合调用在 Go 路径解析阶段失败且未写入；其 Legacy 输出也不再作为证据，后续将分别重读两侧。
+
+### 2026-08-17 — DarkCaptain 检索模式不得交给 zsh 裸展开
+
+- Symptom: 一次 Go 只读命令把未核验的 `cmd/crystal-server/*teleport*` 作为裸 shell 参数，zsh 在无匹配时退出；该调用无写入，所有输出作废。
+- Root cause: 习惯性使用文件名 glob，未先列出精确文件，也未使用 `rg --glob` 让检索器处理模式。
+- Prevention: 先用 `rg --files` 核对候选，或把模式作为 `rg --glob` 参数；禁止未核验 glob 交给 zsh，任何非零读取调用整体作废。
+- Verification: 本次 shell 展开失败未改变文件；后续 DarkCaptain 读取只使用已存在的 Go 文件路径和 `rg --glob`。
+
 ### 2026-08-17 — Go 工作目录绝对路径不得重复拼接
 
 - Symptom: 一次 Go 只读检索把已核验根目录重复成 `.../me_work/me_work/Crystal.GoServer`，进程未启动，输出不能作为源码证据。
@@ -2804,3 +2821,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 新 AI 常量补丁没有先搜索现有常量声明，导致把已存在的标识符再次加入常量区。
 - Prevention: 新增 AI/协议常量前先用 `rg -n` 在 Go 包内搜索完整标识符，确认唯一声明位置；随后立即运行 `gofmt` 和 `go test ./cmd/crystal-server -run '^$'`，包级编译通过后再写行为测试。
 - Verification: 删除重复声明并格式化后，包级空测试和 `TestWoodBox` 定向测试均通过。
+
+### 2026-08-17 — DarkCaptain 范围、推退与传送必须按客户端副作用验收
+
+- Symptom: DarkCaptain 初版范围测试把半径边界、Fullmoon 推退和传送后的目标切换当成单一伤害行为，遗漏了边界之外目标、`ObjectPushed` 广播及传送后下一 tick 重新选目标的可观察结果。
+- Root cause: 只按技能名称概括了 AI 效果，没有分别展开 Thunder/MassThunder 的范围比较、Fullmoon 的每目标推退通知和 `Teleport` 对缓存目标字段的同步；真实会话还可能被后台维护 tick 抢先消费。
+- Prevention: 新 AI 测试先建立坐标半径/目标种类矩阵，再按每个目标的私有与观察者包序断言；推退必须验证坐标、方向和 `ObjectPushed`；传送改变实体人口后同步 `MonsterAITargetID/Kind`，真实 `net.Pipe` transcript 在手工 tick 前冻结初始化、搜索和动作时间并用 KeepAlive 屏障。
+- Verification: DarkCaptain world 测试覆盖 Player、owned Monster/Hero、半径边界、Thunder/MassThunder、Orb、Line/Fullmoon、传送、延迟伤害和 Slave 清理；authenticated `net.Pipe` transcript 与包级定向回归通过，修复后的传送后弱目标选择测试确认缓存目标已同步。
