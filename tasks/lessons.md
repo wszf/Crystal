@@ -2536,3 +2536,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试夹具按字面量直觉推导坐标和“远程=非相邻方向”，没有先核对 Go struct 的精确类型，也没有按 Legacy `CurrentLocation == Target` 或 `!InRange(...,1)` 的 Chebyshev 距离条件建分支表。
 - Prevention: 新增坐标夹具先显式声明 `int32`；攻击矩阵用距离 0、1、>1 分别覆盖同格、近战和远程，再单独标注直线/非直线；延迟 tick 必须继续执行一次完整 AI 流程，把冷却期间的移动/无移动作为包级断言。
 - Verification: AI=148 测试改用 `int32` 坐标、距离 2/3 的直线远程和距离 2/1 的非直线场景；世界测试、`net.Pipe` transcript 及普通/race 定向门禁均通过。
+
+### 2026-08-17 — 跨仓库只读核对也必须保持单仓库调用边界
+
+- Symptom: AI=149 开始前的一次只读状态/lessons/源码核对把 Legacy 与 Go 命令放进同一个并行调用；虽然没有写入，但该调用违反了已建立的单仓库证据边界。
+- Root cause: 为减少往返，把两个仓库的状态、C# 基线和 Go 实现查询合并编排，忽略了 lessons 对跨仓库输出整体作废的约束。
+- Prevention: 每次跨仓库工作先独立读取 Legacy lessons 和 Legacy 状态，再用另一个独立调用读取 Go 状态/源码；混合调用的输出只作诊断，不作为实现依据，继续工作前重新运行对应仓库的独立核验。
+- Verification: 混合调用只产生读取输出且两个工作树没有源码变化；随后已独立读取 Legacy lessons、Legacy 对照和 Go 相关实现，后续补丁与测试仅以 Go 根目录调用的证据为依据。
+
+### 2026-08-17 — Go 读取命令末尾不得追加 Legacy 路径
+
+- Symptom: PowerBead 只读核对在 Go 根目录的命令末尾误带了 Legacy `Server/MirDatabase/BuffInfo.cs`，调用以路径不存在退出；没有写入，但同一调用的全部输出不能作为证据。
+- Root cause: 为连续读取 Go 支持 Buff 与 Legacy 定义而复用了另一仓库的路径参数，未在执行前检查当前调用的单仓库路径 allowlist。
+- Prevention: 每个 `functions.exec` cell 只使用当前已核验仓库的路径；跨仓库对照必须结束当前调用后新建独立调用并重新核对根目录，出现混合路径或非零读取结果时整体作废。
+- Verification: 该调用只读且两仓库均无源码写入；后续 Buff 读取将只在 Go 根目录重跑，Legacy 对照另行执行。
+
+### 2026-08-17 — PowerBead transcript 的随机消费发生在延迟命中阶段
+
+- Symptom: AI=149 `net.Pipe` transcript 在发出 `ObjectRangeAttack` 后立即断言固定 DC 的 `Random.Next(1)`，观察到没有 AI 随机调用。
+- Root cause: Legacy `GetAttackPower` 位于 `CompleteRangeAttack`，而不是发射范围攻击的 `ProcessTarget`；Go action 的攻击力同样只在 300ms 到期 resolver 中计算。
+- Prevention: 将随机边界断言按发射阶段和 impact 阶段拆开；发射只验证范围攻击包和 action due，命中后再验证固定区间的 `[1]` 消费。
+- Verification: PowerBead world test 与真实 `net.Pipe` transcript 均验证发射阶段无该消费、300ms impact 阶段恰有一次 `bound=1`。
+
+### 2026-08-17 — Monster/Hero 的 PowerBead 包必须按客户端观察者投影断言
+
+- Symptom: AI=149 初始测试把 Monster/Hero 的 `ObjectRangeAttack` recipient 写成目标 ObjectID，导致包序为空或混入 Hero 自身 AI 包。
+- Root cause: 服务端只向附近在线 Player 写广播；Monster 不接收 socket，Hero 的 owner Player 还可能在同一 tick 自己运行 Hero AI。
+- Prevention: Monster 目标使用独立附近 Player observer，Hero 目标使用 owner/隔离 observer，并先冻结 Hero `ActionReadyAt`；所有断言按 recipient 的可观察包序过滤。
+- Verification: Effect 0 Player/owned Monster/Hero 世界测试与 PowerBead session transcript 均通过，且只保留目标类型应有的广播。
+
+### 2026-08-17 — PowerBead 的 PetOwner 夹具不能走普通 Monster AI population
+
+- Symptom: AI=149 Effect 1 与 PetMode 测试通过 `world.tick` 驱动带 `PetOwnerID` 的 bead，却没有产生 action。
+- Root cause: Go 的普通 `tickMonsterAILocked` 明确把 `PetOwnerID` monster 交给 ordinary-pet pipeline；Legacy AI=149 的常见 SpawnRandom bead 是无 Master 的 summoned monster。直接测试 master 分支时必须调用 PowerBead processor，或使用真实无 owner bead。
+- Prevention: session/生产路径使用无 `PetOwnerID` 的 AI=149 bead；仅验证 owner/PetMode 边界时在持有 world 状态的夹具中直接调用 `processPowerBeadLocked` 并写回 authoritative map。
+- Verification: Effect 1 清理、PetMode matrix 和真实无 owner `net.Pipe` transcript 均按对应调度路径通过。
