@@ -3282,3 +3282,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 对照 C# 时只看到了 Kirin 的显式抗性/几率门，没有继续核对 `HumanObject.ApplyPoison` 对 Monster caster 的第二次抗性检查。
 - Prevention: 迁移每个 poison effect 时同时读取施法者调用点与目标 `ApplyPoison` 实现，按目标 Race 明确列出所有 resistance/chance gate。
 - Verification: Go Player fixture 固定并验证 `[10,5,10]`，owned-Monster fixture 验证 `[10,5,5]`；两类测试及 race 定向回归通过。
+
+### 2026-08-18 — IcePhantom 批次选择与新增 helper 必须以当前矩阵和签名为准
+
+- Symptom: 延续摘要把已完成的 AI=112 指向为下一批；切换到 IcePhantom 后首次包级编译又把 `*worldMonster` 传给按值接收的攻击力 helper，编译失败。
+- Root cause: 使用了过期的会话状态而不是当前迁移矩阵，并在新增 AI 文件中没有在调用点复核 helper 的接收者和值/指针边界。
+- Prevention: 选批次先核对当前矩阵、工厂启用状态和源码缺口；每次新增 AI 接线后立即执行 `gofmt` 与 `go test ./cmd/crystal-server -run '^$' -count=1`，并显式检查 helper 签名。
+- Verification: 当前矩阵/工厂核对后改为 AI=178；攻击力调用改为显式解引用，IcePhantom 包级编译、世界测试和会话测试通过。
+
+### 2026-08-18 — IcePhantom transcript 必须保留完整 Process/tick 前导通知
+
+- Symptom: 初稿把冷却期 `MoveTo` 误判为无通知，并遗漏了 Shock 状态在攻击前产生的 `ObjectColourChanged`；行为测试通知序列失败。
+- Root cause: 只断言了延迟伤害，没有按 Legacy tick 的颜色刷新、攻击门禁、冷却期移动顺序建模。
+- Prevention: AI transcript 同时验证 HP/延迟 action 与每个接收者的前导包；远距冷却 tick 允许移动包，Shock in-range 则按颜色包后接攻击包断言。
+- Verification: IcePhantom close/range、owned-Monster/Hero、Shock 边界及 authenticated `net.Pipe` transcript 均通过。
+
+### 2026-08-18 — 新 session 测试必须复用现有协议 payload helper
+
+- Symptom: IcePhantom session 测试首次编译引用不存在的 `ObjectWalkPayload/ObjectWalkInfo`，协议测试无法启动。
+- Root cause: 根据语义自行猜测移动 payload 类型，没有先搜索项目已有的统一 `ObjectMovementPayload` 编码 helper。
+- Prevention: 新增 transcript 前先用 `rg` 定位同类 session 测试和协议构造函数，复用现有 helper，不按包名臆造 API。
+- Verification: 改用 `protocol.ObjectMovementPayload` 后 IcePhantom authenticated session transcript 通过。
