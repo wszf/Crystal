@@ -4187,3 +4187,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 真实会话启动 ticker 与连接维护 tick 会竞争消费 200ms 延迟动作；Blink 0 级成功门槛还依赖 `roll(4) == 0`，默认随机源会合法地拒绝传送。
 - Prevention: 会话测试在 bootstrap 后停止 ticker，再用确定性 `combatRoll` 覆盖成功分支；手动 tick 前确认动作仍在队列，避免把时序或随机性误判为业务回归。
 - Verification: 停止 ticker 并固定 roll 后，Blink `net.Pipe` 会话测试连续 5 次通过，且仍验证 `MapChanged -> ObjectEffect -> AddBuff` 顺序。
+
+### 2026-08-18 — 新增会话测试前先查同包协议解析辅助与创建参数
+
+- Symptom: SummonSkeleton 会话测试首次编译找不到 `protocol.ParseObjectMonsterPayload`，修正后又因把 `CreateCharacter` 的 class 参数设为 2 而得到结果码 2。
+- Root cause: 假设协议包提供了尚未导出的 ObjectMonster 解析 API，并凭 Legacy 职业语义猜测测试 helper 接受任意 class 值，没有先查现有同包辅助和创建夹具约定。
+- Prevention: 新会话断言先用 `rg` 查已有 parser/helper 并复用同包解析器；创建角色先复制已通过的 session fixture 参数，再逐步改变测试所需字段。
+- Verification: 复用 `ordinaryPetTestParseObjectMonster`，将会话角色创建参数改为现有有效值后，SummonSkeleton 定向世界/会话测试通过。
+
+### 2026-08-18 — 会话坐标断言要用实际方向映射验证
+
+- Symptom: SummonSkeleton 延迟生成对象实际位于 `(6,5)`，测试按直觉把方向 2 预期成 `(5,6)`。
+- Root cause: 没有先调用项目的 `movePoint` 方向映射，直接凭方向编号推断前方坐标。
+- Prevention: 位置相关会话夹具统一使用 `movePoint` 计算预期，或先读取相同方向的已验证对象位置；不要把数字方向当作笛卡尔轴的固定约定。
+- Verification: 修正对象位置断言为方向 2 的 `(6,5)` 后，SummonSkeleton `net.Pipe` 延迟对象/健康包测试通过。
