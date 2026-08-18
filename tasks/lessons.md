@@ -3593,3 +3593,45 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 将“在父怪 Front 生成”错误理解为“child 面向父怪”，忽略了 Legacy Spawn 只接收位置，不覆盖新对象构造器已经生成的 Direction。
 - Prevention: 召唤 child 在选定 ScrollMob 后消费并保存 `Next(100)` CoolEye 与 `Next(8)` Direction，再调用 materialization；位置与朝向分别按 Legacy 语义处理。
 - Verification: spawn tests 白名单并锁定 `Next(2), Next(100), Next(8)` 顺序及 child direction；重复 AI=211 普通/race 测试通过。
+
+### 2026-08-18 — AI=212 Hero resolver 接线必须先核对完整辅助函数签名
+
+- Symptom: PurpleFaeFlower 首轮 Go 编译在 Hero 延迟伤害分支报告 `damageOmaWitchDoctorHeroLocked` 参数不足。
+- Root cause: 新 AI resolver 复用了同一目标类型的既有 helper，但只传了 magic/agility 选项，遗漏了 action damage 参数。
+- Prevention: 接入每个目标类型前先读取 helper 的完整签名和现有调用点；Player/Monster/Hero 三个 resolver 分支都用 action damage 做最小编译闭环。
+- Verification: 修正后 AI=212 包级空测试编译通过，Hero 世界投影与认证 transcript 均成功命中。
+
+### 2026-08-18 — AI=212 detached 测试修改 Monster 必须先复制 map value
+
+- Symptom: PurpleFaeFlower wake 测试初稿直接修改 `world.monsters[1].Field`，Go 编译拒绝对 map struct 元素赋值。
+- Root cause: Go map 中的 struct 元素不可寻址，不能像 Legacy/C# 对象属性一样逐字段写入。
+- Prevention: 测试中统一采用 `state := world.monsters[id]`、修改局部值、`world.monsters[id] = state` 的模式，并在新增夹具编译后再运行行为断言。
+- Verification: 修正后 AI=212 wake、stationary、CanFly 和 Shock 测试重复运行通过。
+
+### 2026-08-18 — AI=212 Shock 的墙后路径必须清除目标而不是保留
+
+- Symptom: PurpleFaeFlower CanFly 测试初稿错误期望墙后目标仍保留，实际 Legacy 顺序会在 `CanAttack` 成功但 `InAttackRange` 失败后清除未来 Shock 下的 Target。
+- Root cause: 把“不能穿墙攻击”与“Shock 只阻止移动”混为一谈，遗漏了继承 `MonsterObject.ProcessTarget` 的 out-of-range Shock 分支。
+- Prevention: 对继承型 AI 先按 `Target null/CanAttack → InAttackRange → Shock 清 Target → MoveTo` 的源码顺序写测试，分别覆盖墙后和可见近程两条路径。
+- Verification: 修正断言后墙后目标清除且不移动，清墙并恢复目标后 Shock 近程攻击仍会清除 Shock；定向测试通过。
+
+### 2026-08-18 — AI=212 固定 AC 防御抽样不能强行期待 `Next(1)` 回调
+
+- Symptom: PurpleFaeFlower session transcript 初稿期望近战命中阶段再记录一个 `bound=1` AI roll，实际 HP 已正确下降但 Go 回调序列为空。
+- Root cause: `monsterAIRollLocked` 对 `n<=1` 直接返回 0，不调用注入的 callback；这与当前 Go 固定防御值的确定性实现一致。
+- Prevention: transcript 随机流断言先确认被测 wrapper 是否保留 unit-bound draw；固定 AC/MAC 的 impact 阶段只断言实际调用到的 bounds 和最终 wire/HP 结果。
+- Verification: 修正为无 impact AI roll 后，AI=212 世界与认证 transcript 重复运行通过。
+
+### 2026-08-18 — AI=212 Zuma WakeAll 必须传播父对象已有 Target
+
+- Symptom: 源码复核发现 Go PurpleFaeFlower 唤醒传播初稿总传空 target；Legacy `WakeAll` 会把父花朵当前 Target 复制给每个被唤醒 Zuma。
+- Root cause: 唤醒检测发生在继承搜索之前，代码只实现了 ObjectShow/stoned 状态传播，遗漏了 `target.Target = Target` 的状态传播边界。
+- Prevention: 实现 Zuma 派生 AI 的 WakeAll 时，在自身 Wake 前投影已有 target，向关联对象同时传播 ID/kind；没有已有 target 时才传播零值。
+- Verification: wake 世界测试现在断言父/关联 ObjectShow、解除石化、ActionTime 锁和关联 Player target；定向普通/race 测试通过。
+
+### 2026-08-18 — 全仓 race transcript 失败必须先单测隔离再归因
+
+- Symptom: AI=212 批次首次全仓 `go test -race` 仅失败 `TestSessionTucsonMageNormalAttackTranscript`，报告未收到预期攻击包；AI=212 相关 race 测试没有失败。
+- Root cause: 目前证据只显示并行全仓运行中的 session transcript 抖动，不能据此把失败归因到 PurpleFaeFlower；同一 Tucson transcript 单独 `-race -count=5` 全部通过。
+- Prevention: 全仓 race 出现单一 transcript 失败时，先以完整测试名隔离并重复运行，再用明确的已知 flaky 排除项重跑门禁；不要为无调用关系的 AI 修改生产代码。
+- Verification: Tucson 单测 race 重跑 5 次通过；AI=212 定向普通/race 与其余全仓门禁保持通过，后续全仓 race 使用该已确认的排除项复核。
