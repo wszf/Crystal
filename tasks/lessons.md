@@ -43,6 +43,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为连续查看 Buff 枚举而复用了另一仓库的相对路径，没有把工作目录与参数集合绑定为单一仓库。
 - Prevention: 每次工具调用只使用当前已核验根目录下的路径；切换仓库必须结束调用、重新执行 `git rev-parse --show-toplevel`，失败调用的全部读取输出作废。
 - Verification: 本次命令未写入文件；后续 Legacy 的 Buff 枚举与 Go 的实现读取将拆成两个独立、纯仓库调用。
+- Strengthening after recurrence: Repulsion/FireBurst 差集查询再次在 Go 根目录命令末尾混入 Legacy 相对路径，导致整条读取作废；即使前面的 Go 输出看似成功，也不得继续使用。
+- Verification after recurrence: 将 Go 与 Legacy 查询拆为两个纯仓库调用并重新核对根目录后，后续实现判断只采用成功调用的输出。
 
 ### 2026-08-17 — BoulderSpirit 会话必须冻结无时间门禁 AI 的维护 tick
 
@@ -3863,3 +3865,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `magicAttack` 在 admission 阶段复制了 `worldMagic` 值；即时 resolver 通过 map 更新经验后，函数尾部仍把旧快照写回，覆盖了练习结果。
 - Prevention: 任何在 `magicAttack` 内即时执行并可能调用 `levelMagicLocked` 的分支完成后，重新读取 `player.Magics[spell]`，再写入本次 cast timestamp；测试同时检查状态 map 和升级通知。
 - Verification: 加入即时效果后的 map-value 刷新，EnergyRepulsor 经验/通知定向测试、普通/race 全量门禁和构建检查全部通过。
+
+### 2026-08-18 — Repulsion 家族测试标签要使用显式协议值映射
+
+- Symptom: 共享 Repulsion/FireBurst 测试首次包编译失败，协议包没有假定的 `SpellName` helper；resolver 重构后旧文件还保留了未使用的 `protocol` import。
+- Root cause: 测试为了生成 subtest 名称凭记忆假设了协议 API，重构只修改了调用点而没有同步清理文件级 import。
+- Prevention: 新测试只依赖已核对的协议 API；没有名称 helper 时使用显式 `{name, spell}` 表，重命名 resolver 后立即运行 `gofmt` 与目标包编译，清理未使用 import。
+- Verification: 修正标签表和 import 后，Repulsion/FireBurst 定向普通与 race 测试及完整门禁通过。
+
+### 2026-08-18 — FireBurst 练习测试必须满足 spell-specific level gate
+
+- Symptom: FireBurst 已正确推送 Player/Monster/Hero 且扣除 10 mana，但技能经验仍为 0。
+- Root cause: Legacy `FireBurst` 的 `Level1` 是 33，测试共享 caster 只有 30 级；`levelMagicLocked` 正确拒绝了练习，行为本身没有失败。
+- Prevention: 共享法术 resolver 测试除行为相同外，必须逐 spell 核对 catalogue 的 cost、Level1/2/3 和练习门；FireBurst 场景显式使用至少 33 级 caster。
+- Verification: FireBurst 夹具提升至 33 级后，经验、mana、推送结果与 Repulsion 对照测试通过，普通/race 全仓库门禁、vet 和 build 均通过。
