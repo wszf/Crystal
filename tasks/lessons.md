@@ -3408,6 +3408,9 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 已知的实时 session maintenance tick 会在手动 transcript 前消费 bound=2 的随机数（AI=188 已记录），属于既有维护基线，不是 DarkWraith 行为变化。
 - Prevention: 保留精确失败证据，单独运行该既有测试和排除它的回归命令；不为迁移新 AI 修改无关行为或放宽 wire assertion，最终报告明确保留例外。
 - Verification: `go test ./cmd/crystal-server -count=1 -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'` 通过，DarkWraith 定向测试通过。
+- Strengthening after recurrence: AI=197 GlacierSnail 后的 `go test ./... -count=1` 再次只命中同一 OmaMage 用例，观察到相同 `[2 1]` 前导；GlacierSnail 定向普通/race、服务端整包其余用例和其他 Go 包均通过。
+- Prevention strengthening: 新批次全量门禁先按失败测试名与随机边界对照既有 lessons；确认是相同 session maintenance 前导后，单独保留失败证据并使用排除该基线用例的全仓命令验收，不把它归因到新 AI。
+- Verification after strengthening: 将重跑该既有用例并执行排除它的 `go test ./... -count=1 -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'`；后续 race/vet/build 也采用同一基线分类。
 
 ### 2026-08-18 — AntCommander 协议 helper 必须区分 Packet 与通知包装
 
@@ -3429,3 +3432,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 将目标类型的 Legacy ApplyPoison 逻辑和通用 `addPlayerAppliedPoisonLocked` 的已迁移恢复处理重复拼接。
 - Prevention: Player/英雄 Green/Red poison 统一只经过各自的 applied-poison helper；专用代码只保留 Dazed 的额外 effect/chat 行为，并为非零恢复值建立回归夹具。
 - Verification: AntCommander 远程 Green poison 测试设置恢复值 2 并确认 7 秒变为 5 秒；定向 AI=196、认证 session 与完整服务端包测试均通过。
+
+### 2026-08-18 — AI=197 patch 必须复用 gofmt 后的精确锚点
+
+- Symptom: GlacierSnail 常量重命名和迁移矩阵插入的首次 patch 都因手写空格/上下文与当前文件不一致而被拒绝，未产生部分写入。
+- Root cause: 没有在 `gofmt` 后重新读取物理行，且矩阵 hunk 使用了概括文本而非当前稳定标题。
+- Prevention: patch 前复读目标文件的连续精确行；格式化后的声明按实际空格取锚点，矩阵追加优先使用稳定标题的最小 hunk；拒绝后先确认工作树未变再重试。
+- Verification: 重读后两个最小 patch 均成功；包级编译、GlacierSnail 世界/认证测试及普通/race 重复回归通过。
