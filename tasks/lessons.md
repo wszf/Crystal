@@ -3849,3 +3849,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试夹具把英雄 runtime 放入世界后，`tick` 同时推进了 `tickHeroesLocked`；该输出与 Revelation resolver 的目标类型分支无关。
 - Prevention: 验证某个 delayed action 的“无效果”分支时，直接在世界锁内调用对应 resolver 并只断言其返回通知；只有需要验证完整调度顺序或跨系统副作用时才使用 `world.tick`，并过滤/断言已知的其他周期系统输出。
 - Verification: 改为直接解析排队的 Revelation action 后，英雄准入仍成立、resolver 返回空通知；其余 Revelation 延迟广播、随机门和玩家目标定向测试通过。
+
+### 2026-08-18 — EnergyRepulsor 夹具要遵守 Go 值语义、地图范围和通知矩阵
+
+- Symptom: 新增 EnergyRepulsor 定向测试先因直接给 `world.mapRules[0].SafeZones` 赋值而编译失败；修正后又出现 nil `Stats` 写入 panic、把目标移到施法者外围之外导致“不推送”，以及 caster 通知断言漏掉 `ObjectPushed`/伤害包。
+- Root cause: Go map-of-struct 元素不可链式修改，手写 `worldPlayer` 不会自动初始化 map 字段；3x3 perimeter 只扫描 Chebyshev 距离 1，且立即效果通过现有广播通道在 `MagicLeveled` 前产生多类通知。
+- Prevention: map-of-struct 夹具统一采用“取值—修改—写回”，显式初始化需要写入的 map；设置目标后重新核对扫描范围和字段 map；通知断言按接收者与完整顺序建立，而不是只断言最终升级包。
+- Verification: EnergyRepulsor 三个定向测试及其 race 版本通过，随后普通/race 全仓库门禁、`go vet ./...` 和 `go build ./...` 均通过。
+
+### 2026-08-18 — 即时法术练习不能被 admission 快照覆盖
+
+- Symptom: EnergyRepulsor 的 resolver 已发出 `MagicLeveled`，但 caster 的 `Magics` 中经验仍为 0。
+- Root cause: `magicAttack` 在 admission 阶段复制了 `worldMagic` 值；即时 resolver 通过 map 更新经验后，函数尾部仍把旧快照写回，覆盖了练习结果。
+- Prevention: 任何在 `magicAttack` 内即时执行并可能调用 `levelMagicLocked` 的分支完成后，重新读取 `player.Magics[spell]`，再写入本次 cast timestamp；测试同时检查状态 map 和升级通知。
+- Verification: 加入即时效果后的 map-value 刷新，EnergyRepulsor 经验/通知定向测试、普通/race 全量门禁和构建检查全部通过。
