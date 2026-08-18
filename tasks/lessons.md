@@ -4082,3 +4082,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: zsh 的 `nomatch` 行为会在 `rg` 启动前拒绝空 glob。
 - Prevention: 查询文件集合时使用 `rg --glob '*.cs'`，或先用 `rg --files` 确认路径；不要在命令正文中放未经验证的裸通配符。
 - Verification: 失败调用未修改源码；重跑查询已改用 `rg --glob '*.cs'` 并成功返回旧版定义。
+
+### 2026-08-18 — FlashDash 测试的 MP 断言要按等级成本计算
+
+- Symptom: FlashDash 定向测试首次把等级 2 的施法后 MP 写成 76，实际运行值为 84，导致新测试失败。
+- Root cause: 只记住了基础消耗 12，遗漏了 `LevelCost=2` 按法术等级累加，实际消耗是 `12 + 2*2 = 16`。
+- Prevention: 新法术测试断言资源值前，先从 Go 目录的 catalogue 和 `playerMagicCost` 同时核对基础消耗、等级消耗及等级；不要凭基础值推导等级施法结果。
+- Verification: 修正为 MP 84 后，FlashDash 的移动、零位移、多目标和延迟命中定向测试全部通过。
+
+### 2026-08-18 — 整包会话测试失败要先隔离复现
+
+- Symptom: `go test ./internal/protocol ./cmd/crystal-server` 的一次完整运行中，Tucson 普通攻击会话用例收到空通知而失败；单独以 `-run '^TestSessionTucsonMageNormalAttackTranscript$' -count=1 -v` 重跑通过。
+- Root cause: 失败只出现在整包会话生命周期/时序环境，隔离重跑不可复现；具体触发点尚未确认，不能据此归因到 FlashDash 代码。
+- Prevention: 完整回归出现会话类失败时，先保存失败用例和完整命令，再用精确 `-run` 单独复现；只有隔离失败仍存在时才把它作为当前批次回归处理。
+- Verification: Tucson 用例隔离重跑通过，FlashDash 定向测试也通过；该现象保留为后续整包稳定性关注项。
