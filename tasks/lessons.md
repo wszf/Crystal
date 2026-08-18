@@ -3750,3 +3750,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 忽略了 C# 基类方法会直接修改派生对象状态，Go value receiver/值参数不会把 `ActionTime` 和 `AttackTime` 的覆盖传播回 map 中的 Monster。
 - Prevention: 任何会复用基类并覆盖计时器的 AI helper 都使用 `*worldMonster`，在调用点核对 map value 的写回边界；测试同时断言 action due 和 live `MonsterAIActionAt`。
 - Verification: AI=219 默认攻击测试现在断言 ObjectAttack/伤害 action 在 300ms 到期且 live ActionAt 为 `base+300ms`；定向普通测试通过。
+
+### 2026-08-18 — AI=221 测试三角几何必须从实际攻击方向和步数推导
+
+- Symptom: SepHighTaoist TriangleAttack 测试第一次把 Mir 方向 0 当作正右方，并把第二排左右目标放在第一步前点的侧边，导致只排入前点 action；修正方向后仍因第二排应从两步前点展开而失败。
+- Root cause: 测试夹具手写了方向和坐标，没有按 `DirectionFromPoint`、`PointMove(CurrentLocation, Direction, i)`、再调用 `Left/Right` 的 Legacy 顺序生成三角点。
+- Prevention: 范围攻击测试先由目标位置计算实际方向，再重复 Legacy 的步进几何生成夹具坐标；逐个断言每个点的目标 ID 与 `50ms * MaxDistance + additionalDelay` 到期时间。
+- Verification: AI=221 MassHealing 三角测试按一步前点和两步前点左右点生成三个目标，分别验证 850ms/900ms action，并在 900ms impact 后全部命中。
+
+### 2026-08-18 — AI=221 召唤前对象数量断言要区分 Player 与 Monster
+
+- Symptom: SepHighTaoist Shinsu 延迟召唤测试预期召唤前有两个 Monster，但世界实际只有攻击 Monster 一个，导致未到 Spawn 时间的数量断言失败。
+- Root cause: 测试把存在于 `world.players` 的攻击目标也计入了 `len(world.monsters)`；召唤前 ObjectMagic 已发出、父 Monster 的 pending 状态已正确保存。
+- Prevention: 断言世界对象数量时按存储容器和协议对象族分别计算；召唤测试应独立断言 pending marker、Spawn 后 child state 以及 ObjectMonster/ObjectHealth 通知。
+- Verification: 数量断言改为召唤前一个 Monster，随后验证同一 pending ID 在一秒后生成带父对象、目标、PetLevel/MaxPetLevel 和通知的 Shinsu。
+
+### 2026-08-18 — AI=221 Go 测试分支不保留未使用的 tick 结果
+
+- Symptom: AI=221 三类目标解析测试把 `world.tick(base)` 绑定到未使用的 `launch` 变量，Go 包测试在行为执行前直接编译失败。
+- Root cause: 从需要检查通知的攻击测试复制了局部变量声明到只检查 action/HP 的子测试，未同步收紧变量接收。
+- Prevention: 每个新 subtest 先运行包级编译；只触发状态推进时直接调用 `world.tick(...)`，需要结果时才绑定返回值，其他 helper 返回值用 `_` 显式丢弃。
+- Verification: 删除无用绑定后，AI=221 定向普通测试通过，三类 Player/owned-Monster/Hero 目标均完成延迟命中断言。
+
+### 2026-08-18 — AI=221 延迟 Spawn 必须捕获攻击时的 Front 坐标
+
+- Symptom: AI=221 Shinsu 的延迟 Spawn 初稿在到期处理时重新用父对象当前位置/方向计算 Front；若父对象在 1 秒内被推送或改变方向，child 会偏离 Legacy `DelayedAction(Spawn, ..., monster, Front)` 的位置。
+- Root cause: 把 DelayedAction 的 Point 参数误当成到期时求值，而 C# 构造 action 时已经保存了攻击瞬间的 `Front`。
+- Prevention: 迁移携带坐标参数的延迟 action 时，在排队处显式保存生成时的 x/y/direction，解析时只使用保存值；测试同时覆盖 pending marker 和最终 child 坐标。
+- Verification: Go AI=221 召唤状态保存攻击时坐标/方向字段，Spawn 测试验证 child 在攻击时 Front 生成；到期逻辑不再读取父对象的当前坐标。
