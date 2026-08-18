@@ -4201,3 +4201,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 没有先调用项目的 `movePoint` 方向映射，直接凭方向编号推断前方坐标。
 - Prevention: 位置相关会话夹具统一使用 `movePoint` 计算预期，或先读取相同方向的已验证对象位置；不要把数字方向当作笛卡尔轴的固定约定。
 - Verification: 修正对象位置断言为方向 2 的 `(6,5)` 后，SummonSkeleton `net.Pipe` 延迟对象/健康包测试通过。
+
+### 2026-08-18 — 新召唤会话夹具要复用合法的短角色标识
+
+- Symptom: SummonShinsu/SummonHolyDeva 的世界测试通过，但新增 `net.Pipe` 测试在 bootstrap 前得到角色创建结果码 1；缩短标识后又曾把对象名断言按旧的长构造名写错。
+- Root cause: 会话角色名由法术显示名拼接而成，超过旧版长度约束；修正夹具后断言仍没有读取实际传入的短角色名。
+- Prevention: 新会话测试先使用已验证长度的固定账号/角色名完成创建和登录，再以同一 `characterName` 构造对象名断言；bootstrap 失败时先修夹具，不归因于法术逻辑。
+- Verification: 改用 `ShinsuSess`/`HolySess` 与短账号后，两种召唤的认证 `net.Pipe` 转录、护符 DeleteItem 数量、延迟对象/健康包顺序均通过。
