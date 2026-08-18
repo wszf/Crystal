@@ -4745,3 +4745,33 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 这些会话测试的客户端消费边界与实时 world ticker 在既有基线中存在阻塞/竞态，失败堆栈不涉及本批 UserInformation/ObjectPlayer 投影代码。
 - Prevention: 新批次先运行新增测试和相关包，再运行全量；全量失败时记录具体测试、超时和独立包结果，并用定向测试、race、vet、build 验证新改动，不能把既有 net.Pipe 基线失败标为本批回归。
 - Verification: LevelEffects/Hair 定向测试通过；内部包全量通过；后续将单独复核上述既有会话测试，不改变本批实现以掩盖无关失败。
+
+### 2026-08-19 — tail 读取 lessons 必须使用当前 shell 的合法参数
+
+- Symptom: 读取 lessons 尾部时误用了 `tail -320p`，BSD/macOS `tail` 报 `illegal option -- -320p`。
+- Root cause: 把另一种 `tail` 实现的参数记法直接带入当前 zsh 环境，没有先使用 `tail -n 320` 的可移植形式。
+- Prevention: 读取固定行数统一使用 `tail -n <count>`；命令失败后先修正参数再继续读取，不把失败输出当作上下文。
+- Verification: 改用 `tail -n 320 tasks/lessons.md` 后成功读取文件尾部，未产生文件修改。
+
+### 2026-08-19 — 跨仓库核对不得使用 Promise.all 或混合命令编排
+
+- Symptom: 本轮一次 `functions.exec` 用 `Promise.all` 同时发起 Legacy 与 Go 查询，违反单仓库调用边界；后续还出现了在 Go workdir 中引用 Legacy `Shared/Enums.cs`、以及缺少 `me_work` 的错误 Go 路径。
+- Root cause: 为减少往返而把两个仓库的 workdir/相对路径放进同一编排，调用前没有逐条检查仓库根与命令字符串。
+- Prevention: 每个工具调用/嵌套命令只允许一个明确仓库根；跨仓库比较必须拆成串行、独立调用，命令内不得出现另一仓库路径或相对路径。
+- Verification: 本批后续 Go 格式化、测试、矩阵编辑均只触及 Go 仓库，Legacy 仅通过独立调用读取 lessons；错误混合输出未用于实现判断。
+
+### 2026-08-19 — NPC 输入按钮必须按 Legacy 的 `/@@KEY` 语法构造
+
+- Symptom: 新增 `NPCConfirmInput` 会话测试首次使用 `/[@@INPUT]`，Go 正确解析了页面文本但没有把按钮登记为 `[@@INPUT]`，第二次调用无响应并在 net.Pipe 超时。
+- Root cause: NPC 按钮解析器从 `/@` 标记开始提取键名；方括号属于解析器生成格式，输入源应写 `/@@INPUT`，不能把方括号再放进源文本。
+- Prevention: 新增 NPC 脚本夹具先用 `ParseNPCScript` 断言 `page.Buttons`，再写网络 transcript；严格区分源脚本链接语法与客户端传输的方括号键名。
+- Verification: 改为 `/@@INPUT` 后，协议/脚本单测及认证 net.Pipe 测试连续通过，并观察到 `NPCRequestInput -> NPCResponse -> GainedGold` 顺序。
+
+### 2026-08-19 — NPC 输入批次全量回归仍需标注既有基线失败
+
+- Symptom: 本批 `go test ./... -count=1` 仍失败于 Blizzard/MeteorStrike 两个 30 秒 net.Pipe 超时、HealingCircle 30 秒超时和 TucsonMage 额外 `[61 72]` 包。
+- Root cause: 与上一会话记录的实时 ticker/客户端消费边界基线完全相同，失败不涉及 NPC 输入、协议 payload 或脚本动作替换。
+- Prevention: 保留失败测试名、超时和额外 packet 作为基线证据；以新增会话测试、相关包 race、全仓库编译和 vet/build 作为本批验收，不为无关基线改动 NPC 实现。
+- Verification: `NPCInput`/`BuyItemBack` 目标测试、相关 `go test -race` 和 `go test ./... -run '^$'` 均通过；全量失败集合与既有 lessons 完全一致。
+
+补充证据：一次用 `sed -n '/switch packet.ID/,/default:/p'` 统计 Go 客户端入口时，提前命中了嵌套 `default`，输出了大量伪缺失入口；改用整份 `main.go` 的 `protocol.Client*` 引用集合复核后结果为空。预防再强化为：协议覆盖审计不得用会被嵌套 switch 截断的范围表达式，必须用语法边界明确的提取或完整引用集合，并对结果做人工抽样。
