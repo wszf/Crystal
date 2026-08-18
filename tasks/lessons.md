@@ -4455,3 +4455,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 添加测试辅助函数前只检查了相邻测试文件，没有检索整个 Go 包的同名声明。
 - Prevention: 新增包级测试 helper 前先用 `rg -n '^func <name>\(' cmd/...` 检查全包；已有 helper 直接复用，确需变体时使用带功能前缀的唯一名称。
 - Verification: 失败输出已用于定位；删除重复声明并改用既有 `mustWorldSpellInfo(byte)` 后重新运行 SpecialArrow 定向测试验证。
+
+### 2026-08-19 — BattleCry 最高等级练习不会增加经验
+
+- Symptom: BattleCry level-3 threshold 测试命中目标后预期经验增加 1，但实际经验保持 0。
+- Root cause: 测试把“命中触发 LevelMagic”误当成“最高等级仍会累计经验”；Go/Legacy 的 `LevelMagic` 对 level 3 直接结束，不发练习进度。
+- Prevention: 新增技能练习断言前先按当前 magic level 检查 `LevelMagic` 的 level 0/1/2/3 分支；最高等级只断言效果，不断言经验或 `MagicLeveled` 增长。
+- Verification: 将 level-3 命中期望改为经验不变，BattleCry 世界/会话定向测试通过；level 0/1/2 仍验证一次练习经验。
