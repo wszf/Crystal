@@ -3473,3 +3473,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 复用夹具前没有核对完整函数签名、Hero 延迟防御随机流和世界 tick 的基线通知；把“包含目标攻击包”误写成“目标只收到一个包”。
 - Prevention: 复用测试夹具先读取完整返回签名；多目标 MAC 测试允许各目标防御随机上界；通知断言用目标 packet helper 检查关键包存在，并单独断言状态/动作，不假设无关基线通知消失。
 - Verification: AI=200 近战/远程/同格、Shock/Cooldown、owned-Monster/Hero、延迟重验证、认证 transcript 的重复普通/race 测试以及全仓普通/race 均通过。
+
+### 2026-08-18 — AI=200 ProjectileAttack 默认仍是 ACAgility
+
+- Symptom: 复核已提交的 AI=200 发现 Go 将远程 action 标成 `Magic=true`，但 Legacy 调用 `ProjectileAttack(damage)` 时使用其默认 `DefenceType.ACAgility`。
+- Root cause: 根据“远程”几何分支推断了 MAC 防御，没有读取 `ProjectileAttack` 的默认参数；攻击形状和防御类型不是同一语义。
+- Prevention: 每个延迟 action 都记录 Legacy 的确切 `DefenceType` 实参或默认值；用非零 AC/MAC 夹具验证防御路径，不以 ranged/magic 名称推断类型。
+- Verification: Go action、AI=200 世界/认证测试和迁移矩阵已改为 ACAgility；`go test ./cmd/crystal-server -run 'FurbolgCommander' -count=3` 通过。
