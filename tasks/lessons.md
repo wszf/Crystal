@@ -4223,10 +4223,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-18 — 单仓只读命令不得携带另一仓库路径
 
-- Symptom: MoonLight 研究期间的一次 Go-only 命令误带了 Legacy 的 `Server/MirObjects/MapObject.cs`，导致命令部分成功、部分失败。
-- Root cause: 在同一 shell 命令中混用了两个仓库的相对路径，没有把跨仓库核对拆成独立工具调用。
-- Prevention: 每次工具调用先固定唯一 `workdir`，命令正文只使用该仓库的相对路径；出现路径错误或部分失败时丢弃整次输出，重新单仓读取。
-- Verification: 后续 MoonLight 的 Legacy 与 Go 查询分别在各自 workdir 重跑，且不再引用对侧仓库路径。
+- Symptom: MoonLight 研究期间一次 Go-only 命令误带了 Legacy 的 `Server/MirObjects/MapObject.cs`；随后核对 DarkBody/MoonLight 增伤公式时同类错误又发生两次，导致命令部分成功、部分失败。
+- Root cause: 在同一 shell 命令中混用了两个仓库的相对路径，没有把跨仓库核对拆成独立工具调用；连续研究时也没有在执行前检查命令正文是否仍含对侧路径。
+- Prevention: 每次工具调用先固定唯一且存在的 `workdir`，命令正文只使用该仓库的相对路径；执行前用 `pwd`/文件清单验证目录，并逐字检查命令中不得出现另一仓库根路径或对侧目录；出现路径错误或部分失败时丢弃整次输出，重新单仓读取。
+- Verification: 三次混仓错误输出和一次不存在目录的失败调用均已作废；后续 Legacy 与 Go 查询分别在已验证的 workdir 重跑，并在执行前确认命令正文没有对侧仓库路径。
 
 ### 2026-08-18 — 隐身清理通知只发送实际存在的 buff
 
@@ -4234,3 +4234,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 清理逻辑遍历支持的 MoonLight/DarkBody 类型列表时没有记录实际命中的类型，向客户端无条件发送了两种移除包。
 - Prevention: 状态删除与协议通知使用同一份 `removedTypes` 集合；测试同时断言 buff 状态和目标收件人的包顺序/数量。
 - Verification: 修正后 MoonLight 世界、命中揭示和认证 `net.Pipe` 测试通过，当前只有 MoonLight 时只产生一个 RemoveBuff。
+
+### 2026-08-18 — MoonLight/DarkBody 迁移要覆盖近战增伤消费者
+
+- Symptom: MoonLight 的施法、隐身、过期和受击揭示测试通过后，审查发现 Go 近战仍只使用基础 DC，没有实现 Legacy `Attack` 在揭示前加入 `magic.GetPower()` 的行为。
+- Root cause: 只按法术入口和 Buff 状态迁移，遗漏了同一 Buff 在普通近战伤害计算中的下游消费者。
+- Prevention: 每个新增 Buff 都沿 Legacy 类型的全部引用检查施法、移动/攻击揭示、伤害/防御计算、过期和登录恢复；至少添加一个带确定性 `MPowerBase` 的命中伤害断言及包顺序断言。
+- Verification: Go 已在近战开始前清理 MoonLight/DarkBody、捕获对应等级的 spell power 并加入 DC；等级 0 MoonLight 的 5 点增伤和 `RemoveBuff -> ObjectHidden -> ObjectAttack` 顺序测试通过。
+
+### 2026-08-18 — Legacy 只读检索必须先确认每个精确文件
+
+- Symptom: UltimateEnhancer 包序核对时，Legacy `rg` 参数混入了尚未确认存在的 `Server/MirObjects/Buff.cs` 和其他路径，命令以路径错误结束；该调用的其余输出不能作为源码证据。
+- Root cause: 连续查看实现和枚举时凭记忆追加了概念文件名，没有先用 `rg --files` 建立精确清单。
+- Prevention: 只读调用先在当前仓库独立确认根目录和目标文件存在性，再让 `rg` 只读取已确认路径；任一非零读取调用的全部输出作废，禁止从部分成功输出继续推导行为。
+- Verification: 失败调用未写入文件；随后 UltimateEnhancer 的实现判断只保留此前成功的 HumanObject/MapObject 读取和 Go 侧已核对的源码，未修改任何 C# 文件。
+
+### 2026-08-18 — 已核对的仓库根目录必须直接复用于 Go 补丁
+
+- Symptom: UltimateEnhancer 实现期间两次 `apply_patch` 把 Go 仓库绝对路径写错：一次重复了 `Dropbox`，一次漏掉了 `me_work`；补丁均在写入前失败。
+- Root cause: 手工复制绝对路径时没有直接复用最近核对的 `git rev-parse --show-toplevel` 结果，也没有在补丁前用 `test -f` 验证每个目标。
+- Prevention: Go 补丁先独立核对根目录和目标文件，再逐字复制该根目录；每次补丁只包含当前仓库路径，目标不存在时停止并重建补丁，不从失败文本推断状态。
+- Verification: 两次失败补丁均未产生文件变化；使用精确的 `Crystal.GoServer` 根目录重试后，UltimateEnhancer 实现、世界测试和认证转录通过。
+
+### 2026-08-18 — 多次施法测试期望必须从当前运行状态推导
+
+- Symptom: UltimateEnhancer ResetStatAndDuration 测试第二次施法仍固定断言 MP=972，实际第二次应在第一次结果上再扣 28，导致定向测试失败。
+- Root cause: 辅助函数只按首次施法设计，没有把当前 caster.MP 作为第二次施法的输入状态。
+- Prevention: 可重复施法的测试辅助在发包前从当前状态计算期望 MP、护符数量、冷却和技能经验；不要把首次调用的常量复用于后续调用。
+- Verification: 辅助断言改为 `caster.MP - 28` 后，UltimateEnhancer 世界测试覆盖五职业、重置和过期均通过。
+
+### 2026-08-18 — 物品消耗后的 Buff 持久化必须使用最终快照
+
+- Symptom: UltimateEnhancer 认证转录的 DeleteItem 和运行时护符数量正确，但 auth JSON 仍保存 2 个护符。
+- Root cause: 私有 AddBuff 持久化通知在 `ConsumeItem` 前捕获了角色快照，随后覆盖了主处理器已经写入的 1 个护符状态。
+- Prevention: 任何“先 AddBuff/技能升级、后 ConsumeItem”的路径都要在物品变更后追加最终持久化快照，并在 net.Pipe 测试同时断言包序和 auth 存档数量。
+- Verification: UltimateEnhancer 在消耗后追加最终快照；认证测试确认 `AddBuff -> MagicLeveled -> DeleteItem -> Magic` 包序、运行时数量和持久化数量均正确。
