@@ -3831,3 +3831,14 @@ Record project-specific corrections and failure-prevention patterns here.
 - Additional root cause: Go map 中的结构字段不能通过链式索引修改，必须先复制值、修改字段，再写回 map。
 - Strengthened prevention: 对 map-of-struct 夹具统一使用 `rules := map[key]`、修改、`map[key] = rules` 的写回模式。
 - Additional verification: 改为写回 `worldMapRules` 副本后，TurnUndead 定向测试与 legacyworld/worlddata 测试通过。
+
+### 2026-08-18 — PetEnhancer 成功 admission 必须恢复 Cast 标志
+
+- Symptom: PetEnhancer 已正确通过友方宠物判定并入队 500ms action，但定向测试收到的 `S.Magic.Cast` 仍为 false；EnemyGuild 与自身宠物的成功路径也被误判为失败。
+- Root cause: Go 分支为复现 Legacy 失败目标先把 `result.Magic.Cast` 置为 false，却遗漏了 valid target 分支中的 true 赋值。
+- Prevention: 对“失败时 Cast=false、成功时 Cast=true”的法术，在 admission 测试中同时断言成功/失败的 `S.Magic`、`FoundTarget`、目标 ID 和 action 数量，并在成功分支紧邻目标校验恢复 Cast=true。
+- Verification: 补上成功分支赋值后，PetEnhancer 延迟 Buff、友好模式矩阵和延迟对象存在性定向测试全部通过。
+- Additional symptom: 首次新增测试在解析 AddBuff payload 时引用了循环外不存在的 `err`，包测试编译失败。
+- Additional root cause: `wire` 已在外层声明，解析结果需要在循环内用短变量声明并回填，不能直接给未声明的函数返回错误变量赋值。
+- Strengthened prevention: 对循环内函数调用使用 `parsed, err := ...`，成功后再赋值给外层结果；先运行目标包的编译/定向测试，再进入全仓库门禁。
+- Additional verification: 修正局部变量后，`go test ./cmd/crystal-server -run 'TestPetEnhancer' -count=1` 通过。
