@@ -4165,7 +4165,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Symptom: Teleport/Blink/StormEscape 复核时，Legacy workdir 的查询正文混入了 Go 的 `cmd/crystal-server` 与 `internal/protocol` 路径；第一段报路径不存在，不能把同一调用后续看似有效的输出当作证据。
 - Root cause: 从上一仓库复用查询正文，只切换了 `workdir`，没有重新按当前仓库的实际目录构造命令。
 - Prevention: 仓库切换后从空白命令开始；Legacy 调用只允许 `Server/Shared/Client/tasks` 相对路径，Go 调用只允许 `cmd/internal/docs` 相对路径。发现跨仓库路径后立即丢弃整条输出并分仓库重跑。
-- Verification: 本次没有修改 C# 或 Go 源文件；已记录该失败调用，后续 Teleport 行为证据改为独立的 Legacy-only 与 Go-only 查询。
+- Verification: 本次没有修改 C# 或 Go 源文件；已记录该失败调用，后续 Teleport 行为证据改为独立的 Legacy-only 与 Go-only 查询。本轮复核时一次 Legacy-only 查询又误带 Go 相对路径，整条输出立即作废并用独立仓库命令重跑；后续工具调用继续按仓库单元审计。
 
 ### 2026-08-18 — Go 测试不得直接修改 map 元素的嵌套字段
 
@@ -4202,8 +4202,14 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 位置相关会话夹具统一使用 `movePoint` 计算预期，或先读取相同方向的已验证对象位置；不要把数字方向当作笛卡尔轴的固定约定。
 - Verification: 修正对象位置断言为方向 2 的 `(6,5)` 后，SummonSkeleton `net.Pipe` 延迟对象/健康包测试通过。
 
-### 2026-08-18 — 新召唤会话夹具要复用合法的短角色标识
+### 2026-08-18 — Hallucination 要同时迁移结算状态与通用 AI 搜索门控
 
+- Symptom: Hallucination 施法、延迟成功、Amulet 消耗和 MediumOrchid 颜色测试已通过；首次回归审查发现 Go 通用怪物搜索路径没有读取 HallucinationTime，若只保留专用 AI 的已有门控，普通 AI 仍可能在效果期间重新锁定玩家。新增测试夹具初次编译还把 uint32 对象 ID 直接填入 int32 的 MonsterInfo.Index。
+- Root cause: 实现初版只按 HumanObject.CompleteMagic 的直接状态写入迁移，遗漏了 MonsterObject.ProcessSearch 的下游消费者；测试夹具没有先核对 worlddata.MonsterInfo.Index 的实际类型。
+- Prevention: 迁移带计时字段的效果时，沿字段引用逐项检查显示、tick、AI/目标搜索和过期路径，并为每个下游行为添加确定性断言；新夹具先核对结构体字段类型，再运行目标包最小编译。
+- Verification: 补上通用 AI 搜索在 HallucinationTime 内跳过、到期后恢复搜索的测试，并修正 Index 类型；Hallucination 世界/认证 net.Pipe 测试、go test ./...、go test -race ./cmd/crystal-server、go vet ./... 和 go build ./... 均通过。
+
+### 2026-08-18 — 新召唤会话夹具要复用合法的短角色标识
 - Symptom: SummonShinsu/SummonHolyDeva 的世界测试通过，但新增 `net.Pipe` 测试在 bootstrap 前得到角色创建结果码 1；缩短标识后又曾把对象名断言按旧的长构造名写错。
 - Root cause: 会话角色名由法术显示名拼接而成，超过旧版长度约束；修正夹具后断言仍没有读取实际传入的短角色名。
 - Prevention: 新会话测试先使用已验证长度的固定账号/角色名完成创建和登录，再以同一 `characterName` 构造对象名断言；bootstrap 失败时先修夹具，不归因于法术逻辑。
