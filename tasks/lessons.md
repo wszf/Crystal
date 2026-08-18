@@ -3706,8 +3706,8 @@ Record project-specific corrections and failure-prevention patterns here.
 
 - Symptom: SepAssassin ranged transcript 初稿错误期待多次 `bound=2`，实际 Legacy 顺序只产生 `[5, 2, 5, 11]`；Player/Monster/Hero 目标共享测试在延迟 `world.tick` 时还观察到与攻击无关的 Hero AI `bound=16`，导致严格随机回调失败。
 - Root cause: ranged 夹具没有沿 `ProcessTarget` 的真实调用链核对预范围抽样、继承 `MoveTo` 的一次旋转抽样、最终分支抽样和 DC 抽样；目标类型测试把世界 tick 期间其他 AI 的随机消费误当成 SepAssassin resolver 的消费。
-- Prevention: 先从实现和 Legacy 顺序列出每个实际会调用的随机 bound，再锁定完整序列；涉及延迟解析的多对象 world 使用宽松随机回调，并只断言目标、到期时间、伤害和协议包等被测行为，避免把并行 AI 的消费纳入 transcript。
-- Verification: 修正 ranged 序列与目标类型夹具后，AI=217 定向普通测试连续 5 次、定向 race 测试 3 次通过。
+- Prevention: 先从实现和 Legacy 顺序列出每个实际会调用的随机 bound，再锁定完整序列；涉及延迟解析的多对象 world 使用宽松随机回调，或在攻击阶段结束后切换为宽松模式，并只断言目标、到期时间、伤害和协议包等被测行为，避免把并行 AI 的消费纳入 transcript。
+- Verification: 修正 ranged 序列与目标类型夹具后，AI=217 定向普通测试连续 5 次、定向 race 测试 3 次通过；AI=223 三类延迟目标测试复现了 Hero AI 的 `bound=16` 消费，改为攻击期严格、impact tick 宽松后通过。
 
 ### 2026-08-18 — AI=218 SepArcher 目标对象类型决定通知接收者
 
@@ -3785,3 +3785,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 从原先接收 `*worldMonster` 的攻击函数抽出只读的 ready 阶段时，没有同步核对 helper 签名和调用点的所有权语义。
 - Prevention: 拆分会写入计时器的攻击流程时，先标注 setup/ready helper 的值或指针契约；每次签名调整后立即运行 `go test ./cmd/crystal-server -run '^$'`，再进入行为测试。
 - Verification: 删除值参数上的非法解引用后，AI=222 包级编译、定向测试连续 5 次通过；ready 阶段仍按 live attacker 值排队即时与延迟伤害。
+
+### 2026-08-18 — AI=223 地图尺寸字段不能按方法调用
+
+- Symptom: SepHighArcher 首次包编译在范围扫描处报告 `cannot call gameMap.Height`/`Width`，实现尚未进入行为测试。
+- Root cause: 新代码把 Go `mapdata.Map` 的 `Height`、`Width` 字段误写成了 C# 风格的 `Height()`、`Width()` 方法。
+- Prevention: 使用 Go 地图 API 前先核对 `internal/mapdata.Map` 的字段/方法定义；范围循环统一使用 `ValidPoint` 做边界与可行走性检查，并对尺寸字段不加调用括号。
+- Verification: 改为 `gameMap.Height`/`gameMap.Width` 后，包编译与 AI=223 BackStep、PoisonShot、CrippleShot、退避和投影定向测试通过。
+
+### 2026-08-18 — AI=223 分支测试必须先排除前置 BackStep
+
+- Symptom: CrippleShot 范围测试首次收到 Spell.BackStep，而不是期望的 Spell.CrippleShot；范围伤害和 poison 断言因此没有执行。
+- Root cause: 测试目标处于两格内，注入的 `bound=3` 随机值为 0，按 Legacy 顺序正确触发了 BackStep，测试夹具却直接假定进入 PoisonShot buff 分支。
+- Prevention: 为有前置随机分支的攻击建立分支表，先让 BackStep/早退 gate 返回“跳过”，再为目标分支注入随机值；同时断言完整 bound 序列，避免只看最终 spell。
+- Verification: 将 `bound=3` 改为 1 后，测试锁定 `[11,3,2,1,10,5,10,2,10,2,10]` 的 DC/BackStep/SC/抗性/持续时间顺序，并通过 CrippleShot multi-target damage/poison 断言。
