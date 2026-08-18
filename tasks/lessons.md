@@ -45,6 +45,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 本次命令未写入文件；后续 Legacy 的 Buff 枚举与 Go 的实现读取将拆成两个独立、纯仓库调用。
 - Strengthening after recurrence: Repulsion/FireBurst 差集查询再次在 Go 根目录命令末尾混入 Legacy 相对路径，导致整条读取作废；即使前面的 Go 输出看似成功，也不得继续使用。
 - Verification after recurrence: 将 Go 与 Legacy 查询拆为两个纯仓库调用并重新核对根目录后，后续实现判断只采用成功调用的输出。
+- Strengthening after recurrence: CounterAttack 对照时又在 Go 命令中追加 `../Crystal/Server/...` Legacy 路径并触发读取失败；任何跨仓库参数再次出现时，整条命令输出必须丢弃，不能只忽略失败的末尾路径。
+- Verification after strengthening: 随后用独立 Legacy 调用重新读取 `HumanObject.cs`，Go 调用只读取 `Crystal.GoServer` 文件；CounterAttack 顺序判断仅采用这两次成功调用的结果。
 
 ### 2026-08-17 — BoulderSpirit 会话必须冻结无时间门禁 AI 的维护 tick
 
@@ -4578,3 +4580,35 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只查看了目录前段就追加 FatalSword，没有先用全文件搜索确认该键已存在于目录后段。
 - Prevention: 修改静态 map 前先用 `rg -n` 搜索完整键名并检查所有命中；新增条目必须同时更新唯一性/数量测试，不能凭目录片段推断缺失。
 - Verification: 删除重复条目、恢复 109 条目录数量断言，并重新运行目录编译测试后确认不再出现重复键。
+
+### 2026-08-19 — 复用公共伤害函数时必须使用其实际攻击者参数
+
+- Symptom: CounterAttack 定向编译失败，`world.go` 报 `undefined: attacker`。
+- Root cause: 在接入公共 `damagePlayerAsLocked` 时按调用方习惯引用了 `attacker`，但该函数用 `killer` 表示实际伤害归属者，函数体不存在 `attacker` 变量。
+- Prevention: 修改共享伤害路径前先核对函数签名和 wire attacker/kill owner 的职责；新增逻辑只使用当前作用域中的参数，并为普通玩家与宠物攻击分别保留语义。
+- Verification: 将反击触发参数改为 `killer` 后重新运行 CounterAttack 定向编译测试，确认该未定义标识符错误消失。
+### 2026-08-19 — CounterAttack 测试必须分别固定 AC/MAC 与暴击边界
+
+- Symptom: CounterAttack 定向测试首次失败：激活测试把不同基础 AC/MAC 当成相同值；玩家/怪物反击伤害分别得到 56/40 而不是未暴击值。
+- Root cause: 角色基础 AC 与 MAC 是独立派生值，Buff 只对各自基础值加成；同时 Legacy 暴击条件是 `Random.Next(0, 100) <= Accuracy`，固定随机值 0 配合 `Accuracy=0` 会命中暴击边界。
+- Prevention: 验证防御 Buff 时分别保存并比较 AC、MAC 四个基线；固定随机测试若要排除暴击，使用 `Accuracy=-1` 或让 bound=100 返回大于 Accuracy 的值，不能把 0 视为“不会暴击”。
+- Verification: 修正测试基线与 Accuracy 后，重新运行 CounterAttack、FatalSword、TwinDrake、FlamingSword、Slaying 定向测试，确认伤害和防御断言按 Legacy 边界计算。
+### 2026-08-19 — CounterAttack 成功排队后立即消费运行时旗标
+
+- Symptom: 玩家反击测试在动作已排队、伤害值正确时失败，入站伤害返回后 `CounterAttack` 已为 false。
+- Root cause: 测试把“触发前已武装”误当成“成功排队后仍武装”；Legacy `CounterAttackCast` 在发送 ObjectMagic 和加入 DelayedAction 后立即执行 `CounterAttack = false`，只保留已排队的延迟伤害。
+- Prevention: 分别断言触发前的 armed 状态、成功排队后的 one-shot 消费状态，以及失败距离/概率分支的保留状态；不要用同一时点断言覆盖三个阶段。
+- Verification: 将入站命中断言改为成功排队后必须清除旗标，并保留失败距离测试验证失败时仍为 armed。
+### 2026-08-19 — 会话技能经验持久化断言必须等待退出清理
+
+- Symptom: CounterAttack `net.Pipe` 会话包序列和 world 运行时经验均正确，但断开前读取 auth 快照仍显示经验为 0。
+- Root cause: Go 会话沿用退出清理边界，在 `serveWithConfig` 收到 EOF/Logout 后才从 world snapshot 调用 `UpdateCharacterMagics`；测试过早读取了持久化层。
+- Prevention: 区分运行时状态与 auth 持久化状态；验证实时包/运行时后先关闭客户端并等待服务 goroutine 完成，再读取 CharacterByIndex 等持久化快照。
+- Verification: 将 CounterAttack 会话的 HP/MP/技能经验 auth 断言移到 `done` 完成之后，确认退出清理后经验同步为 1。
+
+### 2026-08-19 — CounterAttack 触发点必须保留受击副作用顺序
+
+- Symptom: 初版 Go 反击在共享玩家伤害函数进入成功命中分支后立即调用，早于 Legacy 的 GatherElement；若攻击者同时触发元素收集，反击 ObjectMagic 会被错误地排在该副作用之前。
+- Root cause: 只按“反击包必须早于 Struck/ObjectStruck”定位调用点，没有完整对照 `HumanObject.Attacked` 的 GatherElement、状态清理、CounterAttackCast、Struck 顺序。
+- Prevention: 接入受击触发器时先列出成功命中分支的所有可见副作用，再按 Legacy 的相对顺序插入；测试应覆盖触发包与已有副作用同时存在时的包序，而不是只验证无副作用夹具。
+- Verification: Go 调用已移动到 `gatherElementLocked` 之后、Struck 之前；CounterAttack 世界/会话定向测试及完整定向 Warrior 回归通过。
