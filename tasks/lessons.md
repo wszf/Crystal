@@ -3453,6 +3453,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 生产实现和测试夹具沿用了未复读的 API/通知假设，并把世界中的 Monster 目标与已认证网络 recipient 混为一类。
 - Prevention: 新 AI 开始前读取精确 helper 签名、action 结构和 target 投影；协议断言只对有 session/socket 的 Player recipient 生效，owned Monster/Hero 用状态或 action 证据验证。
 - Verification: `go test ./cmd/crystal-server -run 'FurbolgWarrior|furbolgWarrior' -count=10`、对应 race 批次以及包编译均通过。
+- Strengthening after recurrence: AI=202 owned-Monster 投影测试再次把世界目标 ObjectID 当成 socket recipient，证明该边界容易在新增投影测试中回归；先检查通知接收者类型，再决定 wire 断言与状态断言。
+- Verification after strengthening: AI=202 projection tests no longer require Monster/Hero self-recipient packets; target HP/poison state and Player transcript packets are asserted separately; 定向普通/race 测试通过。
 
 ### 2026-08-18 — OmaMage 随机边界基线仍须独立分类
 
@@ -3466,6 +3468,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 夹具只白名单了 AI 攻击的固定 DC/Type 随机上界，遗漏了 Hero 延迟 ACAgility 防御路径的固定防御抽样。
 - Prevention: 多目标投影测试的随机 callback 同时覆盖发起阶段和各目标类型的延迟解析；先区分攻击随机与防御随机，再断言 HP、封包和 value-map 状态。
 - Verification: 放行 Hero 防御 `bound=16` 后，AI=199 世界测试、重复运行、race、认证 `net.Pipe` transcript 及全仓普通/race（排除已知 OmaMage 基线）均通过。
+- Strengthening after recurrence: AI=202 的 Hero Slow 投影再次触发 `bound=16`，说明独立 AI 的 Hero ACAgility 路径仍会复用该随机边界；新增目标夹具必须先记录并白名单攻击与防御两阶段的实际 bounds。
+- Verification after strengthening: AI=202 Hero projection、AI=202 session、定向 race 和排除已知 OmaMage 的全仓 race 均通过。
 
 ### 2026-08-18 — AI=200 测试夹具必须完整消费返回值和通知基线
 
@@ -3501,3 +3505,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 先写 AI 专用生产分支再补共享 action/dispatch；测试假定方向编号是直观 compass 值，并只按 Player/owned-Monster 的零 agility 流设计回调，忽略 Hero 的等级基础 agility。
 - Prevention: 新 action 先完成结构体、tick dispatcher、AI population 与 resolver 的最小编译闭环；协议 payload 使用 `directionFromPoints` 实际值；Player/Monster/Hero 分别读取并白名单其防御随机上界。
 - Verification: AI=201 世界与认证 transcript 已锁定方向 2 的 BackStep、Hero `bound=16`、动态 push 重扫和 ACAgility HP；定向普通 `-count=5`、race、全仓普通/race、vet、build 均通过。
+
+### 2026-08-18 — AI=202 目标状态与零伤害分支必须按 Go 值语义和 Legacy 顺序断言
+
+- Symptom: GlacierBeast 测试初稿不能对 `world.monsters[id]` 取地址或直接改 map 值字段；修正后又错误要求 owned Monster 以自身 ObjectID 收到 socket 通知，并把 Hero 的延迟防御随机流遗漏为 `Next(16)`；零伤害分支还错误期望清除 Shock/更新 ActionTime、AttackTime。
+- Root cause: Go map 的 struct 元素不是可寻址变量；世界 Monster/Hero 是状态目标而不是网络 recipient；Hero 基础敏捷会触发独立的 ACAgility 抽样；Legacy CrazyManworm 在 `GetAttackPower == 0` 时于分支内提前返回，后续 Shock/Action/Attack 更新不会执行。
+- Prevention: 修改 map 中的 Monster 时先复制到局部值再回写；owned Monster/Hero 只用 owner/observer 的 wire 通知验证、用目标状态验证命中；每个目标类型分别覆盖防御随机上界；对 Legacy 分支逐行记录“广播→伤害抽样→零返回→计时器”的顺序，并为零伤害建立不变式测试。
+- Verification: AI=202 Player/owned-Monster/Hero 世界测试与认证 `net.Pipe` transcript 均通过；重复普通/race 定向测试、排除已知 OmaMage transcript 的全仓普通/race、`go vet ./...` 和 `go build ./...` 均通过。
