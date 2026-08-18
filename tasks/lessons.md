@@ -3565,3 +3565,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy WakeAll 会唤醒 14 格内的其他 Zuma 后逐个广播 ObjectShow；测试只覆盖了自身 Wake，遗漏了共享唤醒的客户端可观察通知。
 - Prevention: WakeAll 回归同时建立至少一个关联 stoned Zuma，断言所有唤醒状态、目标继承（无预存 Target 时保持零值）和观察者通知数量/顺序；新增失败后先更新基线再提交。
 - Verification: AI=210 wake test 现断言两条 ObjectShow、关联对象保持零目标并成功唤醒；定向普通/race 与全量门禁均通过。
+
+### 2026-08-18 — AI=211 新增 MonsterSettings 字段必须同步默认值与读取测试
+
+- Symptom: 加入 HoodedSummoner 的四个 ScrollMob 配置字段后，`TestMonsterSettingsDefaultsAndJSONCompatibility` 首次运行失败，默认结构体断言仍缺少四个非零字段。
+- Root cause: 配置 schema、Legacy Setup.ini loader 与运行时 fallback 是同一契约，但只改了生产结构体和 loader，没有同步 named-struct 默认值夹具。
+- Prevention: 新增配置字段时同时更新 `DefaultMonsterSettings`、Setup.ini key mapping、运行时 `configureMonsterSettings`、JSON compatibility 断言和自定义 Setup.ini 读取测试。
+- Verification: `internal/worlddata`、`internal/legacyworld` 配置测试重复运行通过，AI=211 spawn tests 使用自定义四组 ScrollMob 名称成功解析。
+
+### 2026-08-18 — AI=211 手写召唤夹具必须推进 ObjectID 并初始化预置从怪
+
+- Symptom: AI=211 spawn 测试初稿未推进 `nextObjectID`，新 child 获得父怪 ID=1 并覆盖父对象；容量测试的预置 child 未标记已初始化，又触发无关的 3000ms AI 初始化随机抽样。
+- Root cause: detached Go world fixture 绕过了 `nextIDLocked`，而直接写入 `world.monsters` 的 child 不会自动经过 common AI initialization。
+- Prevention: 所有会调用生产 spawn 的 detached fixture 显式设置大于既有对象的 `nextObjectID`；预置从怪设置 `MonsterAIInitialized` 及所有 action/search 时间，避免夹具引入未声明随机流。
+- Verification: AI=211 spawn/cap tests、重复普通/race 定向测试和完整配置测试通过，父对象保持存在且容量分支不消费 child 初始化随机数。
+
+### 2026-08-18 — AI=211 Front 失败时必须回退到 Target.CurrentLocation
+
+- Symptom: 对照 Legacy `SpawnSlaves` 时发现 Go 初稿在 Front 无效时把 child 放回父怪当前位置；Legacy 明确第二次 `Spawn` 使用当前 Target 的位置。
+- Root cause: 召唤 helper 只接收 parent，无法保留 Attack 当次重新验证后的 target projection，误用了 parent location 作为 fallback。
+- Prevention: 召唤函数必须接收当前 target projection；先尝试 `movePoint(parent, Direction)`，仅在该点无效时使用 target 的当前 map 坐标，并保留 map validation。
+- Verification: 新增 invalid-Front fallback 世界测试锁定 child 落在 target 坐标；AI=211 定向普通/race 测试通过。
+
+### 2026-08-18 — AI=211 GetMonster child 必须保留构造器的 CoolEye/Direction 随机流
+
+- Symptom: Legacy `GetMonster` 在 `SpawnSlaves` 中会先执行 MonsterObject 构造器，随机确定 CoolEye 和 Direction；Go 初稿误把父怪 Direction 写入召唤 child。
+- Root cause: 将“在父怪 Front 生成”错误理解为“child 面向父怪”，忽略了 Legacy Spawn 只接收位置，不覆盖新对象构造器已经生成的 Direction。
+- Prevention: 召唤 child 在选定 ScrollMob 后消费并保存 `Next(100)` CoolEye 与 `Next(8)` Direction，再调用 materialization；位置与朝向分别按 Legacy 语义处理。
+- Verification: spawn tests 白名单并锁定 `Next(2), Next(100), Next(8)` 顺序及 child direction；重复 AI=211 普通/race 测试通过。
