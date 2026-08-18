@@ -4054,3 +4054,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy `HumanObject.BackStep` 在无可移动格时仍调用 `Broadcast`，因此包括占位阻挡玩家在内的所有附近非施法者都会收到距离 0 的包。
 - Prevention: 位移/击退测试把阻挡对象也纳入广播接收者集合；分别断言移动距离、通知接收者和距离 0 的 wire payload，不把“未移动”误判为“无广播”。
 - Verification: BackStep 成功、部分受阻和完全受阻定向测试均通过。
+
+### 2026-08-18 — 路径隔离复发时整条跨仓库命令必须作废
+
+- Symptom: BindingShot 协议序号复核时，把 Legacy `Shared/Enums.cs` 路径带入 Go 工作目录，导致该次调用的 Legacy 与 Go 查询同时报路径不存在，不能作为证据。
+- Root cause: 切换工作目录后继续复用上一条命令正文，未先删除另一仓库的相对路径。
+- Prevention: 每次仓库切换都从空白命令开始；Go 调用只能引用 Go 路径，Legacy 调用只能引用 Legacy 路径。发现混入后立即停止使用整条输出，记录并分仓库重跑。
+- Verification: 本条记录后，协议序号与载荷核对拆成独立的 Legacy-only、Go-only 调用，并仅采用重跑结果。
+
+### 2026-08-18 — Go 测试夹具的多字段赋值要逐字段核对
+
+- Symptom: BindingShot 释放测试首次编译报多变量赋值数量不匹配，`near.ObjectID, near.X, near.Y` 左侧三个字段却只提供了两个右值。
+- Root cause: 复制怪物夹具后修改坐标时，遗漏了第三个坐标值，编译器才暴露了夹具结构错误。
+- Prevention: 修改结构体夹具的多个字段时逐一对应字段和值；新增测试后先跑目标包编译/定向测试，再进入完整回归。
+- Verification: 为 `ObjectID/X/Y` 提供完整三元组后，继续运行 BindingShot 定向测试。
