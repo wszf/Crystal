@@ -4490,3 +4490,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 将玩家/运行时对象的 MAC 字段命名习惯错误套用到怪物导入统计枚举；Go 怪物统计只提供 AC，MAC 夹具应在加载后直接设置对象字段。
 - Prevention: 为新会话夹具添加怪物统计前先检索对应 `monsterStat*` 声明；若导入模型不支持某字段，使用运行时对象字段并在测试中显式覆盖。
 - Verification: 移除不存在的导入统计后直接设置怪物 MAC，CatTongue 会话测试、全部 CatTongue 定向测试和 race 测试通过。
+
+### 2026-08-18 — 会话账号夹具必须遵守共同的 15 字符上限
+
+- Symptom: CrescentSlash 会话测试在法术请求前收到 `ServerLogin` 的错误结果，未进入游戏阶段。
+- Root cause: 测试账号 `crescentslashnet` 超过 Go/Legacy 账号 ID 的 3–15 字符校验范围。
+- Prevention: 新增 net.Pipe 会话账号时先按认证层正则校验 ID/密码长度，并复用短、唯一、只含字母数字的账号名。
+- Verification: 改为合法的 `cresnet` 后 CrescentSlash 会话完整通过，未再出现登录阶段错误包。
+
+### 2026-08-18 — 前置施法通知必须在技能专属通知中追加
+
+- Symptom: 复核 CrescentSlash 分支发现直接赋值练功通知会覆盖隐身施法路径先生成的 `RemoveBuff` 通知。
+- Root cause: 把技能 helper 返回的通知当成该阶段唯一来源，忽略了 `HumanObject.Magic` 在 switch 前已经追加的通用前置副作用。
+- Prevention: 分支 helper 只返回专属通知；接入 `magicAttack` 时统一使用 `append` 保留全局前置通知，并为 Hidden/RemoveBuff 组合路径保留顺序断言。
+- Verification: 已改为追加语义，Go 包编译、CrescentSlash 世界/会话/race 定向测试通过，前置通知不会被覆盖。
