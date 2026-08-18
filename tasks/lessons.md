@@ -3879,3 +3879,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy `FireBurst` 的 `Level1` 是 33，测试共享 caster 只有 30 级；`levelMagicLocked` 正确拒绝了练习，行为本身没有失败。
 - Prevention: 共享法术 resolver 测试除行为相同外，必须逐 spell 核对 catalogue 的 cost、Level1/2/3 和练习门；FireBurst 场景显式使用至少 33 级 caster。
 - Verification: FireBurst 夹具提升至 33 级后，经验、mana、推送结果与 Repulsion 对照测试通过，普通/race 全仓库门禁、vet 和 build 均通过。
+
+### 2026-08-18 — SoulFireBall 接入要核对 Go receiver 与协议字段
+
+- Symptom: SoulFireBall 首次目标包编译分别报告未定义的 `stoningStatueHeroMissLocked` 和不存在的 `MagicRequest.TargetY`。
+- Root cause: 新增方法调用漏写 `w.`，测试夹具又凭 C#/坐标命名习惯猜测了协议字段；实际请求字段是 `LocationY`。
+- Prevention: 新增方法在目标包编译前逐一核对 receiver；构造协议请求只使用已打开的 Go `protocol` 定义，不凭记忆补字段名。
+- Verification: 修正 receiver 与字段后，SoulFireBall 目标测试编译并通过；随后普通/race 目标回归通过。
+
+### 2026-08-18 — SoulFireBall 夹具要在 world.enter 后恢复派生属性并使用运行时 ID
+
+- Symptom: SoulFireBall 目标测试第一次得到错误的伤害/护甲值，玩家和 Hero 断言还因按夹具原始 ID 查找而出现 nil/崩溃。
+- Root cause: `world.enter` 会重建玩家派生战斗属性并分配运行时 ObjectID，覆盖了手写的 SC/MAC 和原始 ID；测试断言没有使用 enter 后的对象身份。
+- Prevention: 任何经过 `world.enter` 的夹具都在 admission 前重新设置并检查派生 combat stats；对象断言按运行时 ID 或稳定业务字段查找，且先显式检查 nil 再读取字段。
+- Verification: 恢复 enter 后的 SC/MAC、按运行时对象查找玩家/Hero 后，怪物/玩家/Hero 三目标、护符消耗和延迟命中测试通过。
+
+### 2026-08-18 — SoulFireBall 延迟 resolver 必须在单一路径内完成伤害与练习
+
+- Symptom: 玩家目标命中后经验仍为 0；接入玩家专用 MAC/抗性路径时又短暂出现玩家被重复扣血，抗性测试先掉血后才返回 miss；专用路径还曾因 `int` 与 `int32` 比较未显式转换而编译失败。
+- Root cause: 玩家分支遗漏了 SoulFireBall 的 `levelMagicLocked`；修复时先调用通用伤害再覆盖结果，两个调用都修改了 HP；协议统计值为 `int32`，随机函数返回 `int`。
+- Prevention: 延迟目标类型先选择唯一的伤害实现，再执行一次状态 mutation，并在成功命中后统一练习；跨类型统计比较显式转换，目标测试覆盖命中、抗性 miss、HP 和经验。
+- Verification: 加入玩家/Hero MAC 区间与魔法抗性处理、单次玩家伤害分支及成功练习后，SoulFireBall 普通/race 专项与相邻魔法回归均通过。
