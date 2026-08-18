@@ -3635,3 +3635,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 目前证据只显示并行全仓运行中的 session transcript 抖动，不能据此把失败归因到 PurpleFaeFlower；同一 Tucson transcript 单独 `-race -count=5` 全部通过。
 - Prevention: 全仓 race 出现单一 transcript 失败时，先以完整测试名隔离并重复运行，再用明确的已知 flaky 排除项重跑门禁；不要为无调用关系的 AI 修改生产代码。
 - Verification: Tucson 单测 race 重跑 5 次通过；AI=212 定向普通/race 与其余全仓门禁保持通过，后续全仓 race 使用该已确认的排除项复核。
+
+### 2026-08-18 — AI=213 Siege 的 protected Attack 不等于可达 AI 行为
+
+- Symptom: Siege 工厂分支标为 TODO 且类中仍有 `Attack`，初看容易把它当作普通目标搜索/攻击 AI；但该类同时覆写了 `FindTarget`、`ProcessSearch`、`ProcessTarget`，而征战资产的可达 Spawn 路径实际要求 AI=72 的 Gate。
+- Root cause: 只按类名或 protected 方法存在与否判断功能，未沿 `ProcessAI` 虚调用链和征战资产 Spawn 条件确认客户端可观察路径。
+- Prevention: 迁移特殊 MonsterObject 前先列出所有覆写方法并追踪实际调用者；区分不可达 protected helper 与运行时行为，另核对外部资产是否使用同一 AI 编号。
+- Verification: AI=213 Go 测试确认无搜索、无自动攻击，Effect 1/2 保留一秒随机游走，Effect 3/4/5 保持静止；既有征战 AI=72 Gate 测试继续通过。
