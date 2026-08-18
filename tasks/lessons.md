@@ -4571,3 +4571,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Go 通用 `magicAttack` admission 只扣减了运行时 MP；与普通攻击和 SpellToggle 路径不同，它没有同步角色持久化结构中的 MP 字段。
 - Prevention: 每个会改变 MP 的世界路径都必须同时更新运行时对象和 `Character` 镜像；会话测试除了检查包和运行时值，还要检查最终角色状态。
 - Verification: 在通用魔法扣费点同步 `player.Character.MP` 后，BladeAvalanche 世界/会话定向测试通过，并确认最终两个 MP 字段均为 86。
+
+### 2026-08-19 — 修改 Go 魔法目录前必须先查完整现有键
+
+- Symptom: FatalSword 定向测试在编译阶段失败，`magic_catalog.go` 的 map literal 报 `duplicate key 91`。
+- Root cause: 只查看了目录前段就追加 FatalSword，没有先用全文件搜索确认该键已存在于目录后段。
+- Prevention: 修改静态 map 前先用 `rg -n` 搜索完整键名并检查所有命中；新增条目必须同时更新唯一性/数量测试，不能凭目录片段推断缺失。
+- Verification: 删除重复条目、恢复 109 条目录数量断言，并重新运行目录编译测试后确认不再出现重复键。
