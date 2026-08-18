@@ -4674,3 +4674,21 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `pushMonsterLocked` 的 Legacy 对应路径只向附近客户端广播 `ObjectPushed`，玩家私有 `Pushed` 仅适用于被推动的 HumanObject；新增几何夹具没有先核对当前 Go 辅助函数清单。
 - Prevention: 新增移动效果时按目标对象类型和接收者分别核对 packet ID/payload，怪物通知使用 `ObjectPushedPayload(ObjectID, x, y, direction)`；新增算术夹具先搜索现有 helper，再运行最小目标测试编译。
 - Verification: Entrapment 世界测试按三次 `ObjectPushed` 的最终位置和认证会话按 `ObjectEffect -> ObjectPushed -> MagicLeveled -> ObjectPoisoned` 重新断言，世界/会话定向测试通过。
+
+### 2026-08-19 — 跨仓库路径错误复发后必须把每个 read 命令绑定到绝对根
+
+- Symptom: 已有“跨仓库读取不得放入同一并行编排”的约束后，勘察下一技能时仍有只读命令在 Legacy workdir 下引用 Go 相对路径/通配符，产生路径不存在或 zsh glob 错误；没有修改文件，但浪费了勘察轮次。
+- Root cause: 依赖当前 workdir 和相对路径来回切换仓库，并在同一命令字符串中混用第二个仓库的路径。
+- Prevention: 每个 `exec_command`、补丁、格式化、测试和提交调用都显式绑定单一仓库的绝对 workdir，命令内只允许出现该仓库下的路径；派发前检查命令字符串，不在分隔符后追加另一仓库路径或 glob。
+- Verification: 后续 Entrapment 的格式化、测试、构建、提交和三项 C# 审计均按仓库隔离执行并通过；误用命令未留下文件变更。
+
+补充证据：本轮 SlashingBurst 勘察仍在 Go 查询编排中夹入了 Legacy 绝对路径；命令保持只读且失败在路径解析阶段。预防再加强为“一次 `functions.exec` 编排只允许一个仓库根，跨仓库查询必须拆成独立工具调用”，并在派发前逐个检查所有嵌套命令的 `workdir` 与路径。
+
+### 2026-08-19 — 延迟移动会话必须验证断开时的持久化坐标
+
+- Symptom: SlashingBurst 世界状态与延迟 `UserLocation` 已移动到新坐标，但认证 `net.Pipe` transcript 关闭会话后，账号仍保存施法前坐标。
+- Root cause: 世界 ticker/延迟动作可以在会话阻塞读取期间更新玩家；仅验证 world snapshot 和即时包不足以证明会话局部坐标及 logout map-runtime 写入已同步。
+- Prevention: 每个会改变玩家坐标的延迟技能都要在会话测试中手动推进 action、读取私有位置包、触发一次会话边界刷新，再断开并断言 `Character.LocationX/Y/Direction` 与持久化 map runtime；修复必须同时覆盖 world snapshot 和 session-local projection。
+- Verification: 本轮失败测试已复现“world=新坐标、stored=旧坐标”；修复后将重新运行 SlashingBurst world/session、race 与全量回归。
+
+补充证据：首轮修复时曾把 runtime 局部变量放进 `leaveGameForObserver` 而不是持久化 defer，最小 Go 编译立即报未定义/未使用。预防为修改 defer/闭包时同时核对变量声明作用域、执行顺序和所有引用；随后 gofmt、服务端定向测试及全量 build 均通过。
