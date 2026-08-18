@@ -3900,3 +3900,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 玩家分支遗漏了 SoulFireBall 的 `levelMagicLocked`；修复时先调用通用伤害再覆盖结果，两个调用都修改了 HP；协议统计值为 `int32`，随机函数返回 `int`。
 - Prevention: 延迟目标类型先选择唯一的伤害实现，再执行一次状态 mutation，并在成功命中后统一练习；跨类型统计比较显式转换，目标测试覆盖命中、抗性 miss、HP 和经验。
 - Verification: 加入玩家/Hero MAC 区间与魔法抗性处理、单次玩家伤害分支及成功练习后，SoulFireBall 普通/race 专项与相邻魔法回归均通过。
+
+### 2026-08-18 — Trap 延迟完成要保留原始目标引用语义并以 impact 时间计时
+
+- Symptom: Trap 延迟测试首次在原始目标死亡后无法选择同格的第二个怪物；修正实现后，生命周期断言又把 60 秒 expiry 锚定在施法时而非延迟完成时。
+- Root cause: Legacy `CompleteSpell(Trap)` 即使原始 `MapObject` 已死亡仍读取其当前位置，再按 Cell 顺序筛选其他 Monster；`ShockTime` 和 `SpellObject.ExpireTime` 都在 500ms action 完成时写入。
+- Prevention: 延迟 action 保存并重新读取原始目标的位置，不把原始目标死亡误作整条 action 失败；生命周期测试分别覆盖原始目标死亡、同格 Cell 顺序、`now == ExpireTime` 保留和 `now > ExpireTime` 移除，并以 resolver 的当前时间计算 expiry。
+- Verification: Trap resolver 改为完成时重新扫描并在成功后执行第二次 Legacy 练习；定向 Trap 测试及 race 版本覆盖 ObjectSpell、MagicLeveled、静态可见性恢复/移除和精确过期边界并通过。
+
+### 2026-08-18 — 跨仓库工具调用必须复用已验证的仓库根路径
+
+- Symptom: 本批次两次只读检查因手写 `workdir` 漏掉 `me_work` 或重复目录而失败，导致命令输出不能作为证据。
+- Root cause: 在已知两个相邻仓库的情况下重新猜测绝对路径，没有先复用 `git rev-parse --show-toplevel` 的结果。
+- Prevention: 每次切换仓库先单独执行并记录 `git rev-parse --show-toplevel`，后续同一批次所有工具调用只使用该精确路径；读命令失败时丢弃其全部输出并重跑。
+- Verification: 修正根路径后，Go Trap 编译、普通/race 定向测试和后续检查均在 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 完成，旧版只读检查在 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 完成。
