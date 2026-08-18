@@ -3643,12 +3643,12 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 迁移特殊 MonsterObject 前先列出所有覆写方法并追踪实际调用者；区分不可达 protected helper 与运行时行为，另核对外部资产是否使用同一 AI 编号。
 - Verification: AI=213 Go 测试确认无搜索、无自动攻击，Effect 1/2 保留一秒随机游走，Effect 3/4/5 保持静止；既有征战 AI=72 Gate 测试继续通过。
 
-### 2026-08-18 — AI=214 方向夹具必须以 Go 的 movePoint 表为准
+### 2026-08-18 — AI=214/215 方向夹具必须以 Go 的 movePoint 表为准
 
 - Symptom: SepWarrior 移动测试把方向 0 当作水平向右，实际对象从 `(5,5)` 移到了 `(5,3)`，导致两格奔跑和受阻退回断言失败。
-- Root cause: Legacy `MirDirection` 的数值映射在 Go `movePoint` 中保持了 0=上、2=右；测试夹具凭直觉选择方向，未沿实际方向表核对坐标。
-- Prevention: 新增方向/移动测试先用 `movePoint` 或 `directionFromPoints` 计算预期坐标，禁止把方向 ordinal 直接当作笛卡尔轴编号。
-- Verification: 将水平向右夹具改为 direction 2 后，AI=214 两格 `ObjectRun` 与第二格受阻的单格 `ObjectWalk` 测试重复通过。
+- Root cause: Legacy `MirDirection` 的数值映射在 Go `movePoint` 中保持了 0=上、2=右；测试夹具凭直觉选择方向，未沿实际方向表核对坐标。AI=215 Repulsion 夹具又把 direction 0 的 `Back` 方向按水平移动计算。
+- Prevention: 新增方向/移动/Back 测试先用 `movePoint` 或 `directionFromPoints` 计算每一步坐标，禁止把方向 ordinal 直接当作笛卡尔轴编号。
+- Verification: 将水平向右夹具改为 direction 2 后，AI=214 两格 `ObjectRun` 与第二格受阻的单格 `ObjectWalk` 测试重复通过；AI=215 Repulsion 现在按 direction 0 的反向路径断言四步推送。
 
 ### 2026-08-18 — AI=214 玩家 ACAgility 防御使用 combatRoll 流
 
@@ -3663,3 +3663,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为保留普通宠物既有封装，新增路径复用了具体 helper，绕过了按 AI 分派的虚拟对象边界；Legacy 的 `GetInfo` 是运行时类型分派，不能由调用点静态假设。
 - Prevention: 所有向客户端发送 Monster/Pet 初始、恢复、召回对象时统一调用 `objectPacketAt`；通用 helper 只保留为非特殊 AI 的 fallback，并为特殊宠物加 owner 外观投影测试。
 - Verification: AI=214 ObjectPlayer 测试覆盖主人名字/性别/发型/Light/WingEffect，普通宠物 restore/recall 测试及全量普通/race 门禁通过。
+
+### 2026-08-18 — AI=215 测试夹具必须按协议定义使用等级宽度
+
+- Symptom: SepWizard 行为测试首次编译失败，`protocol.SelectInfo.Level` 接收 `uint16`，夹具 helper 却把等级参数声明为 `byte`。
+- Root cause: 新增测试复用了 C# 习惯的窄等级类型，没有先读取 Go 协议结构的字段定义。
+- Prevention: 为新 AI 写 Player/Monster/Hero 夹具前先核对 `protocol.SelectInfo`、`worlddata.MonsterInfo` 和 `StoredHero` 的等级宽度；不要用能隐式接近的 `byte` 替代协议字段类型。
+- Verification: 将夹具等级参数改为 `uint16` 后，AI=215 population、FireBang/GreatFireBall、Repulsion、退避和 ObjectPlayer 测试通过。
+
+### 2026-08-18 — AI=215 FearTime 测试必须显式区分攻击与首次退避
+
+- Symptom: SepWizard 退避测试首次收到 FireBang 分支而没有移动。
+- Root cause: 共享测试 world 为攻击场景预设了未来 `MonsterAIFearAt`；测试只复制 attacker，却没有清零 FearTime，因此 Legacy 顺序正确地直接攻击。
+- Prevention: 每个 FearTime 场景在夹具中明确标注状态：未来时间覆盖“允许攻击”，零值覆盖“首次设置 FearTime 后退避”；不要从攻击夹具隐式继承状态。
+- Verification: 退避测试清零 FearTime 后，monster 两格后退并向观察者发送 `ObjectRun`，FireBang/GFB 测试仍保持攻击分支。
+
+### 2026-08-18 — AI=215 Repulsion 私有包按每一步推送计数
+
+- Symptom: SepWizard Repulsion 测试错误地只期待一个私有 `Pushed` 包，实际收到四个 `Pushed` 后再收到 `ObjectMagic`。
+- Root cause: Legacy `HumanObject.Pushed` 在每个成功移动格 enqueue 一次 `Pushed`，Attack 随后的 `ObjectMagic` 是独立广播，不能把四步推送压缩为一次事件。
+- Prevention: 验证推送 transcript 时按成功步数断言私有包数量和顺序，并单独断言最终魔法包；Monster/Hero/Player 三类目标都沿对应 `Pushed` helper 的事件粒度检查。
+- Verification: 四步 Repulsion 夹具现在锁定 `[Pushed, Pushed, Pushed, Pushed, ObjectMagic]` 和最终位置；AI=215 定向测试通过。
