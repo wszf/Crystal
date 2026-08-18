@@ -4092,7 +4092,49 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-18 — 整包会话测试失败要先隔离复现
 
-- Symptom: `go test ./internal/protocol ./cmd/crystal-server` 的一次完整运行中，Tucson 普通攻击会话用例收到空通知而失败；单独以 `-run '^TestSessionTucsonMageNormalAttackTranscript$' -count=1 -v` 重跑通过。
-- Root cause: 失败只出现在整包会话生命周期/时序环境，隔离重跑不可复现；具体触发点尚未确认，不能据此归因到 FlashDash 代码。
-- Prevention: 完整回归出现会话类失败时，先保存失败用例和完整命令，再用精确 `-run` 单独复现；只有隔离失败仍存在时才把它作为当前批次回归处理。
-- Verification: Tucson 用例隔离重跑通过，FlashDash 定向测试也通过；该现象保留为后续整包稳定性关注项。
+- Symptom: `go test ./internal/protocol ./cmd/crystal-server` 又一次在整包会话运行中让 Tucson 普通攻击用例收到空通知；单独以 `-run '^TestSessionTucsonMageNormalAttackTranscript$' -count=1 -v` 重跑仍通过。
+- Root cause: 失败持续只出现在整包会话生命周期/时序环境，隔离重跑不可复现；具体触发点尚未确认，不能据此归因到 FlashDash 或本批次线技能代码。
+- Prevention: 完整回归出现会话类失败时，保存失败用例和完整命令，立即精确隔离复现；隔离仍失败才阻断当前批次，并把整包运行视为独立的并发稳定性信号。
+- Verification: 本次 Tucson 隔离用例通过；Lightning/HeavenlySword 定向世界与 `net.Pipe` 测试通过；该重复现象继续保留为整包稳定性关注项。
+
+### 2026-08-18 — 新增 Go 文件要先清理 import 并核对领域结构字段
+
+- Symptom: 定向 Go 测试首次编译同时报新文件的 `protocol` import 未使用，以及访问不存在的 `worldMonster.InSafeZone` 字段。
+- Root cause: 先按 Legacy 类型直译了安全区判断，且测试前没有检查新文件 import 是否仍被使用。
+- Prevention: 新增 Go 文件完成后先运行 `gofmt`/最小编译；跨模型字段使用前先查实际 struct 定义，安全区等派生状态通过现有 world helper 获取。
+- Verification: 删除未使用 import，并改用 `positionInSafeZoneLocked`；随后重新运行定向测试验证编译路径。
+
+### 2026-08-18 — AttackMode.All 下自有宠物仍属于可攻击目标
+
+- Symptom: Lightning 线扫描测试预期同格自有宠物被跳过并命中后续怪物，实际先命中宠物。
+- Root cause: Legacy `MonsterObject.IsAttackTarget(HumanObject)` 对 `Master == attacker` 返回 `attacker.AMode == All`；`AttackMode.All` 明确允许该自有宠物作为目标。
+- Prevention: 迁移目标过滤前逐分支核对 Legacy `IsAttackTarget`，不能把“自有对象”默认推断为友方；同格测试同时验证插入序和只命中首个合法对象。
+- Verification: Go 线技能测试按 Legacy 插入序断言宠物受击、后续同格怪物不受击；其余每格一个目标、MAC、范围和延迟断言保持通过。
+
+### 2026-08-18 — 会话转录夹具必须显式设置持久化生命值
+
+- Symptom: Lightning `net.Pipe` 会话测试首次把施法者法力包的 HP 预期为 100，实际启动角色的默认 HP 为 18，测试在协议命中断言前失败。
+- Root cause: 会话 bootstrap 从 auth 角色持久化属性初始化世界玩家；测试只覆盖了 MC/MP，没有覆盖 HP，因此沿用了角色创建默认值。
+- Prevention: 会话转录需要固定战斗属性时，在 bootstrap 后逐字段设置 HP、MaxHP、Character.HP 及 MP/防御；不要把世界夹具的默认生命值假设带入真实会话断言。
+- Verification: 将 Lightning 会话夹具改为显式 100 HP 后重新运行同一 `net.Pipe` 测试，继续验证法力、延迟命中和双方包序。
+
+### 2026-08-18 — 会话位置夹具要核对 map/x/y/direction 参数顺序
+
+- Symptom: Lightning 会话测试首次收到位置 `(0,2)`，而用例预期施法者位于 `(0,0)`；测试在命中转录前失败。
+- Root cause: `UpdateCharacterMapRuntime` 的参数顺序是 `mapIndex, x, y, direction`，夹具把方向值写入了 y 参数。
+- Prevention: 设置会话角色位置前先读取 helper 签名，并在 bootstrap 后断言实际 `UserLocation`；坐标和朝向不要依赖位置参数的直觉顺序。
+- Verification: 调整为 `map=0, x=0, y=0, direction=2` 后重新运行 Lightning 会话测试。
+
+### 2026-08-18 — 会话练习包要满足 Legacy 的技能等级门槛
+
+- Symptom: Lightning 会话命中包顺序中没有预期的 `ServerMagicLeveled`，施法与伤害包均已正常送达。
+- Root cause: `levelMagicLocked` 保留 Legacy 的等级门槛；Lightning 等级 0 需要角色等级 26，而 auth 创建角色默认等级为 1，所以命中后不练习也不发练习包。
+- Prevention: 会话测试若断言技能练习，bootstrap 后显式设置满足该法术 `Level1` 的角色等级，并将“命中”和“练习包”分开验证。
+- Verification: 将 Lightning 会话施法者等级设为 40 后重跑，继续验证目标受击与 `ServerMagicLeveled` 顺序。
+
+### 2026-08-18 — 新增 MagicDefence 字段不得改写通用玩家魔法防御
+
+- Symptom: diff review 发现把通用延迟玩家魔法的固定 `playerArmour(..., true)` 改成了新动作字段表达式；未修正时，未标记线技能的旧法术可能错误地切换防御语义。
+- Root cause: 为复用新线技能的 MAC 标志，误把新增动作元数据扩展到了已有通用玩家路径；Legacy 通用玩家魔法本来就始终使用 MAC。
+- Prevention: 新增动作字段只在新分支消费；修改共享 resolver 前先保存旧分支的防御参数，分别核对玩家与怪物的 Legacy armour 语义。
+- Verification: 恢复通用玩家路径的固定 MAC，线技能路径显式传入 `MagicDefence=true`；全量 Go 测试、race、vet 和 build 均通过。
