@@ -4532,3 +4532,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 将 Legacy 先入队的 400ms action 误命名为第一命中，忽略了 `HumanObject.Attack` 在分支内先排入 400ms Agility、分支后再排入 300ms MACAgility 的结构。
 - Prevention: 迁移延迟技能时分别记录“队列插入顺序”和“Due 时间/防御类型语义”；测试同时断言 action 排列、Due、防御标志及每个时间点的 HP。
 - Verification: 修正为 400ms Agility action 先入队、300ms MACAgility action 后入队；DoubleSlash 世界测试、会话测试和旧 Warrior 回归测试通过。
+
+### 2026-08-19 — TwinDrake 的 PvP Stun 外层条件不是“关闭抗性即必定尝试”
+
+- Symptom: 初步阅读把 `PvpCanResistPoison=false` 理解成玩家目标跳过抗毒随机并继续尝试 Stun，可能错误地给 PvP 目标附加效果 5。
+- Root cause: `HumanObject.CompleteAttack` 先判断 `((target.Race != Player) || Settings.PvpCanResistPoison)`，默认配置为 false 时玩家目标直接不进入 `PoisonAttackWeight` 和 40 分支；该设置只影响 `ApplyPoison` 的后续抗性，不会反转外层条件。
+- Prevention: 迁移带配置短路的状态效果时，分别展开外层资格条件、抗性随机、等级门和成功随机；不要用配置字段名称的直觉含义替代布尔表达式，并单独验证默认 PvP 配置下的 Player/Monster 分支。
+- Verification: Go 实现保留默认 `sepWarriorPvpCanResistPoison=false` 的 Player 短路，Monster/Hero 使用权重 10、等级 `< attacker+10` 和非玩家上限 20；TwinDrake 世界、会话和 race 定向测试通过。
