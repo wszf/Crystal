@@ -3715,3 +3715,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `notifyPlayersLocked` 的可观察接收者是附近 Player；Legacy Monster/Hero 的 `Broadcast` 也不会把非 Player 目标当成网络连接，Monster/Hero 场景应通过其主人 Player 验证攻击包。
 - Prevention: 编写跨 Player/owned-Monster/Hero 的协议 transcript 时，先区分“受伤对象”与“网络接收者”；攻击包按实际附近 Player（宠物/英雄使用 Owner）断言，HP/action 仍按目标对象断言。
 - Verification: 将 Monster/Hero 包断言改为主人 Player 接收者后，AI=218 定向普通测试连续 5 次、定向 race 测试 3 次，以及排除两条已知 transcript 抖动的全仓普通/race 门禁通过。
+
+### 2026-08-18 — AI=219 CrossHalfMoon 每次 HalfmoonAttack 都要重置方向
+
+- Symptom: SepHighWarrior `CrossHalfMoon` 初稿把 `PreviousDir(Direction)` 放在重复调用循环外；多个半月目标时第二次扫描会从上一轮的末方向继续，漏掉 Legacy 每次调用应命中的四条相邻射线。
+- Root cause: 将 C# 的 `for (i < targets.Count) HalfmoonAttack(damage)` 机械展开成 Go 循环时，把被调用方法内部的局部方向状态误提升到了外层。
+- Prevention: 迁移会在循环中重复调用的 Legacy 方法时，先保留该方法每次调用的局部初始化；为多个 radius-one 目标写重复命中测试，而不是只验证单目标路径。
+- Verification: Go 实现将方向重置移入每次重复扫描；两个相邻目标的 AI=219 CrossHalfMoon 测试现在排入四个 500ms action，延迟后两个目标均各受两次伤害。
+
+### 2026-08-18 — AI=219 基类 Attack 的 300ms 覆盖必须写回 live Monster
+
+- Symptom: SepHighWarrior 默认分支先设置了 500ms ActionTime，随后调用 Legacy `base.Attack()` 会覆盖为 300ms；Go 初稿用值参数实现该 helper，导致覆盖只发生在副本上，live Monster 仍保留 500ms 锁。
+- Root cause: 忽略了 C# 基类方法会直接修改派生对象状态，Go value receiver/值参数不会把 `ActionTime` 和 `AttackTime` 的覆盖传播回 map 中的 Monster。
+- Prevention: 任何会复用基类并覆盖计时器的 AI helper 都使用 `*worldMonster`，在调用点核对 map value 的写回边界；测试同时断言 action due 和 live `MonsterAIActionAt`。
+- Verification: AI=219 默认攻击测试现在断言 ObjectAttack/伤害 action 在 300ms 到期且 live ActionAt 为 `base+300ms`；定向普通测试通过。
