@@ -4040,3 +4040,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: The test baseline predated the elemental fields; it was not compared against Legacy `PlayerObject.GetInfo`, which always assigns the last `OrbsExpList` value even with no active orb.
 - Prevention: When extending a serialized snapshot, inspect the reference constructor's unconditional/default assignments and update exact-byte tests accordingly; do not suppress a reference field merely to preserve an older Go expectation.
 - Verification: Legacy-only source inspection confirmed Player/Hero `ElementOrbMax` always uses the final orb threshold; the poison snapshot now expects 200 and its targeted regression passes.
+
+### 2026-08-18 — 仓库切换后命令正文必须清空另一侧路径
+
+- Symptom: BackStep 复核期间多次把 Go 路径带入 Legacy 命令，或把 Legacy 路径带入 Go 命令；这些调用虽然只读，但路径错误使输出失效，也重复触发了已有的跨仓库边界问题。
+- Root cause: 切换 `workdir` 时沿用了上一仓库的命令片段，没有把命令正文限制为当前仓库的相对路径。
+- Prevention: 工具调用先固定仓库根目录，再重新构造只含当前仓库路径的命令；跨仓库证据必须拆为两次独立调用，任何混入另一侧路径的输出立即作废并重跑。
+- Verification: BackStep 的 Legacy 行为、Go 协议与实现已分别在两个仓库重跑；后续定向 Go 测试只使用 Go 路径并通过。
+
+### 2026-08-18 — BackStep 受阻仍向附近其他玩家广播距离 0
+
+- Symptom: BackStep 完全受阻测试首次只预期一个观察者通知，实际收到两个 `ObjectBackStep`。
+- Root cause: Legacy `HumanObject.BackStep` 在无可移动格时仍调用 `Broadcast`，因此包括占位阻挡玩家在内的所有附近非施法者都会收到距离 0 的包。
+- Prevention: 位移/击退测试把阻挡对象也纳入广播接收者集合；分别断言移动距离、通知接收者和距离 0 的 wire payload，不把“未移动”误判为“无广播”。
+- Verification: BackStep 成功、部分受阻和完全受阻定向测试均通过。
