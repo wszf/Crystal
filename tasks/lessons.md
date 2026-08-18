@@ -4462,3 +4462,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试把“命中触发 LevelMagic”误当成“最高等级仍会累计经验”；Go/Legacy 的 `LevelMagic` 对 level 3 直接结束，不发练习进度。
 - Prevention: 新增技能练习断言前先按当前 magic level 检查 `LevelMagic` 的 level 0/1/2/3 分支；最高等级只断言效果，不断言经验或 `MagicLeveled` 增长。
 - Verification: 将 level-3 命中期望改为经验不变，BattleCry 世界/会话定向测试通过；level 0/1/2 仍验证一次练习经验。
+
+### 2026-08-19 — PoisonSword 通知断言必须按接收者定位
+
+- Symptom: PoisonSword 定向测试把整个 `BeforeMagicNotifications` 的固定下标当作删除包，玩家目标的中毒聊天通知插入前方后，删除包解析收到错误长度。
+- Root cause: 即时扇形技能会在扫描过程中先为玩家目标追加目标侧 Chat，通知列表是全接收者混合序列，不能用全局下标代替接收者过滤。
+- Prevention: 断言即时技能包序时先按接收者筛选，再按包类型/相对顺序定位；只有证明所有接收者通知都不会交错时才使用全局下标。
+- Verification: 改为按施法者 ObjectID 查找 `ServerDeleteItem` 后，PoisonSword 世界层定向测试连续三次通过，并同时保留施法者 `MagicLeveled -> DeleteItem` 与玩家目标 `Chat` 顺序断言。
+
+### 2026-08-19 — 全包验证需隔离既有 net.Pipe 会话阻塞
+
+- Symptom: 单独运行现有 `TestSessionBlizzardAndMeteorStrikeTranscriptAndPersistence` 时，Blizzard/MeteorStrike 子测试在 30 秒后因 `net.Pipe` 读超时失败；堆栈显示服务端通知写入与测试端未消费读取互相等待。
+- Root cause: 这是当前基线会话测试的 pipe 消费/通知突发阻塞，不涉及本批 PoisonSword 文件；重复并发启动全包测试还会把相同阻塞叠加，不能据此判断新法术失败。
+- Prevention: 提交前先单进程运行新增功能的普通、race、会话测试，再运行全包；全包异常时用 `-json`/独立测试复现并检查堆栈，标明无关基线失败，不把它混入新功能证据。
+- Verification: PoisonSword 世界/会话定向测试和五次 race 均通过；Blizzard 基线测试在不含 PoisonSword 的独立运行中仍复现同一 pipe 超时，且 `git diff` 未包含 Blizzard 源文件。
