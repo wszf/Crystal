@@ -4304,3 +4304,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 会话登录会从角色等级和装备计算 MaxHP/MaxMP，不能复用裸世界夹具的 100/100 初始值。
 - Prevention: 发起会话动作前在 world 锁内记录目标当前 HP/MP，持久化断言只比较预期的相对扣减；裸世界测试与认证夹具分别维护各自基线。
 - Verification: Plague 会话测试改为 `targetStartHP-20` 与 `targetStartMP-12`，不再依赖派生属性的绝对常量。
+
+### 2026-08-18 — Go 补丁必须复用已核对的完整仓库根目录
+
+- Symptom: PoisonCloud 审计期间一次 Go 只读命令和一次补丁因绝对路径漏写 `me_work` 而失败；失败调用没有产生可用源码证据或文件变化。
+- Root cause: 手工重建 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 时遗漏了中间目录，没有直接复制最近确认的根目录。
+- Prevention: 任何 Go 读写前先固定并复用完整根目录；`apply_patch` 前检查目标文件存在，路径错误时丢弃整次调用输出并重试，不从失败调用推断状态。
+- Verification: PoisonCloud 补丁改用完整根目录后成功落盘并通过定向编译检查；失败补丁未修改文件。
+
+### 2026-08-18 — Go 时间夹具必须完整填写 time.Date 参数
+
+- Symptom: PoisonCloud 世界测试首次编译失败，`time.Date` 少传了纳秒参数。
+- Root cause: 新增测试夹具从已有日期表达式手工复制时漏掉了 Go `time.Date` 的完整八参数签名。
+- Prevention: 新增固定时间夹具统一使用 `year, month, day, hour, minute, second, nanosecond, location` 八个参数；提交前先运行新增测试包的编译/定向测试。
+- Verification: 补齐纳秒参数后 `TestGameWorldPoisonCloud` 世界测试通过。
