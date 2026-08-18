@@ -3439,3 +3439,23 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 没有在 `gofmt` 后重新读取物理行，且矩阵 hunk 使用了概括文本而非当前稳定标题。
 - Prevention: patch 前复读目标文件的连续精确行；格式化后的声明按实际空格取锚点，矩阵追加优先使用稳定标题的最小 hunk；拒绝后先确认工作树未变再重试。
 - Verification: 重读后两个最小 patch 均成功；包级编译、GlacierSnail 世界/认证测试及普通/race 重复回归通过。
+
+### 2026-08-18 — AI=198 patch 必须保留 apply_patch 的精确结束标记
+
+- Symptom: FurbolgWarrior 初稿的两次 `apply_patch` 因 `*** End Patch` 被误写进增量行而拒绝，未产生写入。
+- Root cause: 组合较长 patch 时没有把 unified patch 的结束标记作为独立原文校验。
+- Prevention: 失败后先确认工作树无部分写入；重试时让 `*** End Patch` 独占最后一行，再执行 `git diff --check`。
+- Verification: 后续最小 patch 成功，生产文件经 `gofmt`，Go 包编译和 AI=198 定向测试通过。
+
+### 2026-08-18 — AI=198 必须先复核 Go API 和网络 recipient 语义
+
+- Symptom: 首次包编译暴露了错误的 `movePoint` 参数、尚未加入的 action 字段和不存在的 target map 字段；修正编译后，世界测试又错误要求 owned Monster 的 socket 收到攻击包。
+- Root cause: 生产实现和测试夹具沿用了未复读的 API/通知假设，并把世界中的 Monster 目标与已认证网络 recipient 混为一类。
+- Prevention: 新 AI 开始前读取精确 helper 签名、action 结构和 target 投影；协议断言只对有 session/socket 的 Player recipient 生效，owned Monster/Hero 用状态或 action 证据验证。
+- Verification: `go test ./cmd/crystal-server -run 'FurbolgWarrior|furbolgWarrior' -count=10`、对应 race 批次以及包编译均通过。
+
+### 2026-08-18 — OmaMage 随机边界基线仍须独立分类
+
+- Further evidence: AI=198 的一次服务端全量测试恰好通过，但独立 `TestSessionOmaMageRangeSlowFrozenTranscript -count=3` 仍复现 `[2 1]` 对 `[1]` 的失败，确认该问题具有时序/随机性而非新 AI 回归特征。
+- Prevention strengthening: 全量结果即使偶尔通过，也继续单独重跑已知用例；以排除该精确基线用例的全仓普通/race 命令作为本批验收证据。
+- Verification after strengthening: AI=198 批次的 `go test ./... -count=1 -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'`、对应 race、vet、build 和定向测试均通过。
