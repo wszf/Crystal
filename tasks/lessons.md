@@ -4099,10 +4099,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-18 — 新增 Go 文件要先清理 import 并核对领域结构字段
 
-- Symptom: 定向 Go 测试首次编译同时报新文件的 `protocol` import 未使用，以及访问不存在的 `worldMonster.InSafeZone` 字段。
-- Root cause: 先按 Legacy 类型直译了安全区判断，且测试前没有检查新文件 import 是否仍被使用。
-- Prevention: 新增 Go 文件完成后先运行 `gofmt`/最小编译；跨模型字段使用前先查实际 struct 定义，安全区等派生状态通过现有 world helper 获取。
-- Verification: 删除未使用 import，并改用 `positionInSafeZoneLocked`；随后重新运行定向测试验证编译路径。
+- Symptom: 定向 Go 测试首次编译同时报新文件的 `protocol` import 未使用，以及访问不存在的 `worldMonster.InSafeZone` 字段；本批 HellFire 新文件再次出现未使用的 `protocol` import。
+- Root cause: 先按 Legacy 类型直译了安全区判断，且新增文件完成后没有立即清理 import/跑最小编译。
+- Prevention: 新增 Go 文件完成后先运行 `gofmt` 和目标包最小编译，并逐项检查 import；跨模型字段使用前先查实际 struct 定义，安全区等派生状态通过现有 world helper 获取。
+- Verification: 删除 HellFire 的未使用 import，删除旧错误字段访问并改用 `positionInSafeZoneLocked`；随后 HellFire、Lightning/HeavenlySword 定向测试均通过。
 
 ### 2026-08-18 — AttackMode.All 下自有宠物仍属于可攻击目标
 
@@ -4138,3 +4138,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 为复用新线技能的 MAC 标志，误把新增动作元数据扩展到了已有通用玩家路径；Legacy 通用玩家魔法本来就始终使用 MAC。
 - Prevention: 新增动作字段只在新分支消费；修改共享 resolver 前先保存旧分支的防御参数，分别核对玩家与怪物的 Legacy armour 语义。
 - Verification: 恢复通用玩家路径的固定 MAC，线技能路径显式传入 `MagicDefence=true`；全量 Go 测试、race、vet 和 build 均通过。
+
+### 2026-08-18 — HellFire 测试要分别核对等级伤害与逐格时序
+
+- Symptom: HellFire 等级 3 测试首次把 MC=10 的伤害预期为 25，实际为 30；把目标移到第二格后又在首格 +500ms 立即断言命中，导致定向测试失败。
+- Root cause: 只沿用了等级 0 的伤害心算，忽略 `playerMagicDamageForSpell` 的等级倍率；没有区分首个动作 +500ms 和后续每格 +100ms。
+- Prevention: 法术测试断言伤害前按 catalogue 与 `playerMagicDamageForSpell` 逐级计算；链式动作测试把首格、第二格和最终动作分别绑定到 `500ms + n*100ms`。
+- Verification: HellFire 等级 0/3、四格链、逐格重验证测试均通过，等级 3 伤害固定为 30。
+
+### 2026-08-18 — net.Pipe 会话施法要先消费观察者的 ObjectMagic
+
+- Symptom: HellFire 会话影响通知的 `net.Pipe` 写入在测试中超时；目标读取器把施法时的 `ServerObjectMagic` 当成伤害包，导致后续 `ServerHealthChanged` 没有读端。
+- Root cause: 会话夹具只启动了目标的影响包读取，没有为施法广播启动并消费独立的 ObjectMagic 读取器。
+- Prevention: 真实会话测试按阶段为每个观察者建立读取器：施法阶段先读 ObjectMagic，再在手动 tick 前建立影响包读取器；不要把 cast 和 impact 包合并到一个固定计数。
+- Verification: HellFire 会话测试先断言目标 ObjectMagic，再断言双方影响包顺序、HP=82 与 +100ms 链动作，定向运行通过。
+
+### 2026-08-18 — Legacy 对照读取前要核对实际文件路径
+
+- Symptom: HellFire 对照查询首次使用了不存在的 `Server/MirObjects/Map.cs` 和 `Server/Shared` 路径；随后又在 Legacy 仓库查询不存在的 `docs` 目录，命令输出包含错误信息，不能作为行为证据。
+- Root cause: 未先从 `rg --files` 确认目标文件/目录归属，就凭目录印象拼接路径；迁移矩阵实际位于 Go 仓库。
+- Prevention: 读取前先列出并核对实际路径与仓库归属；本项目中地图实现位于 `Server/MirEnvir/Map.cs`，矩阵位于 Go 仓库的 `docs/migration-matrix.md`，不得凭空假设协议或文档目录。任何混入错误的整条输出都丢弃后重跑。
+- Verification: 用 Legacy-only `rg --files Server | rg '/(HumanObject|Map|MapObject)\\.cs$'` 找到源文件，并用 Go-only 读取矩阵；重新确认 HellFire 与 `LevelMagic` 行为，没有修改 C# 文件。
