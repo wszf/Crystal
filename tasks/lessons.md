@@ -4399,3 +4399,59 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 新法术会话测试先从 delayed resolver 的每个 `LevelMagic` 路径推导各接收者包矩阵，再分别断言世界通知和网络读取结果。
 - Verification: 补入 `ServerMagicLeveled` 后由实际通知序列确认它先于主循环追加的 `ServerObjectPoisoned`；施法者期望已固定为 `ObjectStruck -> DamageIndicator -> MagicLeveled -> ObjectPoisoned`，会话定向测试、五次 race 测试及全仓库测试均通过。
   Recurrence evidence: 第二次会话失败不是功能差异，而是把延迟 poison 阶段的包放在 LevelMagic 之前；该顺序误判已纳入预防检查。
+
+### 2026-08-19 — 选择迁移批次前必须核对当前源码而非陈旧矩阵
+
+- Symptom: IceThrust 完成后根据 README 将 `LoginSuccess` 当作仍待迁移的 P3 批次，随后才发现 Go 登录流程、协议序列化和现有测试已经完整覆盖。
+- Root cause: 直接信任陈旧文档中的待办状态，没有先用当前源码、测试和 Legacy 对照确认功能是否已存在。
+- Prevention: 选择下一批前逐项核对 Go 入口、协议编码、行为测试和迁移矩阵；源码与测试是权威，文档只用于发现候选，已实现的功能不得重复修改。
+- Verification: 独立核对 Go `main.go`/`internal/protocol/packet.go`、Legacy `ServerPackets.cs` 及现有测试后确认 `LoginSuccess` 已完成；该误判未产生代码改动，后续候选改为重新研究的缺失法术。
+
+### 2026-08-19 — SpecialArrow 测试必须计入技能练习随机抽样
+
+- Symptom: SpecialArrow 定向测试在命中和状态断言前失败，测试夹具把 bound=3 的随机调用报告为意外输入。
+- Root cause: 夹具只建模了伤害和 Vampire/Poison 状态判定，却遗漏了命中完成后统一 levelMagicLocked 为技能练习抽取 combatRollLocked(3)。
+- Prevention: 为带 LevelMagic 的延迟法术建立随机调用清单时，同时检查命中完成、状态结算和技能练习路径；严格 RNG 夹具必须显式允许并记录练习抽样，不得只覆盖法术专属随机数。
+- Verification: 已从 Go levelMagicLocked 实现确认 bound=3 的调用点；修复夹具后 SpecialArrow 世界/会话定向测试、五次 race、go vet、全仓库测试/race 和 go build 均通过。
+
+### 2026-08-19 — SpecialArrow 会话动作必须按目标类型断言
+
+- Symptom: SpecialArrow 会话测试首次失败，断言玩家目标动作同时把 TargetID 和 PlayerTargetID 都当作目标 ID。
+- Root cause: 测试忽略了 worldMagicAction 对目标类型的互斥表示；玩家目标只写 PlayerTargetID，普通 TargetID 保持 0。
+- Prevention: 新增延迟动作会话断言前先按玩家、怪物、英雄三条 resolver 分支核对字段映射；不要从网络 MagicRequest 的 TargetID 直接推断内部动作字段。
+- Verification: 失败转录显示 PlayerTargetID=目标且 TargetID=0；已将断言改为互斥字段并继续运行 SpecialArrow 会话测试。
+
+### 2026-08-19 — SpecialArrow 会话夹具的法术等级必须与持久化等级一致
+
+- Symptom: SpecialArrow 会话转录预期 PoisonShot 持续 10 秒，但实际 AddBuff 为 5 秒。
+- Root cause: 会话账户保存的是 Level 0，而测试按世界夹具的 Level 1 计算了 5+5×level 的持续时间。
+- Prevention: 会话测试的持续时间、伤害和练习断言必须从账户实际 StoredMagic 等级推导；世界测试等级与会话等级不同步时要显式标注。
+- Verification: 按会话 Level 0 将 AddBuff、内存状态和持久化状态断言统一改为 5 秒，SpecialArrow 定向世界/会话测试通过。
+
+### 2026-08-19 — SpecialArrow 会话毒状态公式必须使用实际法术等级
+
+- Symptom: 修正会话 buff 持续时间后，目标毒状态断言仍失败；Level 0 的实际 duration 为 damage×2+7，而测试预期了 Level 1 的 damage×2+14。
+- Root cause: 只同步了 buff 持续时间的等级修正，没有同步 SpecialArrow poison 的 magicLevel+1 公式。
+- Prevention: 会话夹具统一从 action.MagicLevel 推导 buff duration、poison duration 和 poison value，禁止复用不同等级世界测试的常量。
+- Verification: 失败状态显示 Level 0 的 duration/value，已将会话 poison duration 改为实际等级公式，SpecialArrow 定向世界/会话测试通过。
+
+### 2026-08-19 — Legacy CrippleShot Vampire 区域必须累计 VampAmount
+
+- Symptom: 初版 Go 区域实现能重复命中主目标并清零 VampireShot，却没有增加 VampireAmount。
+- Root cause: 只复用了普通 VampireShot 命中后的累计逻辑，遗漏了 Legacy 3x3 循环中每个符合条件的 targetob 都执行一次 VampAmount 更新。
+- Prevention: 对区域技能逐语句核对循环体内的副作用；除伤害和状态外，必须单独列出每个 cell object 触发的资源累计、计时和广播。
+- Verification: 重新读取 HumanObject.cs 的 CrippleShot 分支确认每个区域对象都累计 value×(level+1)×0.25；Go 已提取共享累计 helper，并加入双目标 VampAmount 世界断言。
+
+### 2026-08-19 — 跨仓库对照命令必须保持单仓库边界
+
+- Symptom: 复核 SpecialArrow 伤害时把 Legacy 和 Go 路径放进同一条 shell 命令，且 Legacy glob 在当前 shell 下失败；该混合调用的全部输出不能作为证据。
+- Root cause: 忘记项目级约束要求每个工具调用只访问一个仓库，并在使用 glob 前没有先核对可用路径。
+- Prevention: Legacy 对照、Go 实现检查和测试始终拆成独立工具调用；每次调用固定 workdir，跨仓库比较只使用两次成功的纯单仓库读取结果。
+- Verification: 已丢弃混合命令输出，分别重读 Go 伤害函数和 Legacy HumanObject/MapObject 片段；后续检查继续使用单仓库调用。
+
+### 2026-08-19 — 新测试必须先检查包内辅助函数命名
+
+- Symptom: SpecialArrow 定向测试首次编译失败，新增的 `mustWorldSpellInfo(*testing.T, byte)` 与包内已有的 `mustWorldSpellInfo(byte)` 重名，且调用参数数量不匹配。
+- Root cause: 添加测试辅助函数前只检查了相邻测试文件，没有检索整个 Go 包的同名声明。
+- Prevention: 新增包级测试 helper 前先用 `rg -n '^func <name>\(' cmd/...` 检查全包；已有 helper 直接复用，确需变体时使用带功能前缀的唯一名称。
+- Verification: 失败输出已用于定位；删除重复声明并改用既有 `mustWorldSpellInfo(byte)` 后重新运行 SpecialArrow 定向测试验证。
