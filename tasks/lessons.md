@@ -3910,7 +3910,21 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-18 — 跨仓库工具调用必须复用已验证的仓库根路径
 
-- Symptom: 本批次两次只读检查因手写 `workdir` 漏掉 `me_work` 或重复目录而失败，导致命令输出不能作为证据。
-- Root cause: 在已知两个相邻仓库的情况下重新猜测绝对路径，没有先复用 `git rev-parse --show-toplevel` 的结果。
-- Prevention: 每次切换仓库先单独执行并记录 `git rev-parse --show-toplevel`，后续同一批次所有工具调用只使用该精确路径；读命令失败时丢弃其全部输出并重跑。
-- Verification: 修正根路径后，Go Trap 编译、普通/race 定向测试和后续检查均在 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 完成，旧版只读检查在 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 完成。
+- Symptom: 本批次早先两次只读检查因手写 `workdir` 漏掉 `me_work` 或重复目录而失败；随后多次又把旧版 `Server/...` 路径带进 Go 仓库命令，相关输出都不能作为证据。
+- Root cause: 在已知两个相邻仓库的情况下重新猜测绝对路径，并在同一个命令中混用了两个仓库的路径；没有把仓库切换当成独立边界。
+- Prevention: 每次切换仓库先在独立工具调用中执行并记录 `git rev-parse --show-toplevel`；后续同一批次的每个工具调用只使用该精确 `workdir`，命令正文也不得引用另一个仓库的路径。任何跨仓库比较必须拆成两个独立工具调用；一旦路径混用失败，立即丢弃全部输出并重跑，下一次调用前重新检查命令中每个路径前缀；若命令包含 `Server/`、`Shared/` 等旧版前缀，必须先确认当前 `workdir` 是 Legacy 根。
+- Verification: 重新按两个独立仓库根目录完成 Go Trap 编译、普通/race 定向测试、后续全量检查及 C# 只读核验；本次复发后的后续检查改为不含旧版前缀的 Go-only 命令，并在提交前重复三项 C# 只读核验。
+
+### 2026-08-18 — Go 时间常量名称必须在目标编译前核对
+
+- Symptom: `DelayedExplosion` 定向测试首次编译失败，测试代码把标准库的 `time.Nanosecond` 写成不存在的 `time.Nanoseconds`。
+- Root cause: 手写纳秒边界表达式时凭复数形式猜测 API 名称，没有在保存精确时间边界前先使用已确认的标准库常量。
+- Prevention: 新增时间边界测试只使用已核对的 `time.Nanosecond`/`time.Microsecond` 等标准库标识；第一次新增测试后立即运行目标包编译，失败时先记录并修正 API 名称。
+- Verification: 改用 `time.Nanosecond` 后重新运行 `gofmt` 与 `TestDelayedExplosion` 定向编译/测试。
+
+### 2026-08-18 — Legacy 源码定位必须先由文件清单确认
+
+- Symptom: 本批次一次旧版行为复核把不存在的 `Server/Objects/...` 路径传给 `rg`，命令失败，输出不能作为对照证据。
+- Root cause: 根据记忆猜测旧版目录层级，没有先从当前 Legacy 根目录枚举目标文件。
+- Prevention: 读取旧版 C# 前先在 Legacy 仓库独立执行 `rg --files` 并筛选实际文件名；后续只引用已返回的相对路径。路径失败时立即丢弃输出并重新定位，不把失败命令当作行为结论。
+- Verification: 改用 `Server/MirObjects/{HumanObject,MonsterObject,HeroObject,MapObject}.cs` 后完成 DelayedExplosion admission、CompleteMagic、ProcessPoison、ApplyPoison 与 Attacked 的只读核对。
