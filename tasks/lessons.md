@@ -4269,3 +4269,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 私有 AddBuff 持久化通知在 `ConsumeItem` 前捕获了角色快照，随后覆盖了主处理器已经写入的 1 个护符状态。
 - Prevention: 任何“先 AddBuff/技能升级、后 ConsumeItem”的路径都要在物品变更后追加最终持久化快照，并在 net.Pipe 测试同时断言包序和 auth 存档数量。
 - Verification: UltimateEnhancer 在消耗后追加最终快照；认证测试确认 `AddBuff -> MagicLeveled -> DeleteItem -> Magic` 包序、运行时数量和持久化数量均正确。
+
+### 2026-08-18 — Go 世界夹具的派生属性要在 enter 后覆盖
+
+- Symptom: Curse 定向测试预期 SC=10 产生 15 秒持续时间，首次实际得到 5 秒；同一原因也使重置测试的首个 Buff 只有 5 秒。
+- Root cause: `world.enter` 会按角色基础/装备/Buff 重新计算派生属性，覆盖了入场前手工设置的 `MinSC`/`MaxSC`。
+- Prevention: 需要固定运行时战斗属性的世界测试先 `enter`，再设置 `MinSC`、`MaxSC`、HP/MP 等字段；若断言公式，先从当前角色快照计算基线，不依赖构造体初始值。
+- Verification: Curse 世界测试改为入场后设置 SC，15 秒持续时间、25 秒重置持续时间及玩家百分比属性均通过。
+
+### 2026-08-18 — 延迟法术会话要按主循环的实际包序读取
+
+- Symptom: Curse `net.Pipe` 测试首次在扣物品包处读到 `ServerUserLocation`，并因后续读端错位超时；修正读序后又没有收到 `ServerMagicLeveled`。
+- Root cause: `BeforeMagicNotifications` 由主循环在 `UserLocation` 之后、`ServerMagic` 之前发送；另外 Curse 的等级 0 练习门槛为角色等级 40，等级 35 的会话夹具合法命中但不会练习。
+- Prevention: 新增会话测试先读取 `main.go` 的写包顺序并按协议 ID 建立阶段读端；若断言练习包，角色等级必须满足 catalogue 的 `Level1`，并把效果命中与技能练习分开验证。
+- Verification: Curse 认证会话现验证 `HealthChanged -> UserLocation -> DeleteItem -> Magic`、延迟目标 `Chat -> AddBuff`、施法者 `MagicLeveled` 及护符/Buff 持久化；等级 50 夹具连续通过。
