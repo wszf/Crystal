@@ -4653,3 +4653,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 活跃会话读循环会持续执行 `world.tick(time.Now())`，测试同时用当前时间手动 tick，后台维护循环可能先消费一次性攻击。
 - Prevention: 会话 transcript 若需要手动推进 world，应先停止可停的后台 ticker，并把测试时钟设为明显晚于实时 `time.Now()` 的未来时间，避免实时维护循环跨过测试事件。
 - Verification: 将 Tucson transcript 基准时间改为 `time.Now().Add(time.Hour)` 后，定向测试连续 10 次通过，随后 `go test ./...` 全量通过。
+
+### 2026-08-19 — LionRoar 的 Legacy ApplyPoison 必须保留零初始 TickTime
+
+- Symptom: LionRoar 首版 Go world test 能写入 `LRParalysis`，但 impact tick 没有发布 `ObjectPoisoned`；同时 session 期望的首次毒状态与 `Elapsed` 不一致。
+- Root cause: Legacy `Map.CompleteMagic` 构造的 `Poison` 只设置 `Duration`/`TickSpeed`，`Time`/`TickTime` 初始为零；迁移时错误地预填了 `TickAt = now + 1s`，跳过了同一 world tick 的首次状态计算。
+- Prevention: 迁移毒效果时必须逐字段对照 Legacy 构造器；没有显式设置 `Time`/`TickTime` 就保持 Go `TickAt` 为零，让 `tickPoisons` 在施毒 impact 立即计算 `CurrentPoison`/`ObjectPoisoned`，并断言首个 `Elapsed`。
+- Verification: LionRoar world 与认证 `net.Pipe` transcript 均验证了 impact 时 `MagicLeveled -> ObjectPoisoned`、`Elapsed=1`、`Duration=magic.Level+2` 和后续持续状态。
+
+### 2026-08-19 — Go map value 测试夹具必须整体写回嵌套结构
+
+- Symptom: LionRoar 安全区测试在编译阶段报 `cannot assign to struct field ... in map`。
+- Root cause: `world.mapRules` 是 `map[int32]worldMapRules`，直接修改 `world.mapRules[0].SafeZones` 试图写入 map 返回的结构体副本。
+- Prevention: 修改 map value 的嵌套字段时先复制到局部变量，修改后用完整 value 写回 map；新增夹具先运行目标包编译测试再扩展行为断言。
+- Verification: 改为 `rules := world.mapRules[0]`、修改 `rules.SafeZones`、`world.mapRules[0] = rules` 后，LionRoar world tests 通过。
