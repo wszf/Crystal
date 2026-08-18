@@ -3629,12 +3629,12 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 实现 Zuma 派生 AI 的 WakeAll 时，在自身 Wake 前投影已有 target，向关联对象同时传播 ID/kind；没有已有 target 时才传播零值。
 - Verification: wake 世界测试现在断言父/关联 ObjectShow、解除石化、ActionTime 锁和关联 Player target；定向普通/race 测试通过。
 
-### 2026-08-18 — 全仓 race transcript 失败必须先单测隔离再归因
+### 2026-08-18 — 全仓 transcript 失败必须先单测隔离再归因
 
-- Symptom: AI=212 批次首次全仓 `go test -race` 仅失败 `TestSessionTucsonMageNormalAttackTranscript`，报告未收到预期攻击包；AI=212 相关 race 测试没有失败。
-- Root cause: 目前证据只显示并行全仓运行中的 session transcript 抖动，不能据此把失败归因到 PurpleFaeFlower；同一 Tucson transcript 单独 `-race -count=5` 全部通过。
-- Prevention: 全仓 race 出现单一 transcript 失败时，先以完整测试名隔离并重复运行，再用明确的已知 flaky 排除项重跑门禁；不要为无调用关系的 AI 修改生产代码。
-- Verification: Tucson 单测 race 重跑 5 次通过；AI=212 定向普通/race 与其余全仓门禁保持通过，后续全仓 race 使用该已确认的排除项复核。
+- Symptom: AI=212 批次首次全仓 `go test -race`，以及 AI=214 对象分派补丁后的全仓普通测试，偶发失败 `TestSessionTucsonMageNormalAttackTranscript`，报告未收到预期攻击包；对应 AI 测试没有失败。
+- Root cause: 目前证据只显示并行全仓运行中的 session transcript 抖动，不能据此把失败归因到 PurpleFaeFlower、SepWarrior 或普通宠物对象分派；同一 Tucson transcript 单独运行可通过。
+- Prevention: 全仓普通/race 出现单一 transcript 失败时，先以完整测试名隔离并重复运行，再用明确的已知 flaky 排除项重跑门禁；不要为无调用关系的 AI 修改生产代码。
+- Verification: Tucson 单测普通与 race 定向重跑通过后，再用 Oma/Tucson 两条已确认排除项完成全仓 race 复核；AI=214 定向普通/race 与其余全仓门禁保持通过。
 
 ### 2026-08-18 — AI=213 Siege 的 protected Attack 不等于可达 AI 行为
 
@@ -3642,3 +3642,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只按类名或 protected 方法存在与否判断功能，未沿 `ProcessAI` 虚调用链和征战资产 Spawn 条件确认客户端可观察路径。
 - Prevention: 迁移特殊 MonsterObject 前先列出所有覆写方法并追踪实际调用者；区分不可达 protected helper 与运行时行为，另核对外部资产是否使用同一 AI 编号。
 - Verification: AI=213 Go 测试确认无搜索、无自动攻击，Effect 1/2 保留一秒随机游走，Effect 3/4/5 保持静止；既有征战 AI=72 Gate 测试继续通过。
+
+### 2026-08-18 — AI=214 方向夹具必须以 Go 的 movePoint 表为准
+
+- Symptom: SepWarrior 移动测试把方向 0 当作水平向右，实际对象从 `(5,5)` 移到了 `(5,3)`，导致两格奔跑和受阻退回断言失败。
+- Root cause: Legacy `MirDirection` 的数值映射在 Go `movePoint` 中保持了 0=上、2=右；测试夹具凭直觉选择方向，未沿实际方向表核对坐标。
+- Prevention: 新增方向/移动测试先用 `movePoint` 或 `directionFromPoints` 计算预期坐标，禁止把方向 ordinal 直接当作笛卡尔轴编号。
+- Verification: 将水平向右夹具改为 direction 2 后，AI=214 两格 `ObjectRun` 与第二格受阻的单格 `ObjectWalk` 测试重复通过。
+
+### 2026-08-18 — AI=214 玩家 ACAgility 防御使用 combatRoll 流
+
+- Symptom: SepWarrior TwinDrake 玩家测试错误期待 Monster AI 随机回调记录两个 `bound=1` 防御抽样，实际只观察到 DC/分支的 `[11,3]`，但玩家 HP 结果正确。
+- Root cause: Go 玩家 ACAgility 伤害走 `damagePlayerByMonsterWithDefenceLocked`，命中与护甲使用 `combatRoll`；Monster 目标才使用 `monsterAIRollIncludingUnitBoundLocked`。
+- Prevention: 跨 Player/Monster/Hero 的攻击 transcript 分开注入并断言 `monsterAIRoll` 与 `combatRoll` 两条随机流，先读取目标 resolver 再编写 bounds 断言。
+- Verification: 修正玩家断言后，AI=214 TwinDrake 玩家即时/延迟伤害与默认 PvP 中毒关闭测试重复通过。
+
+### 2026-08-18 — AI=214 普通宠物生命周期必须走虚拟对象投影
+
+- Symptom: SepWarrior 的 `objectPacketAt` 已按 Legacy `GetInfo()` 返回 `ObjectPlayer`，但普通宠物 restore/recall 路径仍直接调用通用 `ordinaryPetObjectPacketAt`，会把 AI=214 发成 `ObjectMonster`。
+- Root cause: 为保留普通宠物既有封装，新增路径复用了具体 helper，绕过了按 AI 分派的虚拟对象边界；Legacy 的 `GetInfo` 是运行时类型分派，不能由调用点静态假设。
+- Prevention: 所有向客户端发送 Monster/Pet 初始、恢复、召回对象时统一调用 `objectPacketAt`；通用 helper 只保留为非特殊 AI 的 fallback，并为特殊宠物加 owner 外观投影测试。
+- Verification: AI=214 ObjectPlayer 测试覆盖主人名字/性别/发型/Light/WingEffect，普通宠物 restore/recall 测试及全量普通/race 门禁通过。
