@@ -3701,3 +3701,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 看到方法前面计算了 `distance * 50 + 500` 的局部变量，就沿用了 SepWizard 的距离投射规则，没有继续核对真正传给 `DelayedAction` 构造器的参数；该局部值在 SepTaoist 分支没有被使用。
 - Prevention: 迁移延迟攻击时必须沿调用链确认实际排队的 `Due/Envir.Time` 参数，不以附近计算但未消费的局部变量推断协议时序；测试夹具应使用非零距离以区分固定与距离相关实现。
 - Verification: Go 实现、SoulFireBall 测试和迁移矩阵均改为固定 500ms；修正后的 AI=216 定向普通/race 与排除两条已知 flaky transcript 的全仓普通/race、vet 和 build 均通过。
+
+### 2026-08-18 — AI=217 SepAssassin 测试必须隔离继承随机流与世界 tick
+
+- Symptom: SepAssassin ranged transcript 初稿错误期待多次 `bound=2`，实际 Legacy 顺序只产生 `[5, 2, 5, 11]`；Player/Monster/Hero 目标共享测试在延迟 `world.tick` 时还观察到与攻击无关的 Hero AI `bound=16`，导致严格随机回调失败。
+- Root cause: ranged 夹具没有沿 `ProcessTarget` 的真实调用链核对预范围抽样、继承 `MoveTo` 的一次旋转抽样、最终分支抽样和 DC 抽样；目标类型测试把世界 tick 期间其他 AI 的随机消费误当成 SepAssassin resolver 的消费。
+- Prevention: 先从实现和 Legacy 顺序列出每个实际会调用的随机 bound，再锁定完整序列；涉及延迟解析的多对象 world 使用宽松随机回调，并只断言目标、到期时间、伤害和协议包等被测行为，避免把并行 AI 的消费纳入 transcript。
+- Verification: 修正 ranged 序列与目标类型夹具后，AI=217 定向普通测试连续 5 次、定向 race 测试 3 次通过。
