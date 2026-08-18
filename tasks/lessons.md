@@ -3408,3 +3408,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 已知的实时 session maintenance tick 会在手动 transcript 前消费 bound=2 的随机数（AI=188 已记录），属于既有维护基线，不是 DarkWraith 行为变化。
 - Prevention: 保留精确失败证据，单独运行该既有测试和排除它的回归命令；不为迁移新 AI 修改无关行为或放宽 wire assertion，最终报告明确保留例外。
 - Verification: `go test ./cmd/crystal-server -count=1 -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'` 通过，DarkWraith 定向测试通过。
+
+### 2026-08-18 — AntCommander 协议 helper 必须区分 Packet 与通知包装
+
+- Symptom: AI=196 首次编译时，Dazed effect helper 返回 `worldNotification`，但调用点需要可复用的 `protocol.Packet`，`go test ./cmd/crystal-server` 报类型不匹配。
+- Root cause: 把协议 payload 构造和接收者/范围通知包装合并在一个 helper 中，导致不同层级的值被交叉传递。
+- Prevention: 可复用的 effect helper 只返回 `protocol.Packet`；每个调用点再显式创建私有通知或 `notifyPlayersLocked` 范围通知。
+- Verification: 修正后 `gofmt`、AI=196 定向世界测试、认证 `net.Pipe` transcript 以及 `go test ./cmd/crystal-server` 均通过。
+
+### 2026-08-18 — AntCommander 随机 transcript fixture 必须显式驱动分支并先收集序列
+
+- Symptom: AI=196 定向测试初稿把 Type1 期望写成 Type1 payload，但 callback 对 `Next(6)` 始终返回 0，实际发出了 Type0；远程用例的手写随机 bound 白名单也先于完整序列确认而失败。
+- Root cause: 测试夹具没有为分支选择设置有状态返回值，也把攻击发起与后续生命周期/伤害抽样的随机消费混成了预先假定的列表。
+- Prevention: 对分支 bound 用显式计数/状态选择目标分支；先记录实际 bound 序列，再只对已确认的发起关键序列做精确断言，影响包和最终状态仍作为权威证据。
+- Verification: Type1 双命中毒药世界测试、远程 Green poison/延迟测试、CanFly 重验证、Player/owned-Monster/Hero 投影和认证 session transcript 均通过。
+
+### 2026-08-18 — AntCommander Green poison 恢复值只能应用一次
+
+- Symptom: 对照 Player 的 HumanObject.ApplyPoison 语义时发现 Green poison helper 先手动扣除 PoisonRecovery，再调用同样会扣恢复值的共享 Go helper；恢复值非零会把持续时间重复缩短。
+- Root cause: 将目标类型的 Legacy ApplyPoison 逻辑和通用 `addPlayerAppliedPoisonLocked` 的已迁移恢复处理重复拼接。
+- Prevention: Player/英雄 Green/Red poison 统一只经过各自的 applied-poison helper；专用代码只保留 Dazed 的额外 effect/chat 行为，并为非零恢复值建立回归夹具。
+- Verification: AntCommander 远程 Green poison 测试设置恢复值 2 并确认 7 秒变为 5 秒；定向 AI=196、认证 session 与完整服务端包测试均通过。
