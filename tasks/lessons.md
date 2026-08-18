@@ -3991,3 +3991,52 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 想在同一个查询里同时确认旧版 BuffType 与 Go 实现，违反了两个仓库的路径边界。
 - Prevention: 旧版枚举、BuffInfo 和协议基线一律在 Legacy 独立调用读取；Go 调用只引用 `cmd/`、`internal/`、`docs/` 等 Go 相对路径，失败输出立即丢弃。
 - Verification: 重新在 Legacy 确认 Concentration=15、Visible=false，在 Go 独立实现并通过协议、world、race 和 session 测试。
+
+### 2026-08-18 — 跨仓库读取不得放入同一并行编排
+
+- Symptom: 本批次恢复元素系统时，为降低往返延迟把 Legacy 与 Go 的只读定位命令放进同一个 `Promise.all`；虽然没有写入，但违反了项目规定的单仓库工具调用边界。
+- Root cause: 把“命令均为只读”误当成“可以共享一次工具编排”，没有把每个工具调用绑定到唯一仓库根目录。
+- Prevention: Legacy 与 Go 的状态、源码、测试、格式化和提交调用都必须拆成独立工具调用；禁止在同一个 `Promise.all`、shell 或路径变量中混放两侧，跨仓库对照只允许在两次独立成功调用后组合结论。
+- Verification: 本次并行读取输出全部作废且未产生文件变化；后续元素系统复核已改为 Legacy-only 与 Go-only 的顺序调用。
+
+### 2026-08-18 — 工具调用必须复用已验证的 Legacy workdir
+
+- Symptom: 元素系统复核的一次 Legacy-only 读取把项目根目录手写成重复的 `Dropbox` 路径，进程创建失败，输出不能作为源码证据。
+- Root cause: 没有复用当前会话已确认的绝对根路径，而是在工具调用中重新拼接路径。
+- Prevention: 每次调用固定使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`；切换仓库前先独立核对 `git rev-parse --show-toplevel`，禁止手写或拼接已验证根路径。
+- Verification: 失败调用未产生文件变化；下一次 Legacy 读取将先核对根目录，再使用纯仓库相对路径。
+
+### 2026-08-18 — Go-only 查询再次禁止旧版路径
+
+- Symptom: 元素球英雄目标复核的一次 Go 仓库查询仍夹带 `Server/MirObjects/HeroObject.cs`，旧版路径定位失败；该调用的全部输出不能作为实现证据。
+- Root cause: 为同时查找旧版 HeroObject 和 Go 英雄攻击 helper，复用了跨仓库命令正文，没有在仓库切换时清空旧版参数。
+- Prevention: Go workdir 的命令正文只允许 Go 仓库实际目录；旧版 C# 对照必须另起 Legacy-only 调用。即使同一 shell 后续还有合法 Go 子命令，只要出现旧版路径，整条输出作废并重跑。
+- Verification: 失败查询未写入源码；后续英雄攻击复核改为纯 Go 调用，旧版 HeroObject 另行读取。
+
+### 2026-08-18 — 结构字段补丁要避免同一 struct 的重叠插入
+
+- Symptom: 元素系统首次定向编译报 `worldPlayer` 的四个元素状态字段重复声明。
+- Root cause: 两个相邻字段锚点都属于同一个 `worldPlayer`，结构补丁把同一组字段插入了两次。
+- Prevention: 修改结构前先用 `sed -n ...l` 确认完整 struct 边界；同一组字段只选一个语义相邻锚点，补丁后立即做最小包编译。
+- Verification: 删除动作字段处的重复组，保留集中术状态旁的一组；`go test ./internal/protocol ./cmd/crystal-server -run '^Test(SetElemental|Elemental)$'` 通过。
+
+### 2026-08-18 — 新增 Go 测试 helper 要先搜索整个 package
+
+- Symptom: 元素系统测试文件首次编译因 `containsInt16` 与现有 `support_buffs_test.go` helper 重名而失败。
+- Root cause: 只在新测试文件内命名，没有先搜索 `cmd/crystal-server` 包级测试符号。
+- Prevention: 新增测试 helper 前用 `rg -n '^func [A-Za-z0-9_]+' cmd/crystal-server --glob '*_test.go'` 检查包级名称；优先复用现有 helper，专用 helper 使用领域前缀。
+- Verification: 删除重复 helper、复用现有 `containsInt16` 后，元素 Shot、Barrier、Gather 定向测试全部通过。
+
+### 2026-08-18 — Go 测试断言要显式统一协议时长与伤害类型
+
+- Symptom: Barrier duration regression test failed to compile when subtracting `int32` damage ticks from an `int64` buff duration.
+- Root cause: The assertion copied runtime fields with different wire/domain widths into one arithmetic expression without an explicit conversion.
+- Prevention: Before writing duration assertions, inspect the field declarations and convert damage-derived milliseconds to `int64`; keep the expected expression in the same unit and type as the stored field.
+- Verification: Added `int64(...)` around the damage tick subtraction; Elemental Shot/Barrier/Gather/death tests all passed.
+
+### 2026-08-18 — 新增快照字段要用旧版默认赋值更新既有 wire 基线
+
+- Symptom: Full Go regression failed in the poison ObjectPlayer snapshot because the new serializer emitted `ElementOrbMax=200` while the old test expected the pre-migration zero value.
+- Root cause: The test baseline predated the elemental fields; it was not compared against Legacy `PlayerObject.GetInfo`, which always assigns the last `OrbsExpList` value even with no active orb.
+- Prevention: When extending a serialized snapshot, inspect the reference constructor's unconditional/default assignments and update exact-byte tests accordingly; do not suppress a reference field merely to preserve an older Go expectation.
+- Verification: Legacy-only source inspection confirmed Player/Hero `ElementOrbMax` always uses the final orb threshold; the poison snapshot now expects 200 and its targeted regression passes.
