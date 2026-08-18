@@ -3480,3 +3480,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 根据“远程”几何分支推断了 MAC 防御，没有读取 `ProjectileAttack` 的默认参数；攻击形状和防御类型不是同一语义。
 - Prevention: 每个延迟 action 都记录 Legacy 的确切 `DefenceType` 实参或默认值；用非零 AC/MAC 夹具验证防御路径，不以 ranged/magic 名称推断类型。
 - Verification: Go action、AI=200 世界/认证测试和迁移矩阵已改为 ACAgility；`go test ./cmd/crystal-server -run 'FurbolgCommander' -count=3` 通过。
+
+### 2026-08-18 — 非零防御夹具必须区分 armor 与最终 HP
+
+- Symptom: 为验证 AI=200 ranged ACAgility/MAC 分流而设置 AC=3、MAC=40 后，测试初稿把 10 点伤害后的 HP 误期望为 97，实际 AC 路径为 HP=93。
+- Root cause: 把 armor 值 3 当成了剩余 HP，而不是从伤害 10 中扣除后的 7 点有效伤害。
+- Prevention: 非零防御回归同时写出 `damage - armour` 的中间值，并让 expected HP 由该公式得到；用远高于伤害的 MAC 值确保错误 MAC 路径可见。
+- Verification: AI=200 ranged 世界测试现以 AC=3/MAC=40 验证 HP=93，重复定向测试通过。
