@@ -3970,3 +3970,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy `Despawn` 广播以 SpellObject 的 `CurrentMap`/位置筛选接收者，不会向已跨图的 caster 发送旧地图对象移除。
 - Prevention: 跨地图生命周期测试同时保留旧地图 observer 与已迁移 caster，分别断言对象状态清空和旧地图 observer 的移除包，不把 caster 作为旧图广播接收者。
 - Verification: 增加旧地图 observer 后，FireWall cross-map cleanup 清除五个对象并向 observer 发送五个 `ObjectRemove`。
+
+### 2026-08-18 — Go 专项测试夹具要避开移动目标格
+
+- Symptom: Concentration walk 测试首次把 observer 放在玩家的下一步格，移动结果为 `Moved=false`，因此没有产生中断状态；实现没有错误。
+- Root cause: 夹具同时要求 observer 可见和目标格可通行，却没有先检查 `occupiedLocked` 的阻挡语义。
+- Prevention: 设计移动/击退 transcript 时先固定 actor 的候选路径，再把 observer 放在同一可见范围内的非目标格；失败时区分夹具阻挡和实现拒绝。
+- Verification: observer 移到 `(5,2)` 后，Concentration walk、三秒恢复和 expiry 专项测试通过。
+
+### 2026-08-18 — net.Pipe 专项夹具要先满足账号与角色长度约束
+
+- Symptom: Concentration session 首次创建角色返回结果 1，缩短角色名后登录又收到失败包；协议断言尚未开始。
+- Root cause: 新夹具手写了超出旧版约束的角色名和账号标识，没有复用现有 session 测试的短标识模式。
+- Prevention: 新增真实会话测试时先用服务层创建/登录的最小合法账号与角色名跑 bootstrap，再加入法术 transcript 断言；任何非预期 bootstrap 包都先修夹具，不把它归因于法术实现。
+- Verification: 改为 `concowner`/`concwatch` 与 `ConcOwner`/`ConcWatch` 后，Concentration `net.Pipe` cast、SetConcentration owner/observer 顺序和 JSON buff persistence 测试通过。
+
+### 2026-08-18 — Go-only 命令不得夹带 Legacy 文件路径
+
+- Symptom: Concentration 行为定位的一次 Go 仓库查询误带 `Shared/Enums.cs`，命令失败；该输出不能作为协议或枚举证据。
+- Root cause: 想在同一个查询里同时确认旧版 BuffType 与 Go 实现，违反了两个仓库的路径边界。
+- Prevention: 旧版枚举、BuffInfo 和协议基线一律在 Legacy 独立调用读取；Go 调用只引用 `cmd/`、`internal/`、`docs/` 等 Go 相对路径，失败输出立即丢弃。
+- Verification: 重新在 Legacy 确认 Concentration=15、Visible=false，在 Go 独立实现并通过协议、world、race 和 session 测试。
