@@ -4283,3 +4283,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `BeforeMagicNotifications` 由主循环在 `UserLocation` 之后、`ServerMagic` 之前发送；另外 Curse 的等级 0 练习门槛为角色等级 40，等级 35 的会话夹具合法命中但不会练习。
 - Prevention: 新增会话测试先读取 `main.go` 的写包顺序并按协议 ID 建立阶段读端；若断言练习包，角色等级必须满足 catalogue 的 `Level1`，并把效果命中与技能练习分开验证。
 - Verification: Curse 认证会话现验证 `HealthChanged -> UserLocation -> DeleteItem -> Magic`、延迟目标 `Chat -> AddBuff`、施法者 `MagicLeveled` 及护符/Buff 持久化；等级 50 夹具连续通过。
+
+### 2026-08-18 — 复杂 rg 命令必须先做最小语法校验
+
+- Symptom: 筛选下一迁移批次时，包含嵌套引号和反引号的 `rg` 命令以 `zsh: unmatched '"'` 失败，没有产生可用的源码证据。
+- Root cause: 一次性拼接了多层 shell 引号，没有先把检索拆成简单的单引号模式。
+- Prevention: 先用 `rg --files` 确认文件，再用不含嵌套引号/反引号的单引号正则分步读取；命令非零退出时丢弃整个输出。
+- Verification: 后续分步检索成功读取 Plague 的 Legacy 实现；本批实现没有使用失败调用的输出。
+
+### 2026-08-18 — Plague 毒伤公式的等级项必须按实际 Level 验算
+
+- Symptom: Go Plague 红毒定向测试把 Level 0 的持续时间/数值写成 9/5，测试失败；实际结果为 5/3。
+- Root cause: 将公式 `2*(magic.Level+1)+value/10` 与 `value/15+magic.Level+1` 按 Level 2 心算，忽略了夹具的 Level 0。
+- Prevention: 测试期望先从 action 的 `MagicLevel` 和冻结的 `PlagueValue` 逐项代入 Legacy 公式，再断言持续时间、Value、扣蓝等派生结果。
+- Verification: 修正为 Level 0 的 5/3 后，Plague 定向世界测试通过。
+
+### 2026-08-18 — 会话持久化断言必须使用登录后的派生生命/法力基线
+
+- Symptom: Plague 会话的包序和实际命中均通过，但测试把目标血蓝固定写成 80/88，存档实际为等级属性派生值扣除伤害后的 519/121。
+- Root cause: 会话登录会从角色等级和装备计算 MaxHP/MaxMP，不能复用裸世界夹具的 100/100 初始值。
+- Prevention: 发起会话动作前在 world 锁内记录目标当前 HP/MP，持久化断言只比较预期的相对扣减；裸世界测试与认证夹具分别维护各自基线。
+- Verification: Plague 会话测试改为 `targetStartHP-20` 与 `targetStartMP-12`，不再依赖派生属性的绝对常量。
