@@ -4159,3 +4159,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 未先从 `rg --files` 确认目标文件/目录归属，就凭目录印象拼接路径；迁移矩阵实际位于 Go 仓库。
 - Prevention: 读取前先列出并核对实际路径与仓库归属；本项目中地图实现位于 `Server/MirEnvir/Map.cs`，矩阵位于 Go 仓库的 `docs/migration-matrix.md`，不得凭空假设协议或文档目录。任何混入错误的整条输出都丢弃后重跑。
 - Verification: 用 Legacy-only `rg --files Server | rg '/(HumanObject|Map|MapObject)\\.cs$'` 找到源文件，并用 Go-only 读取矩阵；重新确认 HellFire 与 `LevelMagic` 行为，没有修改 C# 文件。
+
+### 2026-08-18 — Teleport 对照查询混入 Go 路径时整条输出作废
+
+- Symptom: Teleport/Blink/StormEscape 复核时，Legacy workdir 的查询正文混入了 Go 的 `cmd/crystal-server` 与 `internal/protocol` 路径；第一段报路径不存在，不能把同一调用后续看似有效的输出当作证据。
+- Root cause: 从上一仓库复用查询正文，只切换了 `workdir`，没有重新按当前仓库的实际目录构造命令。
+- Prevention: 仓库切换后从空白命令开始；Legacy 调用只允许 `Server/Shared/Client/tasks` 相对路径，Go 调用只允许 `cmd/internal/docs` 相对路径。发现跨仓库路径后立即丢弃整条输出并分仓库重跑。
+- Verification: 本次没有修改 C# 或 Go 源文件；已记录该失败调用，后续 Teleport 行为证据改为独立的 Legacy-only 与 Go-only 查询。
+
+### 2026-08-18 — Go 测试不得直接修改 map 元素的嵌套字段
+
+- Symptom: Teleport NoTeleport 定向测试首次编译报 `cannot assign to struct field world.mapRules[0].NoTeleport in map`。
+- Root cause: Go map 索引返回结构体副本，测试夹具直接对副本的嵌套字段赋值。
+- Prevention: 修改 map 中的结构体配置时先读到局部变量，修改字段后再写回 map；新增夹具先跑目标包最小编译。
+- Verification: 按该模式改写 NoTeleport 夹具后，Teleport/Blink/StormEscape 四个定向测试全部通过。
+
+### 2026-08-18 — net.Pipe 会话测试要先按实际通知包数建立读端
+
+- Symptom: Blink 会话测试只为延迟影响阶段读取 3 个包，但 TemporalFlux 的 stat refresh 还会产生额外通知；`deliverWorldNotifications` 在第四个写入处阻塞，测试无输出直至超时。
+- Root cause: 测试夹具假设地图迁移、ObjectEffect、AddBuff 是全部自有包，未计入同一延迟动作返回的健康/状态边界。
+- Prevention: 先执行手动 world tick，按返回通知中 `NoSend` 过滤后的实际包数启动 `net.Pipe` 读取器；随后再断言关键包序，避免固定计数让写端反压。
+- Verification: Blink 会话测试改为动态包数后通过，并保留 `MapChanged -> ObjectEffect -> AddBuff` 的关键顺序断言。
+
+### 2026-08-18 — 延迟传送会话测试要停止后台 ticker 并固定成功随机源
+
+- Symptom: Blink 会话测试在手动冲击 tick 后偶发拿到空通知集；即使停止 world ticker，未固定随机源时仍可能没有迁移包。
+- Root cause: 真实会话启动 ticker 与连接维护 tick 会竞争消费 200ms 延迟动作；Blink 0 级成功门槛还依赖 `roll(4) == 0`，默认随机源会合法地拒绝传送。
+- Prevention: 会话测试在 bootstrap 后停止 ticker，再用确定性 `combatRoll` 覆盖成功分支；手动 tick 前确认动作仍在队列，避免把时序或随机性误判为业务回归。
+- Verification: 停止 ticker 并固定 roll 后，Blink `net.Pipe` 会话测试连续 5 次通过，且仍验证 `MapChanged -> ObjectEffect -> AddBuff` 顺序。
