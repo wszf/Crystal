@@ -4337,8 +4337,8 @@ Record project-specific corrections and failure-prevention patterns here.
 
 - Symptom: PoisonCloud 审计期间一次 Go 只读命令和一次补丁因绝对路径漏写 `me_work` 而失败；失败调用没有产生可用源码证据或文件变化。
 - Root cause: 手工重建 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 时遗漏了中间目录，没有直接复制最近确认的根目录。
-- Prevention: 任何 Go 读写前先固定并复用完整根目录；`apply_patch` 前检查目标文件存在，路径错误时丢弃整次调用输出并重试，不从失败调用推断状态。
-- Verification: PoisonCloud 补丁改用完整根目录后成功落盘并通过定向编译检查；失败补丁未修改文件。
+- Prevention: 任何 Go 读写前先固定并复用完整根目录；`apply_patch` 前逐个用 `test -e`/`rg --files` 核对包含子目录的目标路径，路径错误时丢弃整次调用输出并重试，不从失败调用推断状态。
+- Verification: PoisonCloud 补丁改用完整根目录后成功落盘并通过定向编译检查；IceThrust 首次补丁因漏写 `cmd/crystal-server/` 被拒绝且未改动文件，随后重新核对目标路径后再继续；失败补丁未修改文件。
 
 ### 2026-08-18 — Go 时间夹具必须完整填写 time.Date 参数
 
@@ -4384,3 +4384,18 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试角色等级设为 30，而 Mirroring 的目录 `Level1` 门槛为 41；`levelMagicLocked` 正确拒绝了练习，生产实现并未丢失通知。
 - Prevention: 新增法术测试夹具先读取 Go 对应的 Legacy 目录等级门槛，并把角色等级设到能练习的基线；同时保留低等级/拒绝路径的独立断言。
 - Verification: 将夹具等级调整到 50 后重跑 Mirroring 定向测试，确认新 Clone admission 发出 `MagicLeveled`，而 NoPets/缺少定义路径仍不练习。
+
+### 2026-08-19 — Go 多返回值必须先解包再放入定长坐标
+
+- Symptom: IceThrust 首次针对性编译失败，`movePoint` 的 `(int32, int32)` 返回值直接放入 `[2]int32` 字面量，被 Go 报为 single-value context。
+- Root cause: 将多返回值函数误当作可自动展开的复合字面量元素；Go 不会在这种位置隐式解包。
+- Prevention: 坐标函数的多返回值先赋给 `x, y` 局部变量，再构造数组/结构体；新增几何代码先运行目标包编译测试。
+- Verification: 失败输出用于修复依据；修正三个 IceThrust 起点后 `go test ./cmd/crystal-server -run 'IceThrust' -count=3`、目标包 race 测试和全仓库测试均通过。
+
+### 2026-08-19 — IceThrust 会话转录必须包含延迟命中练习包
+
+- Symptom: IceThrust 会话世界状态和目标端包序正确，但施法者端实际收到 `ObjectStruck -> DamageIndicator -> MagicLeveled -> ObjectPoisoned`，测试期望漏掉了中间的 `MagicLeveled`。
+- Root cause: 只按 FrostCrunch 的广播包矩阵复用施法者期望，忽略 IceThrust 的 `CompleteMagic` 命中后 `train=true` 与统一 `LevelMagic`。
+- Prevention: 新法术会话测试先从 delayed resolver 的每个 `LevelMagic` 路径推导各接收者包矩阵，再分别断言世界通知和网络读取结果。
+- Verification: 补入 `ServerMagicLeveled` 后由实际通知序列确认它先于主循环追加的 `ServerObjectPoisoned`；施法者期望已固定为 `ObjectStruck -> DamageIndicator -> MagicLeveled -> ObjectPoisoned`，会话定向测试、五次 race 测试及全仓库测试均通过。
+  Recurrence evidence: 第二次会话失败不是功能差异，而是把延迟 poison 阶段的包放在 LevelMagic 之前；该顺序误判已纳入预防检查。
