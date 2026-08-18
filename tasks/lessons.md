@@ -3854,10 +3854,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-18 — EnergyRepulsor 夹具要遵守 Go 值语义、地图范围和通知矩阵
 
-- Symptom: 新增 EnergyRepulsor 定向测试先因直接给 `world.mapRules[0].SafeZones` 赋值而编译失败；修正后又出现 nil `Stats` 写入 panic、把目标移到施法者外围之外导致“不推送”，以及 caster 通知断言漏掉 `ObjectPushed`/伤害包。
+- Symptom: 新增 EnergyRepulsor 定向测试先因直接给 `world.mapRules[0].SafeZones` 赋值而编译失败；修正后又出现 nil `Stats` 写入 panic、把目标移到施法者外围之外导致“不推送”，以及 caster 通知断言漏掉 `ObjectPushed`/伤害包；本次 ExplosiveTrap 的 Player MAC 测试再次因直接写入未初始化的 `caster.Stats` panic。
 - Root cause: Go map-of-struct 元素不可链式修改，手写 `worldPlayer` 不会自动初始化 map 字段；3x3 perimeter 只扫描 Chebyshev 距离 1，且立即效果通过现有广播通道在 `MagicLeveled` 前产生多类通知。
-- Prevention: map-of-struct 夹具统一采用“取值—修改—写回”，显式初始化需要写入的 map；设置目标后重新核对扫描范围和字段 map；通知断言按接收者与完整顺序建立，而不是只断言最终升级包。
-- Verification: EnergyRepulsor 三个定向测试及其 race 版本通过，随后普通/race 全仓库门禁、`go vet ./...` 和 `go build ./...` 均通过。
+- Prevention: map-of-struct 夹具统一采用“取值—修改—写回”，显式初始化需要写入的 map；设置目标后重新核对扫描范围和字段 map；通知断言按接收者与完整顺序建立，而不是只断言最终升级包；凡是会写 `worldPlayer.Stats` 的新夹具，构造时直接使用 `make(protocol.ItemStats)`，并在目标测试编译前检查所有 map 写入点。
+- Verification: EnergyRepulsor 三个定向测试及其 race 版本通过；本次为 ExplosiveTrap caster 显式初始化 `Stats` 后，Player MAC 定向测试通过；随后普通/race 目标门禁、`go test ./cmd/crystal-server` 普通/race、跳过两个既有 session 例外的 `go test ./...` 普通/race、`go vet ./...` 和 `go build ./...` 均通过。
 
 ### 2026-08-18 — 即时法术练习不能被 admission 快照覆盖
 
@@ -3910,10 +3910,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-18 — 跨仓库工具调用必须复用已验证的仓库根路径
 
-- Symptom: 本批次早先两次只读检查因手写 `workdir` 漏掉 `me_work` 或重复目录而失败；随后多次又把旧版 `Server/...` 路径带进 Go 仓库命令，相关输出都不能作为证据。
+- Symptom: 本批次早先两次只读检查因手写 `workdir` 漏掉 `me_work` 或重复目录而失败；随后多次又把旧版 `Server/...` 路径带进 Go 仓库命令，相关输出都不能作为证据；本次 ExplosiveTrap 复核再次在 Go `workdir` 中执行了含 Legacy `Server/...` 前缀的只读定位命令。
 - Root cause: 在已知两个相邻仓库的情况下重新猜测绝对路径，并在同一个命令中混用了两个仓库的路径；没有把仓库切换当成独立边界。
-- Prevention: 每次切换仓库先在独立工具调用中执行并记录 `git rev-parse --show-toplevel`；后续同一批次的每个工具调用只使用该精确 `workdir`，命令正文也不得引用另一个仓库的路径。任何跨仓库比较必须拆成两个独立工具调用；一旦路径混用失败，立即丢弃全部输出并重跑，下一次调用前重新检查命令中每个路径前缀；若命令包含 `Server/`、`Shared/` 等旧版前缀，必须先确认当前 `workdir` 是 Legacy 根。
-- Verification: 重新按两个独立仓库根目录完成 Go Trap 编译、普通/race 定向测试、后续全量检查及 C# 只读核验；本次复发后的后续检查改为不含旧版前缀的 Go-only 命令，并在提交前重复三项 C# 只读核验。
+- Prevention: 每次切换仓库先在独立工具调用中执行并记录 `git rev-parse --show-toplevel`；后续同一批次的每个工具调用只使用该精确 `workdir`，命令正文也不得引用另一个仓库的路径。任何跨仓库比较必须拆成两个独立工具调用；一旦路径混用失败，立即丢弃全部输出并重跑，下一次调用前重新检查命令中每个路径前缀；若命令包含 `Server/`、`Shared/` 等旧版前缀，必须先确认当前 `workdir` 是 Legacy 根；Go-only 命令先用 `rg --files`/Go 相对路径确认目标，禁止把 Legacy 路径作为“顺手的对照查询”混入。
+- Verification: 重新按两个独立仓库根目录完成 Go Trap 编译、普通/race 定向测试、后续全量检查及 C# 只读核验；本次复发的失败输出已丢弃，后续 ExplosiveTrap 检查改为不含旧版前缀的 Go-only 命令，并在提交前重复三项 C# 只读核验。
 
 ### 2026-08-18 — Go 时间常量名称必须在目标编译前核对
 
@@ -3928,3 +3928,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 根据记忆猜测旧版目录层级，没有先从当前 Legacy 根目录枚举目标文件。
 - Prevention: 读取旧版 C# 前先在 Legacy 仓库独立执行 `rg --files` 并筛选实际文件名；后续只引用已返回的相对路径。路径失败时立即丢弃输出并重新定位，不把失败命令当作行为结论。
 - Verification: 改用 `Server/MirObjects/{HumanObject,MonsterObject,HeroObject,MapObject}.cs` 后完成 DelayedExplosion admission、CompleteMagic、ProcessPoison、ApplyPoison 与 Attacked 的只读核对。
+
+### 2026-08-18 — ExplosiveTrap 远离清理要保留同轮对象处理顺序
+
+- Symptom: Go 的 ExplosiveTrap distance-cleanup 测试首次预期首个链接对象移除、其余两个留到下一轮；实际 caster 远离时三个对象都在同一次 world tick 消失。
+- Root cause: Legacy `SpellObject.Process` 先检查施法者距离，再检查 fuse；首个对象 `Despawn` 会先把链接对象标记为 detonated，但当前对象循环随后仍按距离条件继续处理每个链接对象，因此同轮全部移除。
+- Prevention: 迁移链接对象生命周期时，分别复核 `Process` 的条件顺序、`RemoveObject`/`Despawn` 的副作用和同轮迭代，而不是只模拟链接对象的下一次 expiry；确定性测试同时覆盖远离、引爆和过期边界。
+- Verification: 直接按旧版顺序对照 `SpellObject.Process`/`Despawn` 后，Go distance-cleanup 断言改为同轮移除全部三格；ExplosiveTrap 普通与 race 定向测试通过。
