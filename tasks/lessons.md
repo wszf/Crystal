@@ -4220,3 +4220,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 仓库切换后复用了上一侧命令正文，未先确认 zsh 的 glob 行为、Go map 值类型或目标文件清单。
 - Prevention: 每个工具调用只允许一个已核验仓库及其相对路径；查询 glob 使用 `rg --glob` 或先列文件；读取前用 `rg --files` 确认目标；接入 map 元素前先检查声明，值类型不做指针解引用，失败调用的全部输出作废。
 - Verification: 后续 Legacy/Go 读取、补丁、测试和提交均按仓库拆分；错误路径复核输出被丢弃并用文件清单重跑；修正 `worldMonster` 值拷贝后，EnergyShield 定向测试、`go test ./...`、race、vet 与 build 全部通过。
+
+### 2026-08-18 — 单仓只读命令不得携带另一仓库路径
+
+- Symptom: MoonLight 研究期间的一次 Go-only 命令误带了 Legacy 的 `Server/MirObjects/MapObject.cs`，导致命令部分成功、部分失败。
+- Root cause: 在同一 shell 命令中混用了两个仓库的相对路径，没有把跨仓库核对拆成独立工具调用。
+- Prevention: 每次工具调用先固定唯一 `workdir`，命令正文只使用该仓库的相对路径；出现路径错误或部分失败时丢弃整次输出，重新单仓读取。
+- Verification: 后续 MoonLight 的 Legacy 与 Go 查询分别在各自 workdir 重跑，且不再引用对侧仓库路径。
+
+### 2026-08-18 — 隐身清理通知只发送实际存在的 buff
+
+- Symptom: MoonLight 命中揭示测试收到两个连续 `ServerRemoveBuff`，虽然玩家只持有 MoonLight。
+- Root cause: 清理逻辑遍历支持的 MoonLight/DarkBody 类型列表时没有记录实际命中的类型，向客户端无条件发送了两种移除包。
+- Prevention: 状态删除与协议通知使用同一份 `removedTypes` 集合；测试同时断言 buff 状态和目标收件人的包顺序/数量。
+- Verification: 修正后 MoonLight 世界、命中揭示和认证 `net.Pipe` 测试通过，当前只有 MoonLight 时只产生一个 RemoveBuff。
