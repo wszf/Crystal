@@ -519,6 +519,34 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 可选持久化回调为空时按成功的 no-op 处理；提交后通知拆成一次性领域写入和可重复保存两个阶段，队列重试只能保存当前最新 authority，不能重新应用旧快照。
 - Verification: 新增无持久化即时投递测试，以及 90→80 两次失败后重试仍只保存最新 80 的回归测试；Conquest 定向、服务端整包、全量普通/race、vet、build 与差异门禁均通过。
 
+### 2026-08-18 — 跨仓库检索命令必须按仓库拆分
+
+- Symptom: 继续筛选下一法术时，把 Legacy `Server/...` 路径追加到 Go 根目录的只读命令，末尾 `sed` 报路径不存在；该调用的全部混合输出作废。
+- Root cause: 为连续查看两侧代码，把相对路径和 `workdir` 绑定错误，破坏了单仓库调用边界。
+- Prevention: 一次工具调用只允许一个仓库；命令正文只出现该仓库已确认存在的相对路径；对侧研究另起独立调用，失败调用的输出不作为源码证据。
+- Verification: 随后 Legacy 只读调用单独读取 `HumanObject`/`Map`/`SpellObject`，Go 只读调用单独读取 `world.go`；未使用失败调用证据，且没有文件变化。
+
+### 2026-08-18 — Blizzard/Meteor 会话断言必须按接收者和技能分开
+
+- Symptom: Blizzard/Meteor 首轮定向测试把场地 `ObjectSpell` 误算为一条，忽略同一可见格会分别广播给附近两个玩家；Meteor 会话还沿用了 Blizzard 的第三条 `ObjectPoisoned` 读取，最终等待 30 秒超时。
+- Root cause: 将“事件产生次数”和“单个接收者收到的包数”混为一谈，并把 Blizzard 特有的 Slow 状态包矩阵复用于不施毒的 MeteorStrike。
+- Prevention: 区域测试按接收者建立读取计数；世界测试只断言目标自身包序前缀，再单独断言广播/状态包；参数化技能会话的读取数量和期望包序必须由技能分支显式决定。
+- Verification: 修正后 Blizzard/Meteor 世界与真实 `net.Pipe` transcript 连续 3 次通过，且未再发生超时。
+
+### 2026-08-18 — 新增 Go 测试夹具必须先复用现有 helper 和真实类型
+
+- Symptom: Blizzard 首次包级测试编译因重复定义已有 `mustWorldSpellInfo` helper，以及把不存在的 `HP/MaxHP` 字段写进 `worlddata.MonsterInfo` 而失败。
+- Root cause: 新测试按概念命名/构造，没有先检索当前包的同名 helper 和配置结构定义。
+- Prevention: 新增测试前用 `rg` 核对 helper 名称与结构字段，先跑 `go test <package> -run '^$'` 再执行行为测试。
+- Verification: helper 改为批次专名、怪物 HP 留在运行时实体后，包级编译及 Blizzard/Meteor 定向测试通过。
+
+### 2026-08-18 — Go 会话夹具赋值必须通过 vet 的自赋值门禁
+
+- Symptom: Blizzard/Meteor 会话测试行为通过后，`go vet ./...` 仍因 `caster.MP, caster.MaxMP = caster.MaxMP, caster.MaxMP` 报 `self-assignment of caster.MaxMP`。
+- Root cause: 为恢复运行时 MP 使用了包含不变字段的元组赋值。
+- Prevention: 会话夹具只写入实际需要改变的字段，批次门禁必须包含 `go vet ./...`，不能以定向行为测试代替。
+- Verification: 改为 `caster.MP = caster.MaxMP` 后，vet 重新通过，后续定向测试保持通过。
+
 ### 2026-08-13 — 缓存目标和延迟投射物必须在命中阶段重验攻城资格
 
 - Symptom: 玩家远程/魔法在开战时成功排入队列后，即使命中前战争结束或攻击者公会成为新 owner，仍会扣除 Conquest 资产生命；Hero 与普通宠物也能保留失效目标继续攻击。
