@@ -4504,3 +4504,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把技能 helper 返回的通知当成该阶段唯一来源，忽略了 `HumanObject.Magic` 在 switch 前已经追加的通用前置副作用。
 - Prevention: 分支 helper 只返回专属通知；接入 `magicAttack` 时统一使用 `append` 保留全局前置通知，并为 Hidden/RemoveBuff 组合路径保留顺序断言。
 - Verification: 已改为追加语义，Go 包编译、CrescentSlash 世界/会话/race 定向测试通过，前置通知不会被覆盖。
+
+### 2026-08-18 — Go 多返回值必须先显式接收再组合
+
+- Symptom: HalfMoon/CrossHalfMoon 初次编译失败，把多返回值函数调用直接作为带其他参数的 helper 实参时触发 `multiple-value ... in single-value context`。
+- Root cause: Go 不允许在普通多参数调用中把一个多返回值表达式隐式展开为多个实参。
+- Prevention: 组合技能结果前先用有意义的局部变量显式接收每个返回值，再逐项写入结果结构或通知列表；新增 helper 后先运行目标包编译。
+- Verification: 拆分为 `impactHit`、`impactKilled`、`impactArmour`、`impactNotifications` 后，HalfMoon/CrossHalfMoon 世界测试、CrescentSlash 回归测试和会话测试通过。
+
+### 2026-08-18 — Warrior 扇形技能测试必须从旧版倍率和通知位置推导期望
+
+- Symptom: HalfMoon/CrossHalfMoon 初始定向测试失败；测试把 CrossHalfMoon 侧向伤害按 HalfMoon 的 0.3 倍计算，并把 `MagicLeveled` 放在所有侧向命中之后。
+- Root cause: 测试复用了 HalfMoon 的数值/顺序假设，没有逐项核对 Legacy `MagicInfo.GetDamage` 的 0.3/0.4 倍率以及 `HumanObject.Attack` 前方命中分支中先调用 `LevelMagic` 的位置。
+- Prevention: 新增技能的伤害和包序断言必须直接由旧版公式、分支顺序和现有 Go packet helper 推导；不要从相邻技能复制常量或通知尾部位置。
+- Verification: 修正 CrossHalfMoon level-0 侧伤害为 8、将 `MagicLeveled` 放到前方命中通知后且侧向通知前；世界、net.Pipe 会话和 race 定向测试通过。
