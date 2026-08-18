@@ -3723,6 +3723,27 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 迁移会在循环中重复调用的 Legacy 方法时，先保留该方法每次调用的局部初始化；为多个 radius-one 目标写重复命中测试，而不是只验证单目标路径。
 - Verification: Go 实现将方向重置移入每次重复扫描；两个相邻目标的 AI=219 CrossHalfMoon 测试现在排入四个 500ms action，延迟后两个目标均各受两次伤害。
 
+### 2026-08-18 — AI=220 等级门槛比较必须显式统一宽度
+
+- Symptom: SepHighWizard 初次编译在 GreatFireBall 推送等级门槛报告 `uint16` 与 `int32` 相加类型不匹配。
+- Root cause: Go 夹具/状态沿用协议等级的 `uint16`，但新 AI 的等级差常量使用 `int32`，没有在比较边界先统一类型。
+- Prevention: 读取 `MonsterInfo.Level`、`SelectInfo.Level` 和现有 target-level helper 的实际宽度后，再用显式 `int32`/`int` 转换比较；避免依赖 C# 的隐式整数提升。
+- Verification: 将比较改为显式 `int32(level) > int32(monster.Info.Level)+gap` 后，AI=220 包级空测试编译通过；后续等级门槛行为测试需保持该边界断言。
+
+### 2026-08-18 — AI=220 GreatFireBall 的 ObjectMagic 坐标必须在推送前采样
+
+- Symptom: SepHighWizard GreatFireBall 测试首次期望 ObjectMagic 携带 `(11,5)`，实际 wire payload 携带 `(8,5)`；目标 HP/推送行为均正确。
+- Root cause: Legacy 先 `Broadcast(ObjectMagic{Target = Target.CurrentLocation})`，再调用 `SinglePushAttack`；测试在 `tick` 后读取已变更的目标坐标来构造发包期望。
+- Prevention: 对“广播后立即改变目标状态”的攻击，先保存发包前 Location/Direction，再断言 ObjectMagic；延迟命中阶段另行断言推送后的 live target 状态。
+- Verification: 断言改为原始 `(8,5)` 后 GreatFireBall magic transcript 与三格推送、500ms AC 伤害 action 同时通过。
+
+### 2026-08-18 — AI=220 Go 测试夹具解构必须清理未使用返回值
+
+- Symptom: AI=220 GreatFireBall 等级门槛测试编译失败，夹具解构出的 `attacker` 没有在该子测试中使用。
+- Root cause: 从共享 world helper 复制“攻击行为”测试结构到“目标等级门槛”测试时保留了多余返回变量；Go 会把未使用局部变量视为编译错误。
+- Prevention: 新增 table/subtest 夹具后立即运行包级编译；不需要的 helper 返回值显式用 `_` 接收，避免以临时读取掩盖测试意图。
+- Verification: 将该返回值改为 `_` 后，AI=220 定向行为测试通过；测试只用目标等级、发包和 action 状态完成门槛断言。
+
 ### 2026-08-18 — AI=219 基类 Attack 的 300ms 覆盖必须写回 live Monster
 
 - Symptom: SepHighWarrior 默认分支先设置了 500ms ActionTime，随后调用 Legacy `base.Attack()` 会覆盖为 300ms；Go 初稿用值参数实现该 helper，导致覆盖只发生在副本上，live Monster 仍保留 500ms 锁。
