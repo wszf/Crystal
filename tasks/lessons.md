@@ -4511,6 +4511,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Go 不允许在普通多参数调用中把一个多返回值表达式隐式展开为多个实参。
 - Prevention: 组合技能结果前先用有意义的局部变量显式接收每个返回值，再逐项写入结果结构或通知列表；新增 helper 后先运行目标包编译。
 - Verification: 拆分为 `impactHit`、`impactKilled`、`impactArmour`、`impactNotifications` 后，HalfMoon/CrossHalfMoon 世界测试、CrescentSlash 回归测试和会话测试通过。
+- Strengthening after recurrence: BladeAvalanche 起点组装再次触发同类错误；凡是坐标/范围 helper 返回多个值，必须先解包到命名变量，再组装数组或结构体。
+- Verification after strengthening: 三个 BladeAvalanche 起点改为显式 `leftX,leftY` 等变量后，目标包重新通过编译。
 
 ### 2026-08-18 — Warrior 扇形技能测试必须从旧版倍率和通知位置推导期望
 
@@ -4546,3 +4548,26 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 将 TwinDrake/普通战士技能的“攻击时按目录成本扣 MP”通用逻辑套到了 `HumanObject.Attack` 中与 Thrusting 共用的 FlamingSword 分支；FlamingSword 的成本只在 `SpellToggle` 激活时消费。
 - Prevention: 迁移同一职业的技能时，先按 Legacy `Attack` 的 switch 分支逐项标注“激活扣费、攻击扣费、无扣费”三种边界；测试必须同时断言激活后的 MP、攻击 self packet 是否存在和最终 MP。
 - Verification: Go admission 对 FlamingSword 返回零攻击成本；世界与 authenticated `net.Pipe` 测试验证 `SpellToggle -> HealthChanged` 激活顺序、+300ms AC 命中和 MP 保持 93，定向回归通过。
+
+### 2026-08-19 — 范围技能测试夹具必须设置实际读取的防御类型
+
+- Symptom: BladeAvalanche 近格目标期望扣除 3 点 MAC，首次测试实际按 0 MAC 结算，HP 比预期少 3 点。
+- Root cause: 复用了只初始化 `MinAC/MaxAC` 的普通战士怪物 helper，而 BladeAvalanche Legacy 分支使用 `DefenceType.MAC`。
+- Prevention: 新技能测试先从 Legacy `DefenceType` 推导夹具字段；AC、MAC、ACAgility 和 Repulsion 分别显式设置，不能仅依赖通用 helper 的参数名。
+- Verification: 为 BladeAvalanche 目标补充 `MinMAC/MaxMAC=3`，保留 AI=49 的 Repulsion 目标为零护甲，重新运行定向测试确认近格/外格/特殊分支伤害。
+- Strengthening after recurrence: 特殊防御只改变护甲结算，不改变三格射线的 60% 外格倍率；AI=49 的第三格应按 `20*0.6-0=12` 伤害计算。
+- Verification after strengthening: 分别断言 AI=49 近格 HP=60、第二格 HP=60、第三格 HP=68，覆盖防御和范围倍率的组合。
+
+### 2026-08-19 — Go 世界数据 stat 常量要与字段来源区分
+
+- Symptom: BladeAvalanche authenticated session 测试首次包级编译找不到 `monsterStatMinMAC`/`monsterStatMaxMAC`。
+- Root cause: 把运行时怪物字段名称误当成 `worlddata.MonsterStat.ID` 常量；项目统一使用 `statMinMAC`/`statMaxMAC` 作为数据表 stat ID。
+- Prevention: 新建世界数据 fixture 时先查 `worlddata` 加载映射和同类测试，区分 `monsterStat*` 的 HP/DC 常量与 `stat*` 的通用属性常量。
+- Verification: 将 session fixture 改用 `statMinMAC`/`statMaxMAC` 后重新执行目标包编译测试。
+
+### 2026-08-19 — 魔法扣费必须同步运行时与持久化角色 MP
+
+- Symptom: BladeAvalanche authenticated session 的健康包和运行时 `player.MP` 都已变为 86，但最终 `player.Character.MP` 仍为 100，导致会话状态断言失败。
+- Root cause: Go 通用 `magicAttack` admission 只扣减了运行时 MP；与普通攻击和 SpellToggle 路径不同，它没有同步角色持久化结构中的 MP 字段。
+- Prevention: 每个会改变 MP 的世界路径都必须同时更新运行时对象和 `Character` 镜像；会话测试除了检查包和运行时值，还要检查最终角色状态。
+- Verification: 在通用魔法扣费点同步 `player.Character.MP` 后，BladeAvalanche 世界/会话定向测试通过，并确认最终两个 MP 字段均为 86。
