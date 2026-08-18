@@ -4692,3 +4692,46 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 本轮失败测试已复现“world=新坐标、stored=旧坐标”；修复后将重新运行 SlashingBurst world/session、race 与全量回归。
 
 补充证据：首轮修复时曾把 runtime 局部变量放进 `leaveGameForObserver` 而不是持久化 defer，最小 Go 编译立即报未定义/未使用。预防为修改 defer/闭包时同时核对变量声明作用域、执行顺序和所有引用；随后 gofmt、服务端定向测试及全量 build 均通过。
+
+补充证据：本轮 ShoulderDash 协议勘察中，一次 Go workdir 查询仍夹入了 Legacy 相对路径，导致 Legacy 文件找不到；命令保持只读且没有留下变更。预防再强化为：查询命令字符串只能引用当前 workdir 仓库，Legacy/Go 的相对路径不得跨命令复用；若需比对，必须拆成两个独立工具调用。
+
+补充证据：同一勘察轮次的另一条 Go 查询再次在单一命令尾部加入 Legacy 相对路径，前半段 Go 查询成功、后半段 Legacy 路径失败。预防升级为：单仓库命令除了 workdir 外不得出现另一仓库目录名或相对路径；跨仓库比对必须在生成命令前拆分并逐条人工检查。
+
+### 2026-08-19 — 相似上下文补丁后必须核对唯一落点
+
+- Symptom: 新增 `ObserverPackets` 的补丁第一次命中了攻击处理分支，而不是预期的 Magic 处理分支。
+- Root cause: 两处代码共享相同的 `ObserverPacket` 条件，补丁上下文过短，未在编辑后立即确认落点。
+- Prevention: 对重复上下文只使用带有相邻业务语句的唯一补丁锚点；每次补丁后立即用 `rg` 和局部 `sed` 检查命中位置，再继续实现或测试。
+- Verification: 本轮在编译前发现并移除了攻击分支中的错误循环，`rg` 已确认 `ObserverPackets` 只位于 Magic 处理路径和结果结构中。
+
+### 2026-08-19 — 新世界行为实现必须先核对现有结构字段
+
+- Symptom: ShoulderDash 最小编译先后报 `worldPlayer` 不存在 `Dead` 字段、NPC map value 不能与 `nil` 比较，以及分支调用参数仍多传一个 request。
+- Root cause: 新 helper 根据 Legacy 对象模型推断了 Go runtime 的字段和值类型，接口签名调整后没有立即同步所有调用点。
+- Prevention: 写新世界 helper 前先读取目标 Go struct/map 定义并搜索所有调用点；每次签名或字段调整后先运行目标包的 `go test -run '^$'` 编译门槛，再扩展行为测试。
+- Verification: 本轮编译失败已定位到三处具体假设，已分别改为 HP 判断、值类型 NPC 访问和正确的 helper 参数；随后目标包最小编译、ShoulderDash world/session 测试及全量 build 均通过。
+
+### 2026-08-19 — ShoulderDash transcript 断言必须保留推撞与移动的交错顺序
+
+- Symptom: 世界测试把观察者包压缩成连续两个 `ObjectPushed`，实际 Legacy 顺序是每次 `ObjectPushed` 后紧跟该步 `ObjectDash`；零移动失败路径也会先广播 `ObjectDashFail`，再发送 Chat/MagicCast。
+- Root cause: 测试只按效果类别分组推断顺序，没有从 Legacy 方法中的逐格循环和失败广播位置建立 transcript 序列。
+- Prevention: 对逐步移动技能先收集完整 recipient packet IDs，再按 Legacy 循环顺序断言交错序列；失败路径必须把 self/observer fail packet 作为 transcript 的第一项纳入断言。
+- Verification: 首次 ShoulderDash 定向测试输出已复现完整序列 `[ObjectPushed,ObjectDash,ObjectPushed,ObjectDash,ObjectStruck,DamageIndicator]` 及失败序列 `[ObjectDashFail,Chat,MagicCast]`，断言将按此修正。
+
+补充证据：ShoulderDash 认证会话首次按类别修正顺序后仍把 `ObjectPushed` 的方向写成施法方向 2，随后又把 `ObjectStruck` 的目标方向写成 0；实际 Legacy `Pushed` 先将目标方向反转为 6，两处 payload 断言因此连续失败。
+预防再强化为：凡是推撞技能，必须同时从 `Pushed` 的状态更新核对推撞包方向、后续受击包中的目标方向及每个接收者的 payload，不得只核对坐标和 packet ID。
+Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为反向 6 后，ShoulderDash 认证会话定向测试通过。
+
+### 2026-08-19 — Go append 混合单值与展开切片必须拆分
+
+- Symptom: ShoulderDash 失败分支编译时报 `too many arguments in call to append`。
+- Root cause: Go 不允许在同一次 `append` 调用中把一个普通元素和另一个切片的 `...` 展开参数混用。
+- Prevention: 构造有序通知 transcript 时，先用一次 `append(slice, element)` 插入私有包，再用独立的 `append(slice, otherSlice...)` 插入广播包；补丁后立即运行目标包的最小编译测试。
+- Verification: 拆成两次 append 后，ShoulderDash world/session 定向测试与目标包编译均通过。
+
+### 2026-08-19 — 会话延迟 action 测试必须隔离全局昼夜状态
+
+- Symptom: Entrapment 会话回归把延迟 action 的期望写成 `[ObjectEffect,ObjectPushed,MagicLeveled,ObjectPoisoned]`，实际稳定多出一个 `ServerTimeOfDay`；race 与普通 `-count=10` 都可复现。
+- Root cause: 测试把 `action.Due` 推到当前时间后一小时，`world.tick` 在处理 delayed magic 前先执行 `updateLightLocked`，跨过光照边界后向在线玩家广播昼夜包。
+- Prevention: 会话 transcript 只验证目标行为时，必须关闭无关的全局 ticker/昼夜状态，或注入固定 light clock；不能用跨越环境边界的未来时间作为唯一隔离手段。
+- Verification: 在 Entrapment 会话夹具停止 ticker 后显式关闭 `lightsEnabled`，重新运行定向测试与 race 定向回归，确认 transcript 不再含 `ServerTimeOfDay`。
