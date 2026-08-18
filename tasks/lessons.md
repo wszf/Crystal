@@ -4667,3 +4667,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `world.mapRules` 是 `map[int32]worldMapRules`，直接修改 `world.mapRules[0].SafeZones` 试图写入 map 返回的结构体副本。
 - Prevention: 修改 map value 的嵌套字段时先复制到局部变量，修改后用完整 value 写回 map；新增夹具先运行目标包编译测试再扩展行为断言。
 - Verification: 改为 `rules := world.mapRules[0]`、修改 `rules.SafeZones`、`world.mapRules[0] = rules` 后，LionRoar world tests 通过。
+
+### 2026-08-19 — Entrapment 推怪物的 transcript 必须区分观察者包与玩家私有包
+
+- Symptom: Entrapment 首轮定向测试把怪物被推通知断言为 `Pushed`/九字节 payload，实际收到的是带 ObjectID 的 `ObjectPushed`；同批夹具还引用了项目不存在的 `minInt32` 辅助函数，先在编译阶段失败。
+- Root cause: `pushMonsterLocked` 的 Legacy 对应路径只向附近客户端广播 `ObjectPushed`，玩家私有 `Pushed` 仅适用于被推动的 HumanObject；新增几何夹具没有先核对当前 Go 辅助函数清单。
+- Prevention: 新增移动效果时按目标对象类型和接收者分别核对 packet ID/payload，怪物通知使用 `ObjectPushedPayload(ObjectID, x, y, direction)`；新增算术夹具先搜索现有 helper，再运行最小目标测试编译。
+- Verification: Entrapment 世界测试按三次 `ObjectPushed` 的最终位置和认证会话按 `ObjectEffect -> ObjectPushed -> MagicLeveled -> ObjectPoisoned` 重新断言，世界/会话定向测试通过。
