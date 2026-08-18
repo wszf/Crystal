@@ -4639,3 +4639,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 旧 Go 测试覆盖了毒 admission/state，却把尚未迁移的 `ProcessPoison` 缺口固化成了期望，没有对照 Legacy Player/HumanObject 的 Bleeding tick 顺序。
 - Prevention: 新增持续效果前必须全量搜索该 poison type 的现有测试；按目标类型分别重算直接伤害、同 tick poison damage、final-tick/expiry 边界和 packet order，不能只让新增测试通过。
 - Verification: 更新 4 组既有 Monster-AI/warrior Bleeding 断言为直接伤害加 Value，并加入 Effect 18、HealthChanged、DamageIndicator 的包序；定向 DemonWolf/DarkBeast/SackWarrior 回归通过。
+
+### 2026-08-19 — 被动技能迁移必须同时核对属性刷新与成功命中练习
+
+- Symptom: Fencing/SpiritSword 首批迁移已覆盖 `RefreshSkills` 的 Accuracy 加成，但遗漏了 `CompleteAttack` 成功命中后按 `Info.Magics` 顺序练习两项技能。
+- Root cause: 差异盘点只搜索了被动技能的 stat-refresh 分支，没有继续追踪 `CompleteAttack` 的 `LevelMagic` 循环及普通/延迟攻击的实际命中边界。
+- Prevention: 每个被动技能都必须同时搜索 stat refresh、攻击完成/命中练习和所有延迟 impact 入口；测试至少覆盖属性向量、成功命中经验、未命中不练习、重复 impact 次数及通知顺序。
+- Verification: Go 已在普通近战、DoubleSlash 两段、TwinDrake 两段、FlamingSword、Slaying 的成功 impact 后复现该循环，并以世界测试验证普通命中与两段延迟命中各自增加 Fencing/SpiritSword 经验及保持角色技能顺序；HalfMoon/CrossHalfMoon/Thrusting 的直接侧向 `Attacked` 路径保持不练习。
+
+### 2026-08-19 — 会话 transcript 手动 tick 必须避开实时维护循环
+
+- Symptom: Go 全量回归中 `TestSessionTucsonMageNormalAttackTranscript` 偶发收到空攻击通知；单独运行同一测试可以通过。
+- Root cause: 活跃会话读循环会持续执行 `world.tick(time.Now())`，测试同时用当前时间手动 tick，后台维护循环可能先消费一次性攻击。
+- Prevention: 会话 transcript 若需要手动推进 world，应先停止可停的后台 ticker，并把测试时钟设为明显晚于实时 `time.Now()` 的未来时间，避免实时维护循环跨过测试事件。
+- Verification: 将 Tucson transcript 基准时间改为 `time.Now().Add(time.Hour)` 后，定向测试连续 10 次通过，随后 `go test ./...` 全量通过。
