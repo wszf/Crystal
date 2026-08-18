@@ -4539,3 +4539,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `HumanObject.CompleteAttack` 先判断 `((target.Race != Player) || Settings.PvpCanResistPoison)`，默认配置为 false 时玩家目标直接不进入 `PoisonAttackWeight` 和 40 分支；该设置只影响 `ApplyPoison` 的后续抗性，不会反转外层条件。
 - Prevention: 迁移带配置短路的状态效果时，分别展开外层资格条件、抗性随机、等级门和成功随机；不要用配置字段名称的直觉含义替代布尔表达式，并单独验证默认 PvP 配置下的 Player/Monster 分支。
 - Verification: Go 实现保留默认 `sepWarriorPvpCanResistPoison=false` 的 Player 短路，Monster/Hero 使用权重 10、等级 `< attacker+10` 和非玩家上限 20；TwinDrake 世界、会话和 race 定向测试通过。
+
+### 2026-08-19 — FlamingSword 激活扣费与攻击扣费必须分开
+
+- Symptom: FlamingSword 世界测试首次发现激活后攻击又发送一次 `HealthChanged`，MP 从 93 降到 86；Legacy 的 FlamingSword 攻击分支实际只检查运行时标记，不再次扣 MP。
+- Root cause: 将 TwinDrake/普通战士技能的“攻击时按目录成本扣 MP”通用逻辑套到了 `HumanObject.Attack` 中与 Thrusting 共用的 FlamingSword 分支；FlamingSword 的成本只在 `SpellToggle` 激活时消费。
+- Prevention: 迁移同一职业的技能时，先按 Legacy `Attack` 的 switch 分支逐项标注“激活扣费、攻击扣费、无扣费”三种边界；测试必须同时断言激活后的 MP、攻击 self packet 是否存在和最终 MP。
+- Verification: Go admission 对 FlamingSword 返回零攻击成本；世界与 authenticated `net.Pipe` 测试验证 `SpellToggle -> HealthChanged` 激活顺序、+300ms AC 命中和 MP 保持 93，定向回归通过。
