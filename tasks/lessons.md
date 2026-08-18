@@ -3778,3 +3778,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把 DelayedAction 的 Point 参数误当成到期时求值，而 C# 构造 action 时已经保存了攻击瞬间的 `Front`。
 - Prevention: 迁移携带坐标参数的延迟 action 时，在排队处显式保存生成时的 x/y/direction，解析时只使用保存值；测试同时覆盖 pending marker 和最终 child 坐标。
 - Verification: Go AI=221 召唤状态保存攻击时坐标/方向字段，Spawn 测试验证 child 在攻击时 Front 生成；到期逻辑不再读取父对象的当前坐标。
+
+### 2026-08-18 — AI=222 攻击状态 helper 的值/指针边界要在重构后立即编译
+
+- Symptom: SepHighAssassin 将公共攻击准备逻辑拆成值参数 helper 后，包级测试编译报错，把 `worldMonster` 值再次解引用为指针。
+- Root cause: 从原先接收 `*worldMonster` 的攻击函数抽出只读的 ready 阶段时，没有同步核对 helper 签名和调用点的所有权语义。
+- Prevention: 拆分会写入计时器的攻击流程时，先标注 setup/ready helper 的值或指针契约；每次签名调整后立即运行 `go test ./cmd/crystal-server -run '^$'`，再进入行为测试。
+- Verification: 删除值参数上的非法解引用后，AI=222 包级编译、定向测试连续 5 次通过；ready 阶段仍按 live attacker 值排队即时与延迟伤害。
