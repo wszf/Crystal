@@ -3537,3 +3537,31 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 新增的测试账号名超过了项目 `CreateCharacter` 的长度限制，基础设施夹具先于游戏行为失败。
 - Prevention: 新增 authenticated session 前复用已通过的短账号/角色命名样式，先单独断言 `CreateCharacter` 返回 10，再启动 server transcript。
 - Verification: 改用短账号名后，完整 GlacierWarrior `net.Pipe` transcript、定向 race 和全量门禁均通过。
+
+### 2026-08-18 — AI=210 action target kind 必须与 Go 队列编码分离
+
+- Symptom: HoodedSummonerScrolls 的世界测试初稿把 Player action 的 `TargetKind` 期望为 1，实际队列编码为 0。
+- Root cause: Go 的 `worldMonsterAttackAction` 为兼容既有解析器，将 Player kind 映射为零值；测试把 resolver 的逻辑枚举误当成 action 的存储编码。
+- Prevention: 新增投影测试时分别断言 action wire/storage 编码和 resolver 使用的逻辑目标 kind；不要用同一个期望值覆盖两层边界。
+- Verification: AI=210 四种效果、Player/owned-Monster/Hero 投影和认证 transcript 均通过，Player action 明确锁定 `TargetKind=0`。
+
+### 2026-08-18 — AI=210 Green poison 首次 tick 必须延迟到 TickSpeed
+
+- Symptom: HoodedSummonerScrolls Taoist area impact 初稿在命中 tick 立即多扣 7 点生命，HP 从 90 变成 83，且 poison elapsed/current state 不符合 Legacy。
+- Root cause: Go poison 记录未设置 `TickAt`，同一 world tick 立即满足 due 条件；Legacy HumanObject.ApplyPoison 在施加时只写入 poison，首次 Green tick 发生在一个 TickSpeed 之后。
+- Prevention: 对所有延迟施加的 Monster Green poison 显式设置 `TickAt=impact+tick`，并在命中时同时断言 HP、Elapsed 和 CurrentPoison，不能只验证 poison 列表。
+- Verification: AI=210 area 与 Taoist death 测试在命中后保持 HP=90、Elapsed=0、CurrentPoison=None，后续全仓普通/race 门禁通过。
+
+### 2026-08-18 — AI=210 MonsterObject.CanAttack 不应复用含 Shock gate 的 Go helper
+
+- Symptom: AI=210 目标在未来 `ShockTime` 内的攻击被 Go 共享 helper 拒绝，无法重现 Legacy 的 in-range attack。
+- Root cause: Legacy MonsterObject.CanAttack 只检查死亡、地图、节点和 cooldown，不检查 Shock；Shock 由 CanMove 和 ProcessTarget 的移动分支处理，而 Attack 会先清除 Shock。
+- Prevention: 对源代码逐项对齐 CanAttack/CanMove/ProcessTarget；AI=210 攻击准入使用临时清除 Shock 的专用检查，仍保留移动 Shock gate 与 out-of-range target 清除逻辑。
+- Verification: AI=210 in-range Shock 世界测试和认证 transcript 均确认攻击包、清 Shock、延迟命中与计时器正确。
+
+### 2026-08-18 — AI=210 WakeAll 的关联 ObjectShow 也必须纳入通知基线
+
+- Symptom: 为验证 stoned scroll 的 WakeAll 新增关联 Zuma fixture 后，测试仍只期望自身一条 ObjectShow，实际观察者收到自身和关联对象各一条。
+- Root cause: Legacy WakeAll 会唤醒 14 格内的其他 Zuma 后逐个广播 ObjectShow；测试只覆盖了自身 Wake，遗漏了共享唤醒的客户端可观察通知。
+- Prevention: WakeAll 回归同时建立至少一个关联 stoned Zuma，断言所有唤醒状态、目标继承（无预存 Target 时保持零值）和观察者通知数量/顺序；新增失败后先更新基线再提交。
+- Verification: AI=210 wake test 现断言两条 ObjectShow、关联对象保持零目标并成功唤醒；定向普通/race 与全量门禁均通过。
