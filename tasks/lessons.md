@@ -4068,3 +4068,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 复制怪物夹具后修改坐标时，遗漏了第三个坐标值，编译器才暴露了夹具结构错误。
 - Prevention: 修改结构体夹具的多个字段时逐一对应字段和值；新增测试后先跑目标包编译/定向测试，再进入完整回归。
 - Verification: 为 `ObjectID/X/Y` 提供完整三元组后，继续运行 BindingShot 定向测试。
+
+### 2026-08-18 — shell 查询中的反引号要避免命令替换
+
+- Symptom: 用反引号包住循环变量给 `rg` 时，zsh 将 spell 名称当作命令执行，查询输出无效。
+- Root cause: 把 shell 命令替换语法误用在变量匹配场景中。
+- Prevention: 使用 `rg -q "$spell"` 或单引号固定模式；执行前检查命令正文中的反引号，避免无意触发命令替换。
+- Verification: 该失败调用未修改源码；后续扫描改用固定模式和双引号变量。
