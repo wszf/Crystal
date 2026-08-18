@@ -4043,10 +4043,10 @@ Record project-specific corrections and failure-prevention patterns here.
 
 ### 2026-08-18 — 仓库切换后命令正文必须清空另一侧路径
 
-- Symptom: BackStep 复核期间多次把 Go 路径带入 Legacy 命令，或把 Legacy 路径带入 Go 命令；这些调用虽然只读，但路径错误使输出失效，也重复触发了已有的跨仓库边界问题。
+- Symptom: BackStep 复核期间多次把 Go 路径带入 Legacy 命令，或把 Legacy 路径带入 Go 命令；本次 FlashDash 评估又在 Go workdir 中夹带旧版路径，导致输出不能作为证据。
 - Root cause: 切换 `workdir` 时沿用了上一仓库的命令片段，没有把命令正文限制为当前仓库的相对路径。
-- Prevention: 工具调用先固定仓库根目录，再重新构造只含当前仓库路径的命令；跨仓库证据必须拆为两次独立调用，任何混入另一侧路径的输出立即作废并重跑。
-- Verification: BackStep 的 Legacy 行为、Go 协议与实现已分别在两个仓库重跑；后续定向 Go 测试只使用 Go 路径并通过。
+- Prevention: 工具调用先固定仓库根目录，再从空白正文重建命令；Go 调用只允许 Go 相对路径，Legacy 调用只允许 Legacy 相对路径。任何混入另一侧路径的调用整条作废并重跑，不能复用其中看似有效的子输出。
+- Verification: 失败调用未写入源码；FlashDash 的 Go/Legacy 证据改为两个独立调用，后续 Go 调用不再引用旧版路径。
 
 ### 2026-08-18 — BackStep 受阻仍向附近其他玩家广播距离 0
 
@@ -4075,3 +4075,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把 shell 命令替换语法误用在变量匹配场景中。
 - Prevention: 使用 `rg -q "$spell"` 或单引号固定模式；执行前检查命令正文中的反引号，避免无意触发命令替换。
 - Verification: 该失败调用未修改源码；后续扫描改用固定模式和双引号变量。
+
+### 2026-08-18 — shell 查询不要依赖可能为空的通配符
+
+- Symptom: Legacy 查询使用未匹配的 `Shared/Packets/*.cs` 通配符时，zsh 直接报 `no matches found`，没有产生可用证据。
+- Root cause: zsh 的 `nomatch` 行为会在 `rg` 启动前拒绝空 glob。
+- Prevention: 查询文件集合时使用 `rg --glob '*.cs'`，或先用 `rg --files` 确认路径；不要在命令正文中放未经验证的裸通配符。
+- Verification: 失败调用未修改源码；重跑查询已改用 `rg --glob '*.cs'` 并成功返回旧版定义。
