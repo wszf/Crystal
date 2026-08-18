@@ -3935,3 +3935,38 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy `SpellObject.Process` 先检查施法者距离，再检查 fuse；首个对象 `Despawn` 会先把链接对象标记为 detonated，但当前对象循环随后仍按距离条件继续处理每个链接对象，因此同轮全部移除。
 - Prevention: 迁移链接对象生命周期时，分别复核 `Process` 的条件顺序、`RemoveObject`/`Despawn` 的副作用和同轮迭代，而不是只模拟链接对象的下一次 expiry；确定性测试同时覆盖远离、引爆和过期边界。
 - Verification: 直接按旧版顺序对照 `SpellObject.Process`/`Despawn` 后，Go distance-cleanup 断言改为同轮移除全部三格；ExplosiveTrap 普通与 race 定向测试通过。
+
+### 2026-08-18 — FireWall 复核仍要保持仓库路径边界
+
+- Symptom: FireWall 行为复核中两次在 Go 仓库命令里误带旧版 `Server/...` 路径，命令只返回 `not found`，输出不能作为证据。
+- Root cause: 为了在同一轮查询 Go 实现和 C# 基线，把旧版相对路径混进了 Go-only 命令；没有在切换仓库后把对照读取拆成独立工具调用。
+- Prevention: Go 调用正文只允许 `cmd/`、`internal/`、`docs/` 等 Go 仓库路径；C# 对照必须另起 Legacy workdir 调用，且失败输出立即丢弃，不以失败定位结果推断行为。
+- Verification: 后续 FireWall C# 读取改为 Legacy-only 调用，Go 读取改为 Go-only 调用；两边路径均由各自仓库根目录确认后继续。
+
+### 2026-08-18 — 新增 Go 法术辅助函数要先检查包级符号
+
+- Symptom: FireWall 首次定向编译失败，新增的 `movePointPair` 与现有 `kirin.go` 包级函数重名。
+- Root cause: 新文件抽取坐标辅助函数时只检查了当前文件，没有先在整个 `cmd/crystal-server` 包内搜索同名符号。
+- Prevention: 新增 Go 包级函数前先用 `rg -n "func .*候选名" cmd/crystal-server --glob '*.go'` 检查全包命名；通用能力优先复用现有函数，专用 helper 使用明确前缀。
+- Verification: helper 改为 `fireWallMovePointPair` 后，重新运行定向编译并继续 FireWall 行为测试。
+
+### 2026-08-18 — FireWall 测试断言要读取 map 中的最终值并核对 MAC 算术
+
+- Symptom: FireWall 首次行为测试把 `world.monsters[id]` 插入后保留的本地 struct 副本当成最终状态，且把伤害 14 减 MAC 2 误算为 10；测试报告的 HP 与实现状态不一致。
+- Root cause: Go map 保存的是 value，伤害 resolver 更新的是 map entry；测试同时没有逐项核对 `damage - magic armour` 的结果。
+- Prevention: 插入 map value 后，所有 mutation 断言都重新读取 `world.monsters[id]`/`world.players[id]`；每个 MAC 场景先写出明确算式，再断言目标 HP 和 map 中的值。
+- Verification: 断言改为读取 map entry，MAC=3 得 89、MAC=2 得 88；FireWall 专项测试随后通过。
+
+### 2026-08-18 — 周期 SpellObject 的精确 expiry tick 仍会先执行伤害检查
+
+- Symptom: FireWall 生命周期测试首次把 `now == ExpireTime` 断言成没有任何 tick 通知；实现实际在精确 expiry 保留对象并执行了当轮到期前的周期检查。
+- Root cause: Legacy `SpellObject.Process` 先用严格 `Envir.Time > ExpireTime` 判断移除，再处理 `TickTime`，所以精确 expiry 不移除但可能命中；测试只关注保留/移除而忽略了同轮 tick。
+- Prevention: 生命周期测试把“精确 expiry 保留”和“超出 expiry 移除”分开；若不想让边界 tick 影响包断言，先把目标移出对象格，避免把周期伤害误判为生命周期失败。
+- Verification: FireWall exact-expiry 测试在边界前移走目标，只断言五个对象仍在；`+1ns` 再断言全部移除。
+
+### 2026-08-18 — 跨地图 SpellObject 移除包只发给旧地图观察者
+
+- Symptom: FireWall caster 改到新地图后，测试错误地要求 caster 收到旧地图五个 `ObjectRemove`；实际 cleanup 已完成但 caster 不在旧地图可见范围，收到包的是旧地图观察者。
+- Root cause: Legacy `Despawn` 广播以 SpellObject 的 `CurrentMap`/位置筛选接收者，不会向已跨图的 caster 发送旧地图对象移除。
+- Prevention: 跨地图生命周期测试同时保留旧地图 observer 与已迁移 caster，分别断言对象状态清空和旧地图 observer 的移除包，不把 caster 作为旧图广播接收者。
+- Verification: 增加旧地图 observer 后，FireWall cross-map cleanup 清除五个对象并向 observer 发送五个 `ObjectRemove`。
