@@ -3799,3 +3799,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试目标处于两格内，注入的 `bound=3` 随机值为 0，按 Legacy 顺序正确触发了 BackStep，测试夹具却直接假定进入 PoisonShot buff 分支。
 - Prevention: 为有前置随机分支的攻击建立分支表，先让 BackStep/早退 gate 返回“跳过”，再为目标分支注入随机值；同时断言完整 bound 序列，避免只看最终 spell。
 - Verification: 将 `bound=3` 改为 1 后，测试锁定 `[11,3,2,1,10,5,10,2,10,2,10]` 的 DC/BackStep/SC/抗性/持续时间顺序，并通过 CrippleShot multi-target damage/poison 断言。
+
+### 2026-08-18 — AI=255 延迟召唤测试要以解析时刻和通知地图为基准
+
+- Symptom: StoneTrap 生成测试把 `DieTime` 预期为施法时刻加持续时间；跨地图主人测试还预期主人能收到陷阱死亡包，导致定向测试失败。
+- Root cause: Legacy 先在玩家 `ActionList` 的“距离×50ms+500ms” action 中执行 `CompleteMagic`、计算 `DieTime` 并调用 `LevelMagic`，再向当时的 `CurrentMap.ActionList` 加入额外 500ms 的 Spawn action；`Broadcast(ObjectDied)` 只向陷阱所在地图附近对象发送，主人已经换图时不会收到该包。
+- Prevention: 验证延迟召唤时拆分“首次解析”和“实际 Spawn”两个时刻：`DieTime` 从首次解析时刻起算，`ObjectMonster/ObjectHealth` 只在第二个 action 到期时发送；地图变化测试要绑定首次解析时的地图，并分别断言对象状态与当前地图可见通知。
+- Verification: Go 测试断言首次 action 为距离×50ms+500ms、`MagicLeveled` 先发，Spawn 再延迟 500ms，`DieTime = first-stage-due+duration`，并覆盖首次解析前/后的换图与无主人通知；AI=255 定向测试全通过。
+
+### 2026-08-18 — AI=255 主人死亡测试要区分宠物广播与死亡者自身广播
+
+- Symptom: StoneTrap 主人死亡测试预期主人同时收到自己的 `ObjectDied` 和 `Death`，定向测试实际只收到 StoneTrap 的 `ObjectDied` 与玩家自身的 `Death`。
+- Root cause: Legacy `PlayerObject.Die` 的玩家 `Broadcast(ObjectDied)` 排除死亡玩家；宠物死亡广播仍可发送给主人，因此两个对象的接收者集合不同。
+- Prevention: 验证主人死亡时按“宠物通知”和“死亡者自身通知”分别建立 recipient/packet 矩阵，不把同一地图广播误推断为发送给死亡者本人。
+- Verification: 将断言收紧为主人收到 StoneTrap `ObjectDied -> player Death`；AI=255 主人死亡与登出移除定向测试通过。
+
+### 2026-08-18 — AI=255 首包投影与地图夹具要使用实际存储布局
+
+- Symptom: StoneTrap `Extra=false` 首包测试最初从已生成的最终对象重建包，无法观察 Spawned 前状态；CanFly 墙体测试还把墙写入 `y*height+x`，导致本应阻挡的路径仍被接受。
+- Root cause: Legacy 首包与 Spawned 后快照的状态不同，必须检查实际通知；Go `mapdata.Map` 按 `x*height+y` 存储 cell，而不是二维数组常见的 `y*width+x`。
+- Prevention: 包序列测试优先解析返回通知中的原始 payload；修改地图夹具前核对 `Map.index`，用坐标到存储索引的同一 helper/公式写入墙体。
+- Verification: 首次 `ObjectMonster` 通知断言 `Extra=false`、后续快照断言 `Extra=true`，并用 `2*Height+1` 写入 (2,1) 墙；AI=255 定向测试通过。
