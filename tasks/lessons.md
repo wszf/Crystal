@@ -3820,3 +3820,14 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy 首包与 Spawned 后快照的状态不同，必须检查实际通知；Go `mapdata.Map` 按 `x*height+y` 存储 cell，而不是二维数组常见的 `y*width+x`。
 - Prevention: 包序列测试优先解析返回通知中的原始 payload；修改地图夹具前核对 `Map.index`，用坐标到存储索引的同一 helper/公式写入墙体。
 - Verification: 首次 `ObjectMonster` 通知断言 `Extra=false`、后续快照断言 `Extra=true`，并用 `2*Height+1` 写入 (2,1) 墙；AI=255 定向测试通过。
+
+### 2026-08-18 — TurnUndead 定向测试要隔离随机门与经验升级阈值
+
+- Symptom: 首轮成功测试使用经验值 100，正好命中默认等级 50 的升级阈值，产生额外的 `HealthChanged/LevelChanged` 包；首个随机失败夹具只提供一个随机值，却实际进入了第二道随机门并越界崩溃。
+- Root cause: Go 默认经验表缺失项按 100 处理，测试角色等级 50 的下一等级阈值也是 100；Legacy `TurnUndead` 先执行 `Next(2)`，只有第一门通过才执行 `Next(100)`，测试没有按分支提供完整随机序列。
+- Prevention: 法术测试使用不会触发升级的最小经验值，或显式配置经验阈值；对有短路随机分支的路径按每个分支建立精确随机序列，并断言失败分支不产生延迟 action。
+- Verification: 将目标经验改为 1、第一门失败目标等级改为 50，并覆盖 `[1]` 与 `[0,99]` 序列；TurnUndead 定向测试全通过。
+- Additional symptom: 为地图夹具直接给 `world.mapRules[0].Fight` 赋值会在 Go 编译器中失败，因为 map 索引返回的是不可寻址结构副本。
+- Additional root cause: Go map 中的结构字段不能通过链式索引修改，必须先复制值、修改字段，再写回 map。
+- Strengthened prevention: 对 map-of-struct 夹具统一使用 `rules := map[key]`、修改、`map[key] = rules` 的写回模式。
+- Additional verification: 改为写回 `worldMapRules` 副本后，TurnUndead 定向测试与 legacyworld/worlddata 测试通过。
