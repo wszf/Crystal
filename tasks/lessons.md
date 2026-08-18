@@ -4318,3 +4318,20 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 新增测试夹具从已有日期表达式手工复制时漏掉了 Go `time.Date` 的完整八参数签名。
 - Prevention: 新增固定时间夹具统一使用 `year, month, day, hour, minute, second, nanosecond, location` 八个参数；提交前先运行新增测试包的编译/定向测试。
 - Verification: 补齐纳秒参数后 `TestGameWorldPoisonCloud` 世界测试通过。
+
+  Recurrence evidence: 下一批筛查时又把 Legacy 相对路径放进了 Go workdir，命令未读到任何对侧文件；该调用输出已作废。
+  Strengthened prevention: 仓库切换时同时更换 `workdir` 与相对路径前缀，命令正文只允许当前仓库已确认存在的路径；跨仓库研究必须拆成两个独立调用，不能以“当前目录下不存在”代替切换仓库。
+
+### 2026-08-18 — MoonMist 的练习时机要同时覆盖 admission 与 delayed train
+
+- Symptom: MoonMist 的首次 Go 迁移只在 admission 发送 `MagicLeveled`；对照 `Map.CompleteMagic` 后发现命中目标时延迟分支仍设置 `train=true`，因此成功命中少练习一次。
+- Root cause: 只读取了 `HumanObject.MoonMist` 的立即 `LevelMagic`，没有沿用 `CompleteMagic` 末尾的统一 `if (train) player.LevelMagic(magic)`，把“立即练习”和“命中后再次练习”误合并成一个行为。
+- Prevention: 对每个同时有 admission 方法和 delayed `CompleteMagic` case 的法术，分别记录每一处 `LevelMagic` 调用及其条件；测试既断言 admission 包，也断言命中/未命中后的最终经验和包序。
+- Verification: MoonMist resolver 已在任一 AC 命中后追加一次 `levelMagicLocked`，未命中仍不追加；世界测试确认经验 1→2，认证转录确认延迟施法者包尾为 `MagicLeveled`，定向测试通过。
+
+### 2026-08-18 — Legacy 检索参数也必须逐项验证
+
+- Symptom: MoonMist 入口核对的一次 Legacy `rg` 调用额外携带不存在的 `Crystal` 路径，虽读到了 `Server` 输出但命令返回路径错误。
+- Root cause: 复制检索命令时没有先确认参数列表，每个路径是否属于当前 Legacy 根目录。
+- Prevention: Legacy 只读查询只传当前仓库已由 `rg --files` 确认的路径；出现任一非零退出或路径错误时整次输出作废，不从部分成功结果继续推导。
+- Verification: 错误调用输出未用于 MoonMist 判断；随后入口、法术和 `Map.CompleteMagic` 均在单独的合法 Legacy 调用中重读确认。
