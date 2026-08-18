@@ -4525,3 +4525,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 复用了测试夹具 helper，却没有先确认声明所在文件及其是否属于非测试构建。
 - Prevention: 生产代码只调用非测试文件中的 helper；新增调用前用 `rg` 核对声明文件，并在定向测试后运行 `go build ./...`。
 - Verification: 已改用生产 helper `worldSpellInfoFor`；Thrusting 世界/会话测试、race、`go vet ./...` 和 `go build ./...` 均通过。
+
+### 2026-08-19 — DoubleSlash 队列插入顺序不等于命中语义顺序
+
+- Symptom: DoubleSlash 首次定向测试在 300ms 断言目标 HP 为 87，实际为 84；执行的是无护甲的敏捷段，而不是应先减 3 点 MAC 的 MACAgility 段。
+- Root cause: 将 Legacy 先入队的 400ms action 误命名为第一命中，忽略了 `HumanObject.Attack` 在分支内先排入 400ms Agility、分支后再排入 300ms MACAgility 的结构。
+- Prevention: 迁移延迟技能时分别记录“队列插入顺序”和“Due 时间/防御类型语义”；测试同时断言 action 排列、Due、防御标志及每个时间点的 HP。
+- Verification: 修正为 400ms Agility action 先入队、300ms MACAgility action 后入队；DoubleSlash 世界测试、会话测试和旧 Warrior 回归测试通过。
