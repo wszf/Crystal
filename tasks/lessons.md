@@ -4476,3 +4476,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 这是当前基线会话测试的 pipe 消费/通知突发阻塞，不涉及本批 PoisonSword 文件；重复并发启动全包测试还会把相同阻塞叠加，不能据此判断新法术失败。
 - Prevention: 提交前先单进程运行新增功能的普通、race、会话测试，再运行全包；全包异常时用 `-json`/独立测试复现并检查堆栈，标明无关基线失败，不把它混入新功能证据。
 - Verification: PoisonSword 世界/会话定向测试和五次 race 均通过；Blizzard 基线测试在不含 PoisonSword 的独立运行中仍复现同一 pipe 超时，且 `git diff` 未包含 Blizzard 源文件。
+
+### 2026-08-18 — 新法术支持列表与飞行规则必须分别核对
+
+- Symptom: CatTongue 初次编译时在同一个 Go 支持列表中被加入两次；预期加入的是 CanFly 路径规则，结果形成重复 switch case。
+- Root cause: 修改 `worldSpellBehaviorSupported` 和 `worldMagicRequiresCanFly` 时只按搜索结果插入，没有在补丁后检查每个法术在各职责列表中的唯一位置。
+- Prevention: 新增法术时分别核对“行为支持、路径校验、影响解析”三个入口，并在编译前检索法术常量的全部 case，确保每个 switch 只出现一次。
+- Verification: 删除重复 case、将 CatTongue 加入正确的 CanFly switch 后，Go 包编译、CatTongue 世界/会话测试及 race 测试通过。
+
+### 2026-08-18 — 测试夹具必须使用实际存在的统计字段
+
+- Symptom: CatTongue 会话测试首次编译失败，引用了不存在的 `monsterStatMinMAC`/`monsterStatMaxMAC` 常量。
+- Root cause: 将玩家/运行时对象的 MAC 字段命名习惯错误套用到怪物导入统计枚举；Go 怪物统计只提供 AC，MAC 夹具应在加载后直接设置对象字段。
+- Prevention: 为新会话夹具添加怪物统计前先检索对应 `monsterStat*` 声明；若导入模型不支持某字段，使用运行时对象字段并在测试中显式覆盖。
+- Verification: 移除不存在的导入统计后直接设置怪物 MAC，CatTongue 会话测试、全部 CatTongue 定向测试和 race 测试通过。
