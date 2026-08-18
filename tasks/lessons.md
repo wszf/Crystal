@@ -3487,3 +3487,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把 armor 值 3 当成了剩余 HP，而不是从伤害 10 中扣除后的 7 点有效伤害。
 - Prevention: 非零防御回归同时写出 `damage - armour` 的中间值，并让 expected HP 由该公式得到；用远高于伤害的 MAC 值确保错误 MAC 路径可见。
 - Verification: AI=200 ranged 世界测试现以 AC=3/MAC=40 验证 HP=93，重复定向测试通过。
+
+### 2026-08-18 — AI=201 多仓 patch 必须先固定目标仓库
+
+- Symptom: AI=201 共享接线的首次多文件 patch 在 Legacy 工作目录尝试读取 Go `world.go`，整个 patch 被拒绝且未写入。
+- Root cause: 跨仓文件路径和当前 workdir 混用，违反了本项目的单仓操作边界。
+- Prevention: 每个 patch/命令只服务一个仓库；执行前确认 workdir 与所有目标文件属于同一根目录，失败后先检查无部分写入再重试。
+- Verification: 改用 Go 仓库单独 patch 后，`FurbolgGuard` action 字段、AI 分发与解析均接入，`go test ./cmd/crystal-server` 编译通过。
+
+### 2026-08-18 — AI=201 action 接线和目标夹具必须先覆盖共享字段与目标特有随机流
+
+- Symptom: AI=201 生产文件初次编译报告 `worldMonsterAttackAction` 缺少 `FurbolgGuard` 字段；修正接线后，push transcript 初稿错误期望方向 0，Hero ACAgility 夹具又遗漏了 `Next(16)`。
+- Root cause: 先写 AI 专用生产分支再补共享 action/dispatch；测试假定方向编号是直观 compass 值，并只按 Player/owned-Monster 的零 agility 流设计回调，忽略 Hero 的等级基础 agility。
+- Prevention: 新 action 先完成结构体、tick dispatcher、AI population 与 resolver 的最小编译闭环；协议 payload 使用 `directionFromPoints` 实际值；Player/Monster/Hero 分别读取并白名单其防御随机上界。
+- Verification: AI=201 世界与认证 transcript 已锁定方向 2 的 BackStep、Hero `bound=16`、动态 push 重扫和 ACAgility HP；定向普通 `-count=5`、race、全仓普通/race、vet、build 均通过。
