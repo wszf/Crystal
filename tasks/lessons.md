@@ -4321,6 +4321,9 @@ Record project-specific corrections and failure-prevention patterns here.
 - Prevention: 先用 `rg --files` 确认文件，再用不含嵌套引号/反引号的单引号正则分步读取；命令非零退出时丢弃整个输出。
 - Verification: 后续分步检索成功读取 Plague 的 Legacy 实现；本批实现没有使用失败调用的输出。
 
+- Strengthening after recurrence: 2026-08-19 再次因矩阵检索 pattern 含反引号导致 `zsh: unmatched "`；执行前先检查命令字符串，优先使用单引号固定模式或拆成多条简单 `rg`，失败整条输出继续作废。
+- Verification after strengthening: 后续矩阵、Legacy 对照和 Go 源码读取均改用单仓库、无反引号的分步命令，成功取得可用证据且没有文件变化。
+
 ### 2026-08-18 — Plague 毒伤公式的等级项必须按实际 Level 验算
 
 - Symptom: Go Plague 红毒定向测试把 Level 0 的持续时间/数值写成 9/5，测试失败；实际结果为 5/3。
@@ -4735,3 +4738,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 测试把 `action.Due` 推到当前时间后一小时，`world.tick` 在处理 delayed magic 前先执行 `updateLightLocked`，跨过光照边界后向在线玩家广播昼夜包。
 - Prevention: 会话 transcript 只验证目标行为时，必须关闭无关的全局 ticker/昼夜状态，或注入固定 light clock；不能用跨越环境边界的未来时间作为唯一隔离手段。
 - Verification: 在 Entrapment 会话夹具停止 ticker 后显式关闭 `lightsEnabled`，重新运行定向测试与 race 定向回归，确认 transcript 不再含 `ServerTimeOfDay`。
+
+### 2026-08-19 — 全量服务端回归失败必须区分既有 net.Pipe 基线
+
+- Symptom: LevelEffects/Hair 批次的 `go test ./... -count=1` 中，服务端包仍复现 Blizzard/MeteorStrike 与 HealingCircle 的 net.Pipe 读写超时，并出现 TucsonMage 后台 tick 额外攻击包；本批两个新测试和所有内部包通过。
+- Root cause: 这些会话测试的客户端消费边界与实时 world ticker 在既有基线中存在阻塞/竞态，失败堆栈不涉及本批 UserInformation/ObjectPlayer 投影代码。
+- Prevention: 新批次先运行新增测试和相关包，再运行全量；全量失败时记录具体测试、超时和独立包结果，并用定向测试、race、vet、build 验证新改动，不能把既有 net.Pipe 基线失败标为本批回归。
+- Verification: LevelEffects/Hair 定向测试通过；内部包全量通过；后续将单独复核上述既有会话测试，不改变本批实现以掩盖无关失败。
