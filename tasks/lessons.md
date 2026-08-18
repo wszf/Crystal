@@ -3459,3 +3459,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Further evidence: AI=198 的一次服务端全量测试恰好通过，但独立 `TestSessionOmaMageRangeSlowFrozenTranscript -count=3` 仍复现 `[2 1]` 对 `[1]` 的失败，确认该问题具有时序/随机性而非新 AI 回归特征。
 - Prevention strengthening: 全量结果即使偶尔通过，也继续单独重跑已知用例；以排除该精确基线用例的全仓普通/race 命令作为本批验收证据。
 - Verification after strengthening: AI=198 批次的 `go test ./... -count=1 -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'`、对应 race、vet、build 和定向测试均通过。
+
+### 2026-08-18 — AI=199 Hero 伤害夹具必须允许防御随机抽样
+
+- Symptom: FurbolgArcher Player/owned-Monster/Hero 投影测试首次失败，Hero 子用例在延迟命中时消费了未预期的 `Next(16)`。
+- Root cause: 夹具只白名单了 AI 攻击的固定 DC/Type 随机上界，遗漏了 Hero 延迟 ACAgility 防御路径的固定防御抽样。
+- Prevention: 多目标投影测试的随机 callback 同时覆盖发起阶段和各目标类型的延迟解析；先区分攻击随机与防御随机，再断言 HP、封包和 value-map 状态。
+- Verification: 放行 Hero 防御 `bound=16` 后，AI=199 世界测试、重复运行、race、认证 `net.Pipe` transcript 及全仓普通/race（排除已知 OmaMage 基线）均通过。
