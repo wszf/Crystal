@@ -523,8 +523,8 @@ Record project-specific corrections and failure-prevention patterns here.
 
 - Symptom: 继续筛选下一法术时，把 Legacy `Server/...` 路径追加到 Go 根目录的只读命令，末尾 `sed` 报路径不存在；该调用的全部混合输出作废。
 - Root cause: 为连续查看两侧代码，把相对路径和 `workdir` 绑定错误，破坏了单仓库调用边界。
-- Prevention: 一次工具调用只允许一个仓库；命令正文只出现该仓库已确认存在的相对路径；对侧研究另起独立调用，失败调用的输出不作为源码证据。
-- Verification: 随后 Legacy 只读调用单独读取 `HumanObject`/`Map`/`SpellObject`，Go 只读调用单独读取 `world.go`；未使用失败调用证据，且没有文件变化。
+- Prevention: 一次工具调用只允许一个仓库；调用前先验证并复用精确的绝对 `workdir`；命令正文只出现该仓库已确认存在的相对路径；对侧研究另起独立调用，失败调用的输出不作为源码证据。
+- Verification: 随后 Legacy 只读调用单独读取 `HumanObject`/`Map`/`SpellObject`，Go 只读调用单独读取 `world.go`；Mirroring 研究中一次重复 `Dropbox` 的错误 `workdir` 被识别为无效并丢弃，重试使用精确根目录成功；另一次把 Go 路径混入 Legacy 调用时，首个 `sed` 失败，后续看似成功的 Legacy 片段也按规则全部丢弃；未发生文件变化。
 
 ### 2026-08-18 — Blizzard/Meteor 会话断言必须按接收者和技能分开
 
@@ -4370,3 +4370,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: `world.monsters` 保存值类型，命中通知按范围广播给所有附近客户端；会话主循环也会在处理施法后继续推进真实时间的世界 tick。
 - Prevention: 修改值类型对象后始终从权威 map 重新读取；按每个接收者的完整包矩阵断言广播；需要手动推进延迟效果的会话测试，将首个效果 tick 和过期时间移到真实时钟之后的合成时间点，避免后台主循环抢先消费。
 - Verification: HealingCircle 世界测试已改为 map 重读并断言额外广播；认证会话连续三次通过，包含目标锁定、首个 `ObjectSpell`、命中和持久化。
+
+### 2026-08-19 — Legacy 对照命令必须先核对实际文件清单
+
+- Symptom: 评估 Mirroring 时把不存在的 `Server/MirEnvir/Settings.cs` 放入 Legacy 只读命令；命令末尾失败，整条输出作废。
+- Root cause: 凭记忆构造文件路径，未先用 `rg --files` 核对 Settings 实际位于 `Server/Settings.cs`。
+- Prevention: Legacy 读取前先独立列出精确文件清单；任何非零读取调用的全部输出丢弃，不能使用前面的成功片段。
+- Verification: 随后 `rg --files Server | rg '(^|/)(Settings|Config|Envir)\\.cs$'` 返回 `Server/Settings.cs`/`Server/MirEnvir/Envir.cs`，重读只使用成功纯 Legacy 调用；无文件写入。
+
+### 2026-08-19 — Mirroring 测试夹具必须满足技能等级门槛
+
+- Symptom: Mirroring 新 Clone 的世界测试首次失败，预期 admission `MagicLeveled` 为空。
+- Root cause: 测试角色等级设为 30，而 Mirroring 的目录 `Level1` 门槛为 41；`levelMagicLocked` 正确拒绝了练习，生产实现并未丢失通知。
+- Prevention: 新增法术测试夹具先读取 Go 对应的 Legacy 目录等级门槛，并把角色等级设到能练习的基线；同时保留低等级/拒绝路径的独立断言。
+- Verification: 将夹具等级调整到 50 后重跑 Mirroring 定向测试，确认新 Clone admission 发出 `MagicLeveled`，而 NoPets/缺少定义路径仍不练习。
