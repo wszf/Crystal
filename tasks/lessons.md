@@ -3842,3 +3842,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Additional root cause: `wire` 已在外层声明，解析结果需要在循环内用短变量声明并回填，不能直接给未声明的函数返回错误变量赋值。
 - Strengthened prevention: 对循环内函数调用使用 `parsed, err := ...`，成功后再赋值给外层结果；先运行目标包的编译/定向测试，再进入全仓库门禁。
 - Additional verification: 修正局部变量后，`go test ./cmd/crystal-server -run 'TestPetEnhancer' -count=1` 通过。
+
+### 2026-08-18 — Revelation 英雄准入测试要隔离世界 tick 的其他周期通知
+
+- Symptom: Revelation 英雄目标按预期被 admission 接受，但用完整 `world.tick` 验证“CompleteMagic 对 Hero 无效果”时，测试仍收到英雄自身周期产生的对象通知，误判为 Revelation 成功。
+- Root cause: 测试夹具把英雄 runtime 放入世界后，`tick` 同时推进了 `tickHeroesLocked`；该输出与 Revelation resolver 的目标类型分支无关。
+- Prevention: 验证某个 delayed action 的“无效果”分支时，直接在世界锁内调用对应 resolver 并只断言其返回通知；只有需要验证完整调度顺序或跨系统副作用时才使用 `world.tick`，并过滤/断言已知的其他周期系统输出。
+- Verification: 改为直接解析排队的 Revelation action 后，英雄准入仍成立、resolver 返回空通知；其余 Revelation 延迟广播、随机门和玩家目标定向测试通过。
