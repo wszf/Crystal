@@ -4623,3 +4623,19 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 改用已有被动夹具后覆盖魔法表，修正 15/25 MP 与两次攻击阈值断言；MPEater 世界测试、认证 `net.Pipe` 测试和 Go 全量测试通过。
 - Strengthening after recurrence: MPEater 首次会话断开后运行时 MP 已是 25，但 auth 快照仍回到初始 221；原因是被动 MP 变更没有调用玩家的 `PersistHealth` 回调，退出清理的 session cache 覆盖了实时值。
 - Verification after strengthening: `changePlayerManaLocked` 在同步 `Character.MP` 后调用 `PersistHealth`；会话测试现在在服务 goroutine 结束后确认 auth MP=25、MPEater 经验=1。
+
+### 2026-08-19 — Hemorrhage 值映射目标的毒状态必须在副作用后重新加载
+
+- Symptom: Hemorrhage 世界测试中主动被动伤害已正确变为 5、Monster HP 已扣除，但 `Bleeding` poison 列表为空。
+- Root cause: `world.monsters` 是值映射；普通攻击路径在 Hemorrhage 写入 map 后仍持有旧 target 快照，后续普通命中收尾再次写回旧值，覆盖了刚加入的毒和 OperateTime 清零。
+- Prevention: 任何会修改 Monster/Hero 值对象的攻击前置副作用后，必须在后续伤害/收尾写回前重新加载最新对象；测试同时断言即时伤害、毒列表、OperateTime 和持续 tick，不能只看 HP。
+- Verification: 普通玩家攻击在被动副作用后 reload `w.monsters[target.ObjectID]`；Hemorrhage Monster、Player、Hero 世界测试与认证 `net.Pipe` transcript 均通过，并覆盖 Effect 17/18、duration/value、Player/Hero final tick 及 Monster expiry-before-damage。
+- Strengthening after recurrence: 使用 `world.tick` 验证 Hero 毒伤时，Hero 的默认零 `ActionReadyAt` 会在同一 tick 自动攻击 Player，污染持续伤害期望；持续效果测试必须冻结非目标 AI 的 action timer，或直接调用对应 poison process。
+- Verification after strengthening: Hero fixture 将 `ActionReadyAt`/`OperateReadyAt` 固定到未来，重新运行 Hemorrhage 定向测试，Player/Hero 每 tick 均只扣除 `MaxDC+1`。
+
+### 2026-08-19 — 补齐持续效果时要更新既有测试的旧行为期望
+
+- Symptom: 全量 Go 回归中 DemonWolf、DarkBeast、SackWarrior 的既有 Bleeding 测试仍期望延迟命中后只扣直接伤害；接入毒 tick 后实际同一 world tick 还按 Legacy 扣除了 Bleeding Value，并多发 Effect 18/持续伤害包。
+- Root cause: 旧 Go 测试覆盖了毒 admission/state，却把尚未迁移的 `ProcessPoison` 缺口固化成了期望，没有对照 Legacy Player/HumanObject 的 Bleeding tick 顺序。
+- Prevention: 新增持续效果前必须全量搜索该 poison type 的现有测试；按目标类型分别重算直接伤害、同 tick poison damage、final-tick/expiry 边界和 packet order，不能只让新增测试通过。
+- Verification: 更新 4 组既有 Monster-AI/warrior Bleeding 断言为直接伤害加 Value，并加入 Effect 18、HealthChanged、DamageIndicator 的包序；定向 DemonWolf/DarkBeast/SackWarrior 回归通过。
