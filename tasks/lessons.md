@@ -3512,3 +3512,28 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Go map 的 struct 元素不是可寻址变量；世界 Monster/Hero 是状态目标而不是网络 recipient；Hero 基础敏捷会触发独立的 ACAgility 抽样；Legacy CrazyManworm 在 `GetAttackPower == 0` 时于分支内提前返回，后续 Shock/Action/Attack 更新不会执行。
 - Prevention: 修改 map 中的 Monster 时先复制到局部值再回写；owned Monster/Hero 只用 owner/observer 的 wire 通知验证、用目标状态验证命中；每个目标类型分别覆盖防御随机上界；对 Legacy 分支逐行记录“广播→伤害抽样→零返回→计时器”的顺序，并为零伤害建立不变式测试。
 - Verification: AI=202 Player/owned-Monster/Hero 世界测试与认证 `net.Pipe` transcript 均通过；重复普通/race 定向测试、排除已知 OmaMage transcript 的全仓普通/race、`go vet ./...` 和 `go build ./...` 均通过。
+
+- Strengthening after recurrence: AI=203 GlacierWarrior 的 Hero 投影测试再次因延迟 ACAgility 路径消费 `Next(16)` 首次失败，证明该边界并非只存在于带毒/带效果 AI。
+- Prevention strengthening: 每个新增 AI 的 Player/owned-Monster/Hero 投影夹具都先分别记录发起阶段与延迟命中阶段的随机 bounds；Hero 分支默认把固定基础敏捷防御 `16` 纳入白名单，并只在实际序列确认后收紧断言。
+- Verification after strengthening: AI=203 Player/owned-Monster/Hero 世界测试、认证 `net.Pipe` transcript 及定向 race 均通过。
+
+### 2026-08-18 — AI=203 attackMonster 测试必须传入方向/法术参数
+
+- Symptom: GlacierWarrior 反应测试首次编译把 `monster.ObjectID` 传给 `attackMonster` 的第二个参数，编译器报告不能把 `uint32` 用作 `byte`。
+- Root cause: 复用了“攻击指定 Monster”的语义假设，但该 helper 的目标由玩家方向扫描，第二个参数实际是攻击方向。
+- Prevention: 写 direct melee 测试前先读取 helper 的完整签名及现有调用点；使用方向 ordinal（本夹具为 `2`）让 helper 自己解析相邻目标。
+- Verification: 修正两个调用后，AI=203 定向世界测试、包级编译和全量普通/race 门禁均通过。
+
+### 2026-08-18 — AI=203 反应夹具必须区分静态 MaxHP 与运行时 HP
+
+- Symptom: GlacierWarrior 重击传送测试首次运行把命中后的 Monster HP 期望成 90，实际为 190。
+- Root cause: 夹具沿用了 Player 的 100 HP 直觉，但 `icePhantomTestInfo` 的 `materializeMonster` 运行时最大 HP 为 200；反应断言未先读取 materialized state。
+- Prevention: 每个 Monster 反应夹具创建后显式设置或读取 `HP/MaxHP`，用 `beforeHP - effectiveDamage` 推导 expected，而不从 Player fixture 复制数值。
+- Verification: 断言改为 190 后，反应阈值/随机门、effect=4 传送包和最终状态测试通过。
+
+### 2026-08-18 — AI=203 authenticated transcript 的账号名必须遵守创建约束
+
+- Symptom: GlacierWarrior session transcript 首次运行在创建角色阶段返回结果码 1，尚未进入协议测试。
+- Root cause: 新增的测试账号名超过了项目 `CreateCharacter` 的长度限制，基础设施夹具先于游戏行为失败。
+- Prevention: 新增 authenticated session 前复用已通过的短账号/角色命名样式，先单独断言 `CreateCharacter` 返回 10，再启动 server transcript。
+- Verification: 改用短账号名后，完整 GlacierWarrior `net.Pipe` transcript、定向 race 和全量门禁均通过。
