@@ -4216,7 +4216,7 @@ Record project-specific corrections and failure-prevention patterns here.
 - Verification: 改用 `ShinsuSess`/`HolySess` 与短账号后，两种召唤的认证 `net.Pipe` 转录、护符 DeleteItem 数量、延迟对象/健康包顺序均通过。
 
 ### 2026-08-18 — EnergyShield 迁移继续隔离仓库调用并先核对值/指针形态
-- Symptom: 本批次两次只读调用把 Legacy 路径混进 Go workdir，另一次 Legacy 查询使用了未匹配的裸 glob；一次 EnergyShield 编译还报 `cannot indirect target`。
-- Root cause: 仓库切换后复用了上一侧命令正文，且未先确认 zsh 的 glob 行为和 `world.monsters` 的值类型。
-- Prevention: 每个工具调用只允许一个已核验仓库及其相对路径；查询 glob 使用 `rg --glob` 或先列文件；接入 map 元素前先检查声明，值类型不做指针解引用，失败调用的全部输出作废。
-- Verification: 后续 Legacy/Go 读取、补丁、测试和提交均按仓库拆分；修正 `worldMonster` 值拷贝后，EnergyShield 定向测试、`go test ./...`、race、vet 与 build 全部通过。
+- Symptom: 本批次两次只读调用把 Legacy 路径混进 Go workdir，另一次 Legacy 查询使用了未匹配的裸 glob；一次 EnergyShield 编译还报 `cannot indirect target`；提交后的复核又假定了不存在的 `cmd/crystal-server/group.go`。
+- Root cause: 仓库切换后复用了上一侧命令正文，未先确认 zsh 的 glob 行为、Go map 值类型或目标文件清单。
+- Prevention: 每个工具调用只允许一个已核验仓库及其相对路径；查询 glob 使用 `rg --glob` 或先列文件；读取前用 `rg --files` 确认目标；接入 map 元素前先检查声明，值类型不做指针解引用，失败调用的全部输出作废。
+- Verification: 后续 Legacy/Go 读取、补丁、测试和提交均按仓库拆分；错误路径复核输出被丢弃并用文件清单重跑；修正 `worldMonster` 值拷贝后，EnergyShield 定向测试、`go test ./...`、race、vet 与 build 全部通过。
