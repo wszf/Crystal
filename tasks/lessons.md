@@ -4335,3 +4335,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 复制检索命令时没有先确认参数列表，每个路径是否属于当前 Legacy 根目录。
 - Prevention: Legacy 只读查询只传当前仓库已由 `rg --files` 确认的路径；出现任一非零退出或路径错误时整次输出作废，不从部分成功结果继续推导。
 - Verification: 错误调用输出未用于 MoonMist 判断；随后入口、法术和 `Map.CompleteMagic` 均在单独的合法 Legacy 调用中重读确认。
+
+### 2026-08-18 — HealingCircle 测试必须读取权威值对象并覆盖完整广播
+
+- Symptom: HealingCircle 世界测试第一次继续读取写入前的本地 `worldMonster` 副本，且只预期被命中目标的 `ObjectStruck`；认证会话还因未消费完整的慢速状态包而在 `net.Pipe` 写入处阻塞。
+- Root cause: `world.monsters` 保存值类型，命中通知按范围广播给所有附近客户端；会话主循环也会在处理施法后继续推进真实时间的世界 tick。
+- Prevention: 修改值类型对象后始终从权威 map 重新读取；按每个接收者的完整包矩阵断言广播；需要手动推进延迟效果的会话测试，将首个效果 tick 和过期时间移到真实时钟之后的合成时间点，避免后台主循环抢先消费。
+- Verification: HealingCircle 世界测试已改为 map 重读并断言额外广播；认证会话连续三次通过，包含目标锁定、首个 `ObjectSpell`、命中和持久化。
