@@ -3635,6 +3635,9 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 目前证据只显示并行全仓运行中的 session transcript 抖动，不能据此把失败归因到 PurpleFaeFlower、SepWarrior 或普通宠物对象分派；同一 Tucson transcript 单独运行可通过。
 - Prevention: 全仓普通/race 出现单一 transcript 失败时，先以完整测试名隔离并重复运行，再用明确的已知 flaky 排除项重跑门禁；不要为无调用关系的 AI 修改生产代码。
 - Verification: Tucson 单测普通与 race 定向重跑通过后，再用 Oma/Tucson 两条已确认排除项完成全仓 race 复核；AI=214 定向普通/race 与其余全仓门禁保持通过。
+- Further evidence: AI=216 的一次全包普通运行再次只失败 `TestSessionOmaMageRangeSlowFrozenTranscript`，随机边界为 `[2 1]` 而非 `[1]`；AI=216 定向测试本身全部通过，未出现相关行为回归。
+- Prevention strengthening: 将该 OmaMage transcript 与 Tucson transcript 一并作为已确认 flaky 排除项；先隔离验证，再使用同时排除两者的普通/race 全仓命令作为批次门禁证据。
+- Verification after strengthening: AI=216 后续定向普通/race、排除两条已知 transcript 的全仓普通/race、vet 和 build 均需分别通过。
 
 ### 2026-08-18 — AI=213 Siege 的 protected Attack 不等于可达 AI 行为
 
@@ -3684,3 +3687,17 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Legacy `HumanObject.Pushed` 在每个成功移动格 enqueue 一次 `Pushed`，Attack 随后的 `ObjectMagic` 是独立广播，不能把四步推送压缩为一次事件。
 - Prevention: 验证推送 transcript 时按成功步数断言私有包数量和顺序，并单独断言最终魔法包；Monster/Hero/Player 三类目标都沿对应 `Pushed` helper 的事件粒度检查。
 - Verification: 四步 Repulsion 夹具现在锁定 `[Pushed, Pushed, Pushed, Pushed, ObjectMagic]` 和最终位置；AI=215 定向测试通过。
+
+### 2026-08-18 — AI=216 SepTaoist 的第三阶段 Green poison 没有伤害值
+
+- Symptom: SepTaoist poison sequence 测试初稿把 `Red→Green` 期望成首次 Green 的 value=6 并把目标 HP 降到 94，实际目标 HP 保持 100，新增 Green poison 的 value 为 0。
+- Root cause: Legacy `SepTaoist.Attack` 只有“无 Green/Red”分支设置 `Value = power / 15 + 4`；“仅 Red”分支的 Green `Poison` 对象没有 Value initializer，默认值就是 0。测试把两个 Green 分支错误合并了。
+- Prevention: 逐分支读取 C# object initializer，分别锁定新增 poison 的 type、value、duration、tick 和同 tick HP；测试夹具显式区分 added poison type，不复用首次 Green 的伤害期望。
+- Verification: 修正后 AI=216 三阶段 Poisoning、Curse 和 SoulFireBall 测试通过，并覆盖 Player、owned-Monster、Hero 的延迟伤害路径。
+
+### 2026-08-18 — AI=216 SepTaoist SoulFireBall 使用固定 500ms 延迟
+
+- Symptom: SepTaoist SoulFireBall 实现初稿把目标距离 6 的命中时间设为 800ms，并在迁移矩阵中写成距离相关延迟；源码实际把 `DelayedAction` 的到期时间固定写成 `Envir.Time + 500`。
+- Root cause: 看到方法前面计算了 `distance * 50 + 500` 的局部变量，就沿用了 SepWizard 的距离投射规则，没有继续核对真正传给 `DelayedAction` 构造器的参数；该局部值在 SepTaoist 分支没有被使用。
+- Prevention: 迁移延迟攻击时必须沿调用链确认实际排队的 `Due/Envir.Time` 参数，不以附近计算但未消费的局部变量推断协议时序；测试夹具应使用非零距离以区分固定与距离相关实现。
+- Verification: Go 实现、SoulFireBall 测试和迁移矩阵均改为固定 500ms；修正后的 AI=216 定向普通/race 与排除两条已知 flaky transcript 的全仓普通/race、vet 和 build 均通过。
