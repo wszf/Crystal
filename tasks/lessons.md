@@ -3466,3 +3466,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 夹具只白名单了 AI 攻击的固定 DC/Type 随机上界，遗漏了 Hero 延迟 ACAgility 防御路径的固定防御抽样。
 - Prevention: 多目标投影测试的随机 callback 同时覆盖发起阶段和各目标类型的延迟解析；先区分攻击随机与防御随机，再断言 HP、封包和 value-map 状态。
 - Verification: 放行 Hero 防御 `bound=16` 后，AI=199 世界测试、重复运行、race、认证 `net.Pipe` transcript 及全仓普通/race（排除已知 OmaMage 基线）均通过。
+
+### 2026-08-18 — AI=200 测试夹具必须完整消费返回值和通知基线
+
+- Symptom: AI=200 初次编译少接 `icePhantomTestWorld` 的攻击者返回值；修正后 Hero MAC 投影遗漏 `Next(16)`，Shock 分支又因把目标 packet 数硬编码为 1 而失败，实际序列含已有 `ObjectHealth` 和 `ObjectAttack`。
+- Root cause: 复用夹具前没有核对完整函数签名、Hero 延迟防御随机流和世界 tick 的基线通知；把“包含目标攻击包”误写成“目标只收到一个包”。
+- Prevention: 复用测试夹具先读取完整返回签名；多目标 MAC 测试允许各目标防御随机上界；通知断言用目标 packet helper 检查关键包存在，并单独断言状态/动作，不假设无关基线通知消失。
+- Verification: AI=200 近战/远程/同格、Shock/Cooldown、owned-Monster/Hero、延迟重验证、认证 transcript 的重复普通/race 测试以及全仓普通/race 均通过。
