@@ -4518,3 +4518,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 测试复用了 HalfMoon 的数值/顺序假设，没有逐项核对 Legacy `MagicInfo.GetDamage` 的 0.3/0.4 倍率以及 `HumanObject.Attack` 前方命中分支中先调用 `LevelMagic` 的位置。
 - Prevention: 新增技能的伤害和包序断言必须直接由旧版公式、分支顺序和现有 Go packet helper 推导；不要从相邻技能复制常量或通知尾部位置。
 - Verification: 修正 CrossHalfMoon level-0 侧伤害为 8、将 `MagicLeveled` 放到前方命中通知后且侧向通知前；世界、net.Pipe 会话和 race 定向测试通过。
+
+### 2026-08-19 — 生产代码不能依赖 `*_test.go` helper
+
+- Symptom: Thrusting helper 的初稿曾引用只在 `hiding_buffs_test.go` 声明的 `mustWorldSpellInfo`，若直接构建生产包会出现未定义标识符。
+- Root cause: 复用了测试夹具 helper，却没有先确认声明所在文件及其是否属于非测试构建。
+- Prevention: 生产代码只调用非测试文件中的 helper；新增调用前用 `rg` 核对声明文件，并在定向测试后运行 `go build ./...`。
+- Verification: 已改用生产 helper `worldSpellInfoFor`；Thrusting 世界/会话测试、race、`go vet ./...` 和 `go build ./...` 均通过。
