@@ -3708,3 +3708,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: ranged 夹具没有沿 `ProcessTarget` 的真实调用链核对预范围抽样、继承 `MoveTo` 的一次旋转抽样、最终分支抽样和 DC 抽样；目标类型测试把世界 tick 期间其他 AI 的随机消费误当成 SepAssassin resolver 的消费。
 - Prevention: 先从实现和 Legacy 顺序列出每个实际会调用的随机 bound，再锁定完整序列；涉及延迟解析的多对象 world 使用宽松随机回调，并只断言目标、到期时间、伤害和协议包等被测行为，避免把并行 AI 的消费纳入 transcript。
 - Verification: 修正 ranged 序列与目标类型夹具后，AI=217 定向普通测试连续 5 次、定向 race 测试 3 次通过。
+
+### 2026-08-18 — AI=218 SepArcher 目标对象类型决定通知接收者
+
+- Symptom: SepArcher Monster/Hero 目标的定向测试按目标 ObjectID 查找 `ObjectMagic`，得到空包；Player 目标同一断言通过，延迟伤害 action 已正确排队。
+- Root cause: `notifyPlayersLocked` 的可观察接收者是附近 Player；Legacy Monster/Hero 的 `Broadcast` 也不会把非 Player 目标当成网络连接，Monster/Hero 场景应通过其主人 Player 验证攻击包。
+- Prevention: 编写跨 Player/owned-Monster/Hero 的协议 transcript 时，先区分“受伤对象”与“网络接收者”；攻击包按实际附近 Player（宠物/英雄使用 Owner）断言，HP/action 仍按目标对象断言。
+- Verification: 将 Monster/Hero 包断言改为主人 Player 接收者后，AI=218 定向普通测试连续 5 次、定向 race 测试 3 次，以及排除两条已知 transcript 抖动的全仓普通/race 门禁通过。
