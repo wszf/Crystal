@@ -3387,3 +3387,24 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 把协议方向 ordinal 当作几何方向编号，忽略 `world.monsters` 按值存储，以及 Legacy Type 1 分支不更新 ActionTime/AttackTime/ShockTime；同时把 `Random.Next(max-min+1)` 的 inclusive 区间误当成最大值本身。
 - Prevention: transcript payload 一律由 `directionFromPoints` 生成；修改 map Monster 后从 map 重新读取断言；为不更新冷却的延迟动作验证 impact tick 的 AI 重入；固定防御区间按 `max-min+1` 记录随机 bound。
 - Verification: AI=191 世界测试和 authenticated `net.Pipe` transcript 已验证方向、当前范围中心、Player/owned-Monster/Hero MAC 伤害、Type 1 重入及 `[1]` 防御抽样，定向测试通过。
+
+### 2026-08-18 — DarkWraith fixture 必须回读 value-map 并展开 MoveTo 回退
+
+- Symptom: AI=192 定向测试初次运行时，owned Monster 的生命值仍为 fixture 默认值 200，且 ProcessTarget 测试少记录了一次 `Next(2)`；攻击后读取局部 Monster 值拷贝也看不到生命值变化。
+- Root cause: `materializeMonster` 的静态信息生命值不等于运行时 fixture 生命值，`world.monsters` 是值 map，且 Legacy `MoveTo` 在 `Walk` 失败后即使移动冷却阻止实际移动仍会消费随机方向/旋转选择。
+- Prevention: 为运行时 fixture 显式设置 HP/MaxHP，并从 `world.monsters[id]` 回读权威值；复刻移动回退时把所有 `MoveTo` 的随机消费纳入 transcript 期望。
+- Verification: DarkWraith geometry、Type 0、Type 1、LineAttack、ProcessTarget 世界测试及 authenticated `net.Pipe` 定向测试均通过。
+
+### 2026-08-18 — Go 复杂 patch 必须先复读精确字段空格锚点
+
+- Symptom: AI=192 首次生产代码 patch 因 `DarkCaptainOrbAt` 附近的实际空格与手写上下文不一致而被拒绝；未产生部分写入。
+- Root cause: 对结构体字段的物理格式作了近似假设，没有先读取精确锚点。
+- Prevention: patch 被拒绝后立即复读目标文件的精确行，只用最小字段/分发 hunk 重试，并先确认没有部分写入再继续。
+- Verification: 精确最小 hunk 成功加入 DarkWraith 字段与分发；`gofmt` 后 `go test ./cmd/crystal-server -run '^$' -count=1` 通过。
+
+### 2026-08-18 — 全量回归失败必须先和既有 session 基线分类
+
+- Symptom: AI=192 的 `go test ./cmd/crystal-server -count=1` 仅失败于既有 `TestSessionOmaMageRangeSlowFrozenTranscript`，实际随机边界为 `[2 1]` 而测试期望 `[1]`；DarkWraith 定向测试没有失败。
+- Root cause: 已知的实时 session maintenance tick 会在手动 transcript 前消费 bound=2 的随机数（AI=188 已记录），属于既有维护基线，不是 DarkWraith 行为变化。
+- Prevention: 保留精确失败证据，单独运行该既有测试和排除它的回归命令；不为迁移新 AI 修改无关行为或放宽 wire assertion，最终报告明确保留例外。
+- Verification: `go test ./cmd/crystal-server -count=1 -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'` 通过，DarkWraith 定向测试通过。
