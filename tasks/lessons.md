@@ -4573,6 +4573,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: Go 通用 `magicAttack` admission 只扣减了运行时 MP；与普通攻击和 SpellToggle 路径不同，它没有同步角色持久化结构中的 MP 字段。
 - Prevention: 每个会改变 MP 的世界路径都必须同时更新运行时对象和 `Character` 镜像；会话测试除了检查包和运行时值，还要检查最终角色状态。
 - Verification: 在通用魔法扣费点同步 `player.Character.MP` 后，BladeAvalanche 世界/会话定向测试通过，并确认最终两个 MP 字段均为 86。
+- Strengthening after recurrence: 仅同步运行时与 `Character` 仍不足以覆盖攻击路径；若会话持有独立的 `gameMP`，世界侧的即时 MP 变化还必须调用 `PersistHealth`，否则退出清理可能用旧缓存覆盖 auth。
+- Verification after strengthening: MPEater 会话曾复现 auth MP 从运行时 25 回到初始 221；补上 MP 变更点的 `PersistHealth` 后，断开并等待服务结束仍持久化为 25。
 
 ### 2026-08-19 — 修改 Go 魔法目录前必须先查完整现有键
 
@@ -4612,3 +4614,12 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 只按“反击包必须早于 Struck/ObjectStruck”定位调用点，没有完整对照 `HumanObject.Attacked` 的 GatherElement、状态清理、CounterAttackCast、Struck 顺序。
 - Prevention: 接入受击触发器时先列出成功命中分支的所有可见副作用，再按 Legacy 的相对顺序插入；测试应覆盖触发包与已有副作用同时存在时的包序，而不是只验证无副作用夹具。
 - Verification: Go 调用已移动到 `gatherElementLocked` 之后、Struck 之前；CounterAttack 世界/会话定向测试及完整定向 Warrior 回归通过。
+
+### 2026-08-19 — MPEater 测试必须区分夹具约束、MP 变化和阈值时点
+
+- Symptom: MPEater 初版测试先因公共战士夹具不接受 `SpellNone` 失败，随后把 Level 1/Accuracy 0 的目标 MP 期望写成 5，并把计数从 99 增至 100 后误判为当次已消费。
+- Root cause: 测试没有先核对夹具允许的 spell 集合和 Legacy `ChangeMP`/“先累加、后检查 armed”语义；该配置每次只扣 5，20 应变为 15，达到 100 只武装下一次攻击。
+- Prevention: 复用测试夹具前先检查其输入域；被动技能测试分开断言“本次累加后武装”和“下一次攻击消费”，并从 Legacy 公式推导 MP 前后值。
+- Verification: 改用已有被动夹具后覆盖魔法表，修正 15/25 MP 与两次攻击阈值断言；MPEater 世界测试、认证 `net.Pipe` 测试和 Go 全量测试通过。
+- Strengthening after recurrence: MPEater 首次会话断开后运行时 MP 已是 25，但 auth 快照仍回到初始 221；原因是被动 MP 变更没有调用玩家的 `PersistHealth` 回调，退出清理的 session cache 覆盖了实时值。
+- Verification after strengthening: `changePlayerManaLocked` 在同步 `Character.MP` 后调用 `PersistHealth`；会话测试现在在服务 goroutine 结束后确认 auth MP=25、MPEater 经验=1。
