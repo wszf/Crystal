@@ -5462,3 +5462,39 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 共享夹具把 `monsterAIRoll` 固定为 0；这正好命中 KingScorpion 的 `Random.Next(5) == 0` 范围攻击分支。
 - Prevention: 对包含随机分支的 AI 测试按分支显式设置 roll callback；范围分支返回 0，普通分支对 bound=5 返回非零，其余伤害/命中 roll 保持确定值。
 - Verification: 修正普通攻击夹具后重跑 KingScorpion 世界与 session 定向测试，确认两种攻击包、伤害类型和延迟均符合预期。
+
+### 2026-08-20 — Goal continuation 的初始审计也必须隔离 Legacy 与 Go 调用
+
+- Symptom: 本轮继续 active Goal 的初始只读审计把 Legacy lessons/status 与 Go status/migration matrix 放进同一个 `Promise.all`；虽然没有写入，但违反了项目的单仓库工具调用边界。
+- Root cause: 为减少状态核对往返，把“只读”误当成可以共享编排；没有把每个工具调用的 workdir、路径参数和证据来源绑定到唯一仓库。
+- Prevention: Goal 续跑的 lessons、status、源码、矩阵、测试和最终审计都按仓库拆成独立 `functions.exec` cell/call；禁止在同一个 `Promise.all`、shell 或 JavaScript 编排中混放 Legacy 与 Go，比较只在两次成功的纯单仓库调用返回后进行。
+- Verification: 本轮初始混合调用输出未用于源码判断；随后完整回读 Legacy lessons 使用独立调用，后续批次勘察与实现将先分别核对根目录和目标路径，再执行另一仓库调用，且本 lesson 在任何源码修改前追加完成。
+
+### 2026-08-20 — 只读定位正则也要先做最小语法校验
+
+- Symptom: 读取 Go 目标判定 helper 时，组合多个函数名的 `rg` 正则括号未闭合，命令直接失败。
+- Root cause: 为一次查询覆盖多个函数，临时拼接了嵌套分组，却没有先用最小模式验证正则语法。
+- Prevention: 组合定位条件优先使用多个简单 `rg` 查询或已验证的非捕获/捕获分组；复杂模式先在单仓库、只读命令中做最小语法检查，再依赖输出判断。
+- Verification: 本次失败输出未用于源码判断；随后将改用逐个函数名的简单查询，且该 lesson 已在继续修改前追加。
+
+### 2026-08-20 — AI=20 落点测试必须分离发射与命中随机调用
+
+- Symptom: DarkDevil 范围攻击测试在命中后看到随机 bound `[3 1]`，却只期待发射阶段的 `[3]`。
+- Root cause: Legacy 的范围伤害在 500ms 延迟执行时重新调用 `GetAttackPower`；测试 callback 同时记录了发射时的冷却随机值和落点时的单位区间伤害随机值。
+- Prevention: 对延迟攻击断言按阶段记录随机调用；发射断言 `[3]`，落点断言追加对应的伤害 bound，不要把完整调用序列误当成单阶段行为。
+- Verification: 修正断言后 AI=20 DarkDevil 世界定向测试全部通过，确认范围包、延迟伤害和 MACAgility 落点行为。
+
+- Strengthening after same-session recurrence: 本轮一次只读 `sed` 调用把已确认的 Go 根目录重复拼成 `Crystal.GoServer.GoServer`，命令未启动，输出不能作为证据。
+- Strengthened prevention: 已确认绝对根目录后直接使用该路径作为 `workdir`；不要在后续 Go 文件读取中再次手工拼接仓库名，且失败路径调用必须立即作废。
+- Verification after strengthening: 失败调用没有文件变化；随后恢复使用精确的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 读取 DarkDevil 源码。
+
+### 2026-08-20 — AI=20 搜索计时到期时必须保留基类目标重选
+
+- Symptom: 对照 Legacy `MonsterObject.ProcessSearch` 时发现 DarkDevil 初版在 `Next(3)==0` 且已有目标时只执行搜索，却没有写回新目标。
+- Root cause: 把“无目标时搜索”误读成了基类的完整条件；Legacy 条件是 `Target == null || Random.Next(3) == 0`，命中随机分支会替换现有 Target。
+- Prevention: 新增专用 AI 时逐项核对继承的 ProcessSearch/ProcessTarget 生命周期；搜索条件命中后无条件写入找到的目标（包括空结果清除），并为已有目标的重选分支加回归测试。
+- Verification: Go AI=20 世界测试新增 `Next(3)==0` 目标替换断言，DarkDevil 定向测试通过。
+
+- Strengthening after same-session recurrence: 本轮追加该 lesson 时 apply_patch 路径漏写 `git_work`，目标文件未找到且没有写入。
+- Strengthened prevention: Legacy 修改前继续复用已确认的绝对路径，并在工具返回路径错误时立即作废调用；不要手工删减根路径。
+- Verification after strengthening: 随后使用完整 Legacy 绝对路径成功写入搜索重选 lesson；失败调用未产生文件变化。

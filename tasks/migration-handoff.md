@@ -389,6 +389,25 @@ C# 文件。
 Go 实现、测试和迁移矩阵已提交为 `fe56473 feat(p5): migrate KingScorpion AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（DarkDevil AI=20）
+
+本批实现 Legacy `DarkDevil` 的野生目标搜索、动态范围和范围伤害行为：
+
+- AI=20 已接入 Go common population；物化遵守 `MonsterObject` 基类构造器的随机
+  方向。`InAttackRange` 严格保留 `_areaTime` 边界：冷却窗口内为一格，
+  `Envir.Time > _areaTime` 后扩展为三格。
+- 首次/范围窗口过期时发送无目标 `ObjectRangeAttack`，设置
+  `2s + Random.Next(3)*1s` 的区域窗口、300ms ActionTime 和 AttackSpeed 冷却，
+  并排入 500ms 延迟的 RangeDamage；活动窗口内沿用基类 `ObjectAttack` 近战，
+  单位区间 DC 抽样和 300ms 延迟。
+- 延迟范围命中按 impact 时怪物当前位置和方向前方两格重新投影，再以 Legacy
+  Cell 插入顺序扫描半径一格；Player、owned Monster、Hero 通过隐藏/视野、地图、
+  安全区、归属和存活门禁后使用 MACAgility。原目标与 impact 目标均重新验证，
+  认证 transcript 覆盖 targetless 包、500ms 命中包序与玩家生命状态。
+
+Go 实现、世界/Cell-order/目标种类测试、认证 `net.Pipe` transcript 和迁移矩阵已提交为
+`cc7e0d1 feat(p5): migrate DarkDevil AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
 Go HEAD `fe56473` 对应本批源码已通过以下收尾门禁：
