@@ -4942,3 +4942,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 只迁移了掉落树选择和地面物品路由，没有继续核对 Legacy `Envir.CreateDropItem` 在 Monster/Player/Fishing 调用点的后续对象初始化；智能生物奖励的随机逻辑也因此被孤立在专用路径。
 - Prevention: 迁移掉落功能时先把“掉落选择 -> UserItem 创建 -> 随机升级 -> 过期/鉴定 -> 全局 ID -> 交付”列成完整调用链，并把共享随机升级器接入每个已确认的 CreateDropItem 等价入口；FreshItem、ShopItem 和已有持久物品复制必须保持独立。
 - Verification: Go 固定向量覆盖耐久、全部附加属性、诅咒、扩槽、鉴定、`[2h]` 过期和全局 ID 分配/耗尽；普通怪物掉落、任务掉落、钓鱼及智能生物定向测试和 `cmd/crystal-server` 全包测试通过。
+
+### 2026-08-19 — 生产代码不能复用仅在测试文件定义的通用 helper
+
+- Symptom: 装备特殊模式批次首次定向测试在编译阶段因 `containsInt16` 与 `support_buffs_test.go` 的测试 helper 重名而失败。
+- Root cause: 新增生产代码时只检查了测试侧已有 helper 名称，没有考虑 `_test.go` 符号与正式构建的可见范围，导致测试构建出现重复定义。
+- Prevention: 新增生产 helper 使用领域前缀命名，并在测试前同时检查生产包和 `_test.go` 的符号；不要依赖只存在于测试文件中的辅助函数。
+- Verification: 将 helper 改为 `containsEquipmentMode` 后，配置、协议、装备定向测试及 `cmd/crystal-server` 全包测试均通过。
+
+### 2026-08-19 — 新增协议常量必须同步完整 ID 映射测试
+
+- Symptom: 全仓测试在新增 `ServerPlayerUpdate=56` 后失败，完整协议 ID 测试把该名称的 `got` 值读成 0。
+- Root cause: 只新增了常量和局部 payload 测试，没有同时把常量加入既有的完整 `wants`/`got` 映射表。
+- Prevention: 每新增一个协议 ID，必须同时更新常量、payload/parser 测试、完整 ordinal 映射和唯一性表，并运行 `go test ./...`。
+- Verification: 补齐 `ServerPlayerUpdate` 的 `got` 映射后，协议定向测试通过，随后重新执行全仓测试。
