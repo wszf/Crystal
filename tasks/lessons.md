@@ -4878,3 +4878,21 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: DarkBody 的 `Die()` 等效通知被放入 `BeforeMagicNotifications`，服务端按 Legacy 入队点在最终 `ServerMagic` 前发送；只有 delayed Mirroring 的 death 才位于最终 Magic 之后。
 - Prevention: 迁移立即效果或召回效果前，先按源码调用点区分 pre-Magic 与 post-Magic 队列，session transcript 同时覆盖成功 spawn 和 existing-object cleanup。
 - Verification: 调整为 `HealthChanged -> UserLocation -> RemoveBuff -> ObjectHidden -> ObjectDied -> Magic` 后，DarkBody session、race、全量 Go 测试通过。
+
+### 2026-08-19 — 对照命令不得把 Go 路径带入 Legacy 工作目录
+
+- Symptom: 读取 PetSettings 对照时在 Legacy 根目录追加了 Go 的 `internal/worlddata/world.go`，命令在首个不存在路径处失败；没有写入，整条输出不能作为源码证据。
+- Root cause: 连续查看两侧配置时复用了另一仓库的相对路径，没有把 `workdir` 与参数集合绑定为单一仓库。
+- Prevention: 跨仓库对照必须拆成独立调用；每次切换前重新执行当前仓库的 `git rev-parse --show-toplevel`，调用中只允许出现该仓库已核验的路径，失败输出整体作废。
+- Verification: 本次失败命令未改变工作树；随后将 Legacy `Server/...` 与 Go `internal/...` 查询拆开，并只采用两条成功调用的输出。
+
+- Strengthening after recurrence: 本批一次 Go 只读编排又因 `functions.exec` JavaScript 参数对象漏写闭合括号而在执行前失败；即使命令本意只读，也不能把未执行当作源码证据。
+- Strengthened prevention: 复杂读取拆为最小单仓库调用，先用单个 `exec_command` 验证参数闭合和文件存在，再扩展查询；编排脚本必须在提交前逐字检查 `await tools.exec_command({...}); text(r.output);` 结构。
+- Verification after recurrence: 失败发生在工具脚本解析阶段、两个仓库均无文件变化；后续 Go 读取改为单个合法调用后再继续分析。
+
+### 2026-08-19 — Portal 容量测试必须先满足通用施法距离门禁
+
+- Symptom: Portal 双门户容量测试预期已经扣除法力，但实际返回未施法且 MP 未变化。
+- Root cause: 测试目标点距施法者超过 Portal 的目录 Range=9，Magic 入口在专用容量判断前按 Legacy 通用范围门禁直接返回。
+- Prevention: 为法术专用失败分支写测试时，先确认请求通过通用 CanCast、Range、CastReady 和 MP 门禁，再单独构造专用失败条件；范围外行为另设测试。
+- Verification: 将容量测试目标移入 9 格范围后，确认 MP 已扣除、`Cast=false` 且没有延迟动作，Portal 定向测试全通过。
