@@ -4836,3 +4836,45 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 只按业务阶段组织 `worldMagicResult.SelfPackets`，没有追踪 Legacy `Magic`、`SpellObject.Spawned`、`Chat` 和 `ConsumeItem` 各自的入队位置。
 - Prevention: 迁移任何多包动作时，先按源码调用顺序列出每个包的入队点与收件人，再决定放入 self、pre-notification 或 delayed 队列；session transcript 必须覆盖施法者和目标两端。
 - Verification: 将 Reincarnation 删除包移到 pre-Magic 通知尾部后，Legacy 对照顺序与 Go 双会话 transcript 一致，定向 Reincarnation 测试通过。
+
+### 2026-08-19 — Go 检索编排必须先验证仓库路径与 JavaScript 参数
+
+- Symptom: 本轮多次检索命令在执行前失败：两次 `functions.exec` 编排脚本报 JavaScript `Unexpected token ')'`，一次 Go workdir 拼成了不存在的 `Crystal.GoServer.GoServer`，另一次旧目录检索先报 `cmd/crystal-server` 不存在。
+- Root cause: 手写嵌套工具参数时混用了转义引号，并沿用了未先核对的目录/相对路径假设；失败发生在进程启动前，不能提供代码证据。
+- Prevention: 工具脚本统一使用最小、单引号参数对象；每次跨仓库/长任务前先独立运行 `pwd` 与 `git rev-parse --show-toplevel`，再使用已验证根目录和 `rg --files` 得到的实际相对路径。
+- Verification: 改用保守参数格式和已核对的 Go/Legacy 根目录后，Legacy 源码、Go 实现读取及后续测试均成功，失败命令没有产生文件修改。
+
+### 2026-08-19 — 长行文档与功能补丁必须使用小范围 apply_patch 上下文
+
+- Symptom: DarkBody 初版代码补丁和迁移矩阵整行替换都因 `apply_patch verification failed` 未应用。
+- Root cause: 补丁把包含超长 P5 行或已变化上下文的整段文本作为精确匹配，任何微小换行/字段差异都会使整个 hunk 无法定位。
+- Prevention: 代码按文件/函数使用短上下文分块；迁移矩阵只在稳定的段落锚点附近插入新条目，避免替换整行长表格；每次失败后先用只读 `sed`/`rg` 重新确认上下文再重试。
+- Verification: 将 DarkBody 实现拆成支持列表、magic 分支、ObjectMagic 快照和新文件四个小 hunk 后成功；矩阵改为在 Mirroring 段落后插入独立 DarkBody 条目并成功应用。
+
+### 2026-08-19 — DarkBody 测试必须包含通用隐身清理与观察者广播
+
+- Symptom: 初版世界测试错误地期待目标只收到 `ObjectMonster`，并把第二次无效目标施法断言为没有任何 pre-Magic 通知。
+- Root cause: 新 clone 的可见 AddBuff/Hidden 会通过 `notifyPlayersExcept` 广播给附近观察者；而施法入口在玩家已 Hidden 时会先按 Legacy 通用路径移除 DarkBody，产生 `RemoveBuff`/`ObjectHidden(false)`，即使本次目标无效也如此。
+- Prevention: 为每个施法测试分别收集 caster/observer 的包 ID，并在断言前先追踪通用 Magic 前置阶段（隐藏清理、方向、MP）；不要只根据专用 spell helper 的返回值推断完整 transcript。
+- Verification: 更新目标观察者包矩阵并保留无效目标后 clone 存活/不重复练习断言，DarkBody 定向测试与全量服务端测试通过。
+
+### 2026-08-19 — 手工世界 fixture 的属性公式必须明确 StatsInitialized 语义
+
+- Symptom: DarkBody AC 时长测试预期 6000ms，却得到 2500ms。
+- Root cause: fixture 设置 `StatsInitialized=true` 后，`enter` 按空装备重新计算 AC，把手工 `MinAC=7/MaxAC=11` 替换成运行时基础值，公式本身没有错误。
+- Prevention: 测试要验证手工战斗属性时保持 `StatsInitialized=false`；只有要覆盖装备/登录重算时才显式启用该标志，并在施法前断言参与公式的 AC/MC/DC 值。
+- Verification: 移除 fixture 的初始化标志后时长恢复为 6000ms，公式、buff payload 和 DarkBody 全量测试均通过。
+
+### 2026-08-19 — Hero/Monster 测试对象 ID 必须遵守全局 nextID 分配
+
+- Symptom: Hero-target DarkBody 测试首次没有伤害，clone 移动后目标 ID 变成了另一个对象。
+- Root cause: 手工 Hero 使用了即将由 world `nextIDLocked` 分配给新 clone 的 ID 3，导致普通宠物 target lookup 优先命中自身 Monster 并清除 Hero 目标。
+- Prevention: 测试中新增运行时对象后，先读取 world 已分配的 ID；手工对象使用明确不与 `nextIDLocked` 冲突的 ID，并在断言中验证 target ID 全局唯一。
+- Verification: 将 Hero fixture 改用 ID 99 后，clone 保留 Hero target 并在 action boundary 后造成预期伤害，相关普通宠物回归通过。
+
+### 2026-08-19 — DarkBody 召回 transcript 必须按 pre-Magic 入队点断言
+
+- Symptom: 首版 net.Pipe 召回测试期待 `ServerMagic` 先于 `ServerObjectDied`，实际读到 death packet 后测试失败并关闭 pipe。
+- Root cause: DarkBody 的 `Die()` 等效通知被放入 `BeforeMagicNotifications`，服务端按 Legacy 入队点在最终 `ServerMagic` 前发送；只有 delayed Mirroring 的 death 才位于最终 Magic 之后。
+- Prevention: 迁移立即效果或召回效果前，先按源码调用点区分 pre-Magic 与 post-Magic 队列，session transcript 同时覆盖成功 spawn 和 existing-object cleanup。
+- Verification: 调整为 `HealthChanged -> UserLocation -> RemoveBuff -> ObjectHidden -> ObjectDied -> Magic` 后，DarkBody session、race、全量 Go 测试通过。
