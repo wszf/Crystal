@@ -4956,3 +4956,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 只新增了常量和局部 payload 测试，没有同时把常量加入既有的完整 `wants`/`got` 映射表。
 - Prevention: 每新增一个协议 ID，必须同时更新常量、payload/parser 测试、完整 ordinal 映射和唯一性表，并运行 `go test ./...`。
 - Verification: 补齐 `ServerPlayerUpdate` 的 `got` 映射后，协议定向测试通过，随后重新执行全仓测试。
+
+### 2026-08-19 — 特殊 Buff 测试必须区分相同包 ID 的 payload 顺序
+
+- Symptom: 特殊装备 Buff 移除定向测试把两个 `RemoveBuff` 包误期望成一个；修正实现后又发现仅比较包 ID 无法验证 `Skill` 与 `ClearRing` 的反向遍历顺序。
+- Root cause: `Skill` 和 `ClearRing` 都使用同一个 `ServerRemoveBuff` ordinal，测试只断言 ID 数量，没有解析 payload 的 Buff 类型；同时实现最初按正序扫描，偏离 Legacy `ProcessBuffs` 的倒序扫描。
+- Prevention: 对同一 ordinal 的连续事件必须同时断言 payload discriminator 和顺序；迁移 Legacy 倒序列表逻辑时，先固定源端遍历方向，再写包序测试。
+- Verification: Go 测试现在断言 `Skill=113`、`ClearRing=114` 的倒序移除及随后 `ObjectHidden`，定向测试与整个 `cmd/crystal-server` 包均通过。
