@@ -4757,8 +4757,8 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 
 - Symptom: 本轮一次 `functions.exec` 用 `Promise.all` 同时发起 Legacy 与 Go 查询，违反单仓库调用边界；后续还出现了在 Go workdir 中引用 Legacy `Shared/Enums.cs`、以及缺少 `me_work` 的错误 Go 路径。
 - Root cause: 为减少往返而把两个仓库的 workdir/相对路径放进同一编排，调用前没有逐条检查仓库根与命令字符串。
-- Prevention: 每个工具调用/嵌套命令只允许一个明确仓库根；跨仓库比较必须拆成串行、独立调用，命令内不得出现另一仓库路径或相对路径。
-- Verification: 本批后续 Go 格式化、测试、矩阵编辑均只触及 Go 仓库，Legacy 仅通过独立调用读取 lessons；错误混合输出未用于实现判断。
+- Prevention: 每个工具调用/嵌套命令只允许一个明确仓库根；跨仓库比较必须拆成串行、独立调用，命令内不得出现另一仓库路径或相对路径；运行门禁前先用 `git rev-parse --show-toplevel` 核对 workdir，避免重复目录段导致命令根本未启动。
+- Verification: 本批后续 Go 格式化、测试、矩阵编辑均只触及 Go 仓库，Legacy 仅通过独立调用读取 lessons；最后一次全仓测试前的错误 `Dropbox/Dropbox/...` 路径被及时识别，改用已核对的 Go 根目录后全仓测试通过，错误输出未用于实现判断。
 
 ### 2026-08-19 — NPC 输入按钮必须按 Legacy 的 `/@@KEY` 语法构造
 
