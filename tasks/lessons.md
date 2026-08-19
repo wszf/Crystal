@@ -4784,3 +4784,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Verification: 补充 `raw` 方法后，`go test ./internal/legacyaccount ./cmd/crystal-legacy-account-import`、全仓编译、vet/build 均通过。
 
 补充证据：一次用 `sed -n '/switch packet.ID/,/default:/p'` 统计 Go 客户端入口时，提前命中了嵌套 `default`，输出了大量伪缺失入口；改用整份 `main.go` 的 `protocol.Client*` 引用集合复核后结果为空。预防再强化为：协议覆盖审计不得用会被嵌套 switch 截断的范围表达式，必须用语法边界明确的提取或完整引用集合，并对结果做人工抽样。
+
+### 2026-08-19 — 元数据批次全量服务端回归可能超过常规基线时限
+
+- Symptom: 元数据保留批次的 `go test ./... -count=1` 在服务端包无输出运行约 6 分钟后中止；隔离 `go test ./cmd/crystal-server -count=1 -timeout=180s` 最终在 Blizzard/MeteorStrike 用例上超时，栈同时显示 net.Pipe 读端等待和服务端 `writePacket` 锁等待。
+- Root cause: 既有实时会话测试的生产者/客户端消费边界在全包串行压力下会把已知 30 秒 net.Pipe 超时放大为测试进程级等待；本批只改协议桥接字段与账户/auth 持久化，没有修改 `cmd/crystal-server` 的会话实现。
+- Prevention: 全量服务端回归必须设置明确的 package timeout；出现无输出挂起时先中止并用带 `-v` 的单个失败测试和隔离服务端包复现，不能把放大的等待静默视为通过，也不能未经定向证据修改无关会话代码。
+- Verification: 元数据定向测试、相关 race、全仓编译、vet/build 通过；单独 Blizzard/MeteorStrike 测试仍稳定复现两个 30 秒 net.Pipe 失败，确认异常属于同一基线族但本次全量耗时更长。
