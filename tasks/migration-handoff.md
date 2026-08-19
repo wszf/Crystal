@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `483ebae2 docs: record Shinsu migration handoff`，随后增加本次 KingScorpion 交接更新 | 本次文档与 lessons 更新待提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `fe56473 feat(p5): migrate KingScorpion AI` | 干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `904a60cf docs: record DigOutZombie migration handoff`，随后增加本次 AI=25 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `1a7c654 feat(p5): migrate RevivingZombie AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -488,9 +488,28 @@ C# 文件。
 Go 实现、测试和迁移矩阵已提交为 `682302c feat(p5): migrate DigOutZombie AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（RevivingZombie AI=25）
+
+本批实现 Legacy `RevivingZombie` 的死亡复活状态机，并保留继承的普通
+`MonsterObject.ProcessAI` 路径：
+
+- AI=25 已接入 Go common population；构造时初始化 `LifeCount=rand.Intn(3)`，
+  初始对象保持普通怪物的可见性与 `ObjectMonster.Extra=false`。
+- 每次非最终死亡按 Legacy `Random.Next(20)` 记录 4–23 秒复活窗口；严格在
+  截止时间之后以 75%/50% 阶段恢复，清除死亡/重生计时并发送
+  `ObjectRevived(ObjectID, false)`。
+- 当前 `RevivalCount` 参与经验缩放（100%/75%/50%）；内部复活不减少共享
+  respawn group 的 active population，最终死亡才进入普通 despawn/respawn bookkeeping。
+- 世界测试覆盖构造范围、精确截止边界、随机抽样、两次复活、最终死亡、经验
+  缩放和复活后基础相邻攻击；认证 `net.Pipe` transcript 覆盖 `ObjectDied` →
+  `ObjectRevived` 包序与 payload。
+
+Go 实现、测试和迁移矩阵已提交为 `1a7c654 feat(p5): migrate RevivingZombie AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `682302c` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
+Go HEAD `1a7c654` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
 `433c1e9`，IncarnatedGhoul/IncarnatedZT/BoneFamiliar 为前置提交
 `a0a2c2f`/`0c3ca86`/`f8e2a2c`：
 
@@ -525,6 +544,8 @@ Go HEAD `682302c` 对应本批源码已通过以下收尾门禁；DarkDevil foll
 - `go test ./cmd/crystal-server -run 'DigOutZombie|digOutZombie|Armadillo' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'DigOutZombie|digOutZombie|Armadillo' -count=3 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|summonSkeleton' -count=1 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'RevivingZombie' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'RevivingZombie' -count=5 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|BasicMonsterAI|OrdinaryPet|Shinsu' -count=3 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|IncarnatedZT|ZumaMonster|zumaMonster|RedThunderZuma|ZumaTaurus' -count=3 -timeout=600s`
 - `go test ./... -count=1 -timeout=600s`

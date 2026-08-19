@@ -5601,3 +5601,27 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 只校验了外层多行模板字面量，遗漏了 patch 内容本身的模板定界符。
 - Prevention: 调用 `apply_patch` 前扫描整个 JavaScript 模板字面量，正文中的每个反引号都要转义；解析失败时先核对工作树，再重试完整补丁。
 - Verification: 首次调用没有进入 apply_patch 且 handoff diff 未变化；随后将用反引号全部转义的 patch 重新应用。
+
+### 2026-08-20 — AI=25 勘察命令不能把 Legacy 相对路径带入 Go workdir
+
+- Symptom: 在 Go workdir 查询 RevivingZombie 时混入 `Server/MirObjects/MonsterObject.cs`，`sed` 报文件不存在；该部分没有读取到 Legacy 基线。
+- Root cause: 同一编排中复用了 Legacy 相对路径，没有保持仓库与相对路径的一一绑定。
+- Prevention: Legacy 源码只在 Legacy 精确 workdir 查询，Go 源码只在 Go 精确 workdir 查询；跨仓库比较拆成独立调用，失败部分输出立即作废。
+- Verification: 失败的 `sed` 没有修改文件；随后将分别在正确的 Legacy/Go workdir 重读 RevivingZombie 基线与 revive runtime。
+
+### 2026-08-20 — 会话测试账号必须遵守登录协议长度边界
+
+- Symptom: AI=25 会话测试首次使用较长账号名时，登录返回 `ServerLogin`（ID 7）而非 `ServerLoginSuccess`，测试在 bootstrap 前失败。
+- Root cause: 账号名超过了当前测试登录协议/服务校验允许的长度；字符创建成功并不代表后续登录凭据会被接受。
+- Prevention: 新增会话测试沿用已通过的短账号名模式，并在 `startGameBootstrapForTest` 前确认账号长度处于现有成功样例范围。
+- Verification: 将账号改为 `reviveznet` 后重新运行 AI=25 定向测试，单元、会话和继承基础 AI 测试均通过。
+
+### 2026-08-20 — handoff 补丁数组中的每一行必须是合法 JavaScript 字符串
+
+- Symptom: AI=25 handoff 的首次 `functions.exec` 编排因一行 `@@` 未包在字符串中，在工具执行前报 `SyntaxError`，handoff 未变化。
+- Root cause: 多行 patch 使用逐行数组时漏写了字符串定界符，脚本解析先于 `apply_patch` 失败。
+- Prevention: 逐行 patch 数组中每个元素都必须是完整字符串；调用前检查数组项是否都带引号，失败编排不作为文件状态证据。
+- Verification: 首次调用没有进入 `apply_patch` 且 Legacy 工作树未新增 handoff 变化；随后将用合法逐行数组重试并检查 diff。
+- Strengthening after same-session recurrence: handoff 的第二次数组补丁又遗漏了 patch 行前缀，`apply_patch` 在校验阶段拒绝整组补丁，文件仍未变化。
+- Strengthened prevention: 数组项的 JavaScript 字符串定界符与 patch 的 ` ` / `+` / `-` 前缀分别检查；优先拆成单个小 hunk，逐次确认成功。
+- Verification after strengthening: 随后的 Legacy handoff 表格、Go HEAD、门禁和 AI=25 段落均分别成功应用，随后检查 diff。
