@@ -72,6 +72,7 @@
 - `225e855 feat(p11): migrate user name lookup`
 - `d7bc163 feat(p5): migrate TrapHexagon spell`
 - `1126c84 feat(p5): migrate archer summon spells`
+- `213b92e feat(p5): migrate CaveMaggot AI`
 - `ff39426 feat(migration): add Go legacy account exporter`
 - `cb4b899 feat(migration): add Go legacy world exporter`
 - `296f1c1 feat(migration): add Go protocol probe`
@@ -109,12 +110,23 @@
 
 Go 实现与矩阵更新已提交为 `1126c84 feat(p5): migrate archer summon spells`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（CaveMaggot AI=7）
+
+本批实现 Legacy `CaveMaggot` 的普通玩家目标攻击子集：
+
+- AI=7 已加入 Go common population；保持相邻目标的 `ObjectAttack`、300ms 延迟、`AttackSpeed` 冷却和 impact-time 目标校验。
+- 延迟命中沿用 Legacy `DefenceType.MACAgility`：使用 MAC 而不是 AC，保留 MagicResist miss gate 与 Agility/Accuracy hit gate；命中造成实际伤害后按一次 PoisonResist、20 分之一机会施加 5 秒麻痹/1 秒 tick。
+- 世界测试覆盖 AC/MAC 分离、MagicResist 阻断、延迟动作/中毒参数和包序；认证 `net.Pipe` transcript 覆盖登录后 AI 攻击、延迟伤害及 `Poisoned` 状态。
+
+Go 实现与矩阵更新已提交为 `213b92e feat(p5): migrate CaveMaggot AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `1126c84` 对应本批源码已通过以下收尾门禁：
+Go HEAD `213b92e` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test -race ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes' -count=1 -timeout=5m`
+- `go test -race ./cmd/crystal-server -run 'CaveMaggot' -count=1 -timeout=5m`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
 - `go build ./...`
@@ -131,10 +143,10 @@ Go HEAD `1126c84` 对应本批源码已通过以下收尾门禁：
 
 优先继续 P5，因为最近四个批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
-1. 先机械枚举 109-entry spell catalogue 与 `worldSpellBehaviorSupported` 的差集，并从 Legacy 施法入口、命中 resolver、Buff/Poison 创建点建立准确的 `spell -> effect -> side effects` 表。
-2. 从差集中选择共享运行时、协议顺序和测试矩阵的一组技能/Buff 一次迁移；不要再按单功能碎片化推进，也不要仅凭技能名称推断效果。
-3. 每批同时覆盖公式、MP/冷却、ActionTime/SpellTime retry、目标/地图/友方门禁、owner/observer 包序、到期/死亡/重登以及 auth/world/JSON 终态。
-4. 之后再处理 P5 的 fly/wall validation、高级 PvP/Group combat、通用 monster AI、persistent respawn state 和完整 packet-order closure。
+1. 继续 P5 通用 monster AI，优先审计 Legacy AI=5 `CannibalPlant`、AI=6 `Guard` 和 AI=7 之外的相邻低编号类，逐项确认它们的可生成入口、隐藏/移动/目标门禁和攻击 resolver。
+2. 每批从一个可独立验证的 AI 行为簇开始，同时覆盖公式、冷却、延迟动作/目标重验、玩家/宠物/Hero/Monster 投影、包序和 net.Pipe transcript；不要仅凭怪物名称推断行为。
+3. 对已完成的玩家法术差集继续保持机械校验；若发现真实主动入口缺口，再从 Legacy 施法入口、命中 resolver、Buff/Poison 创建点建立准确的 `spell -> effect -> side effects` 表后成批迁移。
+4. 之后再处理 P5 的 fly/wall validation、高级 PvP/Group combat、persistent respawn state 和完整 packet-order closure。
 
 如果下一 Session 决定切换阶段，应以 `docs/migration-matrix.md` 中明确写出的 pending 项为准，不要从 README 的概述自行推导缺口。
 
