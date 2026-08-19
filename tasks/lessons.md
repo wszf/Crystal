@@ -4991,3 +4991,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: Go 原有 `damagePlayerLocked` 只接收已计算的 armour，不保留 Legacy `DefenceType`；Legacy `ApplyNegativeEffects` 明确排除 `MAC`/`MACAgility`。
 - Prevention: 在共享伤害边界增加显式 `magicDefence` 上下文，并在所有已迁移魔法入口传递 `true`；物理入口保持 `false`，专用未统一路径不宣称已覆盖。
 - Verification: 新增物理/魔法玩家与怪物命中测试，断言魔法路径不消耗 1/14 抽取；`go test ./... -count=1 -timeout=5m` 全部通过。
+
+### 2026-08-19 — NoDuraLoss 必须分离攻击者武器与受击者装备耐久
+
+- Symptom: 初版共享命中函数无法同时表达“魔法不扣攻击者武器”和“物理攻击即使被护甲完全吸收仍扣武器”，并可能把受击者装备耐久放在错误的命中阶段。
+- Root cause: Legacy `HumanObject.Attacked` 在防御命中门通过后、护甲吸收判断前调用 `DamageWeapon`，只有实际掉血后才调用 `DamageDura`；各技能还通过独立 `damageWeapon` 布尔值覆盖默认行为。
+- Prevention: 所有共享伤害入口显式传递 `damageWeapon` 与 `magicDefence`；武器扣损放在护甲门前，受击装备扣损放在实际掉血后，并把 Strong、Amulet、婚戒、零耐久即时包和十秒延迟 `DuraChanged` 放在同一个 `DamageItem` 等价边界。
+- Verification: 物理/魔法/怪物命中、NoDuraLoss、强韧、护婚戒、十秒刷新和 14 格装备随机消耗测试通过；Go 全量测试、race、vet、build 后续均作为批次验收。
+
+### 2026-08-19 — 装备耐久迁移必须更新严格随机序列与合成时钟
+
+- Symptom: 耐久接入后多个 session 探针拒绝新增的 `Next(4)` 或十三次 `Next(1)`；Tucson、Blizzard、HealingCircle 在整包运行时还因合成时间跨昼夜收到未预期的 `TimeOfDay` 包而阻塞。
+- Root cause: Legacy `DamageWeapon` 即使武器槽为空也消耗一次 `Next(4)`，`DamageDura` 对每个非武器槽（包括空槽）消耗一次 `Next(1)`；部分 session 测试把真实光照时钟与一小时后的合成 tick 混用。
+- Prevention: 为严格随机回调使用按命中次数生成的显式 bound 序列；会话测试凡是推进合成时间，都在启动 ticker 前注入固定光照时钟，避免把全局维护包混入战斗 transcript。
+- Verification: 修正重复测试 helper、零值 bound 期望、所有受影响 session 回调和三个合成时钟测试后，定向耐久/技能/session 回归与 `go test ./... -count=1 -timeout=5m` 通过。
+
+### 2026-08-19 — 双段与特殊战士技能必须显式携带 weapon-durability 上下文
+
+- Symptom: 仅用 `magicDefence` 或 `agilityOnly` 推断 weapon durability 时，DoubleSlash/TwinDrake 的公共第二段会漏扣武器；进一步复核发现 FatalSword 会改变防御类型，但不能改变 HalfMoon/CrossHalfMoon/Thrusting 侧击显式 `false` 或 Slaying/FlamingSword 公共命中的显式 `true`。
+- Root cause: Legacy 的 `DelayedAction` 单独保存 `damageWeapon`，它与 `DefenceType` 是两个独立维度；同一技能的两段甚至可以分别为 false/true。
+- Prevention: 将 `damageWeapon` 从 action resolver 传到 Player/Monster/Hero 三类目标的最终伤害函数；普通前方命中、Slaying、FlamingSword、DoubleSlash/TwinDrake 公共段传 true，侧击和技能特殊段按 Legacy 显式 false，不从防御类型反推。
+- Verification: DoubleSlash/TwinDrake/FlamingSword/CrescentSlash/CounterAttack/ShoulderDash 定向测试及全量 Go 回归通过，且 C# 基线文件未被修改。
