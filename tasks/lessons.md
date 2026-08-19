@@ -5033,6 +5033,8 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: session ticker goroutine 与这些测试在未统一锁边界的共享玩家/生物状态上并发读写；race 栈不经过 AI=86 文件或其延迟动作 resolver。
 - Prevention: 每批先跑新增 slice 的 `-race` 定向门禁，再逐条审阅全包 race 的完整栈和测试名称；把 ticker/通知读取与 `intelligentCreatureBuffByType` 的共享对象竞争作为既有 fixture 隔离项单独排期，不把无关 race 归因到新功能，也不把全包 race 记为通过。
 - Verification: `go test -race ./cmd/crystal-server -run ManectricClaw -count=1 -timeout=5m` 通过；`go test ./... -count=1 -timeout=5m`、`go vet ./...`、`go build ./...` 通过；全包 race 的两条失败栈均定位到 `player_spell_buffs.go:738` 与 `intelligent_creature_items.go:549`，本批未改动相关代码。
+- Strengthening after recurrence: AI=87 批次再次运行全包 race 时，`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 重现同一 `player_spell_buffs.go:738` 写入与 `intelligent_creature_items.go:549` 读取竞争；新增 AI=87 定向 race 仍通过，且栈不经过 ManectricBlest。
+- Verification after recurrence: 本次全包 race 仍只作为已知失败记录，不宣称通过；AI=87 定向 race、普通全包测试、vet 和 build 均通过，相关共享 fixture 未在本批改动。
 
 ### 2026-08-19 — Go 延迟攻击测试必须先解析既有队列再断言后续伤害
 
@@ -5054,3 +5056,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 按攻击几何相似性选择了专用 helper，没有先核对 C# 子类是否真的覆盖目标搜索生命周期。
 - Prevention: 每个 AI 批次先检查子类覆盖的方法列表，再复用“继承行为” helper；只有源类确实覆盖同一虚方法时才共享专用搜索器。
 - Verification: 对照 `Server/MirObjects/Monsters/ManectricClaw.cs` 与 `MonsterObject.FindTarget` 后改为 `ancientBringerFindTargetLocked`，Go 编译门禁与 AI=86 定向测试通过。
+
+### 2026-08-19 — AI=87 首轮编译必须核对多返回 helper 与运行时投影字段
+
+- Symptom: ManectricBlest 首轮包编译把 `damageManectricClawTargetLocked` 的双返回值直接用于 `append`，并假设 `StoredHero` 暴露 `Hidden` 字段；编译失败。
+- Root cause: 复用相邻 AI 的伤害 helper 时只看了业务含义，没有逐项核对 Go 签名和当前 Hero 持久化/运行时投影结构。
+- Prevention: 新增 AI 前先读取 helper 完整签名与所有目标结构字段；多返回调用显式解构，目标可见性只使用当前模型实际提供的字段，不从 Legacy 类型名推断 Go 字段。
+- Verification: 修正为显式解构并移除不存在的 Hero 字段依赖后，包级 `go test ./cmd/crystal-server -run '^$'`、AI=87 普通/`-race` 定向测试、`go vet ./...` 和 `go build ./...` 均通过。
+
+### 2026-08-19 — AI=87 扇形测试必须按排除的 Front 方向遍历对象
+
+- Symptom: ManectricBlest Type 1 定向测试在遍历期望对象 ID 时因 Front 方向没有创建对象而解引用 nil，测试 panic。
+- Root cause: 夹具创建对象时跳过了 Legacy 明确排除的 Front 单元格，但断言仍把对象 ID 当作连续区间处理。
+- Prevention: 几何攻击测试的断言必须复用与实现相同的方向域和排除条件，通过方向计算对象 ID；不能用带空洞的连续 ID 区间代替单元格集合。
+- Verification: 断言改为遍历八个方向并跳过 Front 后，AI=87 四个行为测试、全 Go 测试包和定向 race 均通过。
