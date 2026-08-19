@@ -5567,9 +5567,30 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Prevention: 断言 MACAgility 时只验证序列前缀（魔抗、Agility、MAC armour），其余副作用随机调用单独验证或不纳入该投影断言；AI/毒 callback 仍按阶段独立记录。
 - Verification: 修正为核对 `[10,1,1]` 前缀；重新运行 AI=22 定向测试将确认伤害、12 分之一麻痹和延迟重验证。
 
+### 2026-08-20 — 下一项 AI 勘察不能假设不存在的 Legacy glob
+
+- Symptom: 定位 AI=23 工厂入口时在 Legacy workdir 使用不存在的 `Server/Objects/Monster/*.cs` glob，zsh 报 `no matches found`，没有取得源码证据。
+- Root cause: 目录结构尚未由 `rg --files` 确认，直接套用了过期的路径假设。
+- Prevention: Legacy 只读定位先用 `rg --files -g '*.cs'` 确认实际目录，再对已确认文件执行 `rg`/ `sed`；glob 失败输出一律作废。
+- Verification: 失败命令没有启动修改或读取目标文件；随后通过 `rg --files` 确认 `Server/MirObjects/Monsters` 并成功读取 BoneFamiliar 基线。
+
+### 2026-08-20 — 多模式 rg 必须使用显式 -e
+
+- Symptom: AI=23 入口查询重复使用多个 `-F` 选项时，rg 将后续模式解释为路径并报文件不存在；输出仅部分有效。
+- Root cause: 组合固定字符串没有采用 rg 的显式 `-e` 语法，导致查询参数边界错误。
+- Prevention: 多模式固定字符串统一写成 `rg -n -e 'pattern1' -e 'pattern2' files`，失败调用的混合输出不作为完整证据。
+- Verification: 随后用显式 `-e` 重跑，确认工厂 `case 23` 与 `BoneFamiliar.cs`；未把前一次错误输出用于实现判断。
+
 ### 2026-08-20 — Legacy handoff 多行补丁必须先用合法 JavaScript 字面量编排
 
 - Symptom: AI=22 handoff 的首次 `functions.exec` 调用把实际换行直接放入双引号字符串，执行前报 `SyntaxError: Invalid or unexpected token`，没有修改文件。
 - Root cause: 多行 `apply_patch` 参数没有使用模板字面量或显式换行转义，脚本解析阶段先于工具调用失败。
 - Prevention: 通过 `functions.exec` 调用 `apply_patch` 时，多行 patch 一律使用模板字面量并转义其中的模板定界符；提交前检查脚本自身可解析，失败调用不得作为文件状态证据。
 - Verification: 首次调用无 shell/apply_patch 执行且工作树未变化；随后将使用合法模板字面量重新应用完整 handoff patch。
+
+### 2026-08-20 — Go 仓库查询不能把已知文件名降级为错误相对路径
+
+- Symptom: AI=23 补丁失败后的 Go 状态核查在 Go 根目录执行了 `rg world.go`，因文件实际位于 `cmd/crystal-server/world.go` 报不存在；该部分没有源码证据。
+- Root cause: 已确认的仓库层级没有与命令中的相对路径同步，误把包内文件当成根目录文件。
+- Prevention: Go 查询统一使用从仓库根展开的精确相对路径（如 `cmd/crystal-server/world.go`），路径错误输出立即作废，不与同条命令的成功输出混用。
+- Verification: 失败命令没有文件变化；随后用精确包路径读取 world.go 与 summon_skeleton_test.go，确认实际上下文。

@@ -453,10 +453,27 @@ C# 文件。
 Go 实现、测试和迁移矩阵已提交为 `0c3ca86 feat(p5): migrate IncarnatedZT AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（BoneFamiliar AI=23）
+
+本批实现 Legacy `BoneFamiliar` 对基础 `MonsterObject` 的轻量特殊化：
+
+- AI=23 已接入 Go inherited base AI population；构造器固定方向为
+  `MirDirection.DownLeft`，`Spawned` 在首个对象包前将 `Summoned=true`，
+  `GetInfo` 因而投影 `ObjectMonster.Extra=true`。
+- Go `materializeMonster` 对 AI=23 固定方向 5 并预置 summoned 状态，普通
+  `SummonSkeleton` 使用真实 AI=23 定义；保留 500ms 延迟召唤、主人对象 ID、
+  `ObjectMonster` 名称/图像/方向和健康包序。
+- 静态构造/投影测试、SummonSkeleton 世界测试及认证 `net.Pipe` transcript
+  覆盖继承的基础 AI admission、固定方向、summoned 标志、master projection 和
+  delayed visibility；AI=21/22 与 OrdinaryPet/Shinsu 回归保持通过。
+
+Go 实现、测试和迁移矩阵已提交为 `f8e2a2c feat(p5): migrate BoneFamiliar AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `0c3ca86` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
-`433c1e9`，IncarnatedGhoul 为前置提交 `a0a2c2f`：
+Go HEAD `f8e2a2c` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
+`433c1e9`，IncarnatedGhoul/IncarnatedZT 为前置提交 `a0a2c2f`/`0c3ca86`：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -486,6 +503,8 @@ Go HEAD `0c3ca86` 对应本批源码已通过以下收尾门禁；DarkDevil foll
 - `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|incarnatedGhoul' -count=3 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'IncarnatedZT|incarnatedZT' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'IncarnatedZT|incarnatedZT' -count=3 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|summonSkeleton' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|BasicMonsterAI|OrdinaryPet|Shinsu' -count=3 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|IncarnatedZT|ZumaMonster|zumaMonster|RedThunderZuma|ZumaTaurus' -count=3 -timeout=600s`
 - `go test ./... -count=1 -timeout=600s`
 - `go vet ./...`
