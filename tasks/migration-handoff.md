@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `6c7c4059 docs: record Guard migration`，随后增加本次交接更新 | 干净 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `bc2e919 feat(p5): migrate Tao Guard AI` | 干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `6491b0cb docs: record Tao Guard migration`，随后增加本次交接更新 | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `03dad46 feat(p11): migrate harvest lifecycle` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -46,7 +46,7 @@
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
 | P9 Guild/War/Territory/Conquest | In progress | 公会核心、仓库、进度/Buff、战争、领地和完整 Conquest runtime/NPC/assets 子簇已迁移；P9 其余范围尚未统一收口。 |
 | P10 Mail/Market/Auction/Rental/GameShop | In progress | 五个主要经济功能簇均已有协议、事务、在线通知、持久化和竞态测试，但阶段仍未宣告完整。 |
-| P11 Fishing/Awakening/Ranking/Intelligent Creature/Misc | In progress | Fishing、Awakening、Ranking、Intelligent Creature 功能簇已迁移；聊天物品链接已按库存/解锁 Storage/已召唤 HeroInventory 授权并展开定义；`RequestUserName`/`UserName` 已补齐全局角色名查询、缺失静默和协议探针；其他 miscellaneous 系统待补。 |
+| P11 Fishing/Awakening/Ranking/Intelligent Creature/Misc | In progress | Fishing、Awakening、Ranking、Intelligent Creature 功能簇已迁移；聊天物品链接已按库存/解锁 Storage/已召唤 HeroInventory 授权并展开定义；`RequestUserName`/`UserName` 已补齐全局角色名查询、缺失静默和协议探针；共享 HarvestMonster carcass 生命周期已迁移；其他 miscellaneous 系统待补。 |
 | P12 恢复/备份/部署 | Pending | 最终 restart equivalence、生产化 smoke test、备份与部署尚未开始。 |
 
 ## 已交付的重要能力
@@ -78,6 +78,7 @@
 - `ff39426 feat(migration): add Go legacy account exporter`
 - `cb4b899 feat(migration): add Go legacy world exporter`
 - `296f1c1 feat(migration): add Go protocol probe`
+- `03dad46 feat(p11): migrate harvest lifecycle`
 
 ## 最近完成的 P5 批次
 
@@ -170,9 +171,21 @@ Go 实现与矩阵更新已提交为 `b747d76 feat(p5): migrate CannibalPlant AI
 
 Go 实现与迁移矩阵更新已提交为 `bc2e919 feat(p5): migrate Tao Guard AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P11 批次（HarvestMonster carcass lifecycle）
+
+本批实现 Legacy 共享 `HarvestMonster` carcass 生命周期的客户端可观察子集：
+
+- 固定当前线材 `ClientHarvest=49`、`ServerObjectHarvest=91`、`ServerObjectHarvested=92`，并按 Legacy 的 13 字节 `ObjectHarvest` payload 做 round-trip 与截断/尾随字节校验。
+- AI `{1,2,4,5,7,9,28}` 的尸体进入 Harvest 路径；普通死亡掉落被抑制，Skeleton 状态投影贯通静态 `ObjectMonster` 与认证会话。
+- 保留前方一格加一环扫描、方向/移动/动作冷却、两次剥皮后生成缓存掉落、后续 Harvest 领取、背包叠加线材快照、满包/无物品文本、QuestRequired 和 Meat 质量/耐久处理。
+- 保留最近击杀者五秒经验归属及组成员门禁；未实现的独立 Deer AI=1/2 逃跑移动明确留在待迁移项，不把共享 Harvest 生命周期扩张为完整 Deer AI。
+- Go 世界测试覆盖皮肤计数、掉落/背包、无掉落、叠加线材、组门禁；认证 `net.Pipe` transcript 覆盖三次 Harvest、`UserLocation`/`ObjectHarvest`/领取与持久化。
+
+Go 实现与迁移矩阵更新已提交为 `03dad46 feat(p11): migrate harvest lifecycle`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `bc2e919` 对应本批源码已通过以下收尾门禁：
+Go HEAD `03dad46` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test -race ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes' -count=1 -timeout=5m`
@@ -185,6 +198,7 @@ Go HEAD `bc2e919` 对应本批源码已通过以下收尾门禁：
 - CannibalPlant/CreeperPlant 领域回归与 CannibalPlant `net.Pipe` 会话 transcript 通过
 - Guard 领域/认证 session 测试与 `-race` 通过；FurbolgGuard session `-race -count=3` 通过
 - Tao Guard route/目标门禁与认证 session 测试通过；Guard/Tao Guard session `-race -count=5` 通过
+- Harvest 协议/世界/认证 session `-race -count=5` 通过，覆盖三次剥皮、缓存掉落、组门禁和持久化
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 

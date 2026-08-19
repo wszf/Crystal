@@ -2,6 +2,13 @@
 
 Record project-specific corrections and failure-prevention patterns here.
 
+### 2026-08-19 — Harvest 最后一层皮剥必须在同一次调用生成掉落
+
+- Symptom: 初版 Go Harvest 把 `RemainingSkinCount` 从 1 减到 0 后也提前返回，导致 AI=9 尸体比 Legacy 多需要一次客户端 Harvest 才能生成/领取掉落。
+- Root cause: Legacy 只有减完仍大于 0 时返回；减到 0 的最后一次调用会继续进入 `HarvestDrops` 生成分支。
+- Prevention: 处理皮剥次数时仅在 decrement 后仍大于 0 才返回，并把边界测试固定为“第一次只减皮、第二次生成、第三次领取”。
+- Verification: Go world 测试与 `net.Pipe` 会话转录均按三次 Harvest 通过，第二次检查缓存掉落，第三次收到 `GainedItem/ObjectHarvested`。
+
 ### 2026-08-18 — AI=181 Player 目标持久种类与动作编码不同
 
 - Symptom: WaterDragon session reveal 断言把 Player 的 `MonsterAITargetKind` 写成 0，实际搜索后持久状态为 `ancientBringerPlayerTarget (1)`。
@@ -354,6 +361,10 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 在准备 Legacy/Go 对照时复用了上一条命令的路径片段，没有把 `workdir` 与相对路径作为不可分割的一组重新核对。
 - Prevention: 每次跨仓库读取先单独执行并核对 `git rev-parse --show-toplevel`，随后命令只出现当前仓库的相对路径；另一仓库必须在新的调用中读取。
 - Verification: 本次错误命令在读取阶段失败且工作树无变化；后续先在 Go 根目录独立读取 AI 代码，Legacy 对照命令仅使用 `Server/...` 路径。
+- Strengthening after recurrence: 本轮在 Legacy 根目录核对 Harvest 基线时又追加了 Go 的 `cmd/crystal-server` 路径，导致整条读取命令失败；即使 Legacy 前半段输出看似完整，也不得继续采用。
+- Verification after recurrence: 本次调用只读且没有文件变化；后续 Harvest 对照将拆成纯 Legacy 与纯 Go 两次调用，并在每次调用前重新核对根目录。
+- Strengthening after second recurrence: 同一 Harvest 对照中又把 Go 的 `internal/protocol/packet_test.go` 路径追加到 Legacy 命令；任何跨仓库路径一旦出现，整条命令仍必须丢弃，不能只保留前面的 Legacy 输出。
+- Verification after second recurrence: 调用只读且未改动文件；后续先完成纯 Legacy 读取，再结束调用并独立核对 Go 根目录后读取协议实现。
 
 - Strengthening after recurrence: 跨仓库补丁目标也必须在调用前用完整绝对路径核验；少拼一段目录的目标会在 apply 阶段失败，不能依赖工具错误文本代替路径检查。
 - Verification after recurrence: 本次 Go 测试期望补丁因缺少 `me_work` 目录在写入前被拒绝；随后将所有目标固定为已核验的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer/...` 路径。
