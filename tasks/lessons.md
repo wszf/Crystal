@@ -4890,9 +4890,26 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthened prevention: 复杂读取拆为最小单仓库调用，先用单个 `exec_command` 验证参数闭合和文件存在，再扩展查询；编排脚本必须在提交前逐字检查 `await tools.exec_command({...}); text(r.output);` 结构。
 - Verification after recurrence: 失败发生在工具脚本解析阶段、两个仓库均无文件变化；后续 Go 读取改为单个合法调用后再继续分析。
 
+- Strengthening after second recurrence: 本轮再次把 Go 的 `cmd/crystal-server/*.go` 路径带入 Legacy 命令，shell 在执行前因路径不存在而失败；以后每条只读命令也必须做仓库路径审计，不能仅依赖 workdir。
+- Verification after second recurrence: 失败发生在 shell 展开阶段且无文件写入；拆分为 Legacy-only 与 Go-only 调用后，元素/觉醒源码证据均来自成功命令。
+
 ### 2026-08-19 — Portal 容量测试必须先满足通用施法距离门禁
 
 - Symptom: Portal 双门户容量测试预期已经扣除法力，但实际返回未施法且 MP 未变化。
 - Root cause: 测试目标点距施法者超过 Portal 的目录 Range=9，Magic 入口在专用容量判断前按 Legacy 通用范围门禁直接返回。
 - Prevention: 为法术专用失败分支写测试时，先确认请求通过通用 CanCast、Range、CastReady 和 MP 门禁，再单独构造专用失败条件；范围外行为另设测试。
 - Verification: 将容量测试目标移入 9 格范围后，确认 MP 已扣除、`Cast=false` 且没有延迟动作，Portal 定向测试全通过。
+
+### 2026-08-19 — 选迁移批次前必须核对实际运行时调用链
+
+- Symptom: 看到 Go `ItemAwakening` 注释称觉醒效果尚未应用后，把它误选为待实现的 P11 缺口。
+- Root cause: 只依据陈旧注释判断状态，没有先沿 `addItemStats`、装备统计计算和玩家刷新链路核对；实际 Go 已按六种觉醒类型把值投影到 DC/MC/SC/AC/MAC/HP+MP。
+- Prevention: 从 TODO、注释或矩阵选择批次前，必须搜索真实运行时入口和调用链；已有行为只补覆盖测试/修正文档，不重复实现。
+- Verification: 检查 Go 装备统计与 `refreshPlayerStatsLocked` 调用链，确认觉醒值已生效；随后转向实际未迁移的元素配置边界。
+
+### 2026-08-19 — Go 配置加载的多返回值先拆开再组装
+
+- Symptom: 元素配置首轮定向测试未能编译，提示 `loadElementalSettings` 的多返回值被用于结构体字面量的单值位置。
+- Root cause: 为保持初始化紧凑，把 `(value, error)` 函数调用直接嵌入 `legacySettings` 字面量；Go 不允许该多返回值上下文。
+- Prevention: 配置加载函数返回值包含错误时，先显式接收并检查 error，再赋入结构体字段；完成新 loader 后先跑目标包的最小编译/定向测试。
+- Verification: 改为显式赋值并传播错误后，`go test ./internal/worlddata ./internal/legacyworld ./cmd/crystal-server`、`go test ./...`、`go vet ./...` 与 `go build ./...` 均通过。
