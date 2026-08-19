@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `b7dbb14e docs: record Deer AI migration`，随后增加本次 Tree 交接更新 | 本次文档更新待提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `a25713a feat(p5): migrate EvilCentipede AI` | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `ff1cbd3 feat(p5): migrate RootSpider and BombSpider AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3 和 EvilCentipede AI=14 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14 以及 BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -81,6 +81,7 @@
 - `03dad46 feat(p11): migrate harvest lifecycle`
 - `93b1d77 feat(p5): migrate Deer AI`
 - `a25713a feat(p5): migrate EvilCentipede AI`
+- `ff1cbd3 feat(p5): migrate RootSpider and BombSpider AI`
 
 ## 最近完成的 P5 批次
 
@@ -225,12 +226,33 @@ Go 实现与迁移矩阵更新已提交为 `373dec2 feat(p5): migrate Tree AI`�
   duration 5）毒状态、两秒 tick 以及 Monster/Human/Hero 的抵抗/机会顺序。Go
   世界测试覆盖隐藏目标 AOE、目标顺序、计时和 poison state，认证 `net.Pipe`
   transcript 覆盖显现、攻击、延迟命中和精确包序。
-- Go 提交为 `a25713a feat(p5): migrate EvilCentipede AI`；AI=39 RootSpider
-  仍待迁移。本批未修改任何 C# 文件。
+- Go 提交为 `a25713a feat(p5): migrate EvilCentipede AI`；本批未修改任何 C# 文件。
+
+## 本次完成的 P5 批次（BugBagMaggot AI=12、RootSpider AI=39、BombSpider AI=40）
+
+本批实现 Legacy 三个召唤/爆炸怪物 AI 的客户端可观察生命周期：
+
+- BugBagMaggot 与 RootSpider 接入 common population，保持静止、同地图
+  DataRange=16 目标门禁和 20 个存活从属上限；读取 Setup.ini 的
+  `BugBatName`/`BombSpiderName`，发送 `ObjectAttack`，保留父怪 300ms action
+  和 3 秒 attack 冷却。
+- RootSpider 保留 Up/UpRight/Right 三个构造方向及 Back/DownRight/DownLeft
+  召唤格；子怪在 500ms 延迟 Spawn 中出现，继承 Player Target，`Spawned`
+  的两秒 ActionTime 仍可观察，并在后续 world tick 才开始处理。
+- BombSpider 保留目标丢失、相邻不同格接触和五分钟超时死亡；死亡立即发
+  `ObjectDied`，500ms 后按 `FindAllTargets(1, ..., false)` 的 cell/insertion
+  顺序对 Player、owned Monster、Hero 做 ACAgility 爆炸，使用 Legacy
+  DC/SC luck/unit-bound 随机、PoisonResistWeight/5 chance、Green 五秒和两秒
+  首跳毒伤。
+- Go 世界测试覆盖召唤位置、容量、following-tick、接触伤害和毒物状态；认证
+  `net.Pipe` transcript 锁定 `ObjectAttack -> ObjectMonster -> ObjectDied ->
+  delayed explosion/Chat`，并单独锁定首个 Green tick 的伤害和 `ServerPoisoned`。
+
+Go 实现与迁移矩阵已提交为 `ff1cbd3 feat(p5): migrate RootSpider and BombSpider AI`；本批未修改任何 C# 文件。
 
 ## 当前质量门禁
 
-Go HEAD `a25713a` 对应本批源码已通过以下收尾门禁：
+Go HEAD `ff1cbd3` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -240,6 +262,8 @@ Go HEAD `a25713a` 对应本批源码已通过以下收尾门禁：
 - `go test -race ./cmd/crystal-server -run 'CannibalPlant' -count=1 -timeout=5m`
 - `go test ./cmd/crystal-server -run 'CannibalPlant|CreeperPlant|WaterDragon|EvilCentipede' -count=1`
 - `go test -race ./cmd/crystal-server -run 'EvilCentipede' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'BugBagAndRootSpider|RootSpiderStops|RootSpiderChild|BombSpiderContact|SessionRootSpiderBombSpider' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'RootSpider|BombSpider|BugBag' -count=5 -timeout=600s`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
 - `go build ./...`
@@ -250,6 +274,7 @@ Go HEAD `a25713a` 对应本批源码已通过以下收尾门禁：
 - Harvest 协议/世界/认证 session `-race -count=5` 通过，覆盖三次剥皮、缓存掉落、组门禁和持久化
 - Deer 世界/认证 session 定向测试、`go test -race ./cmd/crystal-server -run 'Deer' -count=5` 通过，覆盖目标发现、直线/受阻逃跑、漫游和 `ObjectWalk` transcript
 - `go test ./cmd/crystal-server -count=1 -timeout=600s` 通过
+- `go test ./... -count=1 -timeout=600s` 在本批提交后通过；包含 RootSpider/BombSpider 认证转录
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 
@@ -262,9 +287,9 @@ Go HEAD `a25713a` 对应本批源码已通过以下收尾门禁：
 
 优先继续 P5，因为最近四个批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
-1. 继续 P5 通用 monster AI，优先核对并迁移矩阵中仍 pending 的 AI=39
-   `RootSpider`/BugBag 行为，再按 `docs/migration-matrix.md` 中尚未完成的
-   AI/target sub-slice 排序，逐项确认可生成入口、隐藏/移动/目标门禁和攻击 resolver。
+1. 继续 P5 通用 monster AI，按 `docs/migration-matrix.md` 中下一个仍 pending
+   的 AI/target sub-slice 排序，逐项确认可生成入口、隐藏/移动/目标门禁和攻击
+   resolver；RootSpider/BugBag 已在本批完成。
 2. 每批从一个可独立验证的 AI 行为簇开始，同时覆盖公式、冷却、延迟动作/目标重验、玩家/宠物/Hero/Monster 投影、包序和 net.Pipe transcript；不要仅凭怪物名称推断行为。
 3. 对已完成的玩家法术差集继续保持机械校验；若发现真实主动入口缺口，再从 Legacy 施法入口、命中 resolver、Buff/Poison 创建点建立准确的 `spell -> effect -> side effects` 表后成批迁移。
 4. 之后再处理 P5 的 fly/wall validation、高级 PvP/Group combat、persistent respawn state 和完整 packet-order closure。

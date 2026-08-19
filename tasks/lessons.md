@@ -5261,6 +5261,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthening after same-session recurrence: Go 仓库根目录没有匹配 `*.go` 的文件，未核对布局的根目录 glob 再次使只读检索失败。
 - Strengthened prevention: 先用 `rg --files` 确认文件所在目录，再把精确相对路径或已确认目录传给 `rg`；禁止把猜测 glob 放进后续读取命令。
 - Verification: 该 Go 命令没有被用于推理；后续读取改在已确认的 `cmd/crystal-server` 路径中执行。
+- Strengthening after second same-session recurrence: 本轮又误读了不存在的 `Server/MirObjects/MonsterInfo.cs`、`Server/MirEnvir/Settings.cs`、`Server/MirMap.cs`，并在 Legacy workdir 中带入 `cmd/crystal-server/*.go`；另一条 Go 读取还猜测了 `cmd/crystal-server/worlddata.go`。这些调用的输出全部作废。
+- Verification after strengthening: 后续先以 `rg --files` 核对实际的 `Server/MirDatabase/MonsterInfo.cs`、`Server/Settings.cs`、`Server/MirEnvir/Map.cs` 与 `internal/worlddata/world.go`，再分别在单仓库 workdir 重跑读取；实现和测试只采用成功调用的证据。
+- Strengthening after third same-session recurrence: 本轮 Legacy 读取 `MonsterObject.cs` 时又在同一命令尾部加入 Go 的 `cmd/crystal-server` 路径，导致该只读调用非零；即使前段 Legacy 输出完整，也全部作废，未用于后续判断。
+- Verification after third strengthening: C# 构造器证据随后在纯 Legacy 调用重新读取，Go 字段/实现证据在独立 Go 调用读取；之后的测试、补丁和审计均按仓库边界执行。
 
 ### 2026-08-20 — EvilCentipede map value 回写后的测试断言必须读取 world 状态
 
@@ -5282,6 +5286,19 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 没有先确认目录存在就把猜测路径并入检索；即使命令同时打印了 `tasks` 文件，也不能把非零调用的部分输出当作证据。
 - Prevention: 每次检索先对已知目录单独执行 `rg --files tasks`；跨目录查找只使用该仓库此前核实存在的目录，禁止在同一命令混入猜测路径。
 - Verification: 本次失败无写入，输出已作废；随后应在 `tasks` 单目录中读取 `migration-handoff.md`，并重新检查状态。
+- Strengthening after same-session recurrence: 本轮在 Go workdir 再次执行了包含不存在 `tasks` 目录的 `rg --files tasks docs`；该非零调用不能证明 `docs` 之外的任何路径。目录查询必须按仓库、按已确认目录拆开。
+- Verification after strengthening: 随后 Legacy 只读取 `tasks`，Go 只读取 `docs`，两侧分别返回成功；后续文档更新与状态核对不再复用混合目录命令。
+
+### 2026-08-20 — RootSpider/BombSpider 配置与延迟毒伤必须覆盖完整时序
+
+- Symptom: 新增 `BugBatName`/`BombSpiderName` 后，`TestMonsterSettingsDefaultsAndJSONCompatibility` 首次失败；BombSpider 爆炸测试在首次实现中把玩家 HP 从 100 算到 83，而 Legacy 期望主伤害后仍为 90。
+- Root cause: 配置字段只同步了生产结构和 loader，遗漏了完整默认值/JSON 夹具；BombSpider Green poison 未设置首次 `TickAt`，统一 poison processor 在爆炸同一 tick 立即追加了首跳毒伤，违背 Legacy 的两秒 TickSpeed。
+- Prevention: 每个新增 Setup 字段同时更新默认值、loader、运行时 fallback、JSON 完整结构断言和自定义 Setup 读取测试；所有延迟施加的毒物显式设置 `TickAt = impact + Tick`，并分别断言命中 HP、毒物列表和首次到期 HP。
+- Verification: `go test ./internal/worlddata ./internal/legacyworld -count=1`、`go test ./internal/legacyworld -count=1` 与 RootSpider/BombSpider 定向测试通过；随后 `go test ./... -count=1 -timeout=600s` 全部通过。
+- Strengthening after session recurrence: RootSpider/BombSpider 认证夹具首次把 Player 放在 child 同一格，误以为会立即触发接触死亡；Legacy 的 `InAttackRange` 对同格返回 false，只有相邻不同格才进入 `Die`。随后又把 `ServerPoisoned` 错放在爆炸通知中，忽略了 Green 的首个 2000ms 处理边界。
+- Verification after strengthening: 认证转录改为 child 与 Player 相邻，锁定 `ObjectDied`；爆炸时只断言伤害/Chat，`impact+2s+1ms` 单独断言首跳伤害和 `ServerPoisoned`，定向测试通过。
+- Strengthening after race recurrence: `net.Pipe` 转录首次在 `-race -count=5` 中偶发/重复看到手工接触阶段没有 `ObjectDied`；停止 poison ticker 不会停止连接读循环在每次客户端读取间执行的实时 `world.tick`。
+- Verification after strengthening: 认证夹具在手工驱动前显式将 `monsterAIEnabled=false`，保留直接 resolver 的通知投递；普通定向测试与 `go test -race ./cmd/crystal-server -run 'RootSpider|BombSpider|BugBag' -count=5` 通过。
 
 ### 2026-08-20 — EvilCentipede 的 FindAllTargets(false) 不能复用带可见性门禁的搜索 gate
 
