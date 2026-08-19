@@ -4772,6 +4772,15 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Symptom: 本批 `go test ./... -count=1` 仍失败于 Blizzard/MeteorStrike 两个 30 秒 net.Pipe 超时、HealingCircle 30 秒超时和 TucsonMage 额外 `[61 72]` 包。
 - Root cause: 与上一会话记录的实时 ticker/客户端消费边界基线完全相同，失败不涉及 NPC 输入、协议 payload 或脚本动作替换。
 - Prevention: 保留失败测试名、超时和额外 packet 作为基线证据；以新增会话测试、相关包 race、全仓库编译和 vet/build 作为本批验收，不为无关基线改动 NPC 实现。
+- Verification: 账户二进制导入批次于 2026-08-19 08:11–08:13 UTC 再次得到同一失败指纹；`internal/legacyaccount`、导入命令、所有内部包、`go test ./... -run '^$'`、`go vet ./...` 与 `go build ./...` 均通过，确认该基线未扩散到本批。
+- Strengthened prevention: 全量回归报告必须同时给出失败测试的精确名称/超时、受影响的服务端包，以及新增相关包和全仓静态检查结果；只有失败指纹发生变化才进入本批代码归因。
 - Verification: `NPCInput`/`BuyItemBack` 目标测试、相关 `go test -race` 和 `go test ./... -run '^$'` 均通过；全量失败集合与既有 lessons 完全一致。
+
+### 2026-08-19 — 二进制写出器新增原始字节方法后先做定向编译
+
+- Symptom: 初次运行 `go test ./internal/legacyaccount` 时，新增 `binary_write.go` 报告 `legacyEncoder` 缺少 `raw` 方法，批次测试未能编译。
+- Root cause: 编码器调用了用于拼接已编码 `UserItem` 记录的 `raw` 写入入口，但实现补丁只先添加了带长度前缀的 `bytes` 入口。
+- Prevention: 新增二进制 writer 时先列出 primitive/raw 两类写入 API，并在扩展测试前立即运行受影响包的 `gofmt` 与定向 `go test`。
+- Verification: 补充 `raw` 方法后，`go test ./internal/legacyaccount ./cmd/crystal-legacy-account-import`、全仓编译、vet/build 均通过。
 
 补充证据：一次用 `sed -n '/switch packet.ID/,/default:/p'` 统计 Go 客户端入口时，提前命中了嵌套 `default`，输出了大量伪缺失入口；改用整份 `main.go` 的 `protocol.Client*` 引用集合复核后结果为空。预防再强化为：协议覆盖审计不得用会被嵌套 switch 截断的范围表达式，必须用语法边界明确的提取或完整引用集合，并对结果做人工抽样。
