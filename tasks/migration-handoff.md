@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `a0a3a0b8`，随后增加本交接文档提交 | 干净，较 `origin/master` ahead 84（交接提交前） |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `833d1ef feat(p5): migrate Guard AI` | 干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `6c7c4059 docs: record Guard migration`，随后增加本次交接更新 | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `bc2e919 feat(p5): migrate Tao Guard AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon，以及 SummonVampire/SummonToad/SummonSnakes 的 Legacy admission、目标捕获、两段延迟、宠物生命周期、AI/伤害、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、通用怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard 和 Tao Guard 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、通用怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -141,7 +141,7 @@ Monster/Hero 目标子集：
 
 Go 实现与矩阵更新已提交为 `b747d76 feat(p5): migrate CannibalPlant AI`；本批未修改任何 C# 文件。
 
-## 本次完成的 P5 批次（Guard AI=6）
+## 本次完成的 P5 批次（Guard AI=6、Tao Guard AI=58）
 
 本批实现 Legacy `Guard`（AI=6）的可观察服务端行为，并与已迁移的
 `ArcherGuard`（AI=113）共享目标侧 Guard 门禁：
@@ -161,11 +161,18 @@ Go 实现与矩阵更新已提交为 `b747d76 feat(p5): migrate CannibalPlant AI
   transcript；FurbolgGuard transcript 同步隔离 live AI 与手动时钟，避免
   服务循环污染协议测试的随机流。
 
-Go 实现与迁移矩阵更新已提交为 `833d1ef feat(p5): migrate Guard AI`；本批未修改任何 C# 文件。
+- AI=58 已复用 Guard 的 common population、route-only movement、ViewRange
+  Player/Monster/Hero 目标和 SkyBlue 投影、红名 Player safe-zone/NoFight
+  绕过及 Player 单体/AOE 免疫；保留 Legacy Tao Guard 的差异：owned
+  Monster 只要主人 `AttackMode != Peace` 即可成为目标，而 AI=6/113 仍要求
+  主人 `PKPoints >= 200`。普通域测试覆盖非 Peace/Peace 两侧和 AI=6 对照，
+  认证 `net.Pipe` transcript 覆盖攻击包序与 300ms AC impact。
+
+Go 实现与迁移矩阵更新已提交为 `bc2e919 feat(p5): migrate Tao Guard AI`；本批未修改任何 C# 文件。
 
 ## 当前质量门禁
 
-Go HEAD `833d1ef` 对应本批源码已通过以下收尾门禁：
+Go HEAD `bc2e919` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test -race ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes' -count=1 -timeout=5m`
@@ -177,6 +184,7 @@ Go HEAD `833d1ef` 对应本批源码已通过以下收尾门禁：
 - ArcherSummon/TrapHexagon 会话组合重复 3 次通过，含 net.Pipe keep-alive barrier 回归
 - CannibalPlant/CreeperPlant 领域回归与 CannibalPlant `net.Pipe` 会话 transcript 通过
 - Guard 领域/认证 session 测试与 `-race` 通过；FurbolgGuard session `-race -count=3` 通过
+- Tao Guard route/目标门禁与认证 session 测试通过；Guard/Tao Guard session `-race -count=5` 通过
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 
