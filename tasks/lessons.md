@@ -5616,6 +5616,13 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Prevention: 新增会话测试沿用已通过的短账号名模式，并在 `startGameBootstrapForTest` 前确认账号长度处于现有成功样例范围。
 - Verification: 将账号改为 `reviveznet` 后重新运行 AI=25 定向测试，单元、会话和继承基础 AI 测试均通过。
 
+### 2026-08-20 — Go 查询 workdir 必须直接使用已确认根目录
+
+- Symptom: AI=26 只读查询把 Go workdir 写成 `Crystal.GoServer.GoServer`，CreateProcess 报路径不存在；该调用没有取得源码证据。
+- Root cause: 手工拼接已确认的绝对仓库根目录时重复追加了仓库名。
+- Prevention: Go 命令统一复制精确根目录 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，不在其后追加目录；路径失败输出立即作废。
+- Verification: 失败调用没有文件变化；随后在精确 Go 根目录重读 `monster_ai.go`、`stoning_statue.go` 和攻击 resolver。
+
 ### 2026-08-20 — handoff 补丁数组中的每一行必须是合法 JavaScript 字符串
 
 - Symptom: AI=25 handoff 的首次 `functions.exec` 编排因一行 `@@` 未包在字符串中，在工具执行前报 `SyntaxError`，handoff 未变化。
@@ -5625,3 +5632,20 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthening after same-session recurrence: handoff 的第二次数组补丁又遗漏了 patch 行前缀，`apply_patch` 在校验阶段拒绝整组补丁，文件仍未变化。
 - Strengthened prevention: 数组项的 JavaScript 字符串定界符与 patch 的 ` ` / `+` / `-` 前缀分别检查；优先拆成单个小 hunk，逐次确认成功。
 - Verification after strengthening: 随后的 Legacy handoff 表格、Go HEAD、门禁和 AI=25 段落均分别成功应用，随后检查 diff。
+- Strengthening after same-session recurrence: AI=26 handoff 的首次编排在 JavaScript join 转义处未执行，第二次编排又遗漏了 update hunk 行首的补丁前缀，apply_patch 拒绝整组补丁。
+- Strengthened prevention: 逐行数组补丁的 join 语法先做最小可解析检查；每个 update-hunk 行逐项确认带有空格、加号或减号前缀，并拆分为插入、替换、追加三个小 hunk。
+- Verification after strengthening: 两次失败调用均未修改 handoff；随后三个小 hunk 均成功应用，AI=26 段落、Go HEAD 和门禁记录均已核对。
+
+### 2026-08-20 — AI=26 定向测试必须区分搜索范围与攻击几何
+
+- Symptom: ShamanZombie 定向测试首次把距离七格的搜索结果断言为无通知，实际 AI 已正确锁定目标并发出移动包，测试失败。
+- Root cause: Legacy 的目标搜索范围大于 ShamanZombie 的轴线/对角线六格攻击范围；测试把“找到目标并移动”与“进入攻击范围”混成了一个状态。
+- Prevention: AI 测试分别断言搜索锁定、移动通知、六格攻击排队和延迟命中重验证；不要用攻击几何推断搜索通知为空。
+- Verification: 修正测试后，ShamanZombie 定向测试通过，并验证目标进入安全区后六百毫秒延迟伤害被取消。
+
+### 2026-08-20 — shell 查询中的 Markdown 反引号必须避免进入双引号
+
+- Symptom: AI=26 handoff 核查把含 Markdown 反引号的 rg 模式放进双引号，zsh 报 unmatched quote，没有取得核查输出。
+- Root cause: shell 会在双引号命令参数中处理反引号，查询字符串没有使用安全的单引号边界。
+- Prevention: 含反引号的 rg/sed 模式统一使用单引号或拆成不含反引号的多个查询；失败命令输出不作为状态证据。
+- Verification: 失败命令没有文件变化；随后用单引号模式重新核对 handoff、diff 和状态。

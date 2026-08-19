@@ -507,9 +507,27 @@ C# 文件。
 Go 实现、测试和迁移矩阵已提交为 `1a7c654 feat(p5): migrate RevivingZombie AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（ShamanZombie AI=26）
+
+本批实现 Legacy `ShamanZombie` 的六格轴线/对角线范围攻击，并保留其基础
+MonsterObject 目标搜索、移动、冷却和延迟重验证语义：
+
+- AI=26 已接入 Go common population；目标搜索范围与六格攻击几何分离，支持
+  Player、owned-Monster、Hero 的 Cell-order 首目标投影，并保留 Shock、safe-zone
+  和攻击/行动冷却门禁。
+- `ObjectRangeAttack` 只投影 ObjectID、当前位置和方向；命中伤害采用 Legacy
+  inclusive DC/Luck 抽样，动作固定 300ms，直线每格追加 50ms，使用 MACAgility
+  防御并在延迟命中时重新验证目标有效性。
+- 世界测试覆盖范围边界、搜索后移动、Cell-order 三类目标、六格延迟和安全区
+  取消命中；认证 `net.Pipe` transcript 覆盖真实 bootstrap、攻击 payload、
+  600ms 命中包序、HP 和冷却状态。
+
+Go 实现、测试和迁移矩阵已提交为 `de999b0 feat(p5): migrate ShamanZombie AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `1a7c654` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
+Go HEAD `de999b0` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
 `433c1e9`，IncarnatedGhoul/IncarnatedZT/BoneFamiliar 为前置提交
 `a0a2c2f`/`0c3ca86`/`f8e2a2c`：
 
@@ -546,6 +564,8 @@ Go HEAD `1a7c654` 对应本批源码已通过以下收尾门禁；DarkDevil foll
 - `go test ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|summonSkeleton' -count=1 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'RevivingZombie' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'RevivingZombie' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'ShamanZombie' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'ShamanZombie' -count=5 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|BasicMonsterAI|OrdinaryPet|Shinsu' -count=3 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|IncarnatedZT|ZumaMonster|zumaMonster|RedThunderZuma|ZumaTaurus' -count=3 -timeout=600s`
 - `go test ./... -count=1 -timeout=600s`
