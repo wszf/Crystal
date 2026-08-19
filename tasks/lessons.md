@@ -5107,6 +5107,8 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: session ticker goroutine 与测试/通知侧读取共享玩家 Buff slice 时没有统一锁边界；race 栈没有进入 IcePillar 或其直接特效路由。
 - Prevention: 每批继续运行新增 AI 的定向 race，并按完整 race 栈和测试名分类；若栈只落在既有 `player_spell_buffs.go`/`intelligent_creature_items.go`，记录为共享 fixture 隔离项，不将全包 race 误报为通过或把无关修复带入当前批次。
 - Verification: IcePillar 定向 race 通过；普通 `go test ./cmd/crystal-server -count=1`、`go test ./...`、`go vet ./...`、`go build ./...` 通过；本次全包 race 的失败栈固定在上述既有 Buff 读写路径。
+- Strengthening after AI=84 recurrence: 本批 `go test -race ./cmd/crystal-server -count=1 -timeout=5m` 再次复现 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 在 `player_spell_buffs.go:738` 与 `intelligent_creature_items.go:549` 的共享 Buff 竞争，并新增 `TestSessionHidingTranscriptPersistenceAndExpiry` 在 `player_spell_buffs.go:738` 与 `equipment_transactions.go:778` 的 ticker/装备统计竞争；两条栈均未进入 WingedTigerLord。
+- Verification after AI=84 recurrence: AI=84 定向 race、普通 `go test ./... -count=1 -timeout=5m`、`go vet ./...` 和 `go build ./...` 通过；全包 race 保持已知共享 session fixture 失败，不宣称通过。
 
 ### 2026-08-19 — AI=90/91 首轮门禁必须登记公共人口与 PoisonTarget 实参顺序
 
@@ -5114,3 +5116,18 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 只在 dispatch 和 action resolver 中接入新 AI，没有把人口注册、强类型时间/距离表达式和 Legacy 调用点的参数求值顺序作为同一批次的入口契约核对。
 - Prevention: 新 AI 开工时同时搜索并更新 population、初始化/ProcessAI dispatch、delayed-action resolver 三个入口；首轮用包级空测试编译；对每个 `PoisonTarget` 调用记录参数名称、求值顺序、外层/目标侧抗性和状态持续时间，使用 MC/SC 不同值的 fixture 锁定随机流。
 - Verification: `go test ./cmd/crystal-server -run '^$'`、Troll 普通/定向全包测试、Troll `-race`、`go test ./...`、`go vet ./...` 与 `go build ./...` 均通过；TrollKing 测试验证 MaxMC duration、SC value、Dazed effect/chat 及双次命中顺序。
+
+### 2026-08-19 — AI=84 WingedTigerLord 必须把下一次攻击状态与远程失败分支分开
+
+- Symptom: WingedTigerLord 的普通攻击、Stomp、Tornado 共用同一个延迟动作模型时，容易把标志在当前攻击消费，或在无 Tornado 的远程分支错误发包/消耗 DC；Stomp 还可能把邻格对象误作为命中目标。
+- Root cause: Legacy 在普通近战完成后才分别以 `Random.Next(5)`/`Random.Next(2)` 设置下一次 `stomp`/`tornado`，远程无 Tornado 时只推进初始 500ms 计时；Stomp 扫描只用邻格是否存在可攻击 Player/Monster 决定动作，但每个动作仍绑定原始 `Target`。
+- Prevention: 迁移带持久标志的 AI 时，把“选择本次分支”“消费下一次状态”“动作队列目标”拆成独立字段和阶段；逐项记录同格/非相邻范围、ActionTime/AttackTime 覆盖、八邻格方向顺序及 PoisonTarget 的 SC/抗性/机会随机顺序，并用不同 DC/SC fixture 锁定每次抽样。
+- Verification: 新增 AI=84 Go 确定性测试覆盖独立双段 DC、Type 0/1/2 包、Stomp 八邻格和原始目标绑定、Tornado 半径一捕获、Dazed/Paralysis 参数及无 Tornado 无包边界；`go test ./cmd/crystal-server -run WingedTigerLord -count=1` 通过，且 C# 基线未修改。
+- Review adjustment: Dazed Player 命中若直接在 `addPlayerAppliedPoisonLocked` 返回的 Chat 前插入 Effect，再追加广播，会变成 `Effect → Chat → Broadcast`；Legacy 既有实现要求 `private Effect → broadcast Effect → Chat`，已按该顺序重排并由 Tornado 目标包序前缀测试验证。
+
+### 2026-08-19 — WingedTigerLord AOE 测试必须区分目标私有包与邻格广播
+
+- Symptom: Tornado 新增测试把目标收到的完整 packet ID 列表固定为单个命中的 Struck/Health/Effect/Chat 序列，实际列表还包含邻格目标的伤害和状态广播，定向测试失败。
+- Root cause: Legacy AOE 对每个捕获目标分别命中，`ObjectStruck`、伤害和状态包会按观察范围广播给同一观察者；目标自身的私有包只构成序列前缀，不是整个 recipient transcript。
+- Prevention: AOE 测试先按 payload/object ID 区分私有包、广播包和每个目标的状态，再对单目标前缀或通知集合断言；只有夹具只包含一个可见目标时才固定完整 recipient ordinal 序列。
+- Verification: 失败栈定位到 `winged_tiger_lord_test.go` 的完整序列断言，未进入 Winged resolver 错误；将测试改为按广播矩阵验证后重新运行 AI=84 定向测试。
