@@ -5029,7 +5029,28 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 
 ### 2026-08-19 — 全包 race 失败必须按栈区分既有共享 fixture 竞争
 
-- Symptom: 本批 `go test -race ./cmd/crystal-server -count=1 -timeout=5m` 在既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 失败，报告 `reconcileEquipmentSpecialBuffsLocked` 写入与测试侧 `intelligentCreatureBuffByType` 读取同一运行时对象；普通全包测试、vet、build 均通过。
-- Root cause: session ticker goroutine 与该测试在未统一锁边界的共享玩家/生物状态上并发读写；race 栈不经过 AI=85 文件或其延迟动作 resolver。
-- Prevention: 每批先跑新增 slice 的 `-race` 定向门禁，再审阅全包 race 栈是否落在本批改动；若是既有竞争，保留失败证据并单独排期修复，不把无关 race 误归因到新功能。
-- Verification: `go test -race ./cmd/crystal-server -run FlamingMutant -count=1 -timeout=5m` 通过；`go test ./... -count=1 -timeout=5m`、`go vet ./...`、`go build ./...` 通过，当前改动未触及 guild/intelligent-creature 代码。
+- Symptom: 本批再次运行 `go test -race ./cmd/crystal-server -count=1 -timeout=5m`，既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 与 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff` 分别报告 `reconcileEquipmentSpecialBuffsLocked` 写入和测试/通知侧 `intelligentCreatureBuffByType` 读取同一运行时对象；普通全包测试、AI=86 定向 race、vet、build 均通过。
+- Root cause: session ticker goroutine 与这些测试在未统一锁边界的共享玩家/生物状态上并发读写；race 栈不经过 AI=86 文件或其延迟动作 resolver。
+- Prevention: 每批先跑新增 slice 的 `-race` 定向门禁，再逐条审阅全包 race 的完整栈和测试名称；把 ticker/通知读取与 `intelligentCreatureBuffByType` 的共享对象竞争作为既有 fixture 隔离项单独排期，不把无关 race 归因到新功能，也不把全包 race 记为通过。
+- Verification: `go test -race ./cmd/crystal-server -run ManectricClaw -count=1 -timeout=5m` 通过；`go test ./... -count=1 -timeout=5m`、`go vet ./...`、`go build ./...` 通过；全包 race 的两条失败栈均定位到 `player_spell_buffs.go:738` 与 `intelligent_creature_items.go:549`，本批未改动相关代码。
+
+### 2026-08-19 — Go 延迟攻击测试必须先解析既有队列再断言后续伤害
+
+- Symptom: ManectricClaw 相邻目标的冷却回退测试在第二次近战落点一次解析了首次 500ms thrust 和后续 300ms melee，HP 实际下降两次；随后又错误地把已解析的首个 action 计入队列长度。
+- Root cause: 延迟 action 是按 `Due` 独立保留并在同一 tick 累积解析的，测试把“动作已发出”误当成“动作仍在队列中”，没有建立每个 impact 的前置状态。
+- Prevention: 测试多段延迟攻击时，先推进并断言前一 action 的落点，再创建/检查下一 action；最终 HP 断言必须明确包含已完成的历史伤害。
+- Verification: ManectricClaw 三列 thrust、当前坐标/朝向、双重抗毒和冷却回退测试在分段解析后通过。
+
+### 2026-08-19 — Go 多返回值与坐标 helper 必须在首轮编译门禁中校验
+
+- Symptom: ManectricClaw 初版把返回 `([]worldNotification, bool)` 的伤害 helper 直接作为单返回值返回，并把 `movePoint` 的两个返回值直接放入坐标数组，导致包编译失败。
+- Root cause: 从相邻 AI 实现复制结构时只核对了业务调用形状，没有先核对 Go helper 的签名和多返回值解构规则。
+- Prevention: 新增 resolver 后立即执行 `gofmt` 与 `go test <受影响包> -run '^$'`；所有多返回 helper 显式解构，所有坐标构造先绑定 `(x, y)` 再组装。
+- Verification: 修正后包级编译门禁通过，随后 ManectricClaw 定向行为测试全部通过。
+
+### 2026-08-19 — 继承 MonsterObject 行为不能误用同名专用 AI 搜索器
+
+- Symptom: AI=86 初版为了复用相邻实现，把目标搜索接到了 AI=83 Tornado 的 `tornadoFindTargetLocked`；Legacy `ManectricClaw` 实际没有覆盖 `FindTarget`，应沿用 `MonsterObject.FindTarget`。
+- Root cause: 按攻击几何相似性选择了专用 helper，没有先核对 C# 子类是否真的覆盖目标搜索生命周期。
+- Prevention: 每个 AI 批次先检查子类覆盖的方法列表，再复用“继承行为” helper；只有源类确实覆盖同一虚方法时才共享专用搜索器。
+- Verification: 对照 `Server/MirObjects/Monsters/ManectricClaw.cs` 与 `MonsterObject.FindTarget` 后改为 `ancientBringerFindTargetLocked`，Go 编译门禁与 AI=86 定向测试通过。
