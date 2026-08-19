@@ -4775,6 +4775,9 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 
 - Strengthened evidence: 本批提交前的 Legacy `.cs` 审计再次因手写成 `Dropbox/Dropbox/...` 被拒绝，命令未启动；这证明仅凭记忆填写绝对路径仍会复发。
 - Strengthened prevention: 所有跨仓库门禁调用前先运行独立的 `git rev-parse --show-toplevel`，只把其输出复制为后续 workdir；若路径校验失败，先修正并记录，不继续执行审计或提交。
+- Strengthening after recurrence: 本轮 Deer 基线核对时又在 Legacy workdir 的单条只读命令中混入 Go 相对路径，命令在首个不存在目录处失败，输出完全作废。
+- Strengthened prevention: 读取/测试/审计调用在派发前逐字检查“workdir + 所有相对路径”是否属于同一仓库；需要比较两侧时先完成两个纯仓库调用，再在模型侧比较结果，不在一个 shell 命令中拼接两侧路径。
+- Verification after recurrence: 误用命令没有写入文件；随后 Go 漫游代码和 Legacy `MonsterObject`/`Deer` 基线分别在各自根目录成功读取，后续 Deer 测试与文档补丁未使用失败输出。
 
 ### 2026-08-19 — NPC 输入按钮必须按 Legacy 的 `/@@KEY` 语法构造
 
@@ -5214,3 +5217,6 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: session 测试安装了只接受 transcript 随机边界的 roll 后仍让 live AI 运行；服务循环在 bootstrap 或手动未来时钟之间初始化/移动怪物，既会消费无关随机数，也可能改变测试状态。
 - Prevention: net.Pipe transcript 从启动服务前保持 `monsterAIEnabled=false`；停止 session ticker 后，在锁内直接调用目标 AI 处理并把结果交给后续 delayed-action `tick`，用 keep-alive barrier（需要时）确认服务循环回到读帧状态，避免 live tick 与 transcript 共用随机流。
 - Verification: Guard session 定向测试与 `-race` 通过；FurbolgGuard session `-race -count=3` 及随后 `go test ./... -count=1 -timeout=600s` 通过。
+- Strengthening after Deer AI=2 recurrence: Deer session 初版在停止 ticker 后重新启用 `monsterAIEnabled`，连接读循环仍以真实时钟执行了一次失败的逃跑 Walk，并额外消费 `Random.Next(2)`，导致只接受 transcript 随机边界的回调失败；问题不是 Deer 的手工未来时钟路径。
+- Strengthened prevention: 认证 AI transcript 保持 live AI 关闭到手工状态写入完成；在锁内直接调用 `processMonsterAILocked`（而不是重新启用后调用 `world.tick`），再交付返回通知。只有明确要覆盖实时维护时，才用互斥记录并过滤允许的维护随机边界。
+- Verification after Deer AI=2 recurrence: Deer 世界目标发现/直线逃跑/fallback、认证 `ObjectWalk` transcript、空编译及定向测试均通过；认证测试不再消费任何非 transcript 随机数。

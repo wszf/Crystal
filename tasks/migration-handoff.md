@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `6491b0cb docs: record Tao Guard migration`，随后增加本次交接更新 | 干净 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `03dad46 feat(p11): migrate harvest lifecycle` | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `93b1d77 feat(p5): migrate Deer AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,13 +40,13 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard 和 Tao Guard 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、通用怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard 和 Deer AI=1/2 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
 | P9 Guild/War/Territory/Conquest | In progress | 公会核心、仓库、进度/Buff、战争、领地和完整 Conquest runtime/NPC/assets 子簇已迁移；P9 其余范围尚未统一收口。 |
 | P10 Mail/Market/Auction/Rental/GameShop | In progress | 五个主要经济功能簇均已有协议、事务、在线通知、持久化和竞态测试，但阶段仍未宣告完整。 |
-| P11 Fishing/Awakening/Ranking/Intelligent Creature/Misc | In progress | Fishing、Awakening、Ranking、Intelligent Creature 功能簇已迁移；聊天物品链接已按库存/解锁 Storage/已召唤 HeroInventory 授权并展开定义；`RequestUserName`/`UserName` 已补齐全局角色名查询、缺失静默和协议探针；共享 HarvestMonster carcass 生命周期已迁移；其他 miscellaneous 系统待补。 |
+| P11 Fishing/Awakening/Ranking/Intelligent Creature/Misc | In progress | Fishing、Awakening、Ranking、Intelligent Creature 功能簇已迁移；聊天物品链接已按库存/解锁 Storage/已召唤 HeroInventory 授权并展开定义；`RequestUserName`/`UserName` 已补齐全局角色名查询、缺失静默和协议探针；共享 HarvestMonster carcass 生命周期与 Deer AI=1/2 逃跑移动已迁移；其他 miscellaneous 系统待补。 |
 | P12 恢复/备份/部署 | Pending | 最终 restart equivalence、生产化 smoke test、备份与部署尚未开始。 |
 
 ## 已交付的重要能力
@@ -79,6 +79,7 @@
 - `cb4b899 feat(migration): add Go legacy world exporter`
 - `296f1c1 feat(migration): add Go protocol probe`
 - `03dad46 feat(p11): migrate harvest lifecycle`
+- `93b1d77 feat(p5): migrate Deer AI`
 
 ## 最近完成的 P5 批次
 
@@ -178,14 +179,24 @@ Go 实现与迁移矩阵更新已提交为 `bc2e919 feat(p5): migrate Tao Guard 
 - 固定当前线材 `ClientHarvest=49`、`ServerObjectHarvest=91`、`ServerObjectHarvested=92`，并按 Legacy 的 13 字节 `ObjectHarvest` payload 做 round-trip 与截断/尾随字节校验。
 - AI `{1,2,4,5,7,9,28}` 的尸体进入 Harvest 路径；普通死亡掉落被抑制，Skeleton 状态投影贯通静态 `ObjectMonster` 与认证会话。
 - 保留前方一格加一环扫描、方向/移动/动作冷却、两次剥皮后生成缓存掉落、后续 Harvest 领取、背包叠加线材快照、满包/无物品文本、QuestRequired 和 Meat 质量/耐久处理。
-- 保留最近击杀者五秒经验归属及组成员门禁；未实现的独立 Deer AI=1/2 逃跑移动明确留在待迁移项，不把共享 Harvest 生命周期扩张为完整 Deer AI。
+- 保留最近击杀者五秒经验归属及组成员门禁；独立 Deer AI=1/2 逃跑移动已在随后批次补齐，不把共享 Harvest 生命周期与 Deer 专用 AI 混为同一实现边界。
 - Go 世界测试覆盖皮肤计数、掉落/背包、无掉落、叠加线材、组门禁；认证 `net.Pipe` transcript 覆盖三次 Harvest、`UserLocation`/`ObjectHarvest`/领取与持久化。
 
 Go 实现与迁移矩阵更新已提交为 `03dad46 feat(p11): migrate harvest lifecycle`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（Deer AI=1/2）
+
+本批在共享 HarvestMonster 基础上实现 Legacy Deer 的独立 AI 分支：
+
+- AI=1/2 已接入 common population；AI=2 保留构造时 1/7 逃跑选择、五次剥皮、质量步进和逃跑 Deer 的 `MoveSpeed - 300`，并在 Slow 到期恢复时重新应用该速度差。
+- 逃跑分支保留继承的 ViewRange 搜索/目标重验、`DirectionFromPoint(Target, Current)` 直线逃跑、受阻后的 `NextDir`/`PreviousDir` 七次尝试，以及 ActionTime/MoveTime 冷却；AI=1 和非逃跑 AI=2 清除目标并执行继承式随机漫游。
+- Go 世界测试覆盖目标发现、直线/受阻逃跑、被动与随机 `ObjectTurn` 行为、构造状态和 Slow 恢复；认证 `net.Pipe` transcript 锁定 `ObjectWalk` payload、坐标、方向、目标和运行时速度。
+
+Go 实现与迁移矩阵更新已提交为 `93b1d77 feat(p5): migrate Deer AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `03dad46` 对应本批源码已通过以下收尾门禁：
+Go HEAD `93b1d77` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test -race ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes' -count=1 -timeout=5m`
@@ -199,6 +210,8 @@ Go HEAD `03dad46` 对应本批源码已通过以下收尾门禁：
 - Guard 领域/认证 session 测试与 `-race` 通过；FurbolgGuard session `-race -count=3` 通过
 - Tao Guard route/目标门禁与认证 session 测试通过；Guard/Tao Guard session `-race -count=5` 通过
 - Harvest 协议/世界/认证 session `-race -count=5` 通过，覆盖三次剥皮、缓存掉落、组门禁和持久化
+- Deer 世界/认证 session 定向测试、`go test -race ./cmd/crystal-server -run 'Deer' -count=5` 通过，覆盖目标发现、直线/受阻逃跑、漫游和 `ObjectWalk` transcript
+- `go test ./cmd/crystal-server -count=1 -timeout=600s` 通过
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 
