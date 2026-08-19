@@ -4963,3 +4963,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: `Skill` 和 `ClearRing` 都使用同一个 `ServerRemoveBuff` ordinal，测试只断言 ID 数量，没有解析 payload 的 Buff 类型；同时实现最初按正序扫描，偏离 Legacy `ProcessBuffs` 的倒序扫描。
 - Prevention: 对同一 ordinal 的连续事件必须同时断言 payload discriminator 和顺序；迁移 Legacy 倒序列表逻辑时，先固定源端遍历方向，再写包序测试。
 - Verification: Go 测试现在断言 `Skill=113`、`ClearRing=114` 的倒序移除及随后 `ObjectHidden`，定向测试与整个 `cmd/crystal-server` 包均通过。
+
+### 2026-08-19 — GM 权限测试不能假设冷却检查也被绕过
+
+- Symptom: `@FIND` 定向测试先成功查询后立即用 GM 身份重复查询，错误地期望直接得到“目标不在线”；Go 实现按 Legacy 顺序返回了剩余 180 秒冷却提示，测试失败。
+- Root cause: Legacy `FIND` 先无条件检查 `LastProbeTime`，GM 只绕过权限判断和冷却写入，并不绕过已有冷却；测试把权限 bypass 误当成 cooldown bypass。
+- Prevention: 迁移命令时把“权限门、冷却检查、冷却写入、目标查找”拆成有序断言；GM 测试必须分别覆盖已有冷却和冷却已过期两种状态。
+- Verification: 测试改为在三分钟冷却结束后验证 GM 的缺失目标响应；Probe 权限、180 秒冷却、目标位置和会话包序测试均通过。
+
+### 2026-08-19 — 保留已读取的地图规则字段时必须同步所有版本 fixture 期望
+
+- Symptom: 读取 `NoPosition` 后，版本化地图 schema 定向测试只有 version 114 因期望仍为 false 失败。
+- Root cause: parser 变更保留了此前丢弃的字段，但只更新了部分版本期望/fixture，未将同一二进制位置的字段贯穿所有版本用例。
+- Prevention: 恢复任何旧字段时，逐个检查所有版本 fixture 的读取顺序、期望结构和导出 round-trip，并先运行完整 schema 测试。
+- Verification: 所有版本 `TestReadMapInfoRuleFlagsPreserveLegacyVersionOrder` 均通过，`NoPosition` 从 legacy binary 到 world rules 的导入链已覆盖。
+
+### 2026-08-19 — @MOVE 的 GM 权限、冷却和传送门槛必须分别迁移
+
+- Symptom: 提交前静态复核发现 Go 初版让 GM 绕过已有 `LastTeleportTime`，并复用了带 `RequiredGroup` 检查的传送原语；同时遗漏了 `TestServer` 对无 Teleport 物品玩家的放行。
+- Root cause: 把“权限绕过”误合并为所有后续检查绕过，并未按 Legacy 的命令门槛、无条件冷却、无组门传送顺序建模。
+- Prevention: 对命令逐项保留权限、地图限制、冷却、冷却写入和底层移动原语的独立语义；GM 只绕过 Legacy 明确标注的分支，测试服开关单独进入权限条件。
+- Verification: Go 实现改为无条件检查冷却、使用无组门传送并支持 `TestServer`；定向 GM 冷却/NoPosition/测试服测试、会话测试和全仓 `go test ./...` 均通过。
