@@ -4913,3 +4913,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 为保持初始化紧凑，把 `(value, error)` 函数调用直接嵌入 `legacySettings` 字面量；Go 不允许该多返回值上下文。
 - Prevention: 配置加载函数返回值包含错误时，先显式接收并检查 error，再赋入结构体字段；完成新 loader 后先跑目标包的最小编译/定向测试。
 - Verification: 改为显式赋值并传播错误后，`go test ./internal/worlddata ./internal/legacyworld ./cmd/crystal-server`、`go test ./...`、`go vet ./...` 与 `go build ./...` 均通过。
+
+### 2026-08-19 — 装备套装迁移先核对共享常量与 Legacy 完整门槛
+
+- Symptom: 装备套装补丁首轮目标编译因 `statFreezing`/`statPoisonAttack` 在 Go 包内重复声明失败；修复后 Mir 套装定向测试又因夹具放入 12 件 Mir 装备而没有触发 Legacy 的十件完整奖励。
+- Root cause: 添加装备字段前没有先做包级常量检索；测试夹具按“所有可用槽位”构造，忽略了 Legacy `MirSet.Count() == 10` 的精确条件。
+- Prevention: 新增 stat 常量前先在目标 Go 包全局搜索同名定义；迁移带精确数量/槽位门槛的规则时，测试夹具必须逐槽映射 Legacy 条件，并单独断言完整与部分奖励。
+- Verification: 移除重复声明、将 Torch/Amulet 槽置空保留十个 Mir 槽位后，普通套装/Mir 套装/钓鱼竿定向测试通过，目标包重新编译成功。
