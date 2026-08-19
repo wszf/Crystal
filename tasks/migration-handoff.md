@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `a0a3a0b8`，随后增加本交接文档提交 | 干净，较 `origin/master` ahead 84（交接提交前） |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `1126c84 feat(p5): migrate archer summon spells` | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `b747d76 feat(p5): migrate CannibalPlant AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -73,6 +73,7 @@
 - `d7bc163 feat(p5): migrate TrapHexagon spell`
 - `1126c84 feat(p5): migrate archer summon spells`
 - `213b92e feat(p5): migrate CaveMaggot AI`
+- `b747d76 feat(p5): migrate CannibalPlant AI`
 - `ff39426 feat(migration): add Go legacy account exporter`
 - `cb4b899 feat(migration): add Go legacy world exporter`
 - `296f1c1 feat(migration): add Go protocol probe`
@@ -120,17 +121,38 @@ Go 实现与矩阵更新已提交为 `1126c84 feat(p5): migrate archer summon sp
 
 Go 实现与矩阵更新已提交为 `213b92e feat(p5): migrate CaveMaggot AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（CannibalPlant AI=5）
+
+本批实现 Legacy `CannibalPlant` 的隐藏植物生命周期与 Player/owned
+Monster/Hero 目标子集：
+
+- AI=5 已加入 Go common population；初始隐藏，按 `FindNearby(3)` 每两秒检查，
+  发现目标时按 `ObjectMonster -> ObjectShow` 显示，设置 500ms cell/1000ms
+  action 延迟；无目标时发送 `ObjectHide`、恢复满 HP 并进入三秒隐藏延迟。
+- 隐藏状态贯通 passive object、blocking、搜索、攻击及玩家单体/范围攻击门禁；
+  `CanMove=false` 的不移动边界保留，普通相邻攻击使用 DC/AC-Agility、
+  `ObjectAttack` 和 300ms 延迟，并在 impact 时重验目标。
+- Player、owned Monster、Hero 投影及共享延迟 resolver 已覆盖；AI=153
+  CreeperPlant 的五格远程分支保持不变，只共享隐藏植物门控。
+- Go 世界测试覆盖可见性、FindNearby(3)、不可移动、AC/MAC 分离、目标投影和
+  延迟动作；认证 `net.Pipe` transcript 锁定隐藏显示、相邻攻击、300ms 命中及
+  `Struck/ObjectStruck/DamageIndicator/HealthChanged` 包序。
+
+Go 实现与矩阵更新已提交为 `b747d76 feat(p5): migrate CannibalPlant AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `213b92e` 对应本批源码已通过以下收尾门禁：
+Go HEAD `b747d76` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test -race ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes' -count=1 -timeout=5m`
 - `go test -race ./cmd/crystal-server -run 'CaveMaggot' -count=1 -timeout=5m`
+- `go test -race ./cmd/crystal-server -run 'CannibalPlant' -count=1 -timeout=5m`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
 - `go build ./...`
 - ArcherSummon/TrapHexagon 会话组合重复 3 次通过，含 net.Pipe keep-alive barrier 回归
+- CannibalPlant/CreeperPlant 领域回归与 CannibalPlant `net.Pipe` 会话 transcript 通过
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 
@@ -143,7 +165,7 @@ Go HEAD `213b92e` 对应本批源码已通过以下收尾门禁：
 
 优先继续 P5，因为最近四个批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
-1. 继续 P5 通用 monster AI，优先审计 Legacy AI=5 `CannibalPlant`、AI=6 `Guard` 和 AI=7 之外的相邻低编号类，逐项确认它们的可生成入口、隐藏/移动/目标门禁和攻击 resolver。
+1. 继续 P5 通用 monster AI，优先审计 Legacy AI=6 `Guard`，再处理 AI=7 之外的相邻低编号类，逐项确认它们的可生成入口、隐藏/移动/目标门禁和攻击 resolver。
 2. 每批从一个可独立验证的 AI 行为簇开始，同时覆盖公式、冷却、延迟动作/目标重验、玩家/宠物/Hero/Monster 投影、包序和 net.Pipe transcript；不要仅凭怪物名称推断行为。
 3. 对已完成的玩家法术差集继续保持机械校验；若发现真实主动入口缺口，再从 Legacy 施法入口、命中 resolver、Buff/Poison 创建点建立准确的 `spell -> effect -> side effects` 表后成批迁移。
 4. 之后再处理 P5 的 fly/wall validation、高级 PvP/Group combat、persistent respawn state 和完整 packet-order closure。

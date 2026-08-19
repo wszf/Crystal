@@ -5182,3 +5182,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: `net.Pipe` 没有缓冲；客户端同步 `Write` 等服务端读取，而服务端主循环会先 tick 世界并写出待处理通知，双方在没有读端的情况下互等。前序会话改变时序后稳定暴露该测试竞态。
 - Prevention: 会话测试发送下一帧时，用独立 goroutine 写入，同时主测试 goroutine 持续读取并消费允许出现的中间通知，最后再等待写入完成；不要假设服务端在每个客户端写入前都没有 tick 输出。
 - Verification: ArcherSummon+TrapHexagon 组合会话重复 3 次通过；随后 `go test ./... -count=1 -timeout=600s`、`go vet ./...` 和 `go build ./...` 均通过。
+
+### 2026-08-19 — AI=5 测试状态变量必须保持领域类型独立
+
+- Symptom: CannibalPlant 定向测试首次编译失败，生命周期测试中的 `state` 是 `worldMonster`，攻击断言又把 `world.players[...]`（`*worldPlayer`）赋回该变量并访问 `Character`。
+- Root cause: 在同一测试函数中复用了语义相近但领域类型不同的局部变量名，Go 编译器在首次行为测试前才暴露了错误。
+- Prevention: 测试跨 Player/Monster/Hero 读取时使用带领域含义的独立变量名（如 `monsterState`、`targetState`），提交前先运行目标测试包的空编译和定向测试。
+- Verification: 将玩家断言改为独立的 `targetState`；随后重跑 AI=5 定向测试并确认编译与行为断言通过。
