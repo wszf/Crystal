@@ -4893,6 +4893,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthening after second recurrence: 本轮再次把 Go 的 `cmd/crystal-server/*.go` 路径带入 Legacy 命令，shell 在执行前因路径不存在而失败；以后每条只读命令也必须做仓库路径审计，不能仅依赖 workdir。
 - Verification after second recurrence: 失败发生在 shell 展开阶段且无文件写入；拆分为 Legacy-only 与 Go-only 调用后，元素/觉醒源码证据均来自成功命令。
 
+- Strengthening after third recurrence: 本轮读取 Go monster AI 时又在 Go workdir 下引用了错误的 `internal/world/monster_ai.go` 路径；命令只读但没有产生源码证据。
+- Strengthened prevention: 任何目标文件读取前先用当前仓库的 `rg --files -g '<name>'` 解析实际相对路径，再把该路径用于后续单仓库命令；不得凭记忆补目录名。
+- Verification after third recurrence: 通过 `rg --files` 找到 `cmd/crystal-server/monster_ai.go` 后重新读取成功；Go logging/config/服务端全量测试、race、vet 和 build 均使用已核验的单一 Go 根目录，错误读取没有文件变化。
+
 ### 2026-08-19 — Portal 容量测试必须先满足通用施法距离门禁
 
 - Symptom: Portal 双门户容量测试预期已经扣除法力，但实际返回未施法且 MP 未变化。
