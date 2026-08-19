@@ -4897,6 +4897,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthened prevention: 任何目标文件读取前先用当前仓库的 `rg --files -g '<name>'` 解析实际相对路径，再把该路径用于后续单仓库命令；不得凭记忆补目录名。
 - Verification after third recurrence: 通过 `rg --files` 找到 `cmd/crystal-server/monster_ai.go` 后重新读取成功；Go logging/config/服务端全量测试、race、vet 和 build 均使用已核验的单一 Go 根目录，错误读取没有文件变化。
 
+- Strengthening after fourth recurrence: 本轮 Legacy 读取命令再次误拼成 `Dropbox/Dropbox/...`，进程未启动且输出不可作证据。
+- Strengthened prevention: 每次切换仓库先独立执行 `git rev-parse --show-toplevel`，再从当前仓库用 `rg --files` 解析目标路径；命令中不得出现另一仓库路径，路径校验失败后不得继续使用输出。
+- Verification after fourth recurrence: 纠正为已核验的 Legacy 根目录后，`HumanObject.cs`/共享数据读取成功；错误命令没有文件修改或源码证据。
+
 ### 2026-08-19 — Portal 容量测试必须先满足通用施法距离门禁
 
 - Symptom: Portal 双门户容量测试预期已经扣除法力，但实际返回未施法且 MP 未变化。
@@ -4924,3 +4928,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 添加装备字段前没有先做包级常量检索；测试夹具按“所有可用槽位”构造，忽略了 Legacy `MirSet.Count() == 10` 的精确条件。
 - Prevention: 新增 stat 常量前先在目标 Go 包全局搜索同名定义；迁移带精确数量/槽位门槛的规则时，测试夹具必须逐槽映射 Legacy 条件，并单独断言完整与部分奖励。
 - Verification: 移除重复声明、将 Torch/Amulet 槽置空保留十个 Mir 槽位后，普通套装/Mir 套装/钓鱼竿定向测试通过，目标包重新编译成功。
+
+### 2026-08-19 — 装备属性测试必须断言 RefreshStatCaps 后的最终值
+
+- Symptom: 接入 Legacy 末端属性上限后，RedFlower 套装与 Mir 套装定向测试仍期待未归一化的 `MP -50` 和 `MagicResist +6`，导致回归失败。
+- Root cause: 测试把 `RefreshItemSetStats` 的中间结果当成了 `RefreshStats` 对客户端可见的最终结果，漏掉了随后执行的职业上限与非负/最小最大值归一化。
+- Prevention: 对照 `RefreshStats` 时按完整调用顺序建立最终值断言；凡是新增末端 cap/normalize，都要复查已有套装、负值和抗性测试的期望，不只新增正向夹具。
+- Verification: RedFlower 改为按基础 MP 归零、Mir MagicResist 改为职业上限 2 后，装备属性定向测试通过；新增异常属性向量覆盖全部 cap 与战斗范围归一化。
