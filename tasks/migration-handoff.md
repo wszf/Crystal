@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `a0a3a0b8`，随后增加本交接文档提交 | 干净，较 `origin/master` ahead 84（交接提交前） |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `d7bc163 feat(p5): migrate TrapHexagon spell` | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `1126c84 feat(p5): migrate archer summon spells` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -39,7 +39,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；本批新增玩家 TrapHexagon 的 Legacy admission、护符消耗、500ms 延迟、3×3 ShockTime/AI 清理、八个 ObjectSpell 生命周期、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、通用怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon，以及 SummonVampire/SummonToad/SummonSnakes 的 Legacy admission、目标捕获、两段延迟、宠物生命周期、AI/伤害、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、通用怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -71,6 +71,7 @@
 - `0e17233 feat(p11): migrate fishing awakening and rankings`
 - `225e855 feat(p11): migrate user name lookup`
 - `d7bc163 feat(p5): migrate TrapHexagon spell`
+- `1126c84 feat(p5): migrate archer summon spells`
 - `ff39426 feat(migration): add Go legacy account exporter`
 - `cb4b899 feat(migration): add Go legacy world exporter`
 - `296f1c1 feat(migration): add Go protocol probe`
@@ -97,21 +98,32 @@
 - 字段接入普通静态可见性恢复/移除和 Observer 被动快照；领域测试覆盖边界、目标过滤、点位、生命周期，session 测试覆盖认证、持久护符数量、即时包序与延迟 impact transcript。
 - Go 功能已提交为 `d7bc163 feat(p5): migrate TrapHexagon spell`；本交接文档随后单独提交，两个仓库的 C# 审计保持 tracked、staged、untracked 均为零。
 
+## 本次完成的 P5 批次（ArcherSummon）
+
+本批实现玩家 `Spell.SummonVampire`、`Spell.SummonToad`、`Spell.SummonSnakes`：
+
+- 入口保留 Legacy 的目标/落点捕获、`CanFly`、NoPets 文本和最多两个直接宠物门禁；不消耗护符，首次延迟只练习，第二个 500ms map action 才生成宠物。
+- 新增 `VampireSpider`、`SpittingToad`、`SnakeTotem`、`CharmedSnake` 配置名与 AI 运行时；覆盖召回目标定位、owner 外观/MasterObjectID、等级上限、等级缩放生命期、地图/距离/死亡/登出清理及 Totem 子蛇数量/父子生命周期。
+- Vampire 保留近战吸血和死亡爆发，Toad 保留距离延迟范围伤害，CharmedSnake 保留延迟近战/麻痹；世界测试覆盖目标捕获、两段延迟、召回、NoPets/缺定义、Totem 子蛇和延迟伤害，认证 `net.Pipe` transcript 覆盖 Health/Location/Magic、MagicLeveled、ObjectMonster/ObjectHealth。
+- 为避免 live tick 在下一次客户端写入前产生待发送通知而造成互等，既有 TrapHexagon `net.Pipe` keep-alive barrier 改为并发写入并持续消费服务端帧；ArcherSummon+TrapHexagon 组合重复回归通过。
+
+Go 实现与矩阵更新已提交为 `1126c84 feat(p5): migrate archer summon spells`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `d7bc163` 对应源码已通过：
+Go HEAD `1126c84` 对应本批源码已通过以下收尾门禁：
 
-- `go test ./cmd/crystal-server -count=1 -timeout=600s`
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
-- 本批用户名称路径的 `go test -race ./cmd/crystal-server ./internal/protocol ./internal/probe -run 'TestSessionRequestUserNameResolvesGlobalCharacter|TestUserNamePayloadsKeepLegacyOrdinalsAndLayout|TestRunNetworkAuthenticatedTranscript|TestVerifyVectors' -count=1 -timeout=5m`
+- `go test -race ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes' -count=1 -timeout=5m`
+- `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
 - `go build ./...`
-- 本批 `go test -race ./cmd/crystal-server -run 'TrapHexagon' -count=1 -timeout=5m`
+- ArcherSummon/TrapHexagon 会话组合重复 3 次通过，含 net.Pipe keep-alive barrier 回归
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 
-全仓库 race 仍受既有共享 session Buff 读写竞争影响；该问题的复现栈已记录在
-`tasks/lessons.md`，不属于本批 `RequestUserName` 路径。本批定向 race 通过。
+全仓库 race 尚未作为本批门禁重跑；此前已知的共享 session Buff 读写竞争仍按
+`tasks/lessons.md` 管理。本批定向 ArcherSummon race 通过。
 
 文档交接不会修改 Go 源码。新 Session 开始时仍应先确认两个工作树干净；若环境或工具链变化，再选择与风险相称的门禁重跑。
 

@@ -4495,6 +4495,8 @@ Record project-specific corrections and failure-prevention patterns here.
 - Root cause: 将玩家/运行时对象的 MAC 字段命名习惯错误套用到怪物导入统计枚举；Go 怪物统计只提供 AC，MAC 夹具应在加载后直接设置对象字段。
 - Prevention: 为新会话夹具添加怪物统计前先检索对应 `monsterStat*` 声明；若导入模型不支持某字段，使用运行时对象字段并在测试中显式覆盖。
 - Verification: 移除不存在的导入统计后直接设置怪物 MAC，CatTongue 会话测试、全部 CatTongue 定向测试和 race 测试通过。
+- Strengthening after recurrence: ArcherSummon 会话夹具再次错误使用不存在的 `monsterStatMinMAC`，首轮包编译立即失败；后续改为已声明的 `statMinMAC`/`statMaxMAC` 后通过目标包定向测试。
+- Verification after recurrence: ArcherSummon 普通/race 定向测试、`go test ./...`、`go vet ./...` 和 `go build ./...` 均通过。
 
 ### 2026-08-18 — 会话账号夹具必须遵守共同的 15 字符上限
 
@@ -5166,3 +5168,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 本机 Go build cache 达到约 66 GiB，根文件系统仅剩约 204 MiB。
 - Prevention: 长时间 Go 门禁前先检查 `df -h` 和 `go env GOCACHE`；若仅是可再生缓存占满，使用 `go clean -cache -testcache` 后再判断实现状态，不要把环境错误记录为功能回归。
 - Verification: 清理缓存后可用空间恢复到约 66 GiB，随后重跑 TrapHexagon session 测试。
+
+### 2026-08-19 — 两段延迟技能测试必须推进实际队列时间点
+
+- Symptom: ArcherSummon 测试首次把 admission 返回的最终 `ProjectileDelay` 当作第一段 action 的 `Due`，因此只推进到练习阶段，随后错误断言宠物已经生成。
+- Root cause: Legacy/Go 把距离延迟、练习阶段和第二个固定 500ms map action 分别保存在队列；admission 的总延迟不是首个队列动作的到期时间。
+- Prevention: 延迟技能测试先读取队列中的实际 `Due`，推进首个 action 并断言它产生的后续 action，再读取新的 `Due` 推进最终 impact；不要从 admission 总延迟倒推中间阶段。
+- Verification: ArcherSummon 三个法术的两段生成、召回二段延迟和 session `MagicLeveled -> ObjectMonster/ObjectHealth` 测试通过。
+
+### 2026-08-19 — net.Pipe 会话写入必须允许服务端先发送待处理通知
+
+- Symptom: ArcherSummon 会话之后运行 TrapHexagon 会话时，Trap 测试客户端在同步写 keep-alive 处挂起；单独运行 Trap 测试可通过，服务端栈显示在读取客户端帧前阻塞写一帧 live-tick 通知。
+- Root cause: `net.Pipe` 没有缓冲；客户端同步 `Write` 等服务端读取，而服务端主循环会先 tick 世界并写出待处理通知，双方在没有读端的情况下互等。前序会话改变时序后稳定暴露该测试竞态。
+- Prevention: 会话测试发送下一帧时，用独立 goroutine 写入，同时主测试 goroutine 持续读取并消费允许出现的中间通知，最后再等待写入完成；不要假设服务端在每个客户端写入前都没有 tick 输出。
+- Verification: ArcherSummon+TrapHexagon 组合会话重复 3 次通过；随后 `go test ./... -count=1 -timeout=600s`、`go vet ./...` 和 `go build ./...` 均通过。
