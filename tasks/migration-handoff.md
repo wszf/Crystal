@@ -525,9 +525,30 @@ MonsterObject 目标搜索、移动、冷却和延迟重验证语义：
 Go 实现、测试和迁移矩阵已提交为 `de999b0 feat(p5): migrate ShamanZombie AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（Khazard AI=27）
+
+本批实现 Legacy `Khazard` 的四格拉拽攻击，并保留其基础
+`MonsterObject` 目标搜索、移动、攻击冷却和延迟命中语义：
+
+- AI=27 已接入 Go common population；目标搜索与攻击几何分离，拒绝同格和不等边
+  对角线，接受四格以内的轴线/等边对角线目标；相邻目标走基础 `ObjectAttack`，
+  远端目标进入 `Range` 分支并受 `PullTime` 五秒冷却约束。
+- 远端攻击逐格按 Legacy `MagicResistWeight` 检查，成功后以目标到攻击者的反向
+  方向调用 Player、owned Monster、Hero 的 `Pushed` 投影，再发送不带 TargetID 的
+  `ObjectRangeAttack`；ActionTime 固定 300ms，AttackTime 仍按 AttackSpeed。
+- 相邻攻击释放 BindingShot、清除 Shock，发送基础 `ObjectAttack`，使用 inclusive
+  DC/Luck/unit-bound 抽样，在 300ms 后用 AC+Agility 重新验证 Player、owned Monster
+  和 Hero 目标；安全区、存活、地图和归属变化会取消延迟命中。
+- 世界测试覆盖几何边界、逐格推送顺序、魔抗拒绝、PullTime/cooldown、Player/Monster/
+  Hero 投影、inclusive DC 与延迟重验证；认证 `net.Pipe` transcript 覆盖真实
+  bootstrap、三个 `ServerPushed` 后的 `ObjectRangeAttack` 包序和最终坐标/冷却。
+
+Go 实现、测试和迁移矩阵已提交为 `becac1db47d4a60e2a37e94d14440c572db1a903`
+（`feat(p5): migrate Khazard AI`）；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `de999b0` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
+Go HEAD `becac1db` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
 `433c1e9`，IncarnatedGhoul/IncarnatedZT/BoneFamiliar 为前置提交
 `a0a2c2f`/`0c3ca86`/`f8e2a2c`：
 
@@ -566,6 +587,8 @@ Go HEAD `de999b0` 对应本批源码已通过以下收尾门禁；DarkDevil foll
 - `go test -race ./cmd/crystal-server -run 'RevivingZombie' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'ShamanZombie' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'ShamanZombie' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'Khazard' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'Khazard' -count=5 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|BasicMonsterAI|OrdinaryPet|Shinsu' -count=3 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|IncarnatedZT|ZumaMonster|zumaMonster|RedThunderZuma|ZumaTaurus' -count=3 -timeout=600s`
 - `go test ./... -count=1 -timeout=600s`

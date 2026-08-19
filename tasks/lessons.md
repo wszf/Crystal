@@ -5649,3 +5649,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: shell 会在双引号命令参数中处理反引号，查询字符串没有使用安全的单引号边界。
 - Prevention: 含反引号的 rg/sed 模式统一使用单引号或拆成不含反引号的多个查询；失败命令输出不作为状态证据。
 - Verification: 失败命令没有文件变化；随后用单引号模式重新核对 handoff、diff 和状态。
+
+### 2026-08-20 — AI=27 夹具必须以协议方向和实体初始状态为准
+
+- Symptom: Khazard 首轮定向测试把 `Direction` 断言为 0，且复用了满血 500 的宠物夹具，分别导致攻击 payload 不匹配和宠物 HP 变为 490 而非 90。
+- Root cause: 测试夹具凭直觉假定方向编号，并未把被投影目标的独立初始 HP 归一化到测试期望。
+- Prevention: 新增 AI 测试先从现有协议构造函数和目标类型夹具确认方向/字段编码；Player、owned Monster、Hero 的初始 HP 与 `Character`/`Hero` 镜像字段显式设置后再断言伤害。
+- Verification: 修正为协议实际方向值并将宠物 HP/MaxHP 设为 100 后，Khazard 定向单元、投影和延迟伤害测试全部通过。
+
+### 2026-08-20 — AI=27 双仓库核查不得混用相对路径
+
+- Symptom: Khazard 勘察命令在 Legacy workdir 中带入不存在的 `cmd`/`docs` 路径，随后另一条 Legacy 命令又带入 `cmd/crystal-server/*.go`，分别产生 `No such file or directory` 和 zsh `no matches found`；这些片段没有取得有效证据。
+- Root cause: 跨仓库读取时没有让 workdir 与相对路径保持一一绑定，把 Go 包路径误用于 Legacy 根目录。
+- Prevention: 每条核查命令只服务一个仓库；Legacy 仅使用 `Server/...`、`tasks/...`，Go 仅使用 `cmd/...`、`docs/...`，跨仓库比较拆成独立调用，路径错误输出全部作废。
+- Verification: 失败命令没有修改文件；随后在各自精确根目录重新读取 Khazard C# 基线与 Go 运行时代码，且后续状态核查分别通过。
+
+### 2026-08-20 — 会话 transcript 的 AI 随机边界必须覆盖实时维护 tick
+
+- Symptom: 全量 Go 测试中 Khazard 会话偶发收到 AI roll bound `2`，严格只允许 PullAttack 的 `10` 使测试失败；单独运行时未必复现。
+- Root cause: 认证会话仍有实时维护 tick；合成时钟把 Action/Move 推到未来时，Khazard 的 fallback MoveTo 仍会执行 `Next(2)` 分支选择，和手动合成攻击 tick 交错。
+- Prevention: 会话测试的随机回调同时允许被实时维护路径实际触达的 `2` 与攻击路径的 `MagicResistWeight`，不要把“手动 transcript 期望”误当成整个连接生命周期的唯一随机调用集合；共享回调不追加无锁状态。
+- Verification: 放宽为仅接受 `2`/`MagicResistWeight` 后，Khazard 会话测试重复 20 次通过，且不再依赖未同步的 roll 记录。
