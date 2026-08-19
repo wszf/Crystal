@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `a0a3a0b8`，随后增加本交接文档提交 | 干净，较 `origin/master` ahead 84（交接提交前） |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `b747d76 feat(p5): migrate CannibalPlant AI` | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `833d1ef feat(p5): migrate Guard AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -24,7 +24,8 @@
 
 ## 当前 Goal 状态
 
-本线程的 Goal 记录被误操作为 `objective: resu`、`status: paused`，现有接口无法恢复或替换这个未完成记录。不要为了清理记录而把 100% 迁移误标为完成。切换到新 Session 后，应新建以下完整 Goal：
+本线程当前已恢复以下完整 Goal，状态为 active；不要因为某个批次完成而把
+整体 100% 迁移误标为完成。后续 Session 继续沿用该 Goal：
 
 > 将当前 Crystal 项目按现有功能与客户端可观察行为 100% 迁移到独立 Git 管理的跨平台 Go 项目：服务端、测试客户端、协议探针、导入导出及迁移工具全部使用 Go；两个仓库中的所有 C# 文件仅作只读基线；按可安全合并的功能批次实现、测试、更新迁移矩阵并 Git 提交，持续推进直至功能矩阵全部完成。
 
@@ -140,9 +141,31 @@ Monster/Hero 目标子集：
 
 Go 实现与矩阵更新已提交为 `b747d76 feat(p5): migrate CannibalPlant AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（Guard AI=6）
+
+本批实现 Legacy `Guard`（AI=6）的可观察服务端行为，并与已迁移的
+`ArcherGuard`（AI=113）共享目标侧 Guard 门禁：
+
+- AI=6 已接入 common population；无 route 时保持静止，有 route 时保留
+  Legacy 的 route-only 移动、寻路顺序、移动/动作/攻击计时和 Guard 的
+  `CanMove`/`CanAttack` 边界。
+- 目标搜索按 Legacy 的 ViewRange 距离环和 cell insertion order 覆盖
+  Player、Monster、Hero；只接受同地图、存活、可见且 `PKPoints >= 200`
+  的红名 Player，并保留 Guard 绕过 safe-zone/NoFight 的特殊门禁。
+  Guard 对 Player 的单体/AOE 攻击、对 Guard 类目标的反向攻击均保持免疫。
+- 攻击严格发送目标背向格的 `ObjectAttack`，随后发送 Guard 当前格的
+  `ObjectTurn`；设置 500ms action、`AttackSpeed` cooldown，并在 300ms
+  延迟 impact 重新验证目标。Player 使用普通 AC，Monster/Hero 使用
+  Legacy 的非玩家致命伤害路径，含 IcePillar/TucsonEgg 特殊 resolver。
+- 新增 SkyBlue 名称颜色、Monster/Hero/Player 领域测试和认证 `net.Pipe`
+  transcript；FurbolgGuard transcript 同步隔离 live AI 与手动时钟，避免
+  服务循环污染协议测试的随机流。
+
+Go 实现与迁移矩阵更新已提交为 `833d1ef feat(p5): migrate Guard AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `b747d76` 对应本批源码已通过以下收尾门禁：
+Go HEAD `833d1ef` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test -race ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes' -count=1 -timeout=5m`
@@ -153,6 +176,7 @@ Go HEAD `b747d76` 对应本批源码已通过以下收尾门禁：
 - `go build ./...`
 - ArcherSummon/TrapHexagon 会话组合重复 3 次通过，含 net.Pipe keep-alive barrier 回归
 - CannibalPlant/CreeperPlant 领域回归与 CannibalPlant `net.Pipe` 会话 transcript 通过
+- Guard 领域/认证 session 测试与 `-race` 通过；FurbolgGuard session `-race -count=3` 通过
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 
@@ -165,7 +189,7 @@ Go HEAD `b747d76` 对应本批源码已通过以下收尾门禁：
 
 优先继续 P5，因为最近四个批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
-1. 继续 P5 通用 monster AI，优先审计 Legacy AI=6 `Guard`，再处理 AI=7 之外的相邻低编号类，逐项确认它们的可生成入口、隐藏/移动/目标门禁和攻击 resolver。
+1. 继续 P5 通用 monster AI，按 `docs/migration-matrix.md` 中尚未完成的 AI/target sub-slice 排序，逐项确认可生成入口、隐藏/移动/目标门禁和攻击 resolver。
 2. 每批从一个可独立验证的 AI 行为簇开始，同时覆盖公式、冷却、延迟动作/目标重验、玩家/宠物/Hero/Monster 投影、包序和 net.Pipe transcript；不要仅凭怪物名称推断行为。
 3. 对已完成的玩家法术差集继续保持机械校验；若发现真实主动入口缺口，再从 Legacy 施法入口、命中 resolver、Buff/Poison 创建点建立准确的 `spell -> effect -> side effects` 表后成批迁移。
 4. 之后再处理 P5 的 fly/wall validation、高级 PvP/Group combat、persistent respawn state 和完整 packet-order closure。

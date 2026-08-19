@@ -5189,3 +5189,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 在同一测试函数中复用了语义相近但领域类型不同的局部变量名，Go 编译器在首次行为测试前才暴露了错误。
 - Prevention: 测试跨 Player/Monster/Hero 读取时使用带领域含义的独立变量名（如 `monsterState`、`targetState`），提交前先运行目标测试包的空编译和定向测试。
 - Verification: 将玩家断言改为独立的 `targetState`；随后重跑 AI=5 定向测试并确认编译与行为断言通过。
+
+### 2026-08-19 — AI=6 Guard 的 monster 命中路径不能复用 Player 经验/掉落 helper
+
+- Symptom: Guard 首轮接入后的 Go 空编译失败：`gainMonsterExperienceLocked`、`questKillNotificationsLocked` 和 `dropMonsterLootLocked` 都要求 `*worldPlayer`，但 resolver 传入的是 `worldMonster`。
+- Root cause: 将玩家击杀后的经验、任务和掉落收尾逻辑机械复制到 Guard 对 Monster 的攻击；Legacy Guard 本身没有玩家 Master，不能沿用这些 Player-owned helper。
+- Prevention: 新的 Monster/Hero attacker resolver 复用 helper 前先核对函数签名和归属语义；玩家专属副作用与 monster-to-monster 的 `Attacked`/死亡包路径分开建模，先用 `go test ... -run '^$'` 做空编译。
+- Verification: 移除不适用的 Player-owned 收尾调用后，`go test ./cmd/crystal-server -run '^$' -count=1` 通过；Guard 行为定向测试仍需在本批后续门禁中补齐。
+
+### 2026-08-19 — net.Pipe AI transcript 必须隔离 live tick 与手动时钟
+
+- Symptom: Guard session 首轮在服务线程中触发了手动 `monsterAIRoll` 对 `3000` 的断言并使测试后续访问空玩家；此前同类 FurbolgGuard session 则曾先消费一个预期外的 `Random.Next(2)`。
+- Root cause: session 测试安装了只接受 transcript 随机边界的 roll 后仍让 live AI 运行；服务循环在 bootstrap 或手动未来时钟之间初始化/移动怪物，既会消费无关随机数，也可能改变测试状态。
+- Prevention: net.Pipe transcript 从启动服务前保持 `monsterAIEnabled=false`；停止 session ticker 后，在锁内直接调用目标 AI 处理并把结果交给后续 delayed-action `tick`，用 keep-alive barrier（需要时）确认服务循环回到读帧状态，避免 live tick 与 transcript 共用随机流。
+- Verification: Guard session 定向测试与 `-race` 通过；FurbolgGuard session `-race -count=3` 及随后 `go test ./... -count=1 -timeout=600s` 通过。
