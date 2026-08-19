@@ -5251,3 +5251,41 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 将 MonsterObject 与 HumanObject 两个 overload 的共同 ACAgility/固定 1 HP 结果，错误概括成相同的后置副作用；Legacy 只省略通用 AttackBonus/暴击/毒伤，HumanObject 命中仍保留武器与元素钩子。
 - Prevention: 对每个 Legacy overload 分开列出 admission、命中副作用和死亡收尾；文档使用“无通用 DamageIndicator/bonus/critical/poison，保留 HumanObject weapon/element hooks”的精确表述。
 - Verification: Go `treeAttackedByPlayerLocked` 在命中门禁之后调用 `damagePlayerWeaponLocked` 与 `gatherElementLocked`；迁移矩阵和交接文档已同步修正，Tree 与全包测试通过。
+
+### 2026-08-20 — Legacy 缺口检索不得使用未核对目录 glob
+
+- Symptom: 对照 Monster AI 缺口时把不存在的 `Server/MirDB/*.cs` 放入 Legacy 命令，zsh 因 glob 无匹配而失败。
+- Root cause: 未先用 `rg --files`/目录检查确认路径，且把多个猜测 glob 放进同一读取调用。
+- Prevention: 先独立核对目录和精确文件，再使用已确认路径或 `rg --glob`；任何非零读取调用的全部输出都作废。
+- Verification: 失败命令未写入项目；后续只使用已确认的 `Server/MirObjects/MonsterObject.cs`、`Server/MirEnvir/Envir.cs` 等路径。
+- Strengthening after same-session recurrence: Go 仓库根目录没有匹配 `*.go` 的文件，未核对布局的根目录 glob 再次使只读检索失败。
+- Strengthened prevention: 先用 `rg --files` 确认文件所在目录，再把精确相对路径或已确认目录传给 `rg`；禁止把猜测 glob 放进后续读取命令。
+- Verification: 该 Go 命令没有被用于推理；后续读取改在已确认的 `cmd/crystal-server` 路径中执行。
+
+### 2026-08-20 — EvilCentipede map value 回写后的测试断言必须读取 world 状态
+
+- Symptom: EvilCentipede AOE 测试中玩家和英雄已经受伤，但局部 `pet` 变量仍显示满血，误报宠物目标未被攻击。
+- Root cause: 解析器从 `w.monsters` 取出 value copy，伤害与毒状态通过 map key 回写；测试在调用后继续读取创建时的局部副本。
+- Prevention: 任何会修改 `worldMonster` 的解析或 poison 路径后，断言统一读取 `world.monsters[objectID]`；只有指针型 player/hero 才读取原变量。
+- Verification: 修正夹具前先保留失败证据；修正后需重新运行 EvilCentipede 定向测试，并分别检查 player/pet/hero 最终血量与毒状态。
+
+### 2026-08-20 — 认证会话夹具的账号名必须符合 15 字符协议边界
+
+- Symptom: EvilCentipede 会话 bootstrap 在登录阶段收到 `ServerLogin` 结果码 1，而不是 `ServerLoginSuccess`。
+- Root cause: 新测试账号 `evilcentipedenet` 超过 Go 认证层 `^[A-Za-z0-9]{3,15}$` 的最大长度，账号虽已注册仍被格式门禁拒绝。
+- Prevention: 新增会话测试时先按认证正则核对账号、密码和角色名长度；失败时优先解析登录结果码，不把它归因到会话协议或 AI。
+- Verification: 认证源码中的正则与返回码已核对；改用合法账号名后重新运行 bootstrap 与 EvilCentipede 会话定向测试。
+
+### 2026-08-20 — 路径核对不能把已知存在目录与猜测目录混在同一条读取命令
+
+- Symptom: 为寻找迁移交接文件执行 `rg --files tasks docs`，Legacy 仓库没有 `docs` 目录，zsh/rg 返回非零。
+- Root cause: 没有先确认目录存在就把猜测路径并入检索；即使命令同时打印了 `tasks` 文件，也不能把非零调用的部分输出当作证据。
+- Prevention: 每次检索先对已知目录单独执行 `rg --files tasks`；跨目录查找只使用该仓库此前核实存在的目录，禁止在同一命令混入猜测路径。
+- Verification: 本次失败无写入，输出已作废；随后应在 `tasks` 单目录中读取 `migration-handoff.md`，并重新检查状态。
+
+### 2026-08-20 — EvilCentipede 的 FindAllTargets(false) 不能复用带可见性门禁的搜索 gate
+
+- Symptom: 代码审查发现 EvilCentipede 延迟 AOE 初版复用了 `ancientBringerMonsterCanBeAttackedLocked`，会把隐藏但有 Owner 的 Monster 从 `FindAllTargets(..., false)` 结果中排除。
+- Root cause: Legacy `MonsterObject.FindAllTargets` 只在 `needSight=true` 时检查 `Hidden`；Monster 的 `IsAttackTarget(MonsterObject)` 负责 ownership/combat gate，但不检查客户端可见性。
+- Prevention: 对每个 Legacy `FindNearby`/`FindAllTargets` 调用分别保留 `needSight` 语义；延迟 `false` 扫描使用不含 `monsterClientVisible` 的 ownership/combat gate，并由单独测试覆盖隐藏 owned Monster。
+- Verification: 回读 `MonsterObject.cs` 的 `FindAllTargets` 与 `IsAttackTarget`；Go resolver 改用 MAC 路径的 ownership/combat gate，EvilCentipede 定向世界测试（隐藏 CreeperPlant pet）通过。
