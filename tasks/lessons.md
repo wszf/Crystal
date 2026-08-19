@@ -4935,3 +4935,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 测试把 `RefreshItemSetStats` 的中间结果当成了 `RefreshStats` 对客户端可见的最终结果，漏掉了随后执行的职业上限与非负/最小最大值归一化。
 - Prevention: 对照 `RefreshStats` 时按完整调用顺序建立最终值断言；凡是新增末端 cap/normalize，都要复查已有套装、负值和抗性测试的期望，不只新增正向夹具。
 - Verification: RedFlower 改为按基础 MP 归零、Mir MagicResist 改为职业上限 2 后，装备属性定向测试通过；新增异常属性向量覆盖全部 cap 与战斗范围归一化。
+
+### 2026-08-19 — 掉落奖励必须沿 CreateDropItem 调用链迁移
+
+- Symptom: Go 已加载 `RandomItemStats`，但普通怪物/任务掉落和钓鱼奖励仍直接使用 `CreateFreshItem` 形态，缺少 Legacy 的随机耐久、随机附加属性、诅咒、扩槽、鉴定和名称过期语义。
+- Root cause: 只迁移了掉落树选择和地面物品路由，没有继续核对 Legacy `Envir.CreateDropItem` 在 Monster/Player/Fishing 调用点的后续对象初始化；智能生物奖励的随机逻辑也因此被孤立在专用路径。
+- Prevention: 迁移掉落功能时先把“掉落选择 -> UserItem 创建 -> 随机升级 -> 过期/鉴定 -> 全局 ID -> 交付”列成完整调用链，并把共享随机升级器接入每个已确认的 CreateDropItem 等价入口；FreshItem、ShopItem 和已有持久物品复制必须保持独立。
+- Verification: Go 固定向量覆盖耐久、全部附加属性、诅咒、扩槽、鉴定、`[2h]` 过期和全局 ID 分配/耗尽；普通怪物掉落、任务掉落、钓鱼及智能生物定向测试和 `cmd/crystal-server` 全包测试通过。
