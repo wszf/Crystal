@@ -5107,3 +5107,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: session ticker goroutine 与测试/通知侧读取共享玩家 Buff slice 时没有统一锁边界；race 栈没有进入 IcePillar 或其直接特效路由。
 - Prevention: 每批继续运行新增 AI 的定向 race，并按完整 race 栈和测试名分类；若栈只落在既有 `player_spell_buffs.go`/`intelligent_creature_items.go`，记录为共享 fixture 隔离项，不将全包 race 误报为通过或把无关修复带入当前批次。
 - Verification: IcePillar 定向 race 通过；普通 `go test ./cmd/crystal-server -count=1`、`go test ./...`、`go vet ./...`、`go build ./...` 通过；本次全包 race 的失败栈固定在上述既有 Buff 读写路径。
+
+### 2026-08-19 — AI=90/91 首轮门禁必须登记公共人口与 PoisonTarget 实参顺序
+
+- Symptom: Troll 首轮编译把 `int32` 攻击距离与 `int` 局部变量、距离延迟与 `time.Duration` 混算；修正后定向测试仍未进入 Troll 分支，因为新 AI 没加入 `monsterAICommonPopulation`。继续对照 Legacy 又发现 TrollKing 的 `PoisonTarget(target, 1, Random.Next(MaxMC), Dazed, 1000)` 会先消耗 MaxMC duration，再计算 SC value。
+- Root cause: 只在 dispatch 和 action resolver 中接入新 AI，没有把人口注册、强类型时间/距离表达式和 Legacy 调用点的参数求值顺序作为同一批次的入口契约核对。
+- Prevention: 新 AI 开工时同时搜索并更新 population、初始化/ProcessAI dispatch、delayed-action resolver 三个入口；首轮用包级空测试编译；对每个 `PoisonTarget` 调用记录参数名称、求值顺序、外层/目标侧抗性和状态持续时间，使用 MC/SC 不同值的 fixture 锁定随机流。
+- Verification: `go test ./cmd/crystal-server -run '^$'`、Troll 普通/定向全包测试、Troll `-race`、`go test ./...`、`go vet ./...` 与 `go build ./...` 均通过；TrollKing 测试验证 MaxMC duration、SC value、Dazed effect/chat 及双次命中顺序。
