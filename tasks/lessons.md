@@ -5012,3 +5012,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: Legacy 的 `DelayedAction` 单独保存 `damageWeapon`，它与 `DefenceType` 是两个独立维度；同一技能的两段甚至可以分别为 false/true。
 - Prevention: 将 `damageWeapon` 从 action resolver 传到 Player/Monster/Hero 三类目标的最终伤害函数；普通前方命中、Slaying、FlamingSword、DoubleSlash/TwinDrake 公共段传 true，侧击和技能特殊段按 Legacy 显式 false，不从防御类型反推。
 - Verification: DoubleSlash/TwinDrake/FlamingSword/CrescentSlash/CounterAttack/ShoulderDash 定向测试及全量 Go 回归通过，且 C# 基线文件未被修改。
+
+### 2026-08-19 — Tornado 推送测试必须区分私有 Pushed 与广播 ObjectPushed
+
+- Symptom: AI=83 Tornado 范围测试初版把原始玩家应收到的包固定为 `ObjectRangeAttack` 加两次 `Pushed`，实际还收到其他被推动对象的 `ObjectPushed` 广播，定向测试失败。
+- Root cause: Legacy `FindAllTargets(..., false)` 会逐对象推动，Human/Monster/Hero 的推送广播会按观察范围送给原始玩家；测试只建模了被测玩家自己的私有包，遗漏了跨目标广播。
+- Prevention: 推送类 AOE 测试分别断言攻击包首包、私有 `Pushed` 次数、最终坐标和伤害队列；只有在对象集合与广播接收矩阵均固定时才断言完整 ordinal 序列。
+- Verification: 调整断言后，AI=83 Tornado adjacent/range/search 定向测试通过；范围测试同时覆盖隐藏玩家、owned Monster、Hero、方向与 `dist-1` 推送距离。
