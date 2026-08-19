@@ -5382,3 +5382,62 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: `setLightClock` 自身会获取 `world.mu`，而 session fixture 把它放进了已加锁的玩家/Monster 初始化区，形成同 goroutine 的非可重入锁死锁。
 - Prevention: 认证夹具中凡是会获取 world mutex 的 helper（时钟、配置、连接状态）都必须放在显式 `world.mu.Lock` 外；锁内只做直接字段读写，完成后立即解锁再驱动 transcript。
 - Verification: 已将 `setLightClock` 移到锁前；AI=16 session 定向测试已通过并正常执行 cleanup。
+
+### 2026-08-20 — AI=17 研究读取必须继续保持 Go/Legacy 目录隔离
+
+- Symptom: 在 Go workdir 查询 AI=17 矩阵后，把 Legacy 的 `tasks/lessons.md` 追加到同一条命令；Go 仓库没有该目录，调用返回非零。
+- Root cause: 继续执行时把“当前 Go 的 matrix”和“Legacy 的 lessons”当成同一读取步骤，未按仓库边界拆分命令。
+- Prevention: Go 只在自身已确认存在的 `docs/...` 目录读取矩阵；Legacy 只在自身 `tasks/...` 目录读取 lessons，任何跨仓库证据都用独立调用取得。
+- Verification: 本次失败调用无写入且输出全部作废；随后将分别用 Go/Legacy workdir 重读目标文件，再继续 AI=17 对照。
+
+### 2026-08-20 — AI=17 召唤计时必须映射到 Go 的 MonsterAI 字段
+
+- Symptom: AI=17 首次包级编译因新召唤函数直接写入不存在的 `worldMonster.ActionTime` 与 `AttackTime` 字段而失败。
+- Root cause: 从 Legacy `ZumaTaurus` 复制字段语义时没有先核对 Go `worldMonster` 的状态字段；Go 将动作/攻击计时分别命名为 `MonsterAIActionAt`/`MonsterAIAttackAt`。
+- Prevention: 新增 AI 状态前先读取 Go 实体定义并建立 C# 字段到 Go 字段映射；每个生产 patch 后立即运行 `gofmt` 与包级编译。
+- Verification: 本次失败只发生在编译阶段且无运行时写入；修正字段后 AI=17 包级编译、世界/认证定向测试、组合回归和相关 race 门禁均通过。
+
+### 2026-08-20 — AI=17 认证 transcript 新增断言必须先通过未使用变量编译门禁
+
+- Symptom: AI=17 session 测试首次编译因只用于进入一次循环、却没有读取的 `childID` 局部变量而失败。
+- Root cause: 为检查野生子怪不发送 `ObjectHealth` 临时写了按子 ID 遍历的循环，但实际断言是对整批通知的聚合查询，留下了无意义的变量。
+- Prevention: 新增 transcript 断言先确认是否需要逐对象上下文；批量通知断言直接在通知集合上完成，避免为了“覆盖”而引入未使用循环变量；补丁后立即运行定向编译/测试。
+- Verification: 修正后 AI=17 世界与认证 transcript 定向测试通过，聚合断言仍确认整批通知没有 `ObjectHealth`。
+
+### 2026-08-20 — AI=17 session 夹具角色名必须遵守认证服务长度约束
+
+- Symptom: AI=17 认证测试在启动服务前因 `CreateCharacter` 返回结果 1 失败，没有进入协议 transcript。
+- Root cause: 测试角色名 `ZumaTaurusTarget` 长度超过了当前认证服务允许的角色名上限。
+- Prevention: 新增认证夹具沿用已通过的短角色名，并在服务启动前断言创建结果；不要把 Monster/AI 描述性长名直接复用为角色名。
+- Verification: 将角色名缩短后 AI=17 session 定向测试通过，先完成认证 bootstrap，再按召唤/唤醒/攻击序列读取客户端包。
+
+### 2026-08-20 — AI=17 认证序列必须保留召唤后石化唤醒时序
+
+- Symptom: AI=17 session 在召唤后直接推进到 1 秒攻击点，实际收到 `ObjectShow`（96）而不是测试期待的 `ObjectAttack`（72）。
+- Root cause: Legacy `ZumaTaurus` 先执行 HP 阶段召唤，继承 `ZumaMonster` 仍保持石化；动作冷却到期后的第一次处理会先广播唤醒，唤醒又重新设置 1 秒动作门禁。
+- Prevention: 认证 transcript 必须按客户端可观察状态推进：召唤后单独验证 `ObjectShow`，再从唤醒时刻加 1 秒加纳秒验证近战攻击；不要把召唤计时器误当成石化已解除。
+- Verification: 补入独立 wake step 后 AI=17 session transcript 通过，依次取得 `ObjectAttack(Type=1)`、8 个 `ObjectMonster`、`ObjectShow`、普通 `ObjectAttack(Type=0)` 和延迟伤害包。
+
+### 2026-08-20 — AI=17 Legacy 对照文件必须先用仓库索引确认路径
+
+- Symptom: 研究子怪构造方向时先读取了不存在的 `Server/MirObjects/Monsters/MonsterObject.cs`，导致对照命令失败。
+- Root cause: `MonsterObject.cs` 位于 `Server/MirObjects/MonsterObject.cs`，未先通过仓库文件索引确认公共基类路径。
+- Prevention: Legacy 对照从 `rg --files` 定位基类和派生类后再读取；不要根据目录层级猜测 C# 文件位置。
+- Verification: 重新索引确认 `Server/MirObjects/MonsterObject.cs`、`ZumaMonster.cs`、`ZumaTaurus.cs` 均存在；未发生任何 C# 写入。
+
+### 2026-08-20 — AI=17 子怪 Spawn 不得覆盖 GetMonster 构造方向
+
+- Symptom: 对照 Legacy `MonsterObject` 后发现 AI=17 Go 子怪把父 Taurus 的 `DownLeft` 方向传入并保留；Legacy `GetMonster` 构造器先执行 `Random.Next(8)`，随后 `Spawn(CurrentMap, Front)` 只设置位置，不改方向。
+- Root cause: 迁移召唤位置时把“出生 Front”误当成“构造方向”，没有区分 C# 构造器状态与 Spawn 参数。
+- Prevention: 动态召唤先按各 Monster 构造器 materialize 方向，再单独设置 Spawn 的地图/坐标；只有 Legacy 子类显式覆盖方向时才接受其固定/专用值，不能默认继承父方向。
+- Verification: Go AI=17 生产路径改为不覆盖 materialize 后的子怪方向；世界测试断言方向在 MirDirection 范围且与 `ObjectMonster` payload 一致，认证 transcript 使用实际 child packet；AI=17 定向、组合和全量 Go 测试通过。
+
+### 2026-08-20 — 全量门禁失败必须隔离既有 session 的随机流断言
+
+- Symptom: AI=17 批次的首次全量 `go test ./... -count=1` 在既有 `TestSessionFurbolgCommanderRangedTranscript` 失败：launch roll bounds 收到 `[2 1]`，测试期待 `[1]`；AI=17 定向测试与相关 race 门禁均未失败。
+- Root cause: 当前证据只表明 FurbolgCommander 认证夹具对 live session 期间的随机调用序列作了过窄的精确断言；该失败尚未证明由 AI=17 代码或子怪方向改动触发。
+- Prevention: 全量失败时先按失败测试名隔离重跑并检查其 callback/ticker 生命周期，再决定是否属于当前批次；不要把与改动无关的随机 bound 失败直接记录为本批回归或扩大生产改动。
+- Verification: 独立重跑 FurbolgCommander session 与 AI=17/相关组合门禁；只有在失败可稳定复现且调用栈指向本批改动时才修复生产代码，否则保留为既有门禁问题并在 handoff 明确记录。
+- Strengthening after isolated recurrence: `stopPoisonSessionTicker` 在认证 bootstrap 后可能与服务启动 ticker 竞争；live tick 会在手工基准时刻前看到未来的 `MoveAt`，进入 `MoveTo` fallback 并消费 `bound=2`，再由手工攻击消费 `bound=1`。
+- Prevention strengthening: 认证 transcript 若要断言精确 AI 随机序列，keep-alive barrier 后必须停止 ticker，并在锁内直接调用 `processMonsterAILocked`；用 `world.tick` 会重新混入实时 ticker 的非目标动作。
+- Verification strengthening: FurbolgCommander session 改为直接 process 后 `-count=5` 通过；随后 `go test ./... -count=1 -timeout=600s`、`go vet ./...`、`go build ./...` 全部通过；该改动只收紧 Go 测试夹具，不改变生产 AI 行为。

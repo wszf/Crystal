@@ -319,9 +319,33 @@ Go 实现、测试和迁移矩阵已提交为 `61cfa48 feat(p5): migrate ZumaMon
 
 Go 实现、测试和迁移矩阵已提交为 `9a1d215 feat(p5): migrate RedThunderZuma AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（ZumaTaurus AI=17）
+
+本批实现 Legacy `ZumaTaurus` 的 HP 阶段召唤与继承 ZumaMonster 行为：
+
+- AI=17 接入 Go common population；物化时固定 `MirDirection.DownLeft`、保留
+  `Stoned=true`/`ObjectMonster.Extra`，并按 Legacy 构造器设置
+  `AvoidFireWall=false`。共享两秒出生 ActionTime、`FindNearby(2)` 唤醒、
+  `WakeAll(14)` 和唤醒后 1 秒门禁继续复用 ZumaMonster pipeline。
+- 在继承 `ProcessAI` 前执行 HP 七阶段钩子，使用整数 `MaxHP/7` 除数；每次
+  下降阶段最多召唤一波 8 个子怪，总 `SlaveList` 上限 40。达到上限时仍发送
+  `ObjectAttack(Type=1)` 并更新父怪 300ms/AttackSpeed 计时。
+- 增加 Legacy `Zuma1..Zuma7` 配置字段和默认名（`ZumaStatue`、
+  `ZumaGuardian`、`ZumaArcher`、`WedgeMoth`、`ZumaArcher3`、
+  `ZumaStatue3`、`ZumaGuardian3`）；子怪按 `Next(7)` 查找并复制当前目标，
+  设置两秒 ActionTime。Front 无效时回落父怪格；子怪保留其自身
+  `GetMonster` 构造方向，不继承父方向，野生子怪只发送 `ObjectMonster`，不发送
+  归属/召唤 `ObjectHealth`。
+- Go 世界测试覆盖阶段边界、单波次、40 上限、配置查找、合法/非法 Front、
+  子怪状态和普通 MAC/Agility 近战；认证 `net.Pipe` transcript 覆盖
+  `ObjectAttack(Type=1) -> 8*ObjectMonster -> ObjectShow -> ObjectAttack(Type=0)
+  -> Struck/ObjectStruck/DamageIndicator/HealthChanged`。
+
+Go 实现、测试和迁移矩阵已提交为 `2830708 feat(p5): migrate ZumaTaurus AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `9a1d215` 对应本批源码已通过以下收尾门禁：
+Go HEAD `2830708` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -341,6 +365,9 @@ Go HEAD `9a1d215` 对应本批源码已通过以下收尾门禁：
 - `go test ./cmd/crystal-server -run 'RedThunderZuma|ZumaMonster' -count=1 -timeout=180s -v`
 - `go test -race ./cmd/crystal-server -run 'RedThunderZuma|ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'ZumaMonster|RedThunderZuma|ZumaTaurus|TestGameWorldBasicMonsterAI|FurbolgCommander' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'ZumaTaurus|RedThunderZuma|ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run '^TestSessionFurbolgCommanderRangedTranscript$' -count=5 -timeout=120s`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
 - `go build ./...`
@@ -352,6 +379,7 @@ Go HEAD `9a1d215` 对应本批源码已通过以下收尾门禁：
 - Deer 世界/认证 session 定向测试、`go test -race ./cmd/crystal-server -run 'Deer' -count=5` 通过，覆盖目标发现、直线/受阻逃跑、漫游和 `ObjectWalk` transcript
 - `go test ./cmd/crystal-server -count=1 -timeout=600s` 通过
 - `go test ./... -count=1 -timeout=600s` 在 WoomaTaurus 修复旧 AI=11 占位夹具后通过；包含 RootSpider/BombSpider/WoomaTaurus/RedMoonEvil 认证转录
+- `go test ./... -count=1 -timeout=600s` 在 AI=17 批次最终重跑通过；期间收紧 FurbolgCommander 认证夹具，在 keep-alive barrier 后停止竞争 ticker 并直接调用 `processMonsterAILocked`，避免实时 MoveTo fallback 污染精确随机序列
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 
