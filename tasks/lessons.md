@@ -5488,13 +5488,52 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthened prevention: 已确认绝对根目录后直接使用该路径作为 `workdir`；不要在后续 Go 文件读取中再次手工拼接仓库名，且失败路径调用必须立即作废。
 - Verification after strengthening: 失败调用没有文件变化；随后恢复使用精确的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 读取 DarkDevil 源码。
 
-### 2026-08-20 — AI=20 搜索计时到期时必须保留基类目标重选
+### 2026-08-20 — AI=20 搜索重试必须核对 FindTarget 的保留语义
 
-- Symptom: 对照 Legacy `MonsterObject.ProcessSearch` 时发现 DarkDevil 初版在 `Next(3)==0` 且已有目标时只执行搜索，却没有写回新目标。
-- Root cause: 把“无目标时搜索”误读成了基类的完整条件；Legacy 条件是 `Target == null || Random.Next(3) == 0`，命中随机分支会替换现有 Target。
-- Prevention: 新增专用 AI 时逐项核对继承的 ProcessSearch/ProcessTarget 生命周期；搜索条件命中后无条件写入找到的目标（包括空结果清除），并为已有目标的重选分支加回归测试。
-- Verification: Go AI=20 世界测试新增 `Next(3)==0` 目标替换断言，DarkDevil 定向测试通过。
+- Symptom: 初次对照 `ProcessSearch` 时把 `Next(3)==0` 解读为会替换 DarkDevil 的已有目标。
+- Root cause: 只读取了 `ProcessSearch` 的触发条件，漏看 `FindTarget` 对 Monster/Hero 的 `Target ??=` 和对已有 Player Target 的跳过逻辑；Legacy 的周期搜索不会替换现有目标。
+- Prevention: 新增专用 AI 时必须同时读取 ProcessSearch 与 FindTarget；先区分“触发一次查找”和“查找结果是否写回”，并为已有目标的随机搜索分支加保持目标回归测试。
+- Verification: Go AI=20 已恢复已有目标保持语义，新增测试验证 `Next(3)==0` 后目标仍为原对象；定向测试通过。
 
 - Strengthening after same-session recurrence: 本轮追加该 lesson 时 apply_patch 路径漏写 `git_work`，目标文件未找到且没有写入。
 - Strengthened prevention: Legacy 修改前继续复用已确认的绝对路径，并在工具返回路径错误时立即作废调用；不要手工删减根路径。
-- Verification after strengthening: 随后使用完整 Legacy 绝对路径成功写入搜索重选 lesson；失败调用未产生文件变化。
+- Verification after strengthening: 随后使用完整 Legacy 绝对路径成功改写该 lesson；失败调用未产生文件变化。
+
+### 2026-08-20 — AI=21 测试夹具必须先通过编译再判断生产语义
+
+- Symptom: IncarnatedGhoul 首轮定向测试未进入运行阶段，Go 编译器报告测试夹具中的 `pet` 与 `attack` 局部变量未使用。
+- Root cause: 新增多目标类型测试时先搭了分支变量与延迟攻击调用，却没有在首次执行前清理未使用变量或断言返回值。
+- Prevention: 新增测试文件后先运行目标包编译/定向测试；多分支夹具只保留实际用于断言的变量，调用返回通知必须检查长度或内容，避免把编译失败误判为生产实现失败。
+- Verification: 修正夹具变量后将重跑 AI=21 定向测试；本次编译失败没有产生 Go 源码或测试运行结果，后续只采用修正后的测试输出。
+
+### 2026-08-20 — AI=21 多目标测试必须区分内部目标编码与广播通知范围
+
+- Symptom: 首次运行 IncarnatedGhoul 世界测试时，基础夹具没有设置 `MonsterAITargetID`；修正后又把广播通知总数当成单个玩家应收到的包数，并把 Player 的 action `TargetKind=0` 误判为错误。
+- Root cause: 测试同时覆盖了内部延迟动作投影和 `Broadcast` 可见范围，却沿用了单目标/非零目标 kind 的断言假设。
+- Prevention: 夹具初始化必须显式设置目标 ID/kind；协议断言按具体 recipient 过滤，内部 action 对 Player 使用 legacy 的 `TargetKind=0` 映射，Monster/Hero 才保留专用 kind。
+- Verification: 修正后 IncarnatedGhoul Player、Pet、Hero、延迟重验证和 Cell 顺序定向测试全部通过；失败输出未被当作生产语义证据。
+
+### 2026-08-20 — 只读审计的 JavaScript 编排字符串必须先闭合
+
+- Symptom: 一次仅查询 Go 代码的 `functions.exec` 编排因 JavaScript 字符串引号未闭合而在执行前报 `SyntaxError`，没有产生 shell 输出。
+- Root cause: 为拼接多段只读查询时直接嵌入引号，未先让脚本解析器通过最小语法检查。
+- Prevention: 复杂只读编排先拆成单条 `exec_command`，或先用固定字符串/模板字面量完成语法校验；脚本解析失败时不得把它当作仓库证据。
+- Verification: 该调用没有启动命令或修改文件；随后使用单仓库、单命令查询重新取得目标 helper 输出。
+
+### 2026-08-20 — 只读 `rg` 组合模式失败后必须立即作废输出
+
+- Symptom: 查询 `AttackPowerLocked` 等符号的组合 `rg` 模式括号未闭合，命令直接报正则错误。
+- Root cause: 临时增加分组时没有保留已验证的最小模式，导致模式本身而非源码匹配失败。
+- Prevention: 优先使用多个简单字面模式；需要组合时先单独运行最小正则校验，并将失败调用的空输出标记为无证据。
+- Verification: 随后改用简单字面 `rg`/分段 `sed` 读取 Go 实现，AI=21 的生产判断与测试均基于成功读取和通过的测试结果。
+
+### 2026-08-20 — Legacy 只读命令不能携带 Go 相对路径
+
+- Symptom: 在 Legacy workdir 中查询迁移矩阵时把 Go 的 `docs/migration-matrix.md` 相对路径带入同一条命令，得到文件不存在；该调用没有取得有效矩阵证据。
+- Root cause: 只读审计的 workdir 与相对路径没有绑定到同一个仓库，复用了另一仓库的路径习惯。
+- Prevention: 每条 `functions.exec` 命令只使用当前 workdir 仓库内的相对路径；需要比较时先分别完成两次单仓库调用，再在模型侧比较输出，禁止跨仓库路径混入一条命令。
+- Verification: 失败调用输出未用于判断；随后在精确 Go 根目录独立读取 `docs/migration-matrix.md`，并继续基于成功的 Go/Legacy 单仓库证据推进。
+
+- Strengthening after same-session recurrence: 本轮 Legacy 最终审计的 `workdir` 手工拼成了不存在的路径，进程未创建。
+- Strengthened prevention: 最终门禁命令必须直接复制已确认的绝对仓库根目录；若 CreateProcess 报路径不存在，立即作废调用并在任何状态判断前重跑精确根目录。
+- Verification after strengthening: 该失败调用没有文件变化；后续将使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 重新执行全部 Legacy/C# 审计。

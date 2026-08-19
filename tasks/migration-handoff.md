@@ -408,9 +408,35 @@ C# 文件。
 Go 实现、世界/Cell-order/目标种类测试、认证 `net.Pipe` transcript 和迁移矩阵已提交为
 `cc7e0d1 feat(p5): migrate DarkDevil AI`；本批未修改任何 C# 文件。
 
+随后对照 Legacy `FindTarget` 的 `Target ??=`/已有 Player 跳过语义，单独修正了 DarkDevil
+周期搜索不应替换已有目标的行为；Go follow-up 提交为 `433c1e9 fix(p5): preserve
+DarkDevil target search semantics`，定向世界测试已通过。
+
+## 本次完成的 P5 批次（IncarnatedGhoul AI=21）
+
+本批实现 Legacy `IncarnatedGhoul` 的基类目标搜索、近战、延迟命中与麻痹行为：
+
+- AI=21 已接入 Go common population；物化遵守 `MonsterObject` 构造器的随机方向。
+  `ProcessSearch`/`FindTarget` 保留 Legacy 的奇偶形 ViewRange 扫描、Cell 插入顺序、
+  Monster/Hero 的 `Target ??=` 保留和已有 Player 目标跳过语义；相邻范围严格排除同格。
+- `Attack` 发送 `ObjectAttack`，设置独立 300ms ActionTime 与 AttackSpeed 冷却，按
+  DC 使用 Legacy inclusive/unit-bound/Luck 抽样排入延迟动作；impact 时重新检查地图、
+  安全区、归属、存活和 `IsAttackTarget`，使用 AC+Agility 投影到 Player、owned Monster
+  和 Hero。
+- 正命中后按 Legacy `PoisonTarget(target, 15, 5, Paralysis, 1000)` 重新抽取 SC，
+  保留初始抵抗、15 分之一机会和 Human/Hero `ApplyPoison` 的第二次抵抗；Go 明确设置
+  首次毒 tick 为 impact 后 1 秒，并发送玩家 `You have been poisoned`。
+- 世界测试覆盖玩家/宠物/Hero、Cell 顺序、目标重验证、毒值/时序/随机边界；认证
+  `net.Pipe` transcript 覆盖 bootstrap、`ObjectAttack`、300ms impact、伤害/健康/聊天
+  包序与最终 Paralysis 状态。
+
+Go 实现、测试和迁移矩阵已提交为 `a0a2c2f feat(p5): migrate IncarnatedGhoul AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `fe56473` 对应本批源码已通过以下收尾门禁：
+Go HEAD `a0a2c2f` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
+`433c1e9`：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -436,6 +462,8 @@ Go HEAD `fe56473` 对应本批源码已通过以下收尾门禁：
 - `go test -race ./cmd/crystal-server -run 'Shinsu|SummonShinsu|SepHighTaoist' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'KingScorpion|kingScorpion' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'KingScorpion|kingScorpion' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'IncarnatedGhoul|incarnatedGhoul' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|incarnatedGhoul' -count=3 -timeout=600s`
 - `go test ./... -count=1 -timeout=600s`
 - `go vet ./...`
 - `go build ./...`
