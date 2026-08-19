@@ -5220,3 +5220,34 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthening after Deer AI=2 recurrence: Deer session 初版在停止 ticker 后重新启用 `monsterAIEnabled`，连接读循环仍以真实时钟执行了一次失败的逃跑 Walk，并额外消费 `Random.Next(2)`，导致只接受 transcript 随机边界的回调失败；问题不是 Deer 的手工未来时钟路径。
 - Strengthened prevention: 认证 AI transcript 保持 live AI 关闭到手工状态写入完成；在锁内直接调用 `processMonsterAILocked`（而不是重新启用后调用 `world.tick`），再交付返回通知。只有明确要覆盖实时维护时，才用互斥记录并过滤允许的维护随机边界。
 - Verification after Deer AI=2 recurrence: Deer 世界目标发现/直线逃跑/fallback、认证 `ObjectWalk` transcript、空编译及定向测试均通过；认证测试不再消费任何非 transcript 随机数。
+
+### 2026-08-20 — Legacy/Go 只读核对命令也必须保持仓库边界
+
+- Symptom: 本轮核对 AI=3 Tree 攻击入口时，在 Legacy workdir 的单条只读命令中混入 `cmd/crystal-server` Go 路径；Go glob 未命中，后续输出无效。
+- Root cause: 将跨仓库对照误写成一个 shell 调用，违反了每个命令只使用当前 `workdir` 同仓库相对路径的边界约定。
+- Prevention: Legacy 与 Go 的读取、`rg`、测试和审计全部拆成独立调用；需要比较时先分别取得两份证据，再在模型侧对照，禁止一个命令引用两个仓库路径。
+- Verification: 该失败调用未产生写入；随后 Legacy 读取保持仅含 `Server/...` 路径，Go 读取单独在 Go workdir 执行，继续核对前先废弃失败输出。
+- Strengthening after same-session recurrence: 后续一次 Legacy workdir 命令又误带了 Go 绝对路径；虽然仍未写文件，但该段输出同样被废弃。
+- Strengthened prevention: 每次调用前逐项检查 `workdir`、命令内相对路径和绝对路径，禁止在 Legacy workdir 出现任何 Go 路径，反之亦然；比较动作只在模型侧合并两次独立读取。
+- Verification after recurrence: 已在第二次错误命令后立即停止使用其输出并更新本 lesson；后续实现调用将按单仓库白名单执行。
+
+### 2026-08-20 — AI=3 Tree 测试必须区分入口前置随机与 Tree 命中随机
+
+- Symptom: Tree 玩家命中测试首次只期望 `[1,1]`，实际普通攻击入口还消费了一个 `bound=4` 的 FatalSword admission 抽样；敏捷 miss 夹具把 Tree 敏捷设为 0，`Random.Next(1)` 因而只能命中。
+- Root cause: 将完整 `attackMonster` 的前置随机流误当成 Tree override 的局部随机流，并忽略了 Legacy 单位上界随机在 `Next(1)` 时仍消耗调用但返回 0。
+- Prevention: 测试先分别记录入口前置与目标 override 的随机边界；需要构造 miss 时使用至少 1 的敏捷和越过准确率的返回值，不能用 `Next(1)` 作为 miss 场景。
+- Verification: Tree 定向测试现锁定 `[1,1,4]` 的完整玩家入口序列，并用敏捷 1/返回 1 验证静默 miss；`go test ./cmd/crystal-server -run 'Tree' -count=1` 通过。
+
+### 2026-08-20 — 引入 AI=3 Tree 后旧通用怪物夹具必须改用明确的普通 AI
+
+- Symptom: 全包测试在 `TestSessionMeleeAttackEmitsLegacyCombatTranscript` 和 `TestGameWorldStaticMonsterVisibilityAndObjectIDs` 失败；旧 Goblin 夹具的 `AI=3` 被新 Tree 分支按固定 1 HP/无 DamageIndicator 处理，且生成朝向被固定为 Up。
+- Root cause: 这些历史 Go 测试把 `AI=3` 当作未定义的普通怪物样例，而 Legacy `AI=3` 实际是 Tree；生产代码新增正确映射后，夹具的隐含语义暴露为冲突。
+- Prevention: 新增 AI 常量或专用行为前，搜索所有测试和协议样例中的数值 AI；需要表达普通怪物时显式使用 `AI=0` 或对应已验证的普通 AI，Tree 行为测试只使用 Tree fixture。
+- Verification: 将三个通用 Goblin 会话夹具和一个静态可见性夹具改为 `AI=0`；Tree 定向测试、旧失败测试及随后全包回归通过。
+
+### 2026-08-20 — Tree 的 HumanObject 命中不能误删专属武器/元素钩子
+
+- Symptom: Tree 批次文档初稿把“无通用副作用”写成了“无武器/元素副作用”，与 Legacy `Tree.Attacked(HumanObject)` 的 `DamageWeapon` 和 `GatherElement` 分支不一致。
+- Root cause: 将 MonsterObject 与 HumanObject 两个 overload 的共同 ACAgility/固定 1 HP 结果，错误概括成相同的后置副作用；Legacy 只省略通用 AttackBonus/暴击/毒伤，HumanObject 命中仍保留武器与元素钩子。
+- Prevention: 对每个 Legacy overload 分开列出 admission、命中副作用和死亡收尾；文档使用“无通用 DamageIndicator/bonus/critical/poison，保留 HumanObject weapon/element hooks”的精确表述。
+- Verification: Go `treeAttackedByPlayerLocked` 在命中门禁之后调用 `damagePlayerWeaponLocked` 与 `gatherElementLocked`；迁移矩阵和交接文档已同步修正，Tree 与全包测试通过。

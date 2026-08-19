@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-19（Asia/Singapore）
+最后更新：2026-08-20（Asia/Singapore）
 
 ## 迁移目标与硬边界
 
@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `6491b0cb docs: record Tao Guard migration`，随后增加本次交接更新 | 干净 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `93b1d77 feat(p5): migrate Deer AI` | 干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `b7dbb14e docs: record Deer AI migration`，随后增加本次 Tree 交接更新 | 本次文档更新待提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `373dec2 feat(p5): migrate Tree AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard 和 Deer AI=1/2 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2 和 Tree AI=3 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -194,11 +194,24 @@ Go 实现与迁移矩阵更新已提交为 `03dad46 feat(p11): migrate harvest l
 
 Go 实现与迁移矩阵更新已提交为 `93b1d77 feat(p5): migrate Deer AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（Tree AI=3）
+
+本批实现 Legacy `Tree` 的静态生命周期与普通命中子集：
+
+- AI=3 已接入 common population，物化时固定朝向 `Up`；运行时不移动、攻击、搜索、漫游或再生。
+- 玩家、战士、Hero（按 Legacy 转换为 Owner）和通用 Monster 入口保留 `ACAgility` 严格门禁；敏捷未命中与护甲吸收静默返回，命中固定只扣 1 HP，不产生通用伤害指示、AttackBonus、暴击或中毒副作用，同时保留 HumanObject 命中后的武器耐久与 `GatherElement` 钩子。
+- 保留 Tree 的经验归属、宠物/主人归属窗口、私有健康可见性，以及死亡时 `ObjectDied` 先于最终 `ObjectHealth` 的顺序；非 `ACAgility` 的近战变体、魔法和远程入口不产生伤害。
+- Go 世界测试覆盖静态状态、命中/未命中/吸收、Monster 命中和死亡顺序；认证 `net.Pipe` transcript 锁定 `ObjectAttack`、`ObjectStruck`、`ObjectHealth` 的可观察顺序与最终 HP。尚未宣告其他特殊 Monster AI 作为 Tree 目标的全部入口完成。
+
+Go 实现与迁移矩阵更新已提交为 `373dec2 feat(p5): migrate Tree AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `93b1d77` 对应本批源码已通过以下收尾门禁：
+Go HEAD `373dec2` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
+- `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
+- `go test -race ./cmd/crystal-server -run 'Tree' -count=5 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes' -count=1 -timeout=5m`
 - `go test -race ./cmd/crystal-server -run 'CaveMaggot' -count=1 -timeout=5m`
 - `go test -race ./cmd/crystal-server -run 'CannibalPlant' -count=1 -timeout=5m`
