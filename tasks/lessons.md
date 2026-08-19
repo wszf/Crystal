@@ -5035,6 +5035,8 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Verification: `go test -race ./cmd/crystal-server -run ManectricClaw -count=1 -timeout=5m` 通过；`go test ./... -count=1 -timeout=5m`、`go vet ./...`、`go build ./...` 通过；全包 race 的两条失败栈均定位到 `player_spell_buffs.go:738` 与 `intelligent_creature_items.go:549`，本批未改动相关代码。
 - Strengthening after recurrence: AI=87 批次再次运行全包 race 时，`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 重现同一 `player_spell_buffs.go:738` 写入与 `intelligent_creature_items.go:549` 读取竞争；新增 AI=87 定向 race 仍通过，且栈不经过 ManectricBlest。
 - Verification after recurrence: 本次全包 race 仍只作为已知失败记录，不宣称通过；AI=87 定向 race、普通全包测试、vet 和 build 均通过，相关共享 fixture 未在本批改动。
+- Strengthening after AI=88 recurrence: 本批全包 race 再次复现上述 GuildBuff 竞争，并新增同一共享状态竞争在 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff` 的 `intelligentCreatureBuffByType` 读取栈中出现；两条写入栈仍指向 `reconcileEquipmentSpecialBuffsLocked`/`player_spell_buffs.go:738`，没有进入 ManectricKing 实现。
+- Verification after AI=88 recurrence: `go test -race ./cmd/crystal-server -run ManectricKing -count=1 -timeout=5m` 通过；普通 `go test ./... -count=1 -timeout=5m`、`go vet ./...` 与 `go build ./...` 通过；全包 race 保持既知失败，不宣称通过，继续按共享 session fixture 隔离项排期。
 
 ### 2026-08-19 — Go 延迟攻击测试必须先解析既有队列再断言后续伤害
 
