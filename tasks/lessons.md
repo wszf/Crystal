@@ -5019,3 +5019,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: Legacy `FindAllTargets(..., false)` 会逐对象推动，Human/Monster/Hero 的推送广播会按观察范围送给原始玩家；测试只建模了被测玩家自己的私有包，遗漏了跨目标广播。
 - Prevention: 推送类 AOE 测试分别断言攻击包首包、私有 `Pushed` 次数、最终坐标和伤害队列；只有在对象集合与广播接收矩阵均固定时才断言完整 ordinal 序列。
 - Verification: 调整断言后，AI=83 Tornado adjacent/range/search 定向测试通过；范围测试同时覆盖隐藏玩家、owned Monster、Hero、方向与 `dist-1` 推送距离。
+
+### 2026-08-19 — FlamingMutant AOE 测试必须按推送阻挡与效果 payload 建模
+
+- Symptom: AI=85 FlamingMutant 定向测试首轮把每个目标都预期为完整 `dist-1` 推送，并按通知接收者查找 `FlamingMutantWeb`；实际坐标受先前目标占位阻挡，Monster/Hero 的效果通知接收者也不是被施加对象。
+- Root cause: `Pushed` 是逐格尝试并遵守占位阻挡；`MonsterObject.Broadcast` 按观察范围发送，目标身份只存在于 `ObjectEffect` payload 的 `ObjectID`，不能用 recipient 推导。
+- Prevention: 推送 AOE fixture 先固定对象处理顺序和每一步占位，再断言最终坐标；效果/状态广播测试按 payload discriminator 与 object ID 检索，并分别覆盖 Player/Monster/Hero。
+- Verification: 修正 FlamingMutant fixture 后，AI=85 近战延迟伤害/三类目标推送、远程 MC 区域伤害/麻痹/Web 效果及人类二次抗性拒绝测试全部通过。
+
+### 2026-08-19 — 全包 race 失败必须按栈区分既有共享 fixture 竞争
+
+- Symptom: 本批 `go test -race ./cmd/crystal-server -count=1 -timeout=5m` 在既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 失败，报告 `reconcileEquipmentSpecialBuffsLocked` 写入与测试侧 `intelligentCreatureBuffByType` 读取同一运行时对象；普通全包测试、vet、build 均通过。
+- Root cause: session ticker goroutine 与该测试在未统一锁边界的共享玩家/生物状态上并发读写；race 栈不经过 AI=85 文件或其延迟动作 resolver。
+- Prevention: 每批先跑新增 slice 的 `-race` 定向门禁，再审阅全包 race 栈是否落在本批改动；若是既有竞争，保留失败证据并单独排期修复，不把无关 race 误归因到新功能。
+- Verification: `go test -race ./cmd/crystal-server -run FlamingMutant -count=1 -timeout=5m` 通过；`go test ./... -count=1 -timeout=5m`、`go vet ./...`、`go build ./...` 通过，当前改动未触及 guild/intelligent-creature 代码。
