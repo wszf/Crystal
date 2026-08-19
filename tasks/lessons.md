@@ -5355,3 +5355,30 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 继续执行时复用了摘要中的路径/目录假设，没有在每个工具调用中把唯一仓库根、已确认目录和 patch 相对锚点绑定起来。
 - Prevention: 每个 shell 调用只使用一个仓库根和绝对 `workdir`；zsh 查询先用 `rg --files` 核对目录，禁止未确认 glob；从 Legacy 上下文修改 Go 时先核对 `../Crystal.GoServer/...` 相对锚点，失败调用整体作废。
 - Verification: 三次失败调用均未改变工作树；随后在独立 Go/Legacy 调用中完成 AI=15 源码、测试和文档操作，并通过定向测试。
+
+### 2026-08-20 — 修正 Monster 防御类型时必须同步 net.Pipe 随机边界与失败清理
+
+- Symptom: AI=16 接入时将共享 Zuma 延迟伤害改为 Legacy 的 `MACAgility` 后，既有 AI=15 session fixture 仍只接受 bound=1；回调中的 `t.Fatalf` 使测试失败后清理阶段等待服务 goroutine，定向命令长时间无输出并最终被诊断终止。
+- Root cause: 测试夹具沿用了旧 AC 路径的随机边界假设，没有随防御类型变更加入 `MagicResistWeight` bound=10；`net.Pipe` 测试在服务 goroutine 与 cleanup 之间使用 `FailNow`，放大了断言失败造成的阻塞。
+- Prevention: 每次切换延迟攻击的防御类型，都重新列出 MAC/AC、敏捷和护甲的完整随机调用序列，先更新 fixture 的允许边界再跑认证 transcript；不要在仍可能阻塞的连接生命周期中触发未验证的 fatal callback。
+- Verification: 已将 Zuma session callback 改为接受精确的 bound=10 与 bound=1；AI=15/16 世界和 session 定向测试均通过，新的 MAC 调用序列与 cleanup 路径已收口。
+- Strengthening after world-fixture recurrence: owned Monster/Hero 回归随后仍因 `damageOmaWitchDoctor...` 的 MagicResist 使用 `monsterAIRollLocked(10)` 而失败；世界 fixture 只覆盖了初始化/搜索的 bounds，未覆盖新 MAC 解析的 AI 随机源。
+- Verification after strengthening: 世界 Zuma fixture 已加入 bound=10；AI=15/16 定向测试已同时通过 Player 的 combatRoll 与 owned target 的 monsterAIRoll 两条随机源。
+- Strengthening after hero-fixture recurrence: Hero 分支随后暴露 bound=16；这是 `heroEquipmentStats` 计算出的默认敏捷 `Next(Agility+1)`，并非新的 AI 分支随机。
+- Verification after strengthening: 世界 fixture 的完整允许序列现包含初始化/搜索、MAC 抗性、Hero 敏捷和伤害范围边界；AI=15/16 世界定向测试已通过并保持这些来源分开断言。
+- Symptom: AI=16 新测试首次编译失败，直接给 map 中 struct 字段 `boundaryWorld.monsters[id].MonsterAIAttackAt` 赋值。
+- Root cause: Go map 元素不可寻址，测试为了模拟攻击冷却没有先复制、修改并写回 `worldMonster`。
+- Prevention: 修改 map 中的值类型 struct 时始终使用局部副本并显式重新赋回；新增测试先跑编译门禁再看行为断言。
+- Verification: 已将边界测试改为 copy-modify-store；AI=16 世界定向测试已编译并运行通过。
+- Symptom: AI=16 行为测试首次运行时，远程攻击的“提前冲击”检查把所有通知误当作伤害包；同一组范围边界还触发了 MoveTo 备用方向选择的 bound=2。
+- Root cause: Legacy RedThunderZuma 在攻击动作的 +300ms 后、投射命中前仍可进入移动分支，提前 tick 可能合法地产生 ObjectWalk；测试把通知为空错误地当成伤害未发生的必要条件，且 fixture 未列出继承移动 fallback 的随机边界。
+- Prevention: 延迟攻击测试只用目标 HP/伤害包判断冲击是否提前，不排除合法的移动通知；范围/冷却测试必须把 `MoveTo` 的 direct-walk 失败 fallback bounds 一并列入随机序列。
+- Verification: 已将提前检查改为只断言 HP=100，并允许 bound=2；AI=16 世界定向测试已确认攻击包、延迟伤害和移动时序符合 Legacy。
+- Symptom: AI=16 范围边界测试初版把 9 格目标在 `AttackTime` 尚未到期时也期望为 `ObjectRangeAttack`，实际收到 `ObjectWalk`。
+- Root cause: Legacy `RedThunderZuma.ProcessTarget` 只在 `InAttackRange() && CanAttack` 同时成立时攻击；“冷却中仍移动”的特殊性仅适用于超出 9 格的目标，不能反推为范围内忽略冷却。
+- Prevention: 将攻击距离边界与攻击冷却边界拆成正交用例：9 格使用可攻击状态断言投射，10 格使用冷却状态断言移动。
+- Verification: 已按两种状态改写测试；AI=16 世界定向测试已确认 9 格发 RangeAttack、10 格只移动且不排队伤害。
+- Symptom: AI=16 认证 transcript 初版在启动后长时间无输出；诊断栈显示测试 goroutine 在持有 `world.mu` 时调用 `setLightClock`，服务 goroutine 也无法继续。
+- Root cause: `setLightClock` 自身会获取 `world.mu`，而 session fixture 把它放进了已加锁的玩家/Monster 初始化区，形成同 goroutine 的非可重入锁死锁。
+- Prevention: 认证夹具中凡是会获取 world mutex 的 helper（时钟、配置、连接状态）都必须放在显式 `world.mu.Lock` 外；锁内只做直接字段读写，完成后立即解锁再驱动 transcript。
+- Verification: 已将 `setLightClock` 移到锁前；AI=16 session 定向测试已通过并正常执行 cleanup。

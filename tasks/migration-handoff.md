@@ -295,7 +295,7 @@ Go 实现、测试和迁移矩阵已提交为 `2215a6f feat(p5): migrate RedMoon
   目标并保留唤醒后的 1 秒 ActionTime。
 - 石化阶段拒绝移动、攻击、Push、毒和 Buff；苏醒后复用 inherited
   Player/owned-Monster/Hero 搜索与相邻 `ObjectAttack`，保留 300ms 延迟
-  AC+Agility 伤害、Shock 的近身攻击/远距移动分支、堆叠绕行和随机漫游。
+  MAC+Agility 伤害、Shock 的近身攻击/远距移动分支、堆叠绕行和随机漫游。
 - Go 世界测试覆盖出生/唤醒边界、`WakeAll(14)`、FireWall 阻断、Player/
   owned-Monster/Hero 目标和延迟 HP；认证 `net.Pipe` transcript 覆盖
   `ObjectMonster.Extra -> ObjectShow -> ObjectAttack -> Struck/ObjectStruck/
@@ -303,9 +303,25 @@ Go 实现、测试和迁移矩阵已提交为 `2215a6f feat(p5): migrate RedMoon
 
 Go 实现、测试和迁移矩阵已提交为 `61cfa48 feat(p5): migrate ZumaMonster AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（RedThunderZuma AI=16）
+
+本批实现 Legacy `RedThunderZuma` 的共享石化生命周期与独有雷电攻击行为：
+
+- AI=16 接入 Zuma common population；物化时保留随机朝向、`Stoned=true` 和
+  `ObjectMonster.Extra` 投影，严格遵守两秒出生门禁、`FindNearby(2)` 唤醒和
+  `WakeAll(14)` 传播，并继续遵守 `AvoidFireWall`、Shock 与石化状态门禁。
+- 对齐 Legacy 的九格 Chebyshev 攻击范围（含边界）：相邻目标使用
+  `ObjectAttack` 与 `MACAgility`，命中延迟 300ms；同格和非相邻远程目标使用
+  `ObjectRangeAttack` 与 `MAC`，命中延迟 500ms，远程攻击冷却额外增加 500ms。
+  `ProcessTarget` 保留范围内冷却与范围外移动的边界行为。
+- 延迟结算在 Player、owned Monster、Hero 三类目标上重验地图、存活和攻击资格，
+  并覆盖世界行为与认证 `net.Pipe` transcript 的包序、范围边界、冷却移动和命中时序。
+
+Go 实现、测试和迁移矩阵已提交为 `9a1d215 feat(p5): migrate RedThunderZuma AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `61cfa48` 对应本批源码已通过以下收尾门禁：
+Go HEAD `9a1d215` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -322,6 +338,8 @@ Go HEAD `61cfa48` 对应本批源码已通过以下收尾门禁：
 - `go test ./cmd/crystal-server -run 'RedMoonEvil' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'RedMoonEvil|WoomaTaurus|FlamingWooma' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'ZumaMonster|TestGameWorldBasicMonsterAI' -count=1 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'RedThunderZuma|ZumaMonster' -count=1 -timeout=180s -v`
+- `go test -race ./cmd/crystal-server -run 'RedThunderZuma|ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
