@@ -5306,3 +5306,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: Legacy `MonsterObject.FindAllTargets` 只在 `needSight=true` 时检查 `Hidden`；Monster 的 `IsAttackTarget(MonsterObject)` 负责 ownership/combat gate，但不检查客户端可见性。
 - Prevention: 对每个 Legacy `FindNearby`/`FindAllTargets` 调用分别保留 `needSight` 语义；延迟 `false` 扫描使用不含 `monsterClientVisible` 的 ownership/combat gate，并由单独测试覆盖隐藏 owned Monster。
 - Verification: 回读 `MonsterObject.cs` 的 `FindAllTargets` 与 `IsAttackTarget`；Go resolver 改用 MAC 路径的 ownership/combat gate，EvilCentipede 定向世界测试（隐藏 CreeperPlant pet）通过。
+
+### 2026-08-20 — 迁移矩阵读取必须按仓库分别验证目录
+
+- Symptom: 本轮在 Legacy workdir 同一条 `rg` 命令中同时读取存在的 `tasks/migration-handoff.md` 和未核实的 `docs/migration-matrix.md`，后者不存在使整条读取调用非零。
+- Root cause: 继续把 Legacy handoff 与 Go migration matrix 当成一个跨仓库读取动作，未先核对目录归属。
+- Prevention: 读取或更新 handoff 只在 Legacy workdir 使用 `tasks/...`；读取或更新 matrix 只在 Go workdir 使用已核实的 `docs/...`，比较时在模型侧合并两次成功输出；任何非零读取调用的全部输出作废。
+- Verification: 本次调用没有写入；后续将分别在两个仓库重读目标文件，再进行文档更新与审计。
+
+### 2026-08-20 — 新增 Monster AI 后必须修正旧测试中的数值占位
+
+- Symptom: AI=11 WoomaTaurus 接入后，完整 Go 测试中的 `TestGameWorldBasicMonsterAIIsOptInAndExcludesSpecialPopulations` 多出 `ObjectAttack`，但新增 AI 世界/会话测试本身均通过。
+- Root cause: 旧测试把真实 Legacy AI=11 当作“尚未支持的特殊 AI”占位；接入该 AI 后，夹具开始正确进入 common population 并执行攻击。
+- Prevention: 每次新增 Monster AI 常量后搜索 Go 测试中的同值 `AI` 字面量；普通样例显式用 AI=0，特殊样例改用已确认的专用常量/行为，不复用即将迁移的数值作为无语义占位。
+- Verification: 将旧占位改为已迁移的 `treeMonsterAI` 静态特殊样例；WoomaTaurus 定向测试仍通过，随后完整 Go 测试需重新取得成功结果。
