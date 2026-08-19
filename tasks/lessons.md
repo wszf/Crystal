@@ -4984,3 +4984,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 把“权限绕过”误合并为所有后续检查绕过，并未按 Legacy 的命令门槛、无条件冷却、无组门传送顺序建模。
 - Prevention: 对命令逐项保留权限、地图限制、冷却、冷却写入和底层移动原语的独立语义；GM 只绕过 Legacy 明确标注的分支，测试服开关单独进入权限条件。
 - Verification: Go 实现改为无条件检查冷却、使用无组门传送并支持 `TestServer`；定向 GM 冷却/NoPosition/测试服测试、会话测试和全仓 `go test ./...` 均通过。
+
+### 2026-08-19 — 特殊装备负面效果必须携带防御类型上下文
+
+- Symptom: 将 `Paralize` 接入共享玩家伤害函数时，如果只依据原始护甲值判断，物理与 MAC 命中无法区分，魔法攻击可能错误触发 Paralysis。
+- Root cause: Go 原有 `damagePlayerLocked` 只接收已计算的 armour，不保留 Legacy `DefenceType`；Legacy `ApplyNegativeEffects` 明确排除 `MAC`/`MACAgility`。
+- Prevention: 在共享伤害边界增加显式 `magicDefence` 上下文，并在所有已迁移魔法入口传递 `true`；物理入口保持 `false`，专用未统一路径不宣称已覆盖。
+- Verification: 新增物理/魔法玩家与怪物命中测试，断言魔法路径不消耗 1/14 抽取；`go test ./... -count=1 -timeout=5m` 全部通过。
