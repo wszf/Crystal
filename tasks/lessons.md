@@ -4791,3 +4791,6 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 既有实时会话测试的生产者/客户端消费边界在全包串行压力下会把已知 30 秒 net.Pipe 超时放大为测试进程级等待；本批只改协议桥接字段与账户/auth 持久化，没有修改 `cmd/crystal-server` 的会话实现。
 - Prevention: 全量服务端回归必须设置明确的 package timeout；出现无输出挂起时先中止并用带 `-v` 的单个失败测试和隔离服务端包复现，不能把放大的等待静默视为通过，也不能未经定向证据修改无关会话代码。
 - Verification: 元数据定向测试、相关 race、全仓编译、vet/build 通过；单独 Blizzard/MeteorStrike 测试仍稳定复现两个 30 秒 net.Pipe 失败，确认异常属于同一基线族但本次全量耗时更长。
+
+- Strengthened evidence: 运行时账户 checkpoint 批次使用 `go test ./... -count=1 -timeout=180s` 仍在 `cmd/crystal-server` 失败：Blizzard/MeteorStrike 各约 30 秒 `read/write on closed pipe`，随后 HealingCircle 在总计约 181.7 秒时触发测试 timeout；auth/config/legacyaccount/legacyaccountbridge 及其 race、全仓编译、vet/build 均通过，checkpoint 代码不在失败栈中。
+- Strengthened prevention: 以后全量服务端回归固定带 `-timeout`，同时保留“先通过的内部包 + 精确服务端失败测试/耗时 + 独立定向复现”的三段证据；只有新增失败包或栈进入本批代码才归因并修复。
