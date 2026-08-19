@@ -5320,3 +5320,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 旧测试把真实 Legacy AI=11 当作“尚未支持的特殊 AI”占位；接入该 AI 后，夹具开始正确进入 common population 并执行攻击。
 - Prevention: 每次新增 Monster AI 常量后搜索 Go 测试中的同值 `AI` 字面量；普通样例显式用 AI=0，特殊样例改用已确认的专用常量/行为，不复用即将迁移的数值作为无语义占位。
 - Verification: 将旧占位改为已迁移的 `treeMonsterAI` 静态特殊样例；WoomaTaurus 定向测试仍通过，随后完整 Go 测试需重新取得成功结果。
+
+### 2026-08-20 — RedMoonEvil 多目标测试必须保留 Legacy 的同格与观察者通知语义
+
+- Symptom: AI=13 定向测试初版错误地排除了与 RedMoonEvil 同格的玩家；多目标延迟伤害断言也只期待第一个目标的四个命中包，实际同一观察者还收到第二目标的 `ObjectStruck`/`DamageIndicator`。
+- Root cause: `RedMoonEvil.ProcessTarget` 直接调用 `FindAllTargets(ViewRange, CurrentLocation)`，没有调用其 `InAttackRange` 覆盖，因此 `FindAllTargets` 的距离零格仍有效；每个延迟目标命中后又按 Legacy 广播范围向附近玩家发送可观察的伤害包。
+- Prevention: 对群体 AI 分别验证“目标扫描入口”和“延迟结算的广播接收者”；不要从未调用的 `InAttackRange` 覆盖推导扫描排除规则，并在测试中区分目标自身包与附近观察者包。
+- Verification: Go AI=13 世界测试改为包含同格目标并锁定目标顺序；延迟冲击断言补齐观察者收到的两个额外包，RedMoonEvil 世界、会话定向测试通过。
+
+### 2026-08-20 — Monster 子类构造器计时必须核对 Spawned 覆盖
+
+- Symptom: RedMoonEvil 初版 Go 初始化把首次 `ActionTime` 写成构造器的 300ms，虽然攻击测试通过，却没有覆盖真实出生时序。
+- Root cause: Legacy `RedMoonEvil` 构造器先写入 `ActionTime + 300`，随后通用 `MonsterObject.Spawned` 无条件覆盖为 `Envir.Time + 2000`；只有 `AttackTime + AttackSpeed` 保留构造器值。
+- Prevention: 迁移带自定义构造器计时的 Monster AI 时，必须同时读取构造器和 `Spawned`/`Respawn` 生命周期，分别验证首次动作与攻击冷却，不把构造器赋值直接当作出生后的最终状态。
+- Verification: Go AI=13 初始化改为通用 2s 出生动作门禁、300ms 攻击后的动作冷却；定向世界/会话测试通过。

@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `b7dbb14e docs: record Deer AI migration`，随后增加本次 Tree 交接更新 | 本次文档更新待提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `789022b feat(p5): migrate WoomaTaurus AI` | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `2215a6f feat(p5): migrate RedMoonEvil AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11 以及 BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13 以及 BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -83,6 +83,7 @@
 - `a25713a feat(p5): migrate EvilCentipede AI`
 - `ff1cbd3 feat(p5): migrate RootSpider and BombSpider AI`
 - `789022b feat(p5): migrate WoomaTaurus AI`
+- `2215a6f feat(p5): migrate RedMoonEvil AI`
 
 ## 最近完成的 P5 批次
 
@@ -270,9 +271,21 @@ Go 实现与迁移矩阵已提交为 `ff1cbd3 feat(p5): migrate RootSpider and B
 
 Go 实现、测试和迁移矩阵已提交为 `789022b feat(p5): migrate WoomaTaurus AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（RedMoonEvil AI=13）
+
+本批实现 Legacy `RedMoonEvil` 的静止多目标攻击行为：
+
+- AI=13 接入 common population，物化时固定朝向 `Up`；route 与普通移动路径均跳过，独立分支不进入普通移动/再生处理。
+- 对齐出生生命周期：通用 `Spawned` 的两秒 ActionTime 覆盖构造器初始 300ms；每次攻击后保留 300ms ActionTime 和 `AttackSpeed` 冷却。
+- 按 `FindAllTargets(ViewRange, CurrentLocation)` 的 Legacy cell/insertion order 扫描同地图 Player、owned Monster、Hero；同格目标仍可选，隐藏目标遵守 CoolEye/等级可见性门禁。
+- 一次攻击先发送 `ObjectAttack`，每个非零 DC 目标排队 300ms 的 ACAgility 延迟动作，并立即从攻击者位置广播 `ObjectEffect`，保留 `SpellEffect.RedMoonEvil` 值 4；延迟 resolver 覆盖玩家/Monster/Hero 并在 impact 时重验目标。
+- Go 世界测试覆盖初始时序、静止、同格/隐藏/越界筛选、效果顺序、观察者包和 AC+Agility 延迟伤害；认证 `net.Pipe` transcript 覆盖 `ObjectAttack -> ObjectEffect -> Struck/ObjectStruck/DamageIndicator/HealthChanged`。
+
+Go 实现、测试和迁移矩阵已提交为 `2215a6f feat(p5): migrate RedMoonEvil AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `789022b` 对应本批源码已通过以下收尾门禁：
+Go HEAD `2215a6f` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -286,6 +299,8 @@ Go HEAD `789022b` 对应本批源码已通过以下收尾门禁：
 - `go test -race ./cmd/crystal-server -run 'RootSpider|BombSpider|BugBag' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'WoomaTaurus' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'WoomaTaurus|FlamingWooma' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'RedMoonEvil' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'RedMoonEvil|WoomaTaurus|FlamingWooma' -count=5 -timeout=600s`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
 - `go build ./...`
@@ -296,7 +311,7 @@ Go HEAD `789022b` 对应本批源码已通过以下收尾门禁：
 - Harvest 协议/世界/认证 session `-race -count=5` 通过，覆盖三次剥皮、缓存掉落、组门禁和持久化
 - Deer 世界/认证 session 定向测试、`go test -race ./cmd/crystal-server -run 'Deer' -count=5` 通过，覆盖目标发现、直线/受阻逃跑、漫游和 `ObjectWalk` transcript
 - `go test ./cmd/crystal-server -count=1 -timeout=600s` 通过
-- `go test ./... -count=1 -timeout=600s` 在 WoomaTaurus 修复旧 AI=11 占位夹具后通过；包含 RootSpider/BombSpider/WoomaTaurus 认证转录
+- `go test ./... -count=1 -timeout=600s` 在 WoomaTaurus 修复旧 AI=11 占位夹具后通过；包含 RootSpider/BombSpider/WoomaTaurus/RedMoonEvil 认证转录
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
 
