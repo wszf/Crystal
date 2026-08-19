@@ -5152,3 +5152,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 将长度字段误当成“包 ID 加载荷”而漏算 `Encode` 规定的 4 字节帧头；既有协议帧的长度是头部、ID 和载荷的总长度。
 - Prevention: 每个新 wire vector 同时按 `Encode` 的 `HeaderSize + len(payload)` 计算长度，并优先用 ASCII/UTF-8 字符数与字节数分开核对；不要凭载荷字段总和手写首两个字节。
 - Verification: 修正为 18 字节后，`TestVerifyVectors`、协议/探针/服务器定向测试全部通过。
+
+### 2026-08-19 — TrapHexagon 测试必须直接使用 Legacy 0 级持续时间并隔离可见对象移除
+
+- Symptom: TrapHexagon 首轮测试把 0 级持续时间断言为 15 秒；静态可见性移到远处时又把离开视野的怪物移除包误计入八个字段的移除数量。
+- Root cause: Legacy 公式是 `(Level * 5 + 10) * 1000`，0 级为 10 秒；`refreshStaticVisibility` 会同时维护怪物和法术效果两类可见对象。
+- Prevention: 行为测试的持续时间从基线公式逐级代入计算；可见性断言按 ObjectID/载荷区分对象族，不用所有 `ObjectRemove` 的总数代表单一效果。
+- Verification: 修正测试期望后，TrapHexagon 定向测试重新覆盖 admission、500ms completion、八点坐标、精确到期和静态可见性移除。
+
+### 2026-08-19 — Go 门禁前必须检查可再生构建缓存占用
+
+- Symptom: TrapHexagon session 测试首次启动在创建 Go `vet.cfg`/`importcfg` 时失败，错误是 `no space left on device`，尚未进入代码编译或测试断言。
+- Root cause: 本机 Go build cache 达到约 66 GiB，根文件系统仅剩约 204 MiB。
+- Prevention: 长时间 Go 门禁前先检查 `df -h` 和 `go env GOCACHE`；若仅是可再生缓存占满，使用 `go clean -cache -testcache` 后再判断实现状态，不要把环境错误记录为功能回归。
+- Verification: 清理缓存后可用空间恢复到约 66 GiB，随后重跑 TrapHexagon session 测试。
