@@ -283,9 +283,29 @@ Go 实现、测试和迁移矩阵已提交为 `789022b feat(p5): migrate WoomaTa
 
 Go 实现、测试和迁移矩阵已提交为 `2215a6f feat(p5): migrate RedMoonEvil AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（ZumaMonster AI=15）
+
+本批实现 Legacy `ZumaMonster` 的石化、唤醒和继承近战行为：
+
+- AI=15 接入 common population；物化时保留 `MonsterObject` 的随机朝向与
+  `Stoned=true`，`ObjectMonster.Extra` 在出生阶段正确投影；route 与普通 AI
+  移动均遵守 `AvoidFireWall`。
+- 对齐严格的两秒出生 ActionTime 门禁；`FindNearby(2)` 发现有效目标后发送
+  `ObjectShow` 唤醒自身，并按 Legacy `WakeAll(14)` 唤醒同范围 Zuma、继承当前
+  目标并保留唤醒后的 1 秒 ActionTime。
+- 石化阶段拒绝移动、攻击、Push、毒和 Buff；苏醒后复用 inherited
+  Player/owned-Monster/Hero 搜索与相邻 `ObjectAttack`，保留 300ms 延迟
+  AC+Agility 伤害、Shock 的近身攻击/远距移动分支、堆叠绕行和随机漫游。
+- Go 世界测试覆盖出生/唤醒边界、`WakeAll(14)`、FireWall 阻断、Player/
+  owned-Monster/Hero 目标和延迟 HP；认证 `net.Pipe` transcript 覆盖
+  `ObjectMonster.Extra -> ObjectShow -> ObjectAttack -> Struck/ObjectStruck/
+  DamageIndicator/HealthChanged` 包序。
+
+Go 实现、测试和迁移矩阵已提交为 `61cfa48 feat(p5): migrate ZumaMonster AI`；本批未修改任何 C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `2215a6f` 对应本批源码已通过以下收尾门禁：
+Go HEAD `61cfa48` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -301,6 +321,8 @@ Go HEAD `2215a6f` 对应本批源码已通过以下收尾门禁：
 - `go test -race ./cmd/crystal-server -run 'WoomaTaurus|FlamingWooma' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'RedMoonEvil' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'RedMoonEvil|WoomaTaurus|FlamingWooma' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'ZumaMonster|TestGameWorldBasicMonsterAI' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
 - `go build ./...`

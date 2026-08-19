@@ -5334,3 +5334,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: Legacy `RedMoonEvil` 构造器先写入 `ActionTime + 300`，随后通用 `MonsterObject.Spawned` 无条件覆盖为 `Envir.Time + 2000`；只有 `AttackTime + AttackSpeed` 保留构造器值。
 - Prevention: 迁移带自定义构造器计时的 Monster AI 时，必须同时读取构造器和 `Spawned`/`Respawn` 生命周期，分别验证首次动作与攻击冷却，不把构造器赋值直接当作出生后的最终状态。
 - Verification: Go AI=13 初始化改为通用 2s 出生动作门禁、300ms 攻击后的动作冷却；定向世界/会话测试通过。
+
+### 2026-08-20 — AI=15 ZumaMonster 构造状态与 CheckStacked 必须排除自身
+
+- Symptom: AI=15 世界测试的初始 `ObjectMonster.Extra`/石化状态为 false；修正后攻击边界仍错误产生 `ObjectWalk`，没有发出 `ObjectAttack`。
+- Root cause: `materializeMonster` 的 AI=15 switch 分支只补了随机朝向，遗漏了构造器的 `Stoned=true`；新 `CheckStacked` 直接复用包含当前 Monster 的占用扫描，把自身误判为堆叠对象。
+- Prevention: 迁移构造器分支时逐项核对静态状态和 `ObjectMonster` 投影；实现 `CheckStacked` 时显式排除当前 object ID，并分别覆盖同格 Monster、Player、NPC、Hero 阻塞。
+- Verification: AI=15 世界测试、认证 `net.Pipe` transcript 及 `go test -race ./cmd/crystal-server -run 'ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5` 通过。
+
+### 2026-08-20 — Monster AI 测试随机边界与 ObjectStruck payload 必须以真实调用路径为准
+
+- Symptom: ZumaMonster 夹具把继承搜索/堆叠流程实际使用的 `Next(3)` 当成意外调用而失败；认证 transcript 又把 `ObjectStruck` 的方向误期望为攻击者方向，实际包使用目标当前方向。
+- Root cause: 测试只按新增 AI 的局部攻击随机流配置回调，没有包含继承 `ProcessAI` 的搜索/移动分支；协议断言从 `ObjectAttack` 语义推测 `ObjectStruck` 字段，没有先读取真实 resolver 的 payload。
+- Prevention: 新 AI 测试先列出完整 inherited/custom 调用序列和每个 bound，再配置固定随机回调；每个延迟伤害 transcript 分别核对 `ObjectAttack` 与 `ObjectStruck` 的实际编码来源，不复用攻击方向假设。
+- Verification: AI=15 targeted world/session tests 在普通模式和上述 race 重复门禁中通过。
+
+### 2026-08-20 — 跨仓库工具调用的 workdir、路径和 patch 锚点必须三重核验
+
+- Symptom: 本轮一次 Go 读取使用了重复的 `Crystal.GoServer.GoServer` 根路径，一次 Legacy 读取带入未存在的 `docs/*.md` glob，另一次对 Go 文件的绝对路径 `apply_patch` 在 Legacy 工具上下文中找不到文件；这些调用均失败且没有写入。
+- Root cause: 继续执行时复用了摘要中的路径/目录假设，没有在每个工具调用中把唯一仓库根、已确认目录和 patch 相对锚点绑定起来。
+- Prevention: 每个 shell 调用只使用一个仓库根和绝对 `workdir`；zsh 查询先用 `rg --files` 核对目录，禁止未确认 glob；从 Legacy 上下文修改 Go 时先核对 `../Crystal.GoServer/...` 相对锚点，失败调用整体作废。
+- Verification: 三次失败调用均未改变工作树；随后在独立 Go/Legacy 调用中完成 AI=15 源码、测试和文档操作，并通过定向测试。
