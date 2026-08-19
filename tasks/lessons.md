@@ -5131,3 +5131,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: Legacy AOE 对每个捕获目标分别命中，`ObjectStruck`、伤害和状态包会按观察范围广播给同一观察者；目标自身的私有包只构成序列前缀，不是整个 recipient transcript。
 - Prevention: AOE 测试先按 payload/object ID 区分私有包、广播包和每个目标的状态，再对单目标前缀或通知集合断言；只有夹具只包含一个可见目标时才固定完整 recipient ordinal 序列。
 - Verification: 失败栈定位到 `winged_tiger_lord_test.go` 的完整序列断言，未进入 Winged resolver 错误；将测试改为按广播矩阵验证后重新运行 AI=84 定向测试。
+
+### 2026-08-19 — ChatItem 嵌套 round-trip 夹具必须使用解析器的 canonical 空集合
+
+- Symptom: 新增 `NewChatItem`/`ChatItemStats` 嵌套物品 round-trip 测试首次用 `reflect.DeepEqual` 失败，线材字段相同但解析出的空 `Slots`/`Awake.Values` 与夹具的 nil 表示不同。
+- Root cause: `ParseStoredItemPayload` 会把零长度数组规范化为非 nil 空 slice，而测试夹具只初始化了部分嵌套节点的空集合。
+- Prevention: 新协议嵌套记录的 fixture 必须显式构造解析器会产生的 canonical 空 slice/map，或只比较语义字段；不能把 Go nil/empty 表示差异误判为 wire 不等价。
+- Verification: 为顶层和嵌套 `StoredItem` 补齐空 `Slots`、`AddedStats`、`Awake.Values` 后，`go test ./internal/protocol -count=1` 通过。
+
+### 2026-08-19 — ChatItem 的定义展开深度必须按 CheckItem 调用点核对
+
+- Symptom: 初版聊天物品实现沿用了 Go 其他物品可见性路径的递归 socket 展开；重新读取 Legacy `MirConnection.CheckItem` 后发现它只检查主物品和一层 `Slots`。
+- Root cause: 把另一个功能路径的递归 helper 当成了聊天链路的协议契约，没有逐行核对 `CheckItem` 的循环深度与发包顺序。
+- Prevention: 每个入口分别记录定义展开的深度、顺序和 per-connection cache 语义；相邻功能即使共用 `StoredItem`，也不能直接复用不同可观察路径的递归策略。
+- Verification: 聊天路径已改为主物品加直接 socket；测试夹具加入二层 socket 并确认只发送前一层 ItemInfo，协议/服务器定向测试通过。
