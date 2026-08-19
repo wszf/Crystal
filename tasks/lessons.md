@@ -5455,3 +5455,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 测试在验证基态对象包前复用了显形态状态，混淆了 `GetInfo` 的默认图像与 `Mode` 图像切换。
 - Prevention: 状态投影测试按“默认 79 → Show 后 80 → Hide 后 79”顺序独立设置状态；创建夹具后先断言默认态，再进入显形态断言。
 - Verification: 修正夹具后重跑 Shinsu 定向测试，默认宠物包与 Show/Hide 转录分别验证 79/80/79。
+
+### 2026-08-20 — AI=19 随机攻击分支测试必须显式控制 1/5 判定
+
+- Symptom: KingScorpion 普通攻击用例收到 `ObjectRangeAttack`，而测试期待 `ObjectAttack`。
+- Root cause: 共享夹具把 `monsterAIRoll` 固定为 0；这正好命中 KingScorpion 的 `Random.Next(5) == 0` 范围攻击分支。
+- Prevention: 对包含随机分支的 AI 测试按分支显式设置 roll callback；范围分支返回 0，普通分支对 bound=5 返回非零，其余伤害/命中 roll 保持确定值。
+- Verification: 修正普通攻击夹具后重跑 KingScorpion 世界与 session 定向测试，确认两种攻击包、伤害类型和延迟均符合预期。

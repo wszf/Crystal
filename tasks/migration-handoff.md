@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `b7dbb14e docs: record Deer AI migration`，随后增加本次 Tree 交接更新 | 本次文档更新待提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `2215a6f feat(p5): migrate RedMoonEvil AI` | 干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `483ebae2 docs: record Shinsu migration handoff`，随后增加本次 KingScorpion 交接更新 | 本次文档与 lessons 更新待提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `fe56473 feat(p5): migrate KingScorpion AI` | 干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -85,6 +85,7 @@
 - `789022b feat(p5): migrate WoomaTaurus AI`
 - `2215a6f feat(p5): migrate RedMoonEvil AI`
 - `aa61479 feat(p5): migrate Shinsu AI`
+- `fe56473 feat(p5): migrate KingScorpion AI`
 
 ## 最近完成的 P5 批次
 
@@ -368,9 +369,29 @@ Go 实现、测试和迁移矩阵已提交为 `2830708 feat(p5): migrate ZumaTau
 Go 实现、测试和迁移矩阵已提交为 `aa61479 feat(p5): migrate Shinsu AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（KingScorpion AI=19）
+
+本批实现 Legacy `KingScorpion` 的野生与普通宠物行为：
+
+- AI=19 已接入 Go common population；物化遵守 `MonsterObject` 构造器的随机方向，
+  普通目标范围保持 Legacy 两格奇偶几何（相邻、同对角线和同 parity 的坐标）。
+- 攻击先按两格末端 Cell 是否存在可攻击的 Monster/Player 决定
+  `ObjectRangeAttack`，否则保留 `Random.Next(5)==0` 的范围分支；另一分支发送
+  `ObjectAttack`。两种攻击均设置 300ms ActionTime 与独立 AttackSpeed 冷却。
+- `LineAttack(damage, 2, 300)` 按 Cell 插入顺序每格最多排队一个 Player/Monster/Hero，
+  使用 `distance*50ms + 300ms` 延迟；范围分支使用 MAC/Agility，普通分支使用
+  AC/Agility，并在 impact 重新检查地图、归属、存活和攻击目标门禁。
+- 普通 KingScorpion 宠物使用独立双冷却和主人目标门禁，支持 Player/Monster/Hero
+  投影；击杀野怪后接入宠物经验、任务、掉落和目标清理。世界测试覆盖越界端点、
+  Cell 顺序、两种伤害分支和普通宠物击杀，认证 `net.Pipe` transcript 覆盖 bootstrap、
+  targetless `ObjectRangeAttack`、400ms 两格延迟和玩家生命包序。
+
+Go 实现、测试和迁移矩阵已提交为 `fe56473 feat(p5): migrate KingScorpion AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `aa61479` 对应本批源码已通过以下收尾门禁：
+Go HEAD `fe56473` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -394,6 +415,11 @@ Go HEAD `aa61479` 对应本批源码已通过以下收尾门禁：
 - `go test -race ./cmd/crystal-server -run 'ZumaTaurus|RedThunderZuma|ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'Shinsu|SummonShinsu|SepHighTaoist' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'Shinsu|SummonShinsu|SepHighTaoist' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'KingScorpion|kingScorpion' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'KingScorpion|kingScorpion' -count=5 -timeout=600s`
+- `go test ./... -count=1 -timeout=600s`
+- `go vet ./...`
+- `go build ./...`
 - `go test ./cmd/crystal-server -run '^TestSessionFurbolgCommanderRangedTranscript$' -count=5 -timeout=120s`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
