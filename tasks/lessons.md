@@ -4794,3 +4794,14 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 
 - Strengthened evidence: 运行时账户 checkpoint 批次使用 `go test ./... -count=1 -timeout=180s` 仍在 `cmd/crystal-server` 失败：Blizzard/MeteorStrike 各约 30 秒 `read/write on closed pipe`，随后 HealingCircle 在总计约 181.7 秒时触发测试 timeout；auth/config/legacyaccount/legacyaccountbridge 及其 race、全仓编译、vet/build 均通过，checkpoint 代码不在失败栈中。
 - Strengthened prevention: 以后全量服务端回归固定带 `-timeout`，同时保留“先通过的内部包 + 精确服务端失败测试/耗时 + 独立定向复现”的三段证据；只有新增失败包或栈进入本批代码才归因并修复。
+
+### 2026-08-19 — 新账户导入初始化必须核对嵌套状态类型
+
+- Symptom: 接入 Legacy 二进制账户导入后，Go 目标包最小编译失败，提示租赁迁移暂存表赋值类型不匹配。
+- Root cause: 导入替换逻辑按角色索引清理暂存状态，但根据字段名误写成单层 `map[int32]...`，实际服务字段还按物品 ID 嵌套了一层 map。
+- Prevention: 新增持久化导入/替换路径时，先读取目标字段的完整声明并核对所有嵌套层级；新增状态初始化后立即运行受影响包的 `gofmt` 与 `go test -run '^$'` 编译门槛。
+- Verification: 改为 `map[int32]map[uint64]rentalMailTransferProposal` 后，auth、legacyaccount、legacyaccountbridge 与 crystal-server 目标包最小编译通过；后续导入往返、密码登录测试也通过。
+
+补充证据：本批把普通测试、服务端 race 和全仓编译串成一条命令时，首个 `cmd/crystal-server` 普通测试在约 3 分 40 秒内无输出，仍处于默认 10 分钟测试超时窗口，手动中止后后续门禁未执行。预防再强化为：实时服务端测试必须独立运行并显式设置 `-timeout`；内部包测试、全仓编译和 vet/build 必须拆成可单独判定的命令，不能用一条串行命令掩盖后续门禁是否实际执行。
+
+补充验证：随后独立执行 `go test ./cmd/crystal-server -count=1 -timeout=180s` 于约 39.7 秒通过，`go test ./... -count=1 -timeout=180s` 也全部通过；因此本次组合命令的中止只能作为无界等待证据，不能归类为当前服务端包的确定性失败。
