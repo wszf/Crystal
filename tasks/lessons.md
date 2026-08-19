@@ -4760,6 +4760,9 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Prevention: 每个工具调用/嵌套命令只允许一个明确仓库根；跨仓库比较必须拆成串行、独立调用，命令内不得出现另一仓库路径或相对路径；运行门禁前先用 `git rev-parse --show-toplevel` 核对 workdir，避免重复目录段导致命令根本未启动。
 - Verification: 本批后续 Go 格式化、测试、矩阵编辑均只触及 Go 仓库，Legacy 仅通过独立调用读取 lessons；最后一次全仓测试前的错误 `Dropbox/Dropbox/...` 路径被及时识别，改用已核对的 Go 根目录后全仓测试通过，错误输出未用于实现判断。
 
+- Strengthened evidence: 本批提交前的 Legacy `.cs` 审计再次因手写成 `Dropbox/Dropbox/...` 被拒绝，命令未启动；这证明仅凭记忆填写绝对路径仍会复发。
+- Strengthened prevention: 所有跨仓库门禁调用前先运行独立的 `git rev-parse --show-toplevel`，只把其输出复制为后续 workdir；若路径校验失败，先修正并记录，不继续执行审计或提交。
+
 ### 2026-08-19 — NPC 输入按钮必须按 Legacy 的 `/@@KEY` 语法构造
 
 - Symptom: 新增 `NPCConfirmInput` 会话测试首次使用 `/[@@INPUT]`，Go 正确解析了页面文本但没有把按钮登记为 `[@@INPUT]`，第二次调用无响应并在 net.Pipe 超时。
@@ -4812,3 +4815,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 原 `main` 中配置加载声明的局部 `err` 被重构边界带走，新函数仍使用赋值形式加载 world export，却没有自己的错误变量。
 - Prevention: 抽取入口函数时逐项检查原函数局部变量的声明范围；完成结构重构后先运行目标包的最小编译测试，再添加或解释行为断言。
 - Verification: 在启动 helper 中补充 `var err error` 后，重新执行目标启动/关闭测试，确认编译错误消失并继续验证实际重启链路。
+
+### 2026-08-19 — Reincarnation 会话夹具必须遵守 Legacy 名称长度
+
+- Symptom: 新增 Reincarnation 双会话测试时，`CreateCharacter` 返回结果 1，测试尚未进入网络协议阶段。
+- Root cause: 夹具角色名超过 Go/Legacy 兼容的 15 个字符上限，失败被误判为会话初始化问题。
+- Prevention: 创建会话夹具角色时使用 3–15 字符名称，并在启动网络会话前断言创建结果为 10；不要用业务完整名称替代协议夹具标识。
+- Verification: 改用 `ReincCaster`/`ReincTarget` 后，双会话测试成功完成登录、施法、延迟完成和接受复活流程。
+
+### 2026-08-19 — 特殊法术完成后必须跳过普通目标清理分支
+
+- Symptom: Reincarnation 会话的 `ServerMagic` 把请求目标 ID 发送成 0，尽管 Legacy 的 `S.Magic` 保留死者目标 ID。
+- Root cause: Go 在 Reincarnation admission 后继续进入通用攻击目标校验分支，因死者不是普通攻击目标而清空了 `Magic.TargetID`；Legacy 的 Reincarnation 分支不会执行该清理。
+- Prevention: 新增不属于普通攻击目标解析的法术时，逐项检查最终 `S.Magic`/`ObjectMagic` 字段是否被通用 fallback 覆盖，并用真实 session transcript 验证目标 ID。
+- Verification: 对照 `HumanObject.Magic` 的 Reincarnation 分支，将 Go 通用分支改为排除该法术；双会话回归随后通过，目标 ID、请求/接受包和复活顺序均符合预期。
+
+### 2026-08-19 — Reincarnation 施法包顺序必须按入队点还原
+
+- Symptom: 初版 Go transcript 将 `DeleteItem` 放在 `UserLocation` 之前；对照 Legacy 后发现施法者实际顺序是 `HealthChanged -> UserLocation -> Chat -> ObjectSpell -> DeleteItem -> Magic`。
+- Root cause: 只按业务阶段组织 `worldMagicResult.SelfPackets`，没有追踪 Legacy `Magic`、`SpellObject.Spawned`、`Chat` 和 `ConsumeItem` 各自的入队位置。
+- Prevention: 迁移任何多包动作时，先按源码调用顺序列出每个包的入队点与收件人，再决定放入 self、pre-notification 或 delayed 队列；session transcript 必须覆盖施法者和目标两端。
+- Verification: 将 Reincarnation 删除包移到 pre-Magic 通知尾部后，Legacy 对照顺序与 Go 双会话 transcript 一致，定向 Reincarnation 测试通过。
