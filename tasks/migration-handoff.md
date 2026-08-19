@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13 以及 BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18 以及 BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -84,6 +84,7 @@
 - `ff1cbd3 feat(p5): migrate RootSpider and BombSpider AI`
 - `789022b feat(p5): migrate WoomaTaurus AI`
 - `2215a6f feat(p5): migrate RedMoonEvil AI`
+- `aa61479 feat(p5): migrate Shinsu AI`
 
 ## 最近完成的 P5 批次
 
@@ -343,9 +344,33 @@ Go 实现、测试和迁移矩阵已提交为 `9a1d215 feat(p5): migrate RedThun
 
 Go 实现、测试和迁移矩阵已提交为 `2830708 feat(p5): migrate ZumaTaurus AI`；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（Shinsu AI=18）
+
+本批实现 Legacy `Shinsu` 的野生/高级道士召唤子怪行为，以及普通
+`Spell.SummonShinsu` 宠物的 AI 专用路径：
+
+- AI=18 接入 Go common population；物化时保留 Legacy 构造器随机方向，并在
+  `Spawned` 投影 `Summoned`/`ObjectMonster.Extra=true`；对象图像按隐藏态 79、
+  显形态 80 输出，客户端继续通过 `ObjectShow`/`ObjectHide` 切换图像。
+- 对齐 `Mode`/`ModeTime`：有目标时延长 30 秒，严格遵守 `ActionTime`，显形/隐藏
+  各锁定 1 秒；攻击仅在显形态可用。`InAttackRange` 使用 Legacy 两格奇偶形几何，
+  `ObjectAttack` 后设置 300ms ActionTime 与独立 AttackSpeed 冷却。
+- `LineAttack(damage, 2)` 按方向扫描两格，每格最多选一个合法 Player/Monster/Hero，
+  以 Cell 插入顺序确定首个目标；命中延迟为 `500ms + 50ms*distance`，impact 重新
+  验证地图、存活、归属/攻击模式和目标门禁，并使用 ACAgility 防御与 Legacy AI 随机流。
+- 普通 Shinsu 宠物使用独立的 `PetActionAt`/`ShinsuAttackAt` 双冷却、主人方向捕获、
+  目标/召回/模式门禁和 Player/Monster/Hero 延迟投影；击杀野怪接入宠物经验、任务、
+  掉落与目标清理。高级道士 AI=18 子怪沿用 `OwnerObjectID` 和继承目标路径。
+- Go 世界测试覆盖 79/80/79 图像、Show/Hide 边界、奇偶形范围、Cell 插入顺序、两格
+  延迟伤害和普通宠物；认证 `net.Pipe` transcript 覆盖 bootstrap、显形、严格攻击门禁、
+  `ObjectAttack`、600ms LineAttack impact 与玩家生命包序。
+
+Go 实现、测试和迁移矩阵已提交为 `aa61479 feat(p5): migrate Shinsu AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `2830708` 对应本批源码已通过以下收尾门禁：
+Go HEAD `aa61479` 对应本批源码已通过以下收尾门禁：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -367,6 +392,8 @@ Go HEAD `2830708` 对应本批源码已通过以下收尾门禁：
 - `go test -race ./cmd/crystal-server -run 'ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'ZumaMonster|RedThunderZuma|ZumaTaurus|TestGameWorldBasicMonsterAI|FurbolgCommander' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'ZumaTaurus|RedThunderZuma|ZumaMonster|WoomaTaurus|RedMoonEvil|FlamingWooma' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'Shinsu|SummonShinsu|SepHighTaoist' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'Shinsu|SummonShinsu|SepHighTaoist' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run '^TestSessionFurbolgCommanderRangedTranscript$' -count=5 -timeout=120s`
 - `go test ./internal/worlddata ./internal/legacyworld -count=1 -timeout=120s`
 - `go vet ./...`
@@ -390,7 +417,7 @@ Go HEAD `2830708` 对应本批源码已通过以下收尾门禁：
 
 ## 建议的下一条迁移线
 
-优先继续 P5，因为最近四个批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
+优先继续 P5，因为最近五个批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
 1. 继续 P5 通用 monster AI，按 `docs/migration-matrix.md` 中下一个仍 pending
    的 AI/target sub-slice 排序，逐项确认可生成入口、隐藏/移动/目标门禁和攻击

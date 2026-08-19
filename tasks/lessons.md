@@ -5389,6 +5389,13 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 继续执行时把“当前 Go 的 matrix”和“Legacy 的 lessons”当成同一读取步骤，未按仓库边界拆分命令。
 - Prevention: Go 只在自身已确认存在的 `docs/...` 目录读取矩阵；Legacy 只在自身 `tasks/...` 目录读取 lessons，任何跨仓库证据都用独立调用取得。
 - Verification: 本次失败调用无写入且输出全部作废；随后将分别用 Go/Legacy workdir 重读目标文件，再继续 AI=17 对照。
+- Strengthening after next-session recurrence: 本轮在 Go workdir 查询 Shinsu 时又把 Legacy 的 `Shared/Client/Server` 相对路径带入同一条命令；该读取返回非零，全部输出作废。
+- Strengthened prevention: 先在当前仓库用 `rg --files` 解析实际路径；跨仓库查询必须拆成独立工具调用，且每条命令的相对路径只能来自当前 `workdir`，不能为了并行对照拼接另一仓库目录。
+- Verification after strengthening: 失败调用未写入；随后 Legacy 的 `Server/...` 与 Go 的 `cmd/...`、`internal/...` 查询分别成功，后续判断只采用这些独立结果。
+- Strengthening after same-session path recurrence: 本轮一次 Go 只读调用把已知根目录误写成 `Crystal.GoServer.GoServer`，进程未启动，命令输出不能作为证据。
+- Verification after this recurrence: 该调用没有文件变化；之后恢复使用精确的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` workdir，并先用 `rg --files`/`git rev-parse` 校验路径后再读取。
+- Strengthening after same-session recurrence: 本轮另一条 Go workdir 查询又把 Legacy `Server/MirObjects/...` 路径接在 Go 查询后，导致命令非零；跨仓库的失败输出继续不能作为证据。
+- Verification after this recurrence: 无文件变化；后续只在 Go 根读取 `cmd/...`，需要 C# `GetArmour` 证据时另开 Legacy 调用，并在模型侧合并结果。
 
 ### 2026-08-20 — AI=17 召唤计时必须映射到 Go 的 MonsterAI 字段
 
@@ -5441,3 +5448,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthening after isolated recurrence: `stopPoisonSessionTicker` 在认证 bootstrap 后可能与服务启动 ticker 竞争；live tick 会在手工基准时刻前看到未来的 `MoveAt`，进入 `MoveTo` fallback 并消费 `bound=2`，再由手工攻击消费 `bound=1`。
 - Prevention strengthening: 认证 transcript 若要断言精确 AI 随机序列，keep-alive barrier 后必须停止 ticker，并在锁内直接调用 `processMonsterAILocked`；用 `world.tick` 会重新混入实时 ticker 的非目标动作。
 - Verification strengthening: FurbolgCommander session 改为直接 process 后 `-count=5` 通过；随后 `go test ./... -count=1 -timeout=600s`、`go vet ./...`、`go build ./...` 全部通过；该改动只收紧 Go 测试夹具，不改变生产 AI 行为。
+
+### 2026-08-20 — AI=18 图像夹具必须先区分隐藏态与显形态
+
+- Symptom: Shinsu 普通宠物图像测试期待初始 image 79，却因夹具已提前设置 `ShinsuMode=true` 收到 image 80。
+- Root cause: 测试在验证基态对象包前复用了显形态状态，混淆了 `GetInfo` 的默认图像与 `Mode` 图像切换。
+- Prevention: 状态投影测试按“默认 79 → Show 后 80 → Hide 后 79”顺序独立设置状态；创建夹具后先断言默认态，再进入显形态断言。
+- Verification: 修正夹具后重跑 Shinsu 定向测试，默认宠物包与 Show/Hide 转录分别验证 79/80/79。
