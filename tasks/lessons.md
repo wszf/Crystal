@@ -5537,3 +5537,39 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthening after same-session recurrence: 本轮 Legacy 最终审计的 `workdir` 手工拼成了不存在的路径，进程未创建。
 - Strengthened prevention: 最终门禁命令必须直接复制已确认的绝对仓库根目录；若 CreateProcess 报路径不存在，立即作废调用并在任何状态判断前重跑精确根目录。
 - Verification after strengthening: 该失败调用没有文件变化；后续将使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 重新执行全部 Legacy/C# 审计。
+
+### 2026-08-20 — AI=22 勘察必须保持仓库路径隔离
+
+- Symptom: 定位 Legacy AI=22 工厂入口时，把 Go 的 `docs/migration-matrix.md` 相对路径混入 Legacy workdir；该部分 `rg` 报文件不存在，只有前面的 Legacy 输出有效。
+- Root cause: 同一条只读 shell 命令同时依赖两个仓库的相对路径，违反了本项目的单仓库调用边界。
+- Prevention: Legacy 勘察命令只查询 Legacy 路径；Go 矩阵或实现查询必须在独立的精确 Go workdir 调用中执行，不能把跨仓库相对路径放入同一命令。
+- Verification: 失败的跨路径部分未用于判断；随后只依据 Legacy `MonsterObject`/`IncarnatedZT.cs` 成功输出确认 AI=22 入口。
+
+### 2026-08-20 — AI=22 Go 勘察编排先通过字符串语法
+
+- Symptom: 查询 Go ZumaMonster 实现的 `functions.exec` 脚本因 JavaScript 字符串引号未闭合，在执行前报 `SyntaxError`。
+- Root cause: 复杂命令参数直接嵌入脚本时没有先确认引号闭合，导致没有任何 Go shell 输出。
+- Prevention: 继续使用单仓库单命令；`functions.exec` 中先构造合法的固定命令字符串，必要时拆分查询，脚本解析失败的调用一律不作为源码证据。
+- Verification: 该调用未启动命令或修改文件；后续将使用精确 Go workdir 的独立 `rg`/`sed` 查询重新审计 ZumaMonster。
+
+- Strengthening after same-session recurrence: 本轮读取 Go monster AI helper 时再次把根目录拼成 `Crystal.GoServer.GoServer`，进程未创建。
+- Strengthened prevention: 继续禁止手工追加 Go 仓库名；每次命令直接使用已经确认的 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，路径创建失败的调用立即作废。
+- Verification after strengthening: 失败调用没有文件变化或源码输出；随后将只依据精确 Go 根目录的成功读取继续 AI=22 实现。
+
+- Strengthening after same-session recurrence: AI=22 组合补丁中 `red_thunder_zuma.go` 的绝对路径漏写了 `git_work/me_work`，apply_patch 在校验阶段拒绝整组补丁，Go 工作树保持不变。
+- Strengthened prevention: 多文件补丁提交前逐个核对绝对路径前缀；统一从已确认的 Go 根目录展开目标文件，路径校验失败后不重试部分补丁。
+- Verification after strengthening: 失败补丁没有任何文件变化；后续将用完整路径重新应用并先检查 `git status --short`。
+
+### 2026-08-20 — AI=22 MACAgility 测试必须隔离防御抽样与受击副作用
+
+- Symptom: IncarnatedZT 命中测试实际记录的 `combatRoll` 为 `[10 1 1 1 ...]`，而测试只期待 MACAgility 的 `[10 1 1]`，导致在生产逻辑已完成伤害后失败。
+- Root cause: `Attacked` 后续的装备耐久/反击等通用受击副作用也会消费单位边界随机数；测试把完整 combat callback 序列误当成防御三步序列。
+- Prevention: 断言 MACAgility 时只验证序列前缀（魔抗、Agility、MAC armour），其余副作用随机调用单独验证或不纳入该投影断言；AI/毒 callback 仍按阶段独立记录。
+- Verification: 修正为核对 `[10,1,1]` 前缀；重新运行 AI=22 定向测试将确认伤害、12 分之一麻痹和延迟重验证。
+
+### 2026-08-20 — Legacy handoff 多行补丁必须先用合法 JavaScript 字面量编排
+
+- Symptom: AI=22 handoff 的首次 `functions.exec` 调用把实际换行直接放入双引号字符串，执行前报 `SyntaxError: Invalid or unexpected token`，没有修改文件。
+- Root cause: 多行 `apply_patch` 参数没有使用模板字面量或显式换行转义，脚本解析阶段先于工具调用失败。
+- Prevention: 通过 `functions.exec` 调用 `apply_patch` 时，多行 patch 一律使用模板字面量并转义其中的模板定界符；提交前检查脚本自身可解析，失败调用不得作为文件状态证据。
+- Verification: 首次调用无 shell/apply_patch 执行且工作树未变化；随后将使用合法模板字面量重新应用完整 handoff patch。

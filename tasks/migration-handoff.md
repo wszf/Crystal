@@ -433,10 +433,30 @@ DarkDevil target search semantics`，定向世界测试已通过。
 Go 实现、测试和迁移矩阵已提交为 `a0a2c2f feat(p5): migrate IncarnatedGhoul AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（IncarnatedZT AI=22）
+
+本批实现 Legacy `IncarnatedZT` 在 `ZumaMonster` 基础生命周期上的特殊攻击行为：
+
+- AI=22 已接入 Go common population，并复用 `ZumaMonster` 的唤醒、搜索、漫游和相邻
+  目标生命周期；构造时保持 `Stoned=false` 与 `AvoidFireWall=false`，bootstrap 的
+  `Extra` 和 FireWall 行为与 Legacy 子类构造器一致。
+- 相邻攻击发送 `ObjectAttack`，使用 DC 的 inclusive/unit-bound/Luck 抽样，独立设置
+  300ms ActionTime 与 AttackSpeed 冷却；impact 时重新验证地图、存活、归属、安全区和
+  `IsAttackTarget`，延迟命中沿用 `MACAgility` 投影到 Player、owned Monster 与 Hero。
+- 实际命中后执行 `PoisonTarget(target, 12, 5, Paralysis, 1000)`，保留 SC 值、初始
+  PoisonResist、12 分之一机会以及 Human/Hero 的第二次抵抗，并固定首次毒 tick 为
+  impact 后 1 秒；世界测试覆盖目标类型、随机边界、FireWall/未石化状态和延迟失效目标。
+- 认证 `net.Pipe` transcript 覆盖未石化 bootstrap、`ObjectAttack`、MACAgility 延迟
+  impact、玩家伤害/健康/聊天包序与最终 Paralysis 状态；AI=21 共享麻痹 helper 的
+  回归测试保持通过。
+
+Go 实现、测试和迁移矩阵已提交为 `0c3ca86 feat(p5): migrate IncarnatedZT AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `a0a2c2f` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
-`433c1e9`：
+Go HEAD `0c3ca86` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
+`433c1e9`，IncarnatedGhoul 为前置提交 `a0a2c2f`：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -464,6 +484,9 @@ Go HEAD `a0a2c2f` 对应本批源码已通过以下收尾门禁；DarkDevil foll
 - `go test -race ./cmd/crystal-server -run 'KingScorpion|kingScorpion' -count=5 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'IncarnatedGhoul|incarnatedGhoul' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|incarnatedGhoul' -count=3 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'IncarnatedZT|incarnatedZT' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'IncarnatedZT|incarnatedZT' -count=3 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|IncarnatedZT|ZumaMonster|zumaMonster|RedThunderZuma|ZumaTaurus' -count=3 -timeout=600s`
 - `go test ./... -count=1 -timeout=600s`
 - `go vet ./...`
 - `go build ./...`
