@@ -470,10 +470,29 @@ C# 文件。
 Go 实现、测试和迁移矩阵已提交为 `f8e2a2c feat(p5): migrate BoneFamiliar AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（DigOutZombie AI=24）
+
+本批实现 Legacy `DigOutZombie` 的隐藏挖出生命周期，并复用已迁移的 DigOut/洞穴基础设施：
+
+- AI=24 已接入 Go common population；构造时保持隐藏、不可阻挡、不可被玩家或其他
+  目标攻击，按 `FindNearby(3)` 每两秒严格检查一次；首次发现有效目标后发送
+  `ObjectMonster` 再发送 `ObjectShow`，捕获当前位置和方向并恢复 inherited
+  `MonsterObject` 基础搜索、移动与攻击流程。
+- 显形后严格等待 1 秒才生成 `Spell.DigOutZombie`，使用挖出时捕获的坐标/方向、
+  Value=1、五分钟有效期和两秒 tick；AI=124/125 Armadillo 的 500ms 洞穴延迟保持
+  独立，避免共享 helper 改变既有行为。
+- 世界测试覆盖隐藏 bootstrap/可见性/阻挡/攻击门禁、2 秒探测、严格 1 秒边界、
+  洞穴 payload/生命周期和显形后的 inherited 基础攻击；认证 `net.Pipe` transcript
+  覆盖隐藏启动、显形包序和 DigOutZombie 洞穴包。
+
+Go 实现、测试和迁移矩阵已提交为 `682302c feat(p5): migrate DigOutZombie AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
-Go HEAD `f8e2a2c` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
-`433c1e9`，IncarnatedGhoul/IncarnatedZT 为前置提交 `a0a2c2f`/`0c3ca86`：
+Go HEAD `682302c` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
+`433c1e9`，IncarnatedGhoul/IncarnatedZT/BoneFamiliar 为前置提交
+`a0a2c2f`/`0c3ca86`/`f8e2a2c`：
 
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
 - `go test ./cmd/crystal-server -run 'Tree' -count=1 -timeout=120s`
@@ -503,6 +522,8 @@ Go HEAD `f8e2a2c` 对应本批源码已通过以下收尾门禁；DarkDevil foll
 - `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|incarnatedGhoul' -count=3 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'IncarnatedZT|incarnatedZT' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'IncarnatedZT|incarnatedZT' -count=3 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'DigOutZombie|digOutZombie|Armadillo' -count=1 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'DigOutZombie|digOutZombie|Armadillo' -count=3 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|summonSkeleton' -count=1 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'BoneFamiliar|SummonSkeleton|BasicMonsterAI|OrdinaryPet|Shinsu' -count=3 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'IncarnatedGhoul|IncarnatedZT|ZumaMonster|zumaMonster|RedThunderZuma|ZumaTaurus' -count=3 -timeout=600s`

@@ -5594,3 +5594,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 已确认的仓库层级没有与命令中的相对路径同步，误把包内文件当成根目录文件。
 - Prevention: Go 查询统一使用从仓库根展开的精确相对路径（如 `cmd/crystal-server/world.go`），路径错误输出立即作废，不与同条命令的成功输出混用。
 - Verification: 失败命令没有文件变化；随后用精确包路径读取 world.go 与 summon_skeleton_test.go，确认实际上下文。
+
+### 2026-08-20 — Handoff patch 内容中的反引号也必须转义
+
+- Symptom: AI=24 handoff 补丁的 `functions.exec` 编排因 patch 正文中的 `Value=1` 反引号未转义，执行前报 `SyntaxError: Unexpected identifier 'Value'`，handoff 未变化。
+- Root cause: 只校验了外层多行模板字面量，遗漏了 patch 内容本身的模板定界符。
+- Prevention: 调用 `apply_patch` 前扫描整个 JavaScript 模板字面量，正文中的每个反引号都要转义；解析失败时先核对工作树，再重试完整补丁。
+- Verification: 首次调用没有进入 apply_patch 且 handoff diff 未变化；随后将用反引号全部转义的 patch 重新应用。
