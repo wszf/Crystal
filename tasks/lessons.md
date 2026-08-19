@@ -5072,3 +5072,38 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 夹具创建对象时跳过了 Legacy 明确排除的 Front 单元格，但断言仍把对象 ID 当作连续区间处理。
 - Prevention: 几何攻击测试的断言必须复用与实现相同的方向域和排除条件，通过方向计算对象 ID；不能用带空洞的连续 ID 区间代替单元格集合。
 - Verification: 断言改为遍历八个方向并跳过 Front 后，AI=87 四个行为测试、全 Go 测试包和定向 race 均通过。
+
+### 2026-08-19 — AI=89 首轮编译必须先做常量/多返回值门禁
+
+- Symptom: IcePillar 首轮包编译因 `icePillarMonsterAI` 在新文件和集中 AI 常量块重复声明，以及把无返回值通知追加 helper 当作返回值使用而失败。
+- Root cause: 新 AI 文件与现有集中常量/通知编码边界未逐项核对。
+- Prevention: 新批次先搜索同名常量/helper，再立即 gofmt 和 `go test ./cmd/crystal-server -run '^$'`；无返回值 helper 只调用不赋值。
+- Verification: 修正后包级编译门禁通过；AI=89 定向普通/race、全量测试、vet/build 作为批次验收。
+
+### 2026-08-19 — AI=89 毒抗条件和 PoisonTarget 参数必须按调用签名核对
+
+- Symptom: 初版 IcePillar 毒判定把毒抗为 0 的目标挡住；随后复核又发现近战 `CloseAttack` 将 MC 攻击力作为持续时间传入，而死亡延迟攻击固定为 5 秒，初版两者都固定为 5 秒。第一次把 fixture 的 MC/SC 改在 map value 的局部副本上时，回归测试仍读到旧值而失败。
+- Root cause: 只凭效果名称推断毒逻辑，没有同时对照 Legacy `PoisonTarget` 的外层/人类二次抗性及两个 duration 实参；同时忽略 Go map value 是复制语义。
+- Prevention: 移植概率状态时逐项记录 chance、outer resistance、second resistance、value、duration、tick；对每个调用点保留实参来源，用 MC/SC 不同值的 fixture 覆盖，并在修改 map value 后显式写回。
+- Verification: Go 已改为 `< resistance` 时拒绝，近战使用 MC duration、SC value，死亡使用固定 5 秒；IcePillar 定向测试验证 Frozen 状态与参数。
+
+### 2026-08-19 — AI=89 HumanObject 重载不能从共享伤害路径补加 AttackBonus
+
+- Symptom: 初版 Go IcePillar 玩家命中 helper 为物理调用点补加 `AttackBonus`；逐行对照 Legacy 后确认 `IcePillar.Attacked(HumanObject)` 自身不执行基类的 AttackBonus 加成。
+- Root cause: 把普通 MonsterObject 命中路径的“基类在目标端加成”投影到一个覆盖重载，忽略了 IcePillar override 直接使用传入 damage。
+- Prevention: 对覆盖 `Attacked` 的怪物先标注它是否调用基类/是否显式加 AttackBonus，再决定调用方是否传递或补算；测试 fixture 必须设置非零 AttackBonus。
+- Verification: helper 已移除额外加成，测试以 AttackBonus=2 仍断言传入 damage=10；IcePillar 定向测试通过。
+
+### 2026-08-19 — AI=89 特效入口必须按 C# 的 Struck/Attacked 重载逐条路由
+
+- Symptom: 直接特效路径初版把 TreeQueen 根系等 `Struck` 调用误接到 IcePillar 的 `Attacked` 逻辑，可能错误扣 HP/施加后续毒。
+- Root cause: 只按防御类型名称推断目标入口，未同时核对 C# `SpellObject.ProcessSpell` 的实际重载与后续 `ApplyPoison`；IcePillar 的 `Struck` 和 `ApplyPoison` 都是 no-op。
+- Prevention: 为静态/特效目标逐路径标注 `Attacked` 或 `Struck`；目标 no-op override 必须在 Go 入口和后续状态效果两处短路，不能只在公共伤害函数里兜底。
+- Verification: 已按 C# 修正 TreeQueen/Horned/Flying/Stone/Tucson/DarkOma/General/Healing/MapQuake 等 Struck 路径，并通过 IcePillar/相邻 AI 定向、全量 Go 测试、vet 和 build。
+
+### 2026-08-19 — AI=89 收尾仍需记录全包 race 的新增既有 fixture 栈
+
+- Symptom: `go test -race ./cmd/crystal-server -count=1` 在 AI=89 代码不相关的 `TestSessionDarkBodySpawnAndRecallTranscript`、`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 失败；前者新增 `cloneProtocolCharacterBuffs` 读取与后者已知的 `intelligentCreatureBuffByType` 读取，均与 ticker 的 `reconcileEquipmentSpecialBuffsLocked` 写入竞争。
+- Root cause: session ticker goroutine 与测试/通知侧读取共享玩家 Buff slice 时没有统一锁边界；race 栈没有进入 IcePillar 或其直接特效路由。
+- Prevention: 每批继续运行新增 AI 的定向 race，并按完整 race 栈和测试名分类；若栈只落在既有 `player_spell_buffs.go`/`intelligent_creature_items.go`，记录为共享 fixture 隔离项，不将全包 race 误报为通过或把无关修复带入当前批次。
+- Verification: IcePillar 定向 race 通过；普通 `go test ./cmd/crystal-server -count=1`、`go test ./...`、`go vet ./...`、`go build ./...` 通过；本次全包 race 的失败栈固定在上述既有 Buff 读写路径。
