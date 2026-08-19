@@ -5145,3 +5145,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 把另一个功能路径的递归 helper 当成了聊天链路的协议契约，没有逐行核对 `CheckItem` 的循环深度与发包顺序。
 - Prevention: 每个入口分别记录定义展开的深度、顺序和 per-connection cache 语义；相邻功能即使共用 `StoredItem`，也不能直接复用不同可观察路径的递归策略。
 - Verification: 聊天路径已改为主物品加直接 socket；测试夹具加入二层 socket 并确认只发送前一层 ItemInfo，协议/服务器定向测试通过。
+
+### 2026-08-19 — 新增协议固定向量必须先按完整帧编码规则计算长度
+
+- Symptom: `Server.UserName` 固定向量首次把长度字段写成 16，`TestVerifyVectors` 实际得到 18；载荷本身和解析都正确，但探针门禁失败。
+- Root cause: 将长度字段误当成“包 ID 加载荷”而漏算 `Encode` 规定的 4 字节帧头；既有协议帧的长度是头部、ID 和载荷的总长度。
+- Prevention: 每个新 wire vector 同时按 `Encode` 的 `HeaderSize + len(payload)` 计算长度，并优先用 ASCII/UTF-8 字符数与字节数分开核对；不要凭载荷字段总和手写首两个字节。
+- Verification: 修正为 18 字节后，`TestVerifyVectors`、协议/探针/服务器定向测试全部通过。

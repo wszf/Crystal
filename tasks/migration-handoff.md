@@ -45,7 +45,7 @@
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
 | P9 Guild/War/Territory/Conquest | In progress | 公会核心、仓库、进度/Buff、战争、领地和完整 Conquest runtime/NPC/assets 子簇已迁移；P9 其余范围尚未统一收口。 |
 | P10 Mail/Market/Auction/Rental/GameShop | In progress | 五个主要经济功能簇均已有协议、事务、在线通知、持久化和竞态测试，但阶段仍未宣告完整。 |
-| P11 Fishing/Awakening/Ranking/Intelligent Creature/Misc | In progress | Fishing、Awakening、Ranking、Intelligent Creature 功能簇已迁移；聊天物品链接已按库存/解锁 Storage/已召唤 HeroInventory 授权并展开定义；其他 miscellaneous 系统待补。 |
+| P11 Fishing/Awakening/Ranking/Intelligent Creature/Misc | In progress | Fishing、Awakening、Ranking、Intelligent Creature 功能簇已迁移；聊天物品链接已按库存/解锁 Storage/已召唤 HeroInventory 授权并展开定义；`RequestUserName`/`UserName` 已补齐全局角色名查询、缺失静默和协议探针；其他 miscellaneous 系统待补。 |
 | P12 恢复/备份/部署 | Pending | 最终 restart equivalence、生产化 smoke test、备份与部署尚未开始。 |
 
 ## 已交付的重要能力
@@ -53,6 +53,7 @@
 - 纯 Go 迁移工具：`crystal-legacy-account-export`、`crystal-legacy-world-export`、`crystal-protocol-probe`。保留的 C# 工具仅作历史基线。
 - Go 服务端已贯通账户/角色、地图与可见性、NPC/Quest、物品与经济、Group/Hero/Pet/Mount/Social、Guild/Conquest、Mail/Market/Auction/Rental/GameShop、Fishing/Awakening/Ranking/Intelligent Creature 等大量功能簇。
 - 协议测试使用 Legacy ordinal、精确 payload 和固定向量；关键跨玩家功能使用真实 `net.Pipe` 多会话接收者矩阵。
+- `RequestUserName`/`UserName` 已按 Legacy 的 UInt32 角色索引、全局离线角色查询、缺失无响应语义和 .NET 字符串布局接入服务端，并由协议向量、认证探针和 Game 阶段会话测试锁定。
 - Legacy 数据可通过纯 Go 账户/世界导出器进入 Go JSON 权威状态，并覆盖重登与 restart 恢复路径。
 
 关键里程碑提交：
@@ -68,6 +69,7 @@
 - `0cf4a44 feat(p8): migrate mounts and ordinary pets`
 - `03f9b2b feat(p11): migrate intelligent creatures`
 - `0e17233 feat(p11): migrate fishing awakening and rankings`
+- `225e855 feat(p11): migrate user name lookup`
 - `ff39426 feat(migration): add Go legacy account exporter`
 - `cb4b899 feat(migration): add Go legacy world exporter`
 - `296f1c1 feat(migration): add Go protocol probe`
@@ -87,15 +89,18 @@
 
 ## 当前质量门禁
 
-Go HEAD `9084e6c` 对应源码已通过：
+Go HEAD `225e855` 对应源码已通过：
 
 - `go test ./cmd/crystal-server -count=1 -timeout=600s`
 - `go test ./... -count=1 -timeout=600s`（本次收尾重新运行并明确取得 `exit_code=0`）
-- `go test -race ./... -count=1 -timeout=900s`
+- 本批用户名称路径的 `go test -race ./cmd/crystal-server ./internal/protocol ./internal/probe -run 'TestSessionRequestUserNameResolvesGlobalCharacter|TestUserNamePayloadsKeepLegacyOrdinalsAndLayout|TestRunNetworkAuthenticatedTranscript|TestVerifyVectors' -count=1 -timeout=5m`
 - `go vet ./...`
 - `go build ./...`
 - 两仓库 `git diff --check`
 - 两仓库 tracked、staged、untracked `.cs` 零变化检查
+
+全仓库 race 仍受既有共享 session Buff 读写竞争影响；该问题的复现栈已记录在
+`tasks/lessons.md`，不属于本批 `RequestUserName` 路径。本批定向 race 通过。
 
 文档交接不会修改 Go 源码。新 Session 开始时仍应先确认两个工作树干净；若环境或工具链变化，再选择与风险相称的门禁重跑。
 
