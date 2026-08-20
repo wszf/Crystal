@@ -5791,9 +5791,28 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Prevention: 每个工具调用只使用一个仓库的 workdir 和已核验路径；生成命令后先确认所有路径都属于当前仓库，Legacy/Go 对照必须拆成独立成功调用，任一混入路径或非零结果都丢弃整条调用。
 - Verification: 记录后先用 Legacy-only 调用更新本 lesson，再重新发起不含 Legacy 路径的 Go-only 读取；后续只引用成功且单仓库的输出，未产生源代码变更。
 
+- Strengthening after AI=66 selection: 本次勘察的一条调用在 Go workdir 中同时带入 Legacy `Server/MirObjects/...` 与 Go `cmd/crystal-server/...` 路径并非零；整条输出已作废，未用于 AI=66 判断。
+- Verification after recurrence: 已停用该调用结果，后续 AI=66 对照将严格拆成 Legacy-only 与 Go-only 两条成功调用；本 lesson 写入本身使用完整 Legacy 根路径。
+- Strengthening after immediate recurrence: 切换回 Legacy workdir 后又复用了 Go `cmd/crystal-server/...` 查询正文并产生非零；这次输出同样全部作废，说明仓库切换时不能复用上一条命令字符串。
+- Prevention after recurrence: 每次切换仓库先重建命令 allowlist，再执行；Legacy 调用只出现 `Server/...`/`tasks/...`，Go 调用只出现 `cmd/...`/`internal/...`/`docs/...`，并逐条检查 workdir 与相对路径前缀。
+
 ### 2026-08-20 — HedgeKekTal session 夹具必须区分 value map 与冷却期移动
 
 - Symptom: 新增 HedgeKekTal transcript 首次把 `world.monsters` 的 value map 元素按指针解引用而编译失败；修正后又把延迟命中前的 `ObjectWalk` 误断言为空，定向测试失败。
 - Root cause: Go 世界的 Monster map 存储 `worldMonster` 值而不是指针；Legacy `RightGuard.ProcessTarget` 在攻击冷却期仍会执行 `MoveTo`，因此投射发出后、伤害到达前可能先产生移动包。
 - Prevention: 读取/写回 Monster map 时使用值副本；为带延迟动作的 RightGuard transcript 将“投射 tick、冷却移动 tick、命中 tick”分开断言，并按通知顺序核对移动包的位置和方向。
 - Verification: 修正后 `go test ./cmd/crystal-server -run 'TestGameWorldHedgeKekTal|TestSessionHedgeKekTalRangeAttackTranscript' -count=1` 通过。
+
+### 2026-08-20 — CrazyManworm 三类目标夹具必须隔离 Hero 维护与随机流
+
+- Symptom: AI=66 三类目标测试首次在 Hero case 收到额外 `ObjectAttack/ObjectStruck/DamageIndicator`，随后随机回调又因 Hero 维护路径消费了 bound=16 而失败。
+- Root cause: `world.tick` 会独立运行 Hero 的搜索/攻击维护；夹具只冻结了 Monster 时钟，没有冻结 Hero 的 `ActionReadyAt`/`OperateReadyAt`，并把共享 AI 随机回调误当成只服务 CrazyManworm 的 bound=3。
+- Prevention: 合成 Player/owned-Monster/Hero 目标测试先把非被测 Hero 的 readiness 推到合成时钟之后；随机回调只对被测分支的 bound 做严格断言，允许并记录独立维护路径的合法边界。
+- Verification: 修正夹具后 `go test ./cmd/crystal-server -run 'CrazyManworm' -count=1` 通过。
+
+### 2026-08-20 — AI=66 全包 race 失败仍需归因到既有 session 夹具
+
+- Symptom: AI=66 完成后的全包 `go test -race ./cmd/crystal-server -count=1 -timeout=600s` 仍失败，复现 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、`TestSessionKirinIceThrustTranscript` 与 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff` 的数据竞争；AI=66 定向 race 未失败。
+- Root cause: 失败栈分别落在既有 GuildBuff/装备 buff 共享状态、Kirin transcript 随机回调和 Blink map-transition buff ticker 的并发读写，不在 CrazyManworm 生产路径或其测试。
+- Prevention: 每批迁移同时保留目标定向 race 与全包 race；全包失败时按测试名和 race 栈归因，只有栈指向本批代码才修改生产实现，否则在 handoff 中明确记录为既有门禁问题。
+- Verification: `go test -race ./cmd/crystal-server -run 'CrazyManworm' -count=3 -timeout=300s` 通过；普通全包、全仓库测试、`go vet ./...` 与 `go build ./...` 也通过；重跑的全包 race 日志稳定命中上述既有测试。
