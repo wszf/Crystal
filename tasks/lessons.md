@@ -5905,3 +5905,27 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 为补充 Legacy 对照时把跨仓库检索路径拼进了 Go workdir 命令，没有拆成独立的 Legacy 调用。
 - Prevention: 每条 `exec_command` 只使用一个仓库的 `workdir` 和相对路径；需要跨仓库时拆成两个独立调用，禁止在同一命令中出现另一仓库根。
 - Verification: 本次后续 Go 与 Legacy 命令均按仓库拆分执行；最终两仓库 `.cs` diff/staged/untracked 审计独立通过。
+
+### 2026-08-20 — Legacy 对照与 Go 检索不得共用一次命令
+
+- Symptom: Yimoogi 对照检索时把 Legacy 工作目录与 Go 相对路径放进同一条命令；命令因在 Legacy 根解析 Go 路径而失败，未产生文件改动。
+- Root cause: 读取 Legacy 基线后切换仓库时，仍沿用同一调用构造跨仓库路径，违反单调用单仓库边界。
+- Prevention: 先在当前仓库完成一组只读证据，再结束调用；需要另一仓库时新开独立调用，并让 `workdir` 与所有相对路径属于同一仓库，禁止混入另一仓库根或路径片段。
+- Verification: 该失败调用输出作废；后续 Yimoogi Legacy 与 Go 检索分别在各自精确根目录成功执行，且 `git diff` 未出现 C# 文件变化。
+- Strengthening after recurrence: 后续一次调用仍沿用 Legacy `workdir` 却引用 Go 相对路径，命令再次失败且未改文件。
+- Prevention after recurrence: 每次工具调用前显式复核 `workdir` 字符串是 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 或 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` 之一，并只允许对应仓库的相对路径；不要依据上一条调用的仓库猜测当前目录。
+- Verification after recurrence: 丢弃该失败输出；在继续执行前重新核验每条命令的根路径，Legacy/Go 证据分别成功取得，C# 文件仍无变化。
+
+### 2026-08-20 — Yimoogi 随机夹具必须覆盖固定范围的单位边界与金额语义
+
+- Symptom: Yimoogi 定向测试首次漏报毒效随机顺序，因为断言没有计入固定 DC/SC 范围各自的 `Next(1)`；成对掉落断言使用 `Gold=1` 时，现有随机金额规则合法地产生 0，导致“最终姐妹死亡应有掉落”的断言失败。
+- Root cause: 测试夹具只按业务分支枚举随机调用，未按 Legacy `GetAttackPower` 的 inclusive range 和 Go 当前 `dropMonsterGoldLocked` 的 `[Gold/2, Gold+Gold/2)` 语义核对固定边界。
+- Prevention: 为每个新增 AI 先记录完整随机调用序列（包括 `Next(1)`），并使用能产生正向观测结果的最小掉落金额；不要把“固定范围不消耗随机”或“Gold=1 必为 1”当作默认假设。
+- Verification: 修正为断言 `[1,6,1,10,1,10]` 的毒效顺序并将掉落夹具改为 `Gold=2`；`go test ./cmd/crystal-server -run 'Yimoogi' -count=1`、`go test ./...` 均通过。
+
+### 2026-08-20 — AI=36 全包 race 仍需按本次实际失败栈归因
+
+- Symptom: `go test -race ./... -count=1 -timeout=900s` 仍失败，命中 `TestSessionDarkBodySpawnAndRecallTranscript`、`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、`TestSessionKirinIceThrustTranscript` 与 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`。
+- Root cause: race 栈分别落在既有装备 buff reconciliation 与读取、Kirin 会话实时 ticker 的随机回调，以及 Blink map-transition buff ticker 的并发读写；没有进入 Yimoogi 生产路径或 Yimoogi 会话夹具。
+- Prevention: 每批同时运行本 AI 的定向 race 与全包 race；全包失败必须按本次实际测试名和栈归属记录，不能沿用上一批失败清单，也不能为非本批并发栈修改迁移实现。
+- Verification: `go test -race ./cmd/crystal-server -run 'Yimoogi' -count=3 -timeout=600s`、普通 `go test ./...`、`go vet ./...` 与 `go build ./...` 通过；全包 race 输出未出现 Yimoogi 文件或测试栈。

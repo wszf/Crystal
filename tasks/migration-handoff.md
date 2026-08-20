@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `0ab2c1e docs: record MutatedManworm migration handoff`，本批增加 AI=34 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `e9351b4 feat(p5): complete FrostTiger AI` | AI=34 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `959c7bef docs: record FrostTiger migration handoff`，本批增加 AI=36 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `7df022c feat(p5): complete Yimoogi AI` | AI=36 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -88,6 +88,7 @@
 - `fe56473 feat(p5): migrate KingScorpion AI`
 - `9d15529 feat(p5): complete RightGuard and LeftGuard AI`
 - `f04430f feat(p5): complete MinotaurKing AI`
+- `7df022c feat(p5): complete Yimoogi AI`
 
 ## 最近完成的 P5 批次
 
@@ -941,9 +942,44 @@ race 栈落在装备 buff reconciliation、Kirin transcript 随机回调和 Blin
 buff ticker，未进入 AI=34 生产代码或会话夹具。该结果已记录到 `tasks/lessons.md`，不因
 本批实现改动非相关生产路径。
 
+## 本次完成的 P5 批次（Yimoogi AI=36）
+
+本批实现 Legacy `Yimoogi` 的成对生命周期、目标同步和完整攻击/传送行为：
+
+- AI=36 接入 Go common population 与独立 AI 分支；保留构造后的 dormant 状态、四秒后
+  的 `ObjectAttack Type=2` 姐妹生成、前方点位优先/当前位置回退、子体两秒 action lock
+  和 parent/sister 的目标同步。真实受击入口会在伤害解析前唤醒整对实例。
+- 保留 Legacy 的 parity-shaped 两格近战几何、同格/非近战七格攻击选择、300ms
+  MAC+Agility 近战命中和 500ms MAC-only 远程命中；远程 admission 保留 `ObjectRangeAttack`
+  与 `AttackSpeed+500ms` 冷却。
+- 远程四格内保留 `ObjectAttack Type=1` 的即时 Red poison；固定范围随机消耗覆盖 DC/SC
+  的 inclusive 边界、单位 `Next(1)`、Player/Hero 两阶段抗性和 Monster 单阶段抗性。
+- 低血量 parent 保留 40 次随机传送尝试、effect=1 的出入场可见性包，并在传送前位置生成
+  两个 `WhiteSnake`；成对死亡掉落只允许最后死亡的一方产出共享掉落。
+- Go 实现、确定性世界测试、三类目标投影测试、毒效随机顺序测试和认证 `net.Pipe`
+  ranged transcript 已提交为 `7df022c feat(p5): complete Yimoogi AI`；本批未修改任何
+  C# 文件。
+
+本批新增并通过：
+
+- `go test ./cmd/crystal-server -run 'Yimoogi' -count=1`
+- `go test -race ./cmd/crystal-server -run 'Yimoogi' -count=3 -timeout=600s`
+- `go test ./...`
+- `go vet ./...`
+- `go build ./...`
+
+完整 `go test -race ./... -count=1 -timeout=900s` 仍未全绿：本次实际命中
+`TestSessionDarkBodySpawnAndRecallTranscript`、
+`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、
+`TestSessionKirinIceThrustTranscript` 与
+`TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff` 的既有数据竞争；race
+栈落在装备 buff reconciliation/读取、Kirin 会话 ticker 随机回调和 Blink map-transition
+buff ticker，未进入 AI=36 生产代码或 Yimoogi 会话夹具。该全包 race 继续作为既有门禁问题
+记录，不修改本批生产代码；具体复盘已写入 `tasks/lessons.md`。
+
 ## 当前质量门禁
 
-AI=34 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：
+AI=36 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：
 
 - `go test ./cmd/crystal-server -run 'ToxicGhoul' -count=1 -timeout=120s`
 - `go test -race ./cmd/crystal-server -run 'ToxicGhoul' -count=5 -timeout=600s`
