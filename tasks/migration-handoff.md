@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `959c7bef docs: record FrostTiger migration handoff`，本批增加 AI=36 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `7df022c feat(p5): complete Yimoogi AI` | AI=36 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `307c0e47 docs: record TrapRock migration handoff`，本批继续增加 AI=49/50 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `8eefcf2 feat(p5): complete ThunderElement and GreatFoxSpirit AI` | AI=49/50 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33 以及 FrostTiger AI=34 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33、FrostTiger AI=34、ThunderElement AI=49 以及 GreatFoxSpirit AI=50 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -89,6 +89,8 @@
 - `9d15529 feat(p5): complete RightGuard and LeftGuard AI`
 - `f04430f feat(p5): complete MinotaurKing AI`
 - `7df022c feat(p5): complete Yimoogi AI`
+- `149c60d feat(p5): complete TrapRock AI`
+- `8eefcf2 feat(p5): complete ThunderElement and GreatFoxSpirit AI`
 
 ## 最近完成的 P5 批次
 
@@ -1180,6 +1182,35 @@ Go 实现、协议、测试和矩阵已提交为
 `TestSessionOmaMageRangeSlowFrozenTranscript` 与
 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`；均为既有会话/共享
 状态竞争，未出现 TrapRock 文件或测试栈，具体分类已写入 `tasks/lessons.md`。
+
+## 本次完成的 P5 批次（ThunderElement AI=49、GreatFoxSpirit AI=50）
+
+本批完成 Legacy `ThunderElement` 与 `GreatFoxSpirit` 的 Go 迁移：
+
+- AI=49 接入 common population，保留一格攻击与同格拒绝、`Next(3)==1` 后的双偏移、
+  移动后立即攻击和 `ObjectWalk` 通知；300ms 延迟 MAC 攻击在命中时重扫半径 2，
+  所有目标结算后才广播 `ObjectAttack`。普通 MAC/魔法伤害保持免疫，成功 Repulsion
+  使用距离和 MaxHP 随机值自伤，并在 `ObjectStruck.AttackerID` 中保留真实 pusher ID。
+- AI=50 接入 common population，保留固定不可移动、七格搜索、同格/远程
+  `ObjectRangeAttack`、阶段值单调投影、每目标 effect=8 和 300ms MAC 攻击；Recall
+  保留距离、随机、10 秒冷却、半径 30、MagicResist 与失败回自身位置语义。Slow/Paralysis
+  按 Legacy poison 顺序处理，Spawn/Die 会切换附近 ±20 方形范围的 GuardianRock 状态。
+- Go 世界测试覆盖目标类型、随机/延迟/免疫/推击/召回/阶段与生命周期；认证
+  `net.Pipe` transcript 覆盖 GreatFox 远程攻击、effect 广播源和延迟命中包序。
+
+本批定向验证已通过：
+
+- `go test ./cmd/crystal-server -run 'ThunderElement|GreatFox' -count=1 -timeout=300s`
+- `go test -race ./cmd/crystal-server -run 'ThunderElement|GreatFox' -count=3 -timeout=600s`
+
+普通全仓 `go test ./...`、`go vet ./...` 和 `go build ./...` 通过。完整
+`go test -race ./... -count=1 -timeout=900s` 本次实际失败集合为
+`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 与
+`TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`；栈分别属于既有
+装备 Buff reconciliation 与 Blink map-transition Buff 共享状态竞争，未进入本批
+AI=49/50 文件或测试。该结果已写入 `tasks/lessons.md`，不修改无关模块。
+
+本批 Go 实现、测试和矩阵更新待 Go 仓库提交；本批未修改任何 C# 文件。
 
 ## 当前质量门禁
 

@@ -6079,3 +6079,45 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 失败栈属于既有 GuildBuff/装备、Kirin ticker/随机回调、OmaMage maintenance 和 Blink map-transition buff ticker，未进入 AI=47 生产文件或测试。
 - Prevention: 完整 race 必须在当前 Go HEAD 上重跑并记录最终测试集合；定向 race、普通全包和完整 race 分开归因，非本批栈不修改迁移实现。
 - Verification: TrapRock race `-count=5`、服务端完整普通、protocol、vet/build 通过；完整 race 摘要未出现 TrapRock。
+
+### 2026-08-20 — AI=49/50 对照读取仍须保持单仓库调用边界
+
+- Symptom: ThunderElement/GreatFoxSpirit 收尾期间，一次 Legacy 只读命令混入了 Go 相对路径；命令在读取阶段失败，同一调用前面的读取输出也不能继续作为源码证据。
+- Root cause: 为连续查看两侧实现复用了另一仓库的路径，没有把 `workdir` 与命令参数绑定为单一仓库集合。
+- Prevention: 跨仓库对照必须拆成独立调用；每次先核对当前 `git rev-parse --show-toplevel`，调用内只使用该仓库路径，失败调用的全部输出作废。
+- Verification: 失败调用未产生写入；后续 Legacy 与 Go 查询分别在各自核验过的根目录完成，AI=49/50 判断只采用成功调用的输出。
+
+### 2026-08-20 — ThunderElement 移动分支必须保留 ObjectWalk
+
+- Symptom: ThunderElement 的移动已经改变了怪物坐标，但初版 admission 通知没有包含 `ObjectWalk`，客户端观察到位置变化却没有移动包。
+- Root cause: 复用移动 helper 时丢弃了 `monsterAIMoveToLocked` 返回的通知 slice，只保留了后续攻击动作。
+- Prevention: 任何 AI 的移动与攻击同 tick 分支都必须把移动 helper 的通知按 Legacy 顺序追加到返回值；测试同时断言坐标、`ObjectWalk` 和后续攻击。
+- Verification: `TestGameWorldThunderElementAdmissionMovesThenAttacksAndRescans` 固定移动包后，AI=49 定向普通测试及 `-race -count=3` 通过。
+
+### 2026-08-20 — ThunderElement ObjectAttack 必须在全部目标伤害之后广播
+
+- Symptom: ThunderElement 初版在逐目标伤害前广播 `ObjectAttack`，包序与 Legacy `CompleteAttack` 不同。
+- Root cause: 把 admission 时的普通攻击通知模式直接复用到 impact-time AOE；Legacy 会先完成所有目标的 `Attacked` 回调，再发布攻击包。
+- Prevention: 延迟 AOE resolver 先完成全部目标有效性检查和伤害，再追加一次 `ObjectAttack`；测试按每个目标的伤害/状态包后再读攻击包。
+- Verification: `TestGameWorldThunderElementAdmissionMovesThenAttacksAndRescans` 的通知顺序断言通过，AI=49 定向普通/race 测试均通过。
+
+### 2026-08-20 — GreatFoxSpirit effect 广播必须以 GreatFox 自身坐标为源
+
+- Symptom: GreatFoxSpirit 远程攻击的 effect=8 对目标可见，但初版以目标坐标作为广播中心，远处观察者收到错误的可见性结果。
+- Root cause: effect 通知沿用了目标状态更新的坐标，而 Legacy `SpellEffect` 是由 GreatFoxSpirit 在自身位置广播。
+- Prevention: 区分攻击者源坐标与目标 payload；每个远程 effect 都以 GreatFox 自身地图/坐标调用 observer fan-out，并在会话 transcript 覆盖接收者矩阵。
+- Verification: `TestSessionGreatFoxRangeAttackTranscript` 锁定 `ObjectRangeAttack -> ObjectEffect` 及源坐标，AI=50 定向普通/race 测试通过。
+
+### 2026-08-20 — ThunderElement Repulsion 必须传递真实 pusher ObjectID
+
+- Symptom: ThunderElement 被 Repulsion 推中后，`ObjectStruck.AttackerID` 初版使用了占位 ID，客户端无法看到实际施法者/推击者。
+- Root cause: 共享 push resolver 只传递了受击怪物和距离，没有沿调用链保留真实 pusher 的 ObjectID。
+- Prevention: 所有 Repulsion 入口显式传递 pusher ObjectID，并在 `ObjectStruck` payload 与世界测试中同时断言该 ID；不要从 target 或当前 AI attacker 推断推击者。
+- Verification: `TestGameWorldThunderElementPushedRepulsionDamageUsesPusher` 断言真实 ID 和自伤公式，AI=49 定向普通/race 测试通过。
+
+### 2026-08-20 — AI=49/50 全包 race 仍需按最终实际失败集合归因
+
+- Symptom: 本批最终 `go test -race ./... -count=1 -timeout=900s` 失败于 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 和 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`；ThunderElement/GreatFoxSpirit 定向 race 未失败。
+- Root cause: 两个 race 栈分别落在既有装备 Buff reconciliation 与 Blink map-transition Buff 的共享状态读写，未进入 AI=49/50 生产代码或新会话夹具。
+- Prevention: 每批保留目标定向 race、普通全包和完整 race；完整 race 只按当前运行的实际测试名/栈归因，非本批并发问题写入交接而不修改迁移实现。
+- Verification: AI=49/50 定向 race、`go test ./...`、`go vet ./...` 和 `go build ./...` 通过；完整 race 输出未出现 ThunderElement/GreatFoxSpirit 文件或测试栈。
