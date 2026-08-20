@@ -1086,6 +1086,38 @@ Go 实现、测试和矩阵已提交为
 和 Kirin ticker/随机回调，未出现 OmaKing 文件或测试栈，具体分类已写入
 `tasks/lessons.md`。
 
+## 本次完成的 P5 批次（RedFoxman AI=45 / WhiteFoxman AI=46）
+
+本批完成 Legacy 两种 Foxman 的 Fear/retreat、攻击和 teleport 行为：
+
+- AI=45/46 接入 common population，保留构造时随机方向、继承目标搜索/保留、六格
+  `FearTime` 攻击窗口、`CanAttack` 入口门禁和窗口外的 MoveTo/WalkAway 行为。
+- RedFoxman 在相邻窗口保留 `Random.Next(1)` teleport gate、10 秒 TeleportTime、40 次
+  ±14 格随机尝试和 effect=2 的 `ObjectTeleportOut -> ObjectRemove -> ObjectMonster -> ObjectTeleportIn`
+  顺序；普通攻击广播 Type 0/1 `ObjectRangeAttack`，固定 500ms MAC 延迟。
+- WhiteFoxman 保留 `Next(8)==0` 的 Type 1 Slow 分支（level gap、双重 Player/Hero
+  PoisonResist、SC poison value）和 Type 0 的距离 50ms 加 500ms MAC+Agility 延迟；两类
+  目标均支持 Player/owned Monster/Hero 重验及 value-map 写回。
+- 认证 transcript 覆盖两种 ranged payload、固定延迟、命中包序和目标 HP；世界测试额外
+  覆盖 Red teleport、White Slow、MAC/MACAgility 差异和专用 FearTime。
+
+Go 实现、测试和矩阵已提交为
+`6b87ead feat(p5): complete RedFoxman and WhiteFoxman AI`；本批未修改任何 C# 文件。
+
+本批新增并通过：
+
+- `go test ./cmd/crystal-server -run 'Foxman' -count=3 -timeout=300s`
+- `go test -race ./cmd/crystal-server -run 'Foxman' -count=5 -timeout=600s`
+- `go test ./... -count=1 -timeout=900s`
+- `go vet ./...`
+- `go build ./...`
+
+完整 `go test -race ./... -count=1 -timeout=900s` 本批最终实际命中
+`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、
+`TestSessionKirinIceThrustTranscript` 与
+`TestSessionOmaMageRangeSlowFrozenTranscript`；均为既有共享状态/session 竞争，未出现
+Foxman 文件或测试栈，具体分类已写入 `tasks/lessons.md`。
+
 ## 当前质量门禁
 
 AI=36 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：

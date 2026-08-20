@@ -6002,3 +6002,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: race 栈仍落在既有智能生物会话、GuildBuff/装备共享状态和 Kirin ticker/随机回调，未进入 OmaKing 文件或测试。
 - Prevention: handoff 记录每批实际失败名；目标定向 race、普通全包、完整 race 分开执行，非本批栈只分类记录，不为其修改迁移实现。
 - Verification: OmaKing race `-count=5`、全仓普通、`go vet ./...` 与 `go build ./...` 通过；完整 race 过滤摘要未出现 OmaKing。
+
+### 2026-08-20 — AI=45/46 Foxman 专用 FearTime、SC poison 与 cooldown 必须独立建模
+
+- Symptom: Foxman 初版会话夹具首 tick 得到 Fear/retreat `ObjectWalk` 而非攻击；Red teleport 测试写入通用 `MonsterAIFearAt` 后没有进入 teleport；White Slow value 又错误使用了 DC 的 10 而不是 SC 的 5。
+- Root cause: Legacy Red/White 使用各自的 FearTime 字段，且 `ProcessTarget` 在入口先检查 `CanAttack`；White `PoisonTarget` 的 value 来自 SC，不能复用 ranged DC power helper。
+- Prevention: 每个子类的专用计时器单独映射并在会话 fixture 显式设置；先按 Legacy 入口顺序固定 Fear/CanAttack/cooldown，再为毒物 value 建立 DC/MC/SC 独立随机 helper。
+- Verification: Red/White 世界与认证 transcript 重复测试通过，Red teleport、White Slow、MAC/MACAgility 和 delayed movement 均按预期断言。
+
+### 2026-08-20 — AI=45/46 全包 race 失败必须按最终实际集合归因
+
+- Symptom: 本批最终完整 `go test -race ./... -count=1 -timeout=900s` 命中 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、`TestSessionKirinIceThrustTranscript` 与 `TestSessionOmaMageRangeSlowFrozenTranscript`；Foxman 定向 race 通过。
+- Root cause: 失败栈属于既有 GuildBuff/装备共享状态、Kirin ticker/随机回调和 OmaMage session maintenance，未进入 RedFoxman/WhiteFoxman 代码或测试；同批较早的一次 race 摘要中的 Hiding 失败未在最终重跑复现。
+- Prevention: 每批以最终实际失败名更新 handoff，不沿用前批 race 清单；只修改栈指向本批的生产代码，其余保留为既有门禁问题。
+- Verification: Foxman race `-count=5`、全仓普通、`go vet ./...` 与 `go build ./...` 通过；完整 race 摘要未出现 Foxman 文件或测试栈。
