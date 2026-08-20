@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `0499c844 docs: record BlackFoxman migration handoff`，本批增加 AI=66 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `4213640 feat(p5): complete CrazyManworm AI` | AI=66 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `0499c844 docs: record BlackFoxman migration handoff`，本批增加 AI=65 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `d5dc961 feat(p5): complete MutatedManworm AI` | AI=65 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -788,6 +788,43 @@ Go 实现、测试和迁移矩阵已提交为
 （装备 buff 共享状态）、`TestSessionKirinIceThrustTranscript`（未同步随机流）和
 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`（map-transition
 buff ticker）。race 栈未进入 CrazyManworm；本批不将全包 race 记为通过。
+
+## 本次完成的 P5 批次（MutatedManworm AI=65）
+
+本批将 Legacy `MutatedManworm` 从已有 Player 目标子切片收口为继承
+`CrazyManworm` 生命周期的完整三类目标与客户端可观察行为：
+
+- AI=65 接入完整的目标搜索、`CanAttack`、相邻近战和移动流程；保留 Player、owned
+  Monster、Hero 的 TargetKind，并覆盖三类目标的存活、归属、地图和距离重验。
+- 攻击保留 `Random.Next(3)==0` 的 Type 1 MC 与其余 Type 0 DC，使用 Legacy
+  inclusive `GetAttackPower`/Luck 边界、ACAgility 防御类型和 300ms 延迟结算；零伤害
+  不推进 Shock/Action/Attack 状态，正伤害才推进冷却。
+- `Attacked` 反应保留“受到伤害大于自身 DC 且 `Random.Next(2)==0`”门槛；按
+  `FindAllTargets(ViewRange, CurrentLocation)` 的 Cell insertion order 查找三类目标中
+  MinDC 更低的最后一个候选，保留目标类型并以 Effect=4 传送到目标反向一格，同时
+  重新验证旧目标与新目标的可见性。
+- Go 世界测试覆盖三类目标、DC/MC、搜索/范围、Shock、零伤害、延迟目标取消和重验；
+  认证 `net.Pipe` transcript 覆盖 bootstrap、KeepAlive barrier、物理
+  `ObjectAttack`、300ms 延迟 `Struck/ObjectStruck/DamageIndicator/HealthChanged`
+  包序和最终 HP。
+
+Go 实现、测试和迁移矩阵已提交为
+`d5dc961 feat(p5): complete MutatedManworm AI`；本批未修改任何 C# 文件。
+
+本批新增并通过以下门禁：
+
+- `go test ./cmd/crystal-server -run 'MutatedManworm|CrazyManworm|Mandrill' -count=1 -timeout=300s`
+- `go test -race ./cmd/crystal-server -run 'MutatedManworm|CrazyManworm' -count=3 -timeout=300s`
+- `go test ./cmd/crystal-server -count=1 -timeout=300s`
+- `go test ./... -count=1 -timeout=600s`
+- `go vet ./...`
+- `go build ./...`
+- Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
+
+全包 `go test -race ./cmd/crystal-server -count=1 -timeout=600s` 本次重跑仍失败于既有
+session 夹具竞争：`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`（共享
+装备 buff 状态）和 `TestSessionKirinIceThrustTranscript`（未同步随机流）。race 栈未进入
+MutatedManworm；本批不将全包 race 记为通过。
 
 ## 当前质量门禁
 

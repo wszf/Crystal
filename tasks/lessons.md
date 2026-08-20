@@ -5816,3 +5816,17 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 失败栈分别落在既有 GuildBuff/装备 buff 共享状态、Kirin transcript 随机回调和 Blink map-transition buff ticker 的并发读写，不在 CrazyManworm 生产路径或其测试。
 - Prevention: 每批迁移同时保留目标定向 race 与全包 race；全包失败时按测试名和 race 栈归因，只有栈指向本批代码才修改生产实现，否则在 handoff 中明确记录为既有门禁问题。
 - Verification: `go test -race ./cmd/crystal-server -run 'CrazyManworm' -count=3 -timeout=300s` 通过；普通全包、全仓库测试、`go vet ./...` 与 `go build ./...` 也通过；重跑的全包 race 日志稳定命中上述既有测试。
+
+### 2026-08-20 — MutatedManworm inclusive damage draw 需要同步继承 AI 夹具
+
+- Symptom: AI=65/66 组合回归首次在既有 `TestGameWorldMandrillTeleportsWithEffectSevenAfterHeavyHit` 失败，Mandrill 的随机回调收到合法 `Next(1)`，但夹具只接受 `Next(2)`。
+- Root cause: MutatedManworm 受击反应改为 Legacy `GetAttackPower` 的 inclusive/fixed-range 语义后，Mandrill 继承同一反应路径并额外消费固定 DC 的 `Next(1)`；旧测试只覆盖了 `Next(2)` 的 50% gate。
+- Prevention: 修改共享 Monster AI 的随机消费时，检索所有继承/复用该 helper 的 AI 测试，按调用语义允许固定范围 `Next(1)` 与分支 gate 的合法边界，不用单一测试名称推断完整随机流。
+- Verification: Mandrill 夹具改为接受 `1`/`2` 后，AI=65/66/Mandrill 定向回归通过。
+
+### 2026-08-20 — AI=65 全包 race 仍需按实际失败集合归因
+
+- Symptom: AI=65 批次的全包 `go test -race ./cmd/crystal-server -count=1 -timeout=600s` 失败，当前重跑命中 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 与 `TestSessionKirinIceThrustTranscript`；AI=65/66 定向 race 通过。
+- Root cause: race 栈仍落在既有 GuildBuff/装备 buff 共享状态与 Kirin transcript 随机回调竞争，未进入 MutatedManworm 生产路径或新测试。
+- Prevention: handoff 必须记录本次实际失败测试集合，不用上批 race 结果替代本批证据；继续分离目标定向 race 和全包 race，避免为既有栈改动迁移代码。
+- Verification: `go test -race ./cmd/crystal-server -run 'MutatedManworm|CrazyManworm' -count=3 -timeout=300s` 通过，普通 cmd/全仓库测试、vet 和 build 通过；重跑日志中的 race 栈仅指向既有文件。
