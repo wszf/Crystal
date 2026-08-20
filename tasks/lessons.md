@@ -5053,6 +5053,8 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Verification after recurrence: 本次全包 race 仍只作为已知失败记录，不宣称通过；AI=87 定向 race、普通全包测试、vet 和 build 均通过，相关共享 fixture 未在本批改动。
 - Strengthening after AI=88 recurrence: 本批全包 race 再次复现上述 GuildBuff 竞争，并新增同一共享状态竞争在 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff` 的 `intelligentCreatureBuffByType` 读取栈中出现；两条写入栈仍指向 `reconcileEquipmentSpecialBuffsLocked`/`player_spell_buffs.go:738`，没有进入 ManectricKing 实现。
 - Verification after AI=88 recurrence: `go test -race ./cmd/crystal-server -run ManectricKing -count=1 -timeout=5m` 通过；普通 `go test ./... -count=1 -timeout=5m`、`go vet ./...` 与 `go build ./...` 通过；全包 race 保持既知失败，不宣称通过，继续按共享 session fixture 隔离项排期。
+- Strengthening after AI=51 recurrence: 本次全包 race 再次复现 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go:742` 写入与 `intelligent_creature_items.go:549` 读取竞争，并新增既有 `TestSessionKirinIceThrustTranscript` 对 `monsterAIRollLocked`/测试随机回调的未同步读写；失败栈均未进入 HedgeKekTal 实现或其 session transcript。
+- Verification after AI=51 recurrence: `go test -race ./cmd/crystal-server -run 'HedgeKekTal' -count=1 -timeout=300s` 通过；全包 race 继续按既有共享 session fixture 失败处理，不宣称通过。
 
 ### 2026-08-19 — Go 延迟攻击测试必须先解析既有队列再断言后续伤害
 
@@ -5788,3 +5790,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 在同一 shell 命令中拼接了两个仓库的读取路径，没有先按仓库拆分调用，也没有在执行前扫描命令中的路径前缀。
 - Prevention: 每个工具调用只使用一个仓库的 workdir 和已核验路径；生成命令后先确认所有路径都属于当前仓库，Legacy/Go 对照必须拆成独立成功调用，任一混入路径或非零结果都丢弃整条调用。
 - Verification: 记录后先用 Legacy-only 调用更新本 lesson，再重新发起不含 Legacy 路径的 Go-only 读取；后续只引用成功且单仓库的输出，未产生源代码变更。
+
+### 2026-08-20 — HedgeKekTal session 夹具必须区分 value map 与冷却期移动
+
+- Symptom: 新增 HedgeKekTal transcript 首次把 `world.monsters` 的 value map 元素按指针解引用而编译失败；修正后又把延迟命中前的 `ObjectWalk` 误断言为空，定向测试失败。
+- Root cause: Go 世界的 Monster map 存储 `worldMonster` 值而不是指针；Legacy `RightGuard.ProcessTarget` 在攻击冷却期仍会执行 `MoveTo`，因此投射发出后、伤害到达前可能先产生移动包。
+- Prevention: 读取/写回 Monster map 时使用值副本；为带延迟动作的 RightGuard transcript 将“投射 tick、冷却移动 tick、命中 tick”分开断言，并按通知顺序核对移动包的位置和方向。
+- Verification: 修正后 `go test ./cmd/crystal-server -run 'TestGameWorldHedgeKekTal|TestSessionHedgeKekTalRangeAttackTranscript' -count=1` 通过。

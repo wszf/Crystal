@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `ef8ad483 docs: record VenomSpider migration handoff`，本批增加 AI=44 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `e61f523 feat(p5): complete BlackFoxman AI` | AI=44 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `0499c844 docs: record BlackFoxman migration handoff`，本批增加 AI=51 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `1cc9f54 feat(p5): complete HedgeKekTal AI` | AI=51 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -714,6 +714,42 @@ Go 实现、测试和迁移矩阵已提交为
 - `go vet ./...`
 - `go build ./...`
 - Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
+
+## 本次完成的 P5 批次（HedgeKekTal AI=51）
+
+本批将 Legacy `HedgeKekTal` 从已有 Player 目标子切片收口为完整的三类目标与
+客户端可观察行为：
+
+- AI=51 接入独立 `RightGuard.ProcessTarget` 兼容流程；继承 8 格攻击范围、搜索刷新、
+  `ShockTime` 清理、攻击/行动冷却和攻击冷却期间的目标移动，并按 Legacy Cell
+  insertion order 保留 Player、owned Monster、Hero 的 TargetKind。
+- 近身分支发送 `ObjectAttack`，使用 AC+Agility，300ms 后结算；同格或非相邻目标
+  发送 `ObjectRangeAttack`，使用普通 AC，按 Chebyshev 距离每格增加 50ms，并叠加
+  Legacy 500ms 投射基准；远程 Hero 的普通 AC 也显式保留。
+- 延迟动作在 impact 时重新验证地图、存活、归属和攻击资格；Player、owned Monster、
+  Hero 分别写回正确的生命状态和协议通知，不产生额外 poison 副作用。
+- Go 世界测试覆盖三类目标的近/远程投影、目标搜索、动作防御标记、延迟重验和死亡
+  目标取消；认证 `net.Pipe` transcript 覆盖 bootstrap、KeepAlive barrier、远程攻击、
+  冷却期 `ObjectWalk`、延迟 `Struck/ObjectStruck/DamageIndicator/HealthChanged`
+  包序和最终状态。
+
+Go 实现、测试和迁移矩阵已提交为
+`1cc9f54 feat(p5): complete HedgeKekTal AI`；本批未修改任何 C# 文件。
+
+本批新增并通过以下门禁：
+
+- `go test ./cmd/crystal-server -run 'HedgeKekTal' -count=1`
+- `go test -race ./cmd/crystal-server -run 'HedgeKekTal' -count=1 -timeout=300s`
+- `go test ./cmd/crystal-server -count=1 -timeout=300s`
+- `go test ./... -count=1 -timeout=600s`
+- `go vet ./...`
+- `go build ./...`
+- Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
+
+全包 `go test -race ./cmd/crystal-server -count=1 -timeout=600s` 本次仍复现既有
+session ticker/Buff 共享 fixture 竞争（`player_spell_buffs.go:742` 与
+`intelligent_creature_items.go:549`），并出现既有 Kirin transcript 的未同步随机流
+竞争；失败栈未进入 HedgeKekTal，本批不将全包 race 记为通过。
 
 ## 当前质量门禁
 
