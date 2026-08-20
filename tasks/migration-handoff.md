@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `30ce1dd7 docs: record SandWorm migration handoff`，本批增加 AI=100 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `7397c43 feat(p5): complete VenomSpider AI` | AI=100 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `ef8ad483 docs: record VenomSpider migration handoff`，本批增加 AI=44 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `e61f523 feat(p5): complete BlackFoxman AI` | AI=44 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -684,6 +684,37 @@ Go 实现、测试和迁移矩阵已提交为 `7397c43 feat(p5): complete VenomS
 - `go build ./...`
 - Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
 
+## 本次完成的 P5 批次（BlackFoxman AI=44）
+
+本批将 Legacy `BlackFoxman` 从已有 Player 目标子切片收口为完整的三类目标与
+客户端可观察行为：
+
+- AI=44 接入专用目标/搜索/移动处理路径；继承 `MonsterObject` 的两格
+  parity-shaped 攻击范围、目标保留、ActionTime/AttackSpeed 冷却和 `ShockTime`
+  清理语义，并在搜索时保存 Player、owned Monster、Hero 的 TargetKind。
+- 近身分支保留 `Random.Next(3)>0` 的普通 `ObjectAttack` 与 300ms 延迟；非近身
+  分支发送 Type=1 `ObjectAttack`，逐格按 Cell insertion order 捕获首个有效目标，
+  每格增加 50ms 并叠加 250ms 线攻击延迟。Player、owned Monster、Hero 均使用
+  ACAgility 目标解析，且 impact 时重新验证地图、存活、归属和攻击资格。
+- 新增确定性世界测试覆盖三类目标、搜索、几何、Cell 顺序、近身/直线分支、延迟
+  和死亡目标取消；认证 `net.Pipe` transcript 覆盖 bootstrap、Type=1 攻击包、
+  250ms ActionTime、350ms 两格命中、`Struck/ObjectStruck/DamageIndicator/
+  HealthChanged` 包序和最终 HP。
+
+Go 实现、测试和迁移矩阵已提交为
+`e61f523 feat(p5): complete BlackFoxman AI`；本批未修改任何 C# 文件。
+
+本批新增并通过以下门禁：
+
+- `go test ./cmd/crystal-server -run 'BlackFoxman' -count=1 -timeout=240s`
+- `go test -race ./cmd/crystal-server -run 'BlackFoxman' -count=3 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'BlackFoxman|BoneSpearman|SandWorm|VenomSpider|SpittingSpider|ToxicGhoul' -count=1 -timeout=300s`
+- `go test ./... -count=1 -timeout=600s`
+- `go test -race ./... -count=1 -timeout=900s`
+- `go vet ./...`
+- `go build ./...`
+- Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
+
 ## 当前质量门禁
 
 AI=28 本批新增并通过以下门禁：
@@ -697,7 +728,7 @@ AI=28 本批新增并通过以下门禁：
 - `go build ./...`
 - Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查通过。
 
-Go HEAD `becac1db` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
+此前 Go HEAD `becac1db` 对应的历史源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
 `433c1e9`，IncarnatedGhoul/IncarnatedZT/BoneFamiliar 为前置提交
 `a0a2c2f`/`0c3ca86`/`f8e2a2c`：
 

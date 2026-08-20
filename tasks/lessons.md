@@ -5781,3 +5781,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 先关注被攻击方向会在 `Attack` 中被重算，误把构造时朝向视为不可观察；忽略了 bootstrap/出生包在攻击前会暴露该状态。
 - Prevention: 每个 Monster AI 批次都要分别核对子类构造器、`Spawn`/bootstrap、respawn 与第一次攻击前状态；凡继承基类随机/固定字段，都添加独立物化断言，不因运行时后续覆盖而跳过。
 - Verification: AI=100 物化测试断言朝向始终为 0–7；VenomSpider 定向、race、全量测试、vet 和 build 均通过。
+
+### 2026-08-20 — 跨仓库只读调用不可混入对照路径
+
+- Symptom: BlackFoxman 勘察期间两次 Go 调用误带入 Legacy 的 `Server/MirObjects/MonsterObject.cs` 路径并产生非零输出；两条调用的全部输出均被作废，未用于实现判断。
+- Root cause: 在同一 shell 命令中拼接了两个仓库的读取路径，没有先按仓库拆分调用，也没有在执行前扫描命令中的路径前缀。
+- Prevention: 每个工具调用只使用一个仓库的 workdir 和已核验路径；生成命令后先确认所有路径都属于当前仓库，Legacy/Go 对照必须拆成独立成功调用，任一混入路径或非零结果都丢弃整条调用。
+- Verification: 记录后先用 Legacy-only 调用更新本 lesson，再重新发起不含 Legacy 路径的 Go-only 读取；后续只引用成功且单仓库的输出，未产生源代码变更。
