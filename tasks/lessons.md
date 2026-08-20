@@ -6044,3 +6044,38 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: race 栈属于既有 GuildBuff/装备共享状态和 Kirin ticker/随机回调，未进入 GuardianRock 文件或测试。
 - Prevention: 每批保留目标定向 race、全仓普通和完整 race；最终 handoff 只记录本次实际集合，非本批并发问题不修改迁移实现。
 - Verification: GuardianRock race `-count=5`、全仓普通、`go vet ./...` 与 `go build ./...` 通过；完整 race 摘要未出现 GuardianRock。
+
+### 2026-08-20 — AI=47 TrapRock 子岩石测试必须推进 nextObjectID 并防御 parent 自引用
+
+- Symptom: TrapRock 显形测试手工插入 parent 后没有推进 `nextObjectID`，第一个 child 复用 parent ObjectID；父死亡清理递归进入自身，触发 stack overflow。
+- Root cause: Go 的 value-map fixture 不会自动更新全局 ID allocator；生产清理又按 child ID 递归，缺少坏数据下的 parent-ID 防护。
+- Prevention: 手工插入实体后显式推进 `nextObjectID`；父/子清理遍历始终跳过自身 ID，并从 authoritative map 回读 child 状态。
+- Verification: 修正 fixture 与生产防护后 TrapRock 隐藏/显形/三子岩石/移动死亡测试通过，未再出现递归栈增长。
+
+### 2026-08-20 — TrapRock 协议新增必须同步 ordinal、payload 和 movement gate
+
+- Symptom: AI=47 需要 Legacy `InTrapRock` 单布尔包，Go 协议原先没有 ordinal/payload；被困玩家仍可能通过普通 movement capability 移动。
+- Root cause: 只迁移了对象生命周期，没有把 MapObject setter 的 wire side effect 与 HumanObject.CanWalk 门禁作为同一状态边界。
+- Prevention: 新增协议包时同时更新 Go ordinal 向量、编码/解析测试和实体 movement gate；TrapRock 目标状态只通过权威 world 字段和专用包同步。
+- Verification: `InTrapRock` protocol round-trip、认证显形 transcript 和 movement gate 测试通过，完整 protocol 包测试保持绿色。
+
+### 2026-08-20 — TrapRock 受击入口必须覆盖普通、技能和 Monster damage resolver
+
+- Symptom: 仅在普通 Player attack 入口处理 TrapRock 首次受击会遗漏 Warrior/Magic/Monster 攻击路径，无法保持 parent first-hit death 与 child first-hit arming。
+- Root cause: Legacy 的 `Attacked`/`Struck` 是多态对象入口，Go 将伤害拆成多个 resolver；没有在共享 resolver 边界统一调用 TrapRock override。
+- Prevention: 先定义 `trapRockAttackedLocked` 状态转换，再在 Player normal/Warrior/Magic 与通用 Monster damage helpers 前置调用；父/子状态变化必须写回 value map。
+- Verification: TrapRock 受击世界测试覆盖 parent immediate death、child arms parent、Magic/Monster 编译接线，定向包测试通过。
+
+### 2026-08-20 — 只读/patch 调用失败的部分输出必须整体作废（TrapRock 复发）
+
+- Symptom: TrapRock 研究期间一次 Go workdir 命令混入 Legacy `Shared/ServerPackets.cs`，另一次多文件 patch 使用仓库根下不存在的 `warrior_attack.go`；前者读取失败，后者部分 hunk 被拒绝。
+- Root cause: 没有在命令生成前检查每个路径所属仓库和 `cmd/crystal-server` 包前缀，跨仓库/根路径假设污染了工具调用。
+- Prevention: 每条调用只使用当前仓库路径；Go 源文件 patch 目标必须带完整 `cmd/crystal-server/...` 绝对路径；任何非零读取或 patch 校验失败都不采用同调用其他输出。
+- Verification: 失败调用均未产生未预期文件；随后拆分为纯 Legacy/Go 调用并以精确路径完成 TrapRock 协议、受击和测试接线。
+
+### 2026-08-20 — AI=47 全包 race 必须记录最终实际失败集合
+
+- Symptom: TrapRock 最终完整 `go test -race ./... -count=1 -timeout=900s` 命中 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、`TestSessionKirinIceThrustTranscript`、`TestSessionOmaMageRangeSlowFrozenTranscript` 与 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`；TrapRock 定向 race 未失败。
+- Root cause: 失败栈属于既有 GuildBuff/装备、Kirin ticker/随机回调、OmaMage maintenance 和 Blink map-transition buff ticker，未进入 AI=47 生产文件或测试。
+- Prevention: 完整 race 必须在当前 Go HEAD 上重跑并记录最终测试集合；定向 race、普通全包和完整 race 分开归因，非本批栈不修改迁移实现。
+- Verification: TrapRock race `-count=5`、服务端完整普通、protocol、vet/build 通过；完整 race 摘要未出现 TrapRock。

@@ -1147,6 +1147,40 @@ Go 实现、测试和矩阵已提交为
 `TestSessionKirinIceThrustTranscript`；均为既有 GuildBuff/装备和 Kirin ticker/随机回调
 竞争，未出现 GuardianRock 文件或测试栈，已写入 `tasks/lessons.md`。
 
+## 本次完成的 P5 批次（TrapRock AI=47）
+
+本批完成 Legacy `TrapRock` 的隐身、显形、子岩石和受击生命周期：
+
+- AI=47 接入专用 trap tick；对象出生时不可见、不阻挡客户端/地图移动，经过两秒 probe
+  后在目标四个 cardinal 邻位之一显形，广播 `ObjectMonster -> ObjectShow`，父岩石再
+  生成并显形其余三个子岩石。
+- 父/子分别广播 `ObjectRangeAttack` / `ObjectAttack`；父显形时施加三秒 Paralysis、
+  设置 `InTrapRock` 并发送新增的 Legacy-compatible 单布尔包；玩家被困期间普通移动
+  capability 被拒绝。
+- 保留目标移动/死亡触发的父子清理、父首次受击立即死亡、子岩石受击先解除父
+  `FirstAttack`、visible blocking 和 parent/child value-map 生命周期；Player、Monster、
+  Hero 目标的受击入口均接入 TrapRock override。
+
+Go 实现、协议、测试和矩阵已提交为
+`149c60d feat(p5): complete TrapRock AI`；本批未修改任何 C# 文件。
+
+本批新增并通过：
+
+- `go test ./cmd/crystal-server ./internal/protocol -run 'TrapRock|InTrapRock' -count=3 -timeout=240s`
+- `go test ./cmd/crystal-server -count=1 -timeout=180s`
+- `go test -race ./cmd/crystal-server -run 'TrapRock' -count=5 -timeout=600s`
+- `go test ./internal/protocol -count=1`
+- `go test ./... -count=1 -timeout=900s`（最终 `go_rc=0`）
+- `go vet ./...`
+- `go build ./...`
+
+完整 `go test -race ./... -count=1 -timeout=900s` 本批最终命中
+`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、
+`TestSessionKirinIceThrustTranscript`、
+`TestSessionOmaMageRangeSlowFrozenTranscript` 与
+`TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`；均为既有会话/共享
+状态竞争，未出现 TrapRock 文件或测试栈，具体分类已写入 `tasks/lessons.md`。
+
 ## 当前质量门禁
 
 AI=36 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：
