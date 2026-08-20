@@ -5638,6 +5638,9 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthening after same-session recurrence: AI=30 handoff 的两次编排先后在 `apply_patch` 校验阶段发现替换/上下文行缺少 `-`/`+`/空格前缀，整组补丁均未写入。
 - Strengthened prevention: 生成逐行 patch 数组时，替换行必须成对带 `-`/`+`，上下文行必须带一个空格，空白上下文也必须保留为单独的空格行；先读取带行号的精确区块，再拆分替换和插入 hunk。
 - Verification after strengthening: 第三次使用合法 hunk 成功更新 AI=30 handoff 表格和段落，随后重新读取行号区块确认内容。
+- Strengthening after same-session recurrence: AI=35 矩阵补丁首次把段落上下文行漏写 patch 前缀，第二次修正时又把上下文内容误写成实际制表符，`apply_patch` 均拒绝或产生不期望的排版风险。
+- Strengthened prevention: 文档 patch 数组中，patch 标记空格与上下文正文必须分开；上下文行使用“一个前缀空格 + 原文”，新增正文不携带猜测的制表符；长矩阵更新拆成单一插入/替换 hunk，并立即用 `sed` 复核。
+- Verification after strengthening: 随后分别成功插入 AI=35 概述、替换基础说明和新增表格行，复核显示无意制表符且 `git diff --check` 通过。
 
 ### 2026-08-20 — AI=26 定向测试必须区分搜索范围与攻击几何
 
@@ -5750,3 +5753,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: Legacy `BoneLord.ProcessTarget` 只有成功攻击后立即返回；下一 tick 若 `CanAttack` 仍为 false，会继续执行 `MoveTo(Target.CurrentLocation)`，不同于 BoneSpearman 的提前返回路径。
 - Prevention: 为每个 AI 单独核对攻击后下一 tick 的 `ProcessTarget` 分支，不要把相邻 AI 的冷却期移动门禁套用过来；session transcript 要覆盖攻击、冷却移动和延迟命中顺序。
 - Verification: transcript 加入预期的 `ObjectWalk`（位置 `(1,0)`、方向 6）后，`go test ./cmd/crystal-server -run 'BoneLord' -count=1 -timeout=60s` 通过。
+
+### 2026-08-20 — Legacy 基线读取必须先核验实际目录
+
+- Symptom: SandWorm 对照读取把存在于 `Server/MirObjects/MonsterObject.cs` 的基类路径误写成 `Server/MirObjects/Monsters/MonsterObject.cs`，命令非零；该调用包含的其他输出按规则全部作废。
+- Root cause: 根据子类目录手工推断基类位置，没有先用 `rg --files Server` 核验实际文件路径。
+- Prevention: Legacy 对照前先在同一仓库根目录用 `rg --files` 确认每个目标文件，再执行 `sed`；任一目标不存在或命令非零时丢弃整条只读调用，不引用其部分输出。
+- Verification: 随后用精确的 `Server/MirObjects/MonsterObject.cs` 路径独立重读 ProcessTarget、LineAttack、目标校验和 GetAttackPower，SandWorm 实现与测试依据来自成功调用。

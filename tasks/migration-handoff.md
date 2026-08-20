@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `c85a99c7 docs: record BoneSpearman migration handoff`，本批增加 AI=30 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `8df9715 feat(p5): migrate BoneLord AI` | AI=30 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `8e75cad2 docs: record BoneLord migration handoff`，本批增加 AI=35 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `a894f47 feat(p5): complete SandWorm AI` | AI=35 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -618,6 +618,37 @@ C# 文件。
 
 - `go test ./cmd/crystal-server -run 'BoneLord' -count=1`
 - `go test -race ./cmd/crystal-server -run 'BoneLord' -count=1 -timeout=120s`
+- `go test ./... -count=1 -timeout=300s`
+- `go vet ./...`
+- `go build ./...`
+- Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
+
+## 本次完成的 P5 批次（SandWorm AI=35）
+
+本批将 Legacy `SandWorm` 从已存在的玩家目标子切片收口为完整的三类目标、
+harvest 生命周期和客户端可观察行为：
+
+- AI=35 接入专用 common-population 处理路径；保留 `HarvestMonster` 的两次剥皮
+  状态和普通死亡无 loot 行为，物化时保留基础构造器的随机方向。
+- 目标搜索沿用 Legacy Cell 顺序并支持 Player、owned Monster、Hero；攻击保留
+  `SpittingSpider` 的 parity-shaped 两格范围、Type 0 `ObjectAttack`、300ms
+  ActionTime/AttackSpeed 冷却和每个 line cell 的首个有效目标。
+- 使用 Legacy inclusive DC/Luck 攻击力；每格按距离增加 50ms，再加 300ms
+  ACAgility 延迟命中。Player、owned Monster、Hero 均在 impact 时重验，且不产生
+  Green poison。
+- 确定性世界测试覆盖目标搜索/三类投影、几何、Cell insertion order、Luck/DC、
+  harvest/no-loot、距离延迟和死亡目标取消；认证 `net.Pipe` transcript 覆盖
+  bootstrap、`ObjectAttack`、延迟 `Struck/ObjectStruck/DamageIndicator/HealthChanged`
+  包序和最终 HP。
+
+Go 实现、测试和迁移矩阵已提交为 `a894f47 feat(p5): complete SandWorm AI`；本批未修改任何
+C# 文件。
+
+本批新增并通过以下门禁：
+
+- `go test ./cmd/crystal-server -run 'SandWorm' -count=1 -timeout=120s`
+- `go test -race ./cmd/crystal-server -run 'SandWorm' -count=1 -timeout=120s`
+- `go test ./cmd/crystal-server -run 'SandWorm|BoneLord|BoneSpearman|ToxicGhoul' -count=1 -timeout=180s`
 - `go test ./... -count=1 -timeout=300s`
 - `go vet ./...`
 - `go build ./...`
