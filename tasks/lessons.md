@@ -6016,3 +6016,31 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 失败栈属于既有 GuildBuff/装备共享状态、Kirin ticker/随机回调和 OmaMage session maintenance，未进入 RedFoxman/WhiteFoxman 代码或测试；同批较早的一次 race 摘要中的 Hiding 失败未在最终重跑复现。
 - Prevention: 每批以最终实际失败名更新 handoff，不沿用前批 race 清单；只修改栈指向本批的生产代码，其余保留为既有门禁问题。
 - Verification: Foxman race `-count=5`、全仓普通、`go vet ./...` 与 `go build ./...` 通过；完整 race 摘要未出现 Foxman 文件或测试栈。
+
+### 2026-08-20 — AI=48 GuardianRock 测试必须读取 value-map 权威状态与 push 反向方向
+
+- Symptom: GuardianRock 世界测试首次从旧 attacker 副本读取攻击计时，且会话 push 方向把移动方向 6 当成目标最终 `Pushed` 方向；实际 Go value-map 已写回新计时，`Pushed` payload 使用反向方向 2。
+- Root cause: resolver 按值接收并写回 Monster，测试没有回读 `world.monsters[id]`；`pushPlayerLocked` 沿移动方向推进后把对象方向设为 reverse，wire 方向不是 push 向量本身。
+- Prevention: 所有延迟 resolver 后的 Monster 状态从权威 map 回读；push transcript 分别计算移动向量和对象最终反向方向，不手写 compass ordinal。
+- Verification: GuardianRock 世界/认证测试连续 3 次通过，覆盖成功 push、MagicResist 阻断、计时器和完整包序。
+
+### 2026-08-20 — 完整普通门禁必须同时保留退出码和失败摘要
+
+- Symptom: AI=48 批次第一次 `go test ./...` 返回失败，但大量 `read pipe: EOF` 日志淹没了具体失败名；同一最终工作树随后用捕获退出码的重跑取得 `go_rc=0`。
+- Root cause: 直接展示原始长输出无法稳定区分业务失败与会话清理日志，且没有在同一 shell 中保留 Go 命令的退出码和过滤摘要。
+- Prevention: 长门禁用任务专用变量保存完整输出和退出码，再单独过滤 `--- FAIL`/`FAIL`/panic；失败名不明时不得直接归因到本批生产代码。
+- Verification: 重跑用 `go_rc` 明确取得 0；AI=48 定向测试、race、vet/build 与全仓普通结果分别留存。
+
+### 2026-08-20 — zsh 诊断变量不得使用只读系统名称
+
+- Symptom: 一次全仓测试摘要脚本把 Go 退出码保存到 zsh 只读变量 `status`，在测试结束后赋值时报 `read-only variable`，该调用结果作废。
+- Root cause: shell 变量名与 zsh 内置只读状态名冲突。
+- Prevention: 退出码变量使用任务专用名称（如 `go_rc`），避免 `status`、`PWD`、`HOME` 等系统保留变量；脚本失败时不采用其前置命令输出作为证据。
+- Verification: 改用 `go_rc` 后完整普通门禁取得明确 `go_rc=0`。
+
+### 2026-08-20 — AI=48 全包 race 仍需按最终实际集合归因
+
+- Symptom: GuardianRock 最终完整 `go test -race ./... -count=1 -timeout=900s` 命中 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 与 `TestSessionKirinIceThrustTranscript`；GuardianRock 定向 race 未失败。
+- Root cause: race 栈属于既有 GuildBuff/装备共享状态和 Kirin ticker/随机回调，未进入 GuardianRock 文件或测试。
+- Prevention: 每批保留目标定向 race、全仓普通和完整 race；最终 handoff 只记录本次实际集合，非本批并发问题不修改迁移实现。
+- Verification: GuardianRock race `-count=5`、全仓普通、`go vet ./...` 与 `go build ./...` 通过；完整 race 摘要未出现 GuardianRock。

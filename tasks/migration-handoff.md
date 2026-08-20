@@ -1118,6 +1118,35 @@ Go 实现、测试和矩阵已提交为
 `TestSessionOmaMageRangeSlowFrozenTranscript`；均为既有共享状态/session 竞争，未出现
 Foxman 文件或测试栈，具体分类已写入 `tasks/lessons.md`。
 
+## 本次完成的 P5 批次（GuardianRock AI=48）
+
+本批完成 Legacy `GuardianRock` 的静态拉拽行为：
+
+- AI=48 接入 common population，保留构造时固定 Up 方向、不可移动/转向/漫游、普通
+  受击与毒物免疫，以及 inherited target/search 生命周期。
+- 目标进入 `ViewRange` 后只排入 500ms 延迟 action；命中时广播 `ObjectRangeAttack`，
+  按 MagicResist 进行拉拽，距离为当前 Chebyshev 距离减一并封顶四格，支持
+  Player/owned-Monster/Hero push 和对应 value-map 写回。
+- 严格保留 Legacy 的计时顺序：拉拽/抗性失败也会在命中阶段设置 300ms action 与
+  `AttackSpeed` attack timer；认证 transcript 覆盖两步 `Pushed` 包和抵抗分支。
+
+Go 实现、测试和矩阵已提交为
+`b29054e feat(p5): complete GuardianRock AI`；本批未修改任何 C# 文件。
+
+本批新增并通过：
+
+- `go test ./cmd/crystal-server -run 'GuardianRock' -count=3 -timeout=240s`
+- `go test -race ./cmd/crystal-server -run 'GuardianRock' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -count=1 -timeout=180s`
+- `go test ./... -count=1 -timeout=900s`（最终重跑 `go_rc=0`）
+- `go vet ./...`
+- `go build ./...`
+
+完整 `go test -race ./... -count=1 -timeout=900s` 本批实际命中
+`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 与
+`TestSessionKirinIceThrustTranscript`；均为既有 GuildBuff/装备和 Kirin ticker/随机回调
+竞争，未出现 GuardianRock 文件或测试栈，已写入 `tasks/lessons.md`。
+
 ## 当前质量门禁
 
 AI=36 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：
