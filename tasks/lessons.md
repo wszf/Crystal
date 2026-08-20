@@ -5929,3 +5929,34 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: race 栈分别落在既有装备 buff reconciliation 与读取、Kirin 会话实时 ticker 的随机回调，以及 Blink map-transition buff ticker 的并发读写；没有进入 Yimoogi 生产路径或 Yimoogi 会话夹具。
 - Prevention: 每批同时运行本 AI 的定向 race 与全包 race；全包失败必须按本次实际测试名和栈归属记录，不能沿用上一批失败清单，也不能为非本批并发栈修改迁移实现。
 - Verification: `go test -race ./cmd/crystal-server -run 'Yimoogi' -count=3 -timeout=600s`、普通 `go test ./...`、`go vet ./...` 与 `go build ./...` 通过；全包 race 输出未出现 Yimoogi 文件或测试栈。
+
+### 2026-08-20 — 交接与 lessons 文件必须按仓库归属读取
+
+- Symptom: 在 Go 仓库检索 Legacy 专属的 `tasks/migration-handoff.md` 与 `tasks/lessons.md`，命令因相对路径不存在而报错。
+- Root cause: 已知两份项目文档位于 Legacy 仓库，却在切换 Go workdir 后仍按文件名直接读取，未先确认文档归属。
+- Prevention: 每条命令先确认目标文件属于当前仓库；Legacy 交接/lessons 只在 Legacy 根目录读取，Go 矩阵/源码只在 Go 根目录读取；跨仓库证据拆成独立调用。
+- Verification: 该命令未修改文件；随后在 Legacy 根目录成功读取 lessons 尾部，并继续将 Go 与 Legacy 检索拆分，C# 审计范围保持不变。
+
+### 2026-08-20 — 构造状态与攻击后状态必须分开断言
+
+- Symptom: HolyDeva 回归测试把构造器固定的 DownLeft 方向 5 断言到了攻击后的对象包，首次定向测试失败；攻击实现按 Legacy 先将方向转向当前目标。
+- Root cause: 测试只关注了对象投影字段，没有区分“Spawned/首次 GetInfo”与“Attack 后 GetInfo”两个可观察时点。
+- Prevention: 对有构造器状态和攻击时变状态的 AI，分别在首次投影与动作结算后采样并断言；不要把初始方向、计时器或 Summoned 标记的断言复用于攻击后的快照。
+- Verification: 测试改为初始包断言图片 117/方向 5/Extra，攻击后断言方向为 `DirectionFromPoint`；`go test ./cmd/crystal-server -run 'CrystalSpider|HolyDeva' -count=1` 通过。
+
+### 2026-08-20 — 会话测试的人工时钟必须隔离服务循环 tick
+
+- Symptom: `TestSessionOmaMageRangeSlowFrozenTranscript` 在本批整套测试及单独运行时稳定得到攻击随机边界 `[2 1]`，而不是只得到 `[1]`。
+- Root cause: 会话服务循环在真实 `time.Now()` 下先调用 `world.tick`；测试把 OmaMage 的动作时间设在未来人工时钟附近，OmaMage 即使暂时不能攻击仍会按 Legacy 覆盖逻辑进入 `MoveTo`，消费了 `monsterAIRollLocked(2)`；随后人工 `world.tick(base)` 才消费固定 MC 的 `Next(1)`。调用栈落在 `serveWithConfig -> processOmaMageLocked -> monsterAIMoveToLocked`，与 AI37/38 生产路径无关。
+- Prevention: 会话 transcript 在安装随机回调后，必须阻止实时服务循环推进 AI，或只断言由人工时钟 tick 产生的调用；设置未来人工时钟不能代替 ticker 隔离。出现额外随机边界时先用调用栈定位，禁止为无关 AI 修改生产实现。
+- Verification: 通过 `go test ./cmd/crystal-server -run '^TestSessionOmaMageRangeSlowFrozenTranscript$' -count=3` 稳定复现并定位；本批未修改 OmaMage 代码，AI37/38 定向测试仍通过。
+- Further evidence: 2026-08-20 的全仓 `go test ./... -count=1 -timeout=900s` 再次只命中该用例，仍为 `[2 1]` 对 `[1]`；AI37/38 定向普通/race、vet 和 build 继续通过。
+- Prevention strengthening: 批次收尾必须保留一次全仓普通结果，并将同一随机边界的既有会话维护前导与新 AI 的失败分开记录；不能因为全仓门禁非绿就扩大本批生产代码范围。
+- Verification after strengthening: 本批全仓普通失败与先前调用栈完全一致，未进入 CrystalSpider/HolyDeva 文件；目标定向门禁仍为绿色。
+
+### 2026-08-20 — AI=37/38 全包 race 仍需与定向 race 分开归因
+
+- Symptom: 本批 `go test -race ./... -count=1 -timeout=900s` 失败，当前摘要命中 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、`TestSessionKirinIceThrustTranscript` 与 `TestSessionOmaMageRangeSlowFrozenTranscript`；AI37/38 定向 race 通过。
+- Root cause: GuildBuff 栈落在既有装备 buff reconciliation 与会话读取竞争，Kirin 栈落在既有会话实时 ticker 与随机回调竞争，OmaMage 栈是上一条记录的真实时钟服务循环额外移动随机调用；均未进入 CrystalSpider/HolyDeva 实现或夹具。
+- Prevention: 每批同时保留目标定向 race、普通全包测试和完整 race；完整 race 必须用过滤摘要保留本次实际测试名，不能沿用旧失败清单，也不能为非本批栈修改迁移代码。
+- Verification: `go test -race ./cmd/crystal-server -run 'CrystalSpider|HolyDeva|SummonShinsuAndHolyDeva' -count=3 -timeout=600s`、定向普通测试、`go vet ./...` 与 `go build ./...` 通过；完整 race 摘要仅报告上述既有会话/装备竞争。

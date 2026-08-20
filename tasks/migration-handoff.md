@@ -977,6 +977,46 @@ buff ticker，未进入 AI=34 生产代码或会话夹具。该结果已记录�
 buff ticker，未进入 AI=36 生产代码或 Yimoogi 会话夹具。该全包 race 继续作为既有门禁问题
 记录，不修改本批生产代码；具体复盘已写入 `tasks/lessons.md`。
 
+## 本次完成的 P5 批次（CrystalSpider AI=37 / HolyDeva AI=38）
+
+本批完成 Legacy `CrystalSpider` 与 `HolyDeva` 的野生怪物、普通宠物和协议可观察行为：
+
+- AI=37 `CrystalSpider` 接入 common population，保留构造时随机方向、继承目标搜索/保留/
+  移动生命周期和三格 parity-shaped 几何。相邻目标使用 `ObjectAttack Type=0`、300ms
+  action 加 `AttackSpeed` 冷却；远程使用 `ObjectAttack Type=1`，逐格按 Cell insertion
+  order 选择首个 Player/owned Monster，保留 MagicResist admission、每格 50ms 加 300ms
+  延迟和 MAC+Agility 命中。成功命中后按 SC inclusive 值、PoisonResist 与
+  `Random.Next(8)==0` 施加五秒 Green poison、两秒 tick，并覆盖 Player/Monster/Hero
+  目标重验和投影。
+- AI=38 `HolyDeva` 接入 common population 与 ordinary-pet runtime，保留构造时
+  DownLeft 方向 5、Summoned/`ObjectMonster.Extra`、图片 117 和召唤时捕获 owner
+  direction。野生目标使用含边界的六格范围、五秒 Fear/retreat 门禁；攻击广播
+  `ObjectRangeAttack`（Type 0 默认），300ms action 加 `AttackSpeed` 冷却，固定 500ms
+  后以 MAC-only 方式结算 Player/owned Monster/Hero 目标。普通宠物在超出范围时按
+  PetMode 移动或保持攻击距离。
+- 召唤入口、对象 materialization、普通宠物对象包、延迟 action resolver 和 migration
+  matrix 均已接线；新增确定性世界测试覆盖构造/目标/几何/抗性/毒物/延迟命中/宠物范围
+  攻击，认证 `SummonHolyDeva` transcript 同时确认 AI=38、图片 117 和方向 2 的 owner
+  direction capture。
+
+Go 实现、测试和矩阵已提交为
+`f5dec14 feat(p5): complete CrystalSpider and HolyDeva AI`；本批未修改任何 C# 文件。
+
+本批新增并通过：
+
+- `go test ./cmd/crystal-server -run 'CrystalSpider|HolyDeva|SessionSummonShinsuAndHolyDevaTranscript' -count=1`
+- `go test -race ./cmd/crystal-server -run 'CrystalSpider|HolyDeva|SummonShinsuAndHolyDeva' -count=3 -timeout=600s`
+- `go vet ./...`
+- `go build ./...`
+
+本批收尾的全仓普通测试仍只命中既有
+`TestSessionOmaMageRangeSlowFrozenTranscript`：会话维护循环在真实时钟下先消费
+`monsterAIRollLocked(2)`，因此得到 `[2 1]` 而非夹具只针对手工 tick 期望的 `[1]`；调用栈
+位于 `serveWithConfig -> processOmaMageLocked -> monsterAIMoveToLocked`，未进入
+CrystalSpider/HolyDeva。完整 race 摘要仍命中既有 GuildBuff、Kirin 和 OmaMage 会话/共享
+状态竞争，AI=37/38 定向 race 没有失败；上述分类和复现证据已写入 `tasks/lessons.md`，
+不扩大本批范围修复无关生产代码。
+
 ## 当前质量门禁
 
 AI=36 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：
