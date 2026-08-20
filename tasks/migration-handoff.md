@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `904a60cf docs: record DigOutZombie migration handoff`，随后增加本次 AI=25 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `43017a1 feat(p5): migrate ToxicGhoul AI` | AI=28 生产、测试、矩阵已提交；干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `c85a99c7 docs: record BoneSpearman migration handoff`，本批增加 AI=30 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `8df9715 feat(p5): migrate BoneLord AI` | AI=30 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -591,6 +591,37 @@ C# 文件。
 
 Go 实现、测试和迁移矩阵已提交为 `b9c2cb9 feat(p5): migrate BoneSpearman AI`；本批未修改任何
 C# 文件。
+
+## 本次完成的 P5 批次（BoneLord AI=30）
+
+本批实现 Legacy `BoneLord` 的目标、远程/近战攻击、阶段召唤和客户端可观察
+行为，并将 AI=30 接入 Go common population：
+
+- 物化保留基础构造器的随机方向；目标搜索沿用 Cell insertion order 及 Player、owned
+  Monster、Hero 投影。七格 Chebyshev 范围内，同格或非相邻目标发送
+  `ObjectRangeAttack`，相邻目标发送 `ObjectAttack`；分别在 MACAgility 与 ACAgility
+  路径延迟命中，并在 impact 时重新验证目标。
+- 保留 300ms ActionTime 与 AttackSpeed 冷却；每个阶段使用整数 `HP/(MaxHP/3)`
+  阈值，只触发一次召唤波。每波最多八只、活动子怪最多 40 只，按配置的
+  `BoneMonster1..BoneMonster4` 随机选择定义，复制当前目标，使用 Front 或当前位置
+  fallback，子怪两秒后才可行动，并以无归属的 `ObjectMonster` 广播。
+- 子怪不挂接普通宠物所有权，也不因 BoneLord 死亡而被批量清除；父怪会清理死亡/缺失
+  子怪 ID 后再计算活动容量，匹配 Legacy `SlaveList` 的可观察生命周期。
+- 确定性世界测试覆盖三类目标、几何和延迟、阶段/配置/容量/目标复制/Front 投影；
+  认证 `net.Pipe` transcript 覆盖 bootstrap、远程攻击、冷却期 `ObjectWalk`、延迟
+  `Struck/ObjectStruck/DamageIndicator/HealthChanged` 包序和最终 HP。
+
+Go 实现、测试和迁移矩阵已提交为 `8df9715 feat(p5): migrate BoneLord AI`；本批未修改任何
+C# 文件。
+
+本批新增并通过以下门禁：
+
+- `go test ./cmd/crystal-server -run 'BoneLord' -count=1`
+- `go test -race ./cmd/crystal-server -run 'BoneLord' -count=1 -timeout=120s`
+- `go test ./... -count=1 -timeout=300s`
+- `go vet ./...`
+- `go build ./...`
+- Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
 
 ## 当前质量门禁
 

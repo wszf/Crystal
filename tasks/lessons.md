@@ -5635,6 +5635,9 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Strengthening after same-session recurrence: AI=26 handoff 的首次编排在 JavaScript join 转义处未执行，第二次编排又遗漏了 update hunk 行首的补丁前缀，apply_patch 拒绝整组补丁。
 - Strengthened prevention: 逐行数组补丁的 join 语法先做最小可解析检查；每个 update-hunk 行逐项确认带有空格、加号或减号前缀，并拆分为插入、替换、追加三个小 hunk。
 - Verification after strengthening: 两次失败调用均未修改 handoff；随后三个小 hunk 均成功应用，AI=26 段落、Go HEAD 和门禁记录均已核对。
+- Strengthening after same-session recurrence: AI=30 handoff 的两次编排先后在 `apply_patch` 校验阶段发现替换/上下文行缺少 `-`/`+`/空格前缀，整组补丁均未写入。
+- Strengthened prevention: 生成逐行 patch 数组时，替换行必须成对带 `-`/`+`，上下文行必须带一个空格，空白上下文也必须保留为单独的空格行；先读取带行号的精确区块，再拆分替换和插入 hunk。
+- Verification after strengthening: 第三次使用合法 hunk 成功更新 AI=30 handoff 表格和段落，随后重新读取行号区块确认内容。
 
 ### 2026-08-20 — AI=26 定向测试必须区分搜索范围与攻击几何
 
@@ -5719,3 +5722,31 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 手工重敲绝对路径时遗漏已确认的中间目录，违反了 lessons 中“复制精确 workdir、禁止猜路径”的约束。
 - Prevention: Legacy 文档和源码写入统一使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 根目录；执行前逐段核对 `Dropbox/source_code/git_work/me_work/Crystal`，失败调用不作为状态证据。
 - Verification: 随后使用完整路径成功追加本次 AI=29 两条 lesson，并重新读取其尾部确认内容存在。
+
+### 2026-08-20 — Goal continuation 的勘察调用必须保持单仓库路径闭包
+
+- Symptom: BoneLord 勘察先后出现两次无效调用：Legacy workdir 中追加了 Go 的 `cmd/...`/`docs/...`，Go workdir 中又追加了 Legacy 的 `Server/...`；均因路径不存在非零退出，同一调用的有效输出也不能作为证据。
+- Root cause: 选择下一批 AI 时复用了跨仓库查询正文，派发前没有按 workdir 检查每个相对路径；且未把“单仓库路径闭包”当作调用级约束。
+- Prevention: 每条调用只能使用当前 workdir 所属仓库的相对路径：Legacy 仅 `Server/...`、`tasks/...`，Go 仅 `cmd/...`、`internal/...`、`docs/...`；混合路径或非零退出的只读调用整体作废并重跑，禁止引用其任何输出。
+- Verification: 两次失败调用均未修改源码；随后只用精确 Legacy/Go 根目录的独立成功调用重新读取 BoneLord 基线与 Go 缺口。
+
+### 2026-08-20 — 新增 MonsterSettings 字段必须同步更新结构体默认值断言
+
+- Symptom: Go `internal/worlddata` 的 `TestMonsterSettingsDefaultsAndJSONCompatibility` 在新增 BoneMonster1–4 后失败，旧的显式结构体期望缺少四个非零默认字段。
+- Root cause: 配置投影扩展时只更新了生产结构体和默认值，没有同步检查按完整结构体相等比较的兼容性测试。
+- Prevention: 每次扩展持久化 settings 结构体后，搜索所有显式 `Default...Settings()` 结构体字面量和 JSON 兼容测试，补默认值与至少一个自定义字段的加载断言。
+- Verification: 更新测试后重新运行 `go test ./internal/worlddata ./internal/legacyworld`，并通过全量 Go 测试中的 settings 断言。
+
+### 2026-08-20 — BoneLord 阶段通知期望必须使用协议常量
+
+- Symptom: BoneLord 阶段测试实际收到 `ObjectAttack + 8×ObjectMonster`，但期望数组中的后八项是 `0`，导致通知 ID 比较失败。
+- Root cause: 用 `make([]int16, waveSize)` 只创建了长度，没有把每个元素填成 `protocol.ServerObjectMonster`。
+- Prevention: 构造重复协议 ID 期望时显式循环填充协议常量，避免把零值当成合法包 ID；优先复用已有 `packetIDs`/逐包 helper。
+- Verification: 修正填充后 `go test ./cmd/crystal-server -run 'BoneLord' -count=1` 通过。
+
+### 2026-08-20 — BoneLord 会在攻击冷却期继续尝试移动
+
+- Symptom: net.Pipe transcript 在投射命中前收到 `ServerObjectWalk`，初始测试错误地把该时间点断言为空通知。
+- Root cause: Legacy `BoneLord.ProcessTarget` 只有成功攻击后立即返回；下一 tick 若 `CanAttack` 仍为 false，会继续执行 `MoveTo(Target.CurrentLocation)`，不同于 BoneSpearman 的提前返回路径。
+- Prevention: 为每个 AI 单独核对攻击后下一 tick 的 `ProcessTarget` 分支，不要把相邻 AI 的冷却期移动门禁套用过来；session transcript 要覆盖攻击、冷却移动和延迟命中顺序。
+- Verification: transcript 加入预期的 `ObjectWalk`（位置 `(1,0)`、方向 6）后，`go test ./cmd/crystal-server -run 'BoneLord' -count=1 -timeout=60s` 通过。
