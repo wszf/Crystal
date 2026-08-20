@@ -5844,6 +5844,9 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: `apply_patch` 不继承 `exec_command` 的 `workdir`，且手工复制绝对路径时没有复核 `.../git_work/me_work/Crystal[.GoServer]` 的根段。
 - Prevention: patch 一律使用当前仓库已核验的绝对路径；执行前检查路径只包含一个仓库根，失败调用输出作废，不把相对路径假定为当前 shell workdir。
 - Verification: 两次失败调用均无文件变化；随后 Go patch 使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer/...` 成功，Legacy lesson 使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal/...` 成功，状态与 diff 检查通过。
+- Strengthening after recurrence: 提交后 Legacy 审计又把根路径写成重复的 `Dropbox` 目录，进程在创建阶段失败且没有取得状态证据。
+- Prevention after recurrence: 仓库切换后的每条命令直接复制已确认的 `workdir`，不手写或拼接绝对路径；审计命令必须在成功返回后才可作为提交证据。
+- Verification after recurrence: 丢弃错误调用，使用精确 Legacy 根路径重新完成 diff/status/log 与 `.cs` 三项审计，结果通过且无文件变化。
 
 ### 2026-08-20 — Go 协议模型字段必须先核对再移植 Legacy 状态
 
