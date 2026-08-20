@@ -5698,3 +5698,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 死亡爆发夹具中的 Hero 没有把 `ActionReadyAt` 推到合成时钟之后；`world.tick` 的 Hero 维护路径在检查 ToxicGhoul action 前独立攻击了中心玩家。
 - Prevention: 任何包含 Player、owned Monster、Hero 的合成 AI 时间线，都要把非被测实体的 AI/Action/Move/Attack 时钟显式冻结到未来，并用包 ID/实体 ID 区分“被测动作”和背景维护行为。
 - Verification: 将 Hero `ActionReadyAt` 设为 `base + 1h` 后，AI=28 纯世界测试（攻击、投射、魔抗、延迟重验证、Effect=0、死亡爆发）通过。
+
+### 2026-08-20 — BoneSpearman 新增测试必须显式归一化目标 HP 与几何
+
+- Symptom: AI=29 首轮目标投影测试把 materialize 后 owned Monster 的 30 HP 当作 100 HP 断言；搜索测试还把有意冻结攻击/移动时钟的 tick 直接断言为零通知；另有一条 parity 几何期望把相对位移 `(2,1)` 误判为可攻击。
+- Root cause: 测试夹具没有像目标投影实际状态一样显式设置 Monster 的 HP/MaxHP，且没有先按通知 ID 区分后台维护包与被测 AI；同格 Hero 的 `tickHeroesLocked` 还会在 `world.tick` 中独立产生攻击包；几何断言按直觉而不是 Legacy `x == y || x % 2 == y % 2` 计算。
+- Prevention: Player、owned Monster、Hero 夹具在断言伤害前分别显式设置自身 HP/MaxHP 及镜像字段；包含 Hero 的合成时钟测试把 `ActionReadyAt`/`OperateReadyAt` 推到未来，并先用 `packetIDsForRecipient`/目标 ID 过滤通知，再判断是否应为空；逐条把相对坐标代入 Legacy parity 条件并覆盖奇偶边界。
+- Verification: 修正夹具、通知断言和 parity 用例后，AI=29 定向世界测试重新运行通过，且已有 BoneSpearman 玩家目标测试保持通过。
+
+### 2026-08-20 — BoneSpearman 行攻击不得复用搜索期 Hallucination 过滤
+
+- Symptom: 对照 `MonsterObject.LineAttack` 时发现初版 Go 目标投影 helper 会在攻击行扫描阶段仍排除 Hallucination 期间的 Player；Legacy 只在 `FindTarget` 搜索阶段跳过这类 Player，已锁定目标的 `IsAttackTarget`/`LineAttack` 不重复检查该状态。
+- Root cause: 搜索期可见性筛选与攻击期 `IsAttackTarget` 重验证被放进同一个无条件条件式，误把 AI 搜索规则延伸到了已开始的行攻击。
+- Prevention: 目标投影 helper 明确区分 `needSight=true` 的搜索和 `needSight=false` 的行攻击；Hallucination/Hidden 只在搜索期应用，攻击期只保留目标类型、地图、生命和安全区等 `IsAttackTarget` 规则。
+- Verification: 修正条件后重新运行 AI=29 定向世界测试及既有 BoneSpearman 玩家行攻击测试，均通过。
+
+### 2026-08-20 — Legacy lesson 写入必须复用完整仓库根路径
+
+- Symptom: 追加 BoneSpearman lesson 的一次 `apply_patch` 使用了缺少 `me_work` 的 `/Users/wszf/Dropbox/source_code/git_work/Crystal/...`，工具报文件不存在，未取得写入结果。
+- Root cause: 手工重敲绝对路径时遗漏已确认的中间目录，违反了 lessons 中“复制精确 workdir、禁止猜路径”的约束。
+- Prevention: Legacy 文档和源码写入统一使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` 根目录；执行前逐段核对 `Dropbox/source_code/git_work/me_work/Crystal`，失败调用不作为状态证据。
+- Verification: 随后使用完整路径成功追加本次 AI=29 两条 lesson，并重新读取其尾部确认内容存在。

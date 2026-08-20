@@ -571,6 +571,27 @@ Go 实现、测试和迁移矩阵已提交为 `becac1db47d4a60e2a37e94d14440c572
 Go 实现、测试和迁移矩阵已提交为 `43017a1 feat(p5): migrate ToxicGhoul AI`；本批未修改任何
 C# 文件。
 
+## 本次完成的 P5 批次（BoneSpearman AI=29）
+
+本批将 Legacy `BoneSpearman` 从普通玩家目标子切片收口为完整的三类目标
+投影，并保留其继承的目标搜索、移动、冷却和延迟命中行为：
+
+- AI=29 已接入 Go common population 与专用处理路径；保留 Legacy 两格 parity-shaped
+  直线攻击几何、同格拒绝、方向计算、`ObjectAttack` 和 300ms ActionTime/AttackSpeed
+  冷却，并按 inclusive DC 抽样。
+- 目标搜索和直线逐格扫描均使用 Cell insertion order 的首个有效目标，支持 Player、
+  owned Monster、Hero；搜索期 Hidden/Hallucination 过滤与已选目标行攻击期过滤保持
+  Legacy 的阶段边界。
+- 每个命中格按距离追加 50ms，再加 BoneSpearman 的 250ms 基础延迟；Player、owned
+  Monster、Hero 分别走对应 AC+Agility/延迟重验证路径，无毒素副作用；Hero 使用包含
+  agility 的 Legacy 防御公式。
+- 确定性测试覆盖三类目标、插入顺序、几何边界、350ms 两格命中、死亡目标重验证；
+  认证 `net.Pipe` transcript 覆盖 bootstrap、`ObjectAttack`、延迟
+  `Struck/ObjectStruck/DamageIndicator/HealthChanged` 包序和最终 HP。
+
+Go 实现、测试和迁移矩阵已提交为 `b9c2cb9 feat(p5): migrate BoneSpearman AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
 
 AI=28 本批新增并通过以下门禁：
