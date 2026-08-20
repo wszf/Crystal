@@ -5830,3 +5830,31 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: race 栈仍落在既有 GuildBuff/装备 buff 共享状态与 Kirin transcript 随机回调竞争，未进入 MutatedManworm 生产路径或新测试。
 - Prevention: handoff 必须记录本次实际失败测试集合，不用上批 race 结果替代本批证据；继续分离目标定向 race 和全包 race，避免为既有栈改动迁移代码。
 - Verification: `go test -race ./cmd/crystal-server -run 'MutatedManworm|CrazyManworm' -count=3 -timeout=300s` 通过，普通 cmd/全仓库测试、vet 和 build 通过；重跑日志中的 race 栈仅指向既有文件。
+
+### 2026-08-20 — AI=31/32 RightGuard 的 Shock 与目标门禁必须独立于通用 AI
+
+- Symptom: 初版 RightGuard/LeftGuard 复用通用 `monsterCanAttackLocked` 与 BoneSpearman 目标 helper，遗漏了 Legacy `CanAttack` 不检查 `ShockTime`，并把普通 Guard 的目标规则混入了 Right/Left Guard。
+- Root cause: 相邻 AI 都有八格或延迟攻击外观，但 Legacy 的 `RightGuard.ProcessTarget` 是独立 override；没有先逐行对照 `CanAttack`、`FindTarget` 和 `IsAttackTarget` 的调用边界。
+- Prevention: 对每个 Monster 子类分别实现攻击时序、搜索期与延迟结算期目标门禁；把 Shock-in-range attack、Shock-out-of-range clear、Rage/Hallucination 野生怪物例外和 MAC/MACAgility 防御类型写入独立测试。
+- Verification: AI=31/32 世界测试覆盖 Player/owned-Monster/Hero、野生怪物 Rage 门禁、Shock 边界、Right/Left 距离延迟与 delayed revalidation；普通定向、组合回归、三次 race、全仓库测试、vet/build 均通过。
+
+### 2026-08-20 — Goal continuation 的 patch 路径必须绑定当前仓库绝对根
+
+- Symptom: AI=31/32 实现期间一次相对路径 `apply_patch` 在 Legacy 根目录解析 Go 文件而被拒绝，另一次手写绝对路径重复了 `Dropbox` 目录；两次均未改文件。
+- Root cause: `apply_patch` 不继承 `exec_command` 的 `workdir`，且手工复制绝对路径时没有复核 `.../git_work/me_work/Crystal[.GoServer]` 的根段。
+- Prevention: patch 一律使用当前仓库已核验的绝对路径；执行前检查路径只包含一个仓库根，失败调用输出作废，不把相对路径假定为当前 shell workdir。
+- Verification: 两次失败调用均无文件变化；随后 Go patch 使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer/...` 成功，Legacy lesson 使用 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal/...` 成功，状态与 diff 检查通过。
+
+### 2026-08-20 — Go 协议模型字段必须先核对再移植 Legacy 状态
+
+- Symptom: RightGuard 搜索移植初次引用 `protocol.SelectInfo.GMGameMaster`，Go 编译失败，因为当前 `SelectInfo` 没有该 Legacy 字段。
+- Root cause: 直接把 C# `PlayerObject` 状态字段当成 Go 协议模型已存在，未先检索 `internal/protocol` 和 `worldPlayer` 的可观察字段。
+- Prevention: 移植每个 Legacy 状态条件前先核对 Go 数据模型；缺失字段不得凭空添加到本批，必须按现有 authoritative 状态决定是否可表达，并在 handoff 标注未建模边界。
+- Verification: 删除不可表达的字段检查后，RightGuard/LeftGuard 定向测试、全模块测试、vet/build 和定向 race 通过；Legacy C# 文件仍未修改。
+
+### 2026-08-20 — 全包 race 的新失败必须先做单测复跑归因
+
+- Symptom: AI=31/32 批次完整 `cmd/crystal-server` race 重现既有 GuildBuff/Kirin 数据竞争，并出现 `TestSessionOmaMageRangeSlowFrozenTranscript` 的 `[2 1]`/`[1]` 随机边界断言失败。
+- Root cause: race 并发维护路径触达了非本批的共享状态和 OmaMage transcript 随机记录；失败栈未进入 RightGuard/LeftGuard 代码。
+- Prevention: 每批同时跑目标 race、普通全包和 full race；full race 新失败先单独 `-run` 与多次 `-count` 复跑并检查栈，再决定是否属于本批，不能因时间相邻修改生产代码。
+- Verification: RightGuard/LeftGuard `-race -run ... -count=3` 通过；OmaMage 普通测试通过、单次 race 偶尔通过但 race `-count=5` 重现，full race 失败栈仍只指向既有测试/维护路径，已移交 handoff。
