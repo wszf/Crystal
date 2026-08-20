@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `904a60cf docs: record DigOutZombie migration handoff`，随后增加本次 AI=25 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `1a7c654 feat(p5): migrate RevivingZombie AI` | 干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `43017a1 feat(p5): migrate ToxicGhoul AI` | AI=28 生产、测试、矩阵已提交；干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -546,7 +546,43 @@ C# 文件。
 Go 实现、测试和迁移矩阵已提交为 `becac1db47d4a60e2a37e94d14440c572db1a903`
 （`feat(p5): migrate Khazard AI`）；本批未修改任何 C# 文件。
 
+## 本次完成的 P5 批次（ToxicGhoul AI=28）
+
+本批实现 Legacy `ToxicGhoul` 的相邻攻击、Green 中毒和 Effect=1 死亡爆发，
+并将其接入共享 HarvestMonster/no-normal-loot 生命周期：
+
+- AI=28 已加入 Go common population；物化时保留两次剥皮状态，普通死亡掉落
+  被抑制，Harvest 路径继续复用既有 carcass/缓存掉落实现。
+- 普通 AI 复用 Legacy 目标搜索/移动/冷却边界，支持 Player、owned Monster、
+  Hero 投射；相邻攻击发送 `ObjectAttack`，300ms 后以 MACAgility 重新计算
+  命中，命中后按 SC 值、一次 PoisonResist 和一次机会门施加 Green。
+- Green poison 保留 Legacy 的 duration=5、tick=2s 和零初始 TickAt，
+  因而 impact tick 会同时产生首个 Green 伤害与 `Poisoned` 状态；延迟动作
+  在 impact 时重新验证目标，目标失效则静默取消。
+- Effect=1 死亡只排入一个严格 1 秒后的动作；到期时重新扫描半径一的
+  当前 Cell 顺序，对 Player/owned Monster/Hero 分别使用 AC+Agility，
+  每个目标独立 DC/Green poison 抽样，并保留 Legacy 的首个伤害失败即返回
+  语义。Effect=0 不排入死亡动作。
+- 纯世界测试覆盖 Harvest/no-loot、攻击 payload/延迟、Player/Monster/Hero
+  投射、魔抗、目标重验证、死亡当前扫描、Effect 分支、首个 miss 的早返和
+  poison 状态；认证 `net.Pipe` transcript 覆盖真实登录、攻击、延迟伤害、
+  首个 Green tick、健康包和 `Poisoned` 包序。
+
+Go 实现、测试和迁移矩阵已提交为 `43017a1 feat(p5): migrate ToxicGhoul AI`；本批未修改任何
+C# 文件。
+
 ## 当前质量门禁
+
+AI=28 本批新增并通过以下门禁：
+
+- `go test ./cmd/crystal-server -run 'ToxicGhoul' -count=1 -timeout=120s`
+- `go test -race ./cmd/crystal-server -run 'ToxicGhoul' -count=5 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'Harvest|CaveMaggot|ShamanZombie|Khazard' -count=1 -timeout=180s`
+- `go test ./cmd/crystal-server -count=1 -timeout=600s`
+- `go test ./... -count=1 -timeout=600s`
+- `go vet ./...`
+- `go build ./...`
+- Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查通过。
 
 Go HEAD `becac1db` 对应本批源码已通过以下收尾门禁；DarkDevil follow-up 为前置提交
 `433c1e9`，IncarnatedGhoul/IncarnatedZT/BoneFamiliar 为前置提交

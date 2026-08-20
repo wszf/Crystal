@@ -5670,3 +5670,31 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 认证会话仍有实时维护 tick；合成时钟把 Action/Move 推到未来时，Khazard 的 fallback MoveTo 仍会执行 `Next(2)` 分支选择，和手动合成攻击 tick 交错。
 - Prevention: 会话测试的随机回调同时允许被实时维护路径实际触达的 `2` 与攻击路径的 `MagicResistWeight`，不要把“手动 transcript 期望”误当成整个连接生命周期的唯一随机调用集合；共享回调不追加无锁状态。
 - Verification: 放宽为仅接受 `2`/`MagicResistWeight` 后，Khazard 会话测试重复 20 次通过，且不再依赖未同步的 roll 记录。
+
+### 2026-08-20 — 跨仓库初始审计复发后必须丢弃混合调用证据
+
+- Symptom: 本轮继续 active Goal 时，初始 Legacy lessons/status 与 Go status 查询再次放入同一个 `Promise.all`；调用只读且没有写入，但违反了单仓库证据边界。
+- Root cause: 把降低往返延迟置于已建立的仓库隔离约束之上，未在派发前检查每个嵌套调用的 workdir 与路径集合。
+- Prevention: 每个 `functions.exec` 编排只绑定一个绝对仓库根目录；跨仓库状态、源码、矩阵、测试、审计和 Git 操作必须拆成串行独立调用，混合调用的全部输出立即作废。
+- Verification: 该混合调用未产生文件变化；随后 lessons 以 Legacy-only 分块完整读取，后续 AI=28 勘察将使用独立 Legacy/Go 调用，并在最终门禁重复验证 C# 零变化。
+
+### 2026-08-20 — AI=28 目标搜索核对中的混合路径输出必须立即作废
+
+- Symptom: AI=28 目标搜索核对时，在 Go workdir 的命令中追加了 Legacy `Server/MirObjects/MonsterObject.cs`；命令在 Legacy 路径处失败，不能使用同一调用中前面的 Go 输出。
+- Root cause: 为同时查找 C# 基类与 Go target helper 复用了跨仓库命令正文，未在执行前按当前仓库检查每个路径参数。
+- Prevention: 目标搜索、状态、测试和 patch 调用各自只绑定一个已核验绝对根目录；Legacy/Go 对照必须由两次独立成功调用完成，任一混合路径或非零结果整体作废。
+- Verification: 该调用只读且未写入源码；随后将分别在 Legacy 与 Go 根目录重读 FindTarget/目标投影，后续 AI=28 实现只采用成功的单仓库证据。
+
+### 2026-08-20 — Go-only 矩阵查询不得携带 Legacy `tasks` 路径
+
+- Symptom: AI=28 矩阵核对的 Go workdir 命令同时引用了 Go `docs/migration-matrix.md` 与不存在的 Legacy `tasks/migration-handoff.md`；即使 `|| true` 隐藏退出码，整条调用仍不具备可用证据。
+- Root cause: 为同时读取矩阵和交接文档复用了跨仓库参数，且用 shell 容错掩盖了路径错误，没有执行单仓库路径 allowlist。
+- Prevention: Go-only 调用只允许已核验的 `cmd/`、`internal/`、`docs/` 路径；Legacy `tasks/` 文档另起 Legacy-only 调用，任何错误路径、`|| true` 或混合参数都使整条输出作废。
+- Verification: 该查询只读且没有文件变化；矩阵将由纯 Go `docs/migration-matrix.md` 调用重读，后续审计不再用容错掩盖路径错误。
+
+### 2026-08-20 — 延迟 AI 测试必须冻结夹具实体的独立行为
+
+- Symptom: ToxicGhoul 死亡爆发的提前时间断言收到 `ObjectAttack`、`ObjectStruck` 和 `DamageIndicator`，看起来像延迟动作提前执行。
+- Root cause: 死亡爆发夹具中的 Hero 没有把 `ActionReadyAt` 推到合成时钟之后；`world.tick` 的 Hero 维护路径在检查 ToxicGhoul action 前独立攻击了中心玩家。
+- Prevention: 任何包含 Player、owned Monster、Hero 的合成 AI 时间线，都要把非被测实体的 AI/Action/Move/Attack 时钟显式冻结到未来，并用包 ID/实体 ID 区分“被测动作”和背景维护行为。
+- Verification: 将 Hero `ActionReadyAt` 设为 `base + 1h` 后，AI=28 纯世界测试（攻击、投射、魔抗、延迟重验证、Effect=0、死亡爆发）通过。
