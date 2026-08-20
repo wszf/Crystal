@@ -1017,6 +1017,39 @@ CrystalSpider/HolyDeva。完整 race 摘要仍命中既有 GuildBuff、Kirin 和
 状态竞争，AI=37/38 定向 race 没有失败；上述分类和复现证据已写入 `tasks/lessons.md`，
 不扩大本批范围修复无关生产代码。
 
+## 本次完成的 P5 批次（YinDevilNode AI=41/42）
+
+本批完成 Legacy `YinDevilNode` 的 AI=41/42 双变体：
+
+- 两个 AI 均接入 common population，保留不可移动、不可转向、无漫游、七格
+  `FindFriendsNearby` 门禁和自身排除；成功 admission 广播默认 `ObjectAttack`，写入
+  300ms action lock、`AttackSpeed` cooldown，并在 500ms 延迟 action 中重新扫描对象。
+- 命中阶段按 Legacy `FindAllTargets` 的 Cell/ring 顺序、`IsAttackTarget`、Hidden/CoolEye
+  门禁和 `IsFriendlyTarget` 顺序执行；不把 Player/Hero/owned Monster 的协议可见性或
+  普通 AI 目标规则错误扩大为节点友方。
+- AI=41 使用目标等级 `Level/7+4` 的五秒隐形 `BlessedArmour` MaxAC；AI=42 使用相同值
+  的五秒隐形 `UltimateEnhancer` MaxDC。Player/Monster/Hero 的可表达运行态均复用现有
+  Buff 刷新与 `OperateTime=0` 语义，Monster/Hero 的 value-map/owner 状态按权威副本写回。
+- 认证 transcript 同时覆盖 AI=41/42 的 ObjectAttack、延迟重扫和 `RageTime` 引起的
+  `ObjectColourChanged` 视觉副作用；世界测试覆盖普通两阶段门禁和自身不算友方的边界。
+
+Go 实现、测试和矩阵已提交为
+`316583a feat(p5): complete YinDevilNode AI`；本批未修改任何 C# 文件。
+
+本批新增并通过：
+
+- `go test ./cmd/crystal-server -run 'YinDevilNode' -count=3 -timeout=180s`
+- `go test -race ./cmd/crystal-server -run 'YinDevilNode' -count=5 -timeout=600s`
+- `go test ./... -count=1 -timeout=900s`
+- `go vet ./...`
+- `go build ./...`
+
+完整 `go test -race ./... -count=1 -timeout=900s` 仍命中既有
+`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、
+`TestSessionKirinIceThrustTranscript` 与
+`TestSessionOmaMageRangeSlowFrozenTranscript`；摘要和 lessons 已按实际 race 栈归因，
+未出现 YinDevilNode 生产文件或测试栈，不修改无关生产代码。
+
 ## 当前质量门禁
 
 AI=36 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：

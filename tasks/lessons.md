@@ -5960,3 +5960,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: GuildBuff 栈落在既有装备 buff reconciliation 与会话读取竞争，Kirin 栈落在既有会话实时 ticker 与随机回调竞争，OmaMage 栈是上一条记录的真实时钟服务循环额外移动随机调用；均未进入 CrystalSpider/HolyDeva 实现或夹具。
 - Prevention: 每批同时保留目标定向 race、普通全包测试和完整 race；完整 race 必须用过滤摘要保留本次实际测试名，不能沿用旧失败清单，也不能为非本批栈修改迁移代码。
 - Verification: `go test -race ./cmd/crystal-server -run 'CrystalSpider|HolyDeva|SummonShinsuAndHolyDeva' -count=3 -timeout=600s`、定向普通测试、`go vet ./...` 与 `go build ./...` 通过；完整 race 摘要仅报告上述既有会话/装备竞争。
+
+### 2026-08-20 — AI=41/42 YinDevilNode 测试必须排除自身并保留名称颜色副作用
+
+- Symptom: YinDevilNode 初版友方扫描把节点自身当成“不可攻击友方”，无其他对象时也排入 `ObjectAttack`；认证测试为模拟延迟命中设置 `RageTime` 后，又漏读了同一 tick 的 `ObjectColourChanged`。
+- Root cause: Legacy `FindFriendsNearby` 明确跳过 `ob == this`，而 Rage/Hallucination 计时变化会先由现有视觉刷新路径广播红色名称颜色包，再进入延迟 Buff 结算；测试只按 AI action 预期设计，没有包含可观察视觉副作用。
+- Prevention: 迁移环形对象扫描时显式排除 attacker ObjectID；会话夹具改变 Shock/Rage/Hallucination 等名称颜色来源时，先列出视觉包顺序，再断言延迟动作/状态包，不把“不可见 Buff”误当成“无通知”。
+- Verification: 新增 AI=41/42 自身排除世界测试，session transcript 锁定 `ObjectAttack -> ObjectColourChanged` 与五秒目标 Buff；定向普通/race、全仓普通、vet/build 通过。
+
+### 2026-08-20 — 只读定位正则复发时必须立即改用固定模式
+
+- Symptom: AI=41/42 测试 helper 查询临时组合正则括号未闭合，`rg` 在读取阶段失败；该调用没有源码证据。
+- Root cause: 为覆盖多个 helper 手工拼接复杂分组，没有先执行最小正则语法检查。
+- Prevention: 只读定位优先使用多个 `rg -F` 固定模式；需要组合时先单独验证正则，任何非零读取输出整体作废，不从空/部分输出推断代码。
+- Verification: 失败调用未写入；随后用独立固定模式成功定位 helper，并在本批定向测试前完成实现核对。
+
+### 2026-08-20 — AI=41/42 全包 race 仍需与定向 race 分开归因
+
+- Symptom: 本批完整 `go test -race ./... -count=1 -timeout=900s` 仍命中 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、`TestSessionKirinIceThrustTranscript` 与 `TestSessionOmaMageRangeSlowFrozenTranscript`；YinDevilNode 定向 race 未失败。
+- Root cause: 失败栈仍属于既有 GuildBuff/装备状态、Kirin 实时 ticker/随机回调和 OmaMage session 维护 tick，未进入 AI=41/42 生产代码或测试。
+- Prevention: 每批保留目标定向 race、全仓普通和完整 race；完整 race 只按本次实际测试名/栈归因，非本批并发问题写入交接而不修改迁移实现。
+- Verification: AI=41/42 race `-count=5`、全仓普通、`go vet ./...` 与 `go build ./...` 通过；完整 race 摘要未出现 YinDevilNode 文件或测试栈。
