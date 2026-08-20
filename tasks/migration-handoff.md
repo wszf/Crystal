@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `0ab2c1e docs: record MutatedManworm migration handoff`，本批增加 AI=33 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `f04430f feat(p5): complete MinotaurKing AI` | AI=33 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `0ab2c1e docs: record MutatedManworm migration handoff`，本批增加 AI=34 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `e9351b4 feat(p5): complete FrostTiger AI` | AI=34 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32 以及 MinotaurKing AI=33 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33 以及 FrostTiger AI=34 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -903,9 +903,47 @@ Go 实现、测试和矩阵已提交为
 ticker，未进入 AI=33 生产代码或会话夹具。该全包 race 继续作为既有门禁问题记录，不
 修改本批生产代码；具体复盘已写入 `tasks/lessons.md`。
 
+## 本次完成的 P5 批次（FrostTiger AI=34）
+
+本批实现 Legacy `FrostTiger` 的坐下/唤醒、反击锁定和近远程攻击全路径：
+
+- AI=34 接入 Go common population 与独立 AI 分支；`FindTarget()` 保持空实现，只有真实
+  `Attacked(...)` 入口把 Player 或 Monster 写入目标，避免无目标自主搜索改变 Legacy 行为。
+- 保留构造后的 `Random.Next(120000)` 两分钟坐下计时，以及目标处理时不倒退的
+  `NewSitDownTime` 刷新。坐下时同时设置 `Hidden`，广播精确的 `ObjectSitDown` 字段；
+  `ObjectMonster` 投影同步反映 `Hidden=true` 与 `Extra=true`，目标出现后先唤醒再处理攻击。
+- 保留六格同地图范围、同格/远程分支、300ms 近身 `ObjectAttack` 与 MAC+Agility 命中，
+  以及固定 500ms 远程 `ObjectRangeAttack`、MAC 不含 Agility 的延迟命中和额外
+  `AttackSpeed` 冷却。Player/owned Monster/Hero 目标投影与延迟目标重验均覆盖。
+- 远程攻击 admission 时保留 Effect=0 的五秒 Bleeding 或 Effect=1 的五秒 Slow，均为
+  一秒 tick、零 value，并按 PoisonResist 与 `Random.Next(8)==0` 顺序执行；协议新增
+  `ObjectSitDown` payload/ordinal 固定向量。
+- 目标锁定接入普通近战、Warrior/技能/远程命中共用入口，以及 Monster 延迟动作入口，
+  使空 `FindTarget()` 的 FrostTiger 在真实会话中仍能被攻击后反击。
+
+Go 实现、测试和矩阵已提交为
+`e9351b4 feat(p5): complete FrostTiger AI`；本批未修改任何 C# 文件。
+
+本批新增并通过：
+
+- `go test ./internal/protocol ./cmd/crystal-server -run 'ObjectSitDown|PacketIDsMatchLegacyEnums|FrostTiger|RightLeftGuard|MinotaurKing' -count=1 -timeout=300s`
+- `go test ./cmd/crystal-server -count=1 -timeout=600s`
+- `go test ./... -count=1 -timeout=900s`
+- `go vet ./...`
+- `go build ./...`
+- `go test -race ./cmd/crystal-server -run 'FrostTiger' -count=3 -timeout=300s`
+
+完整 `go test -race ./... -count=1 -timeout=900s` 仍未全绿：本次实际重现
+`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、
+`TestSessionKirinIceThrustTranscript` 与
+`TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff` 的既有数据竞争；
+race 栈落在装备 buff reconciliation、Kirin transcript 随机回调和 Blink map-transition
+buff ticker，未进入 AI=34 生产代码或会话夹具。该结果已记录到 `tasks/lessons.md`，不因
+本批实现改动非相关生产路径。
+
 ## 当前质量门禁
 
-AI=33 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：
+AI=34 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：
 
 - `go test ./cmd/crystal-server -run 'ToxicGhoul' -count=1 -timeout=120s`
 - `go test -race ./cmd/crystal-server -run 'ToxicGhoul' -count=5 -timeout=600s`

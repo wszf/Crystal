@@ -5877,3 +5877,31 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: race 栈分别落在既有装备 buff reconciliation、Kirin transcript 随机回调和 Blink map-transition buff ticker 的并发读写，没有进入 MinotaurKing 生产路径或其会话夹具。
 - Prevention: 每批保留目标定向 race 与完整 race；完整 race 失败时记录当前实际测试集合和栈归属，不能用上一批的失败名单替代，也不能为非本批并发栈修改迁移实现。
 - Verification: `go test -race ./cmd/crystal-server -run 'MinotaurKing' -count=3 -timeout=300s` 通过；普通 cmd/全仓库测试、`go vet ./...` 与 `go build ./...` 通过；完整 race 输出未出现 AI=33 文件或测试栈。
+
+### 2026-08-20 — Legacy 协议文件路径必须先用精确文件清单确认
+
+- Symptom: 读取 `Server/ServerPackets.cs` 失败，因为当前仓库的协议定义实际位于 `Shared/ServerPackets.cs`。
+- Root cause: 依据文件名推测目录，未先用 `rg --files` 验证精确路径。
+- Prevention: 访问 Legacy 文件前先用 `rg --files | rg '(^|/)文件名$'` 定位，再执行逐行读取；迁移代码仍只在 Go 仓库编辑。
+- Verification: 重新定位后已逐行核对 `Shared/ServerPackets.cs` 的 `ObjectSitDown` 字段、读写顺序和枚举位置，未修改任何 C# 文件。
+
+### 2026-08-20 — AI=34 会话夹具必须冻结 FrostTiger 的专有计时器
+
+- Symptom: FrostTiger 延迟命中测试首次在命中时收到合法的 `ObjectSitDown` 广播，而不是只验证延迟命中结果。
+- Root cause: 测试把 AI 随机值固定为 0，却没有把 Legacy `Random.Next(120000)` 生成的坐下时间推到未来；两分钟边界在后续 tick 到期，坐下行为先于延迟命中执行。
+- Prevention: 攻击、延迟命中和中毒 admission 测试显式把 FrostTiger 的坐下/漫游计时器设到测试时钟之后；保留单独的坐下/唤醒测试覆盖到期语义。
+- Verification: `go test ./cmd/crystal-server -run 'FrostTiger' -count=1 -timeout=180s`、全量普通测试和 FrostTiger 定向 race 均通过。
+
+### 2026-08-20 — AI=34 全包 race 仍需按实际栈归因
+
+- Symptom: `go test -race ./... -count=1 -timeout=900s` 仍失败，命中 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、`TestSessionKirinIceThrustTranscript` 与 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`。
+- Root cause: race 栈分别落在既有装备 buff reconciliation、Kirin transcript 随机回调和 Blink map-transition buff ticker 的并发读写，没有进入 FrostTiger 生产路径或新会话夹具。
+- Prevention: 每批同时运行本 AI 的定向 race 与全包 race；全包失败按当前测试名和栈归因，非本批栈只写入 handoff/lessons，不为其修改迁移实现。
+- Verification: `go test -race ./cmd/crystal-server -run 'FrostTiger' -count=3 -timeout=300s` 通过；普通 `go test ./...`、`go vet ./...` 与 `go build ./...` 通过，全包 race 输出未出现 AI=34 文件或测试栈。
+
+### 2026-08-20 — 仓库切换后的命令不得混入另一仓库路径
+
+- Symptom: 一次 Go 仓库只读核对命令同时引用了 Legacy 绝对路径，失去“单工具调用只服务一个仓库”的审计边界。
+- Root cause: 为补充 Legacy 对照时把跨仓库检索路径拼进了 Go workdir 命令，没有拆成独立的 Legacy 调用。
+- Prevention: 每条 `exec_command` 只使用一个仓库的 `workdir` 和相对路径；需要跨仓库时拆成两个独立调用，禁止在同一命令中出现另一仓库根。
+- Verification: 本次后续 Go 与 Legacy 命令均按仓库拆分执行；最终两仓库 `.cs` diff/staged/untracked 审计独立通过。
