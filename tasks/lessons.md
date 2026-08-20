@@ -5760,3 +5760,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 根据子类目录手工推断基类位置，没有先用 `rg --files Server` 核验实际文件路径。
 - Prevention: Legacy 对照前先在同一仓库根目录用 `rg --files` 确认每个目标文件，再执行 `sed`；任一目标不存在或命令非零时丢弃整条只读调用，不引用其部分输出。
 - Verification: 随后用精确的 `Server/MirObjects/MonsterObject.cs` 路径独立重读 ProcessTarget、LineAttack、目标校验和 GetAttackPower，SandWorm 实现与测试依据来自成功调用。
+
+### 2026-08-20 — AI=100 VenomSpider 测试必须区分同数值随机边界
+
+- Symptom: 新增 VenomSpider 测试首次编译失败：SC 统计常量误用了不存在的 `monsterStatMinSC`/`monsterStatMaxSC`，且 `PoisonResistWeight` 与 `MagicResistWeight` 都是 10，不能在同一个 `switch` 中写重复 case。
+- Root cause: 沿用了 Monster DC/HP 常量命名而未核对 SC 的协议统计常量；测试又把“随机边界数值”误当作“随机语义标识”，忽略了 VenomSpider Monster 目标的魔抗检查与一次 poison resistance 检查共享数值边界。
+- Prevention: 新增夹具先用 `rg` 核对统计常量；随机回调测试按调用上下文/总次数断言，允许同值边界被多个 Legacy 阶段消费，不用重复数值 case 区分语义。
+- Verification: 修正后 `go test ./cmd/crystal-server -run 'VenomSpider' -count=1 -timeout=180s`、`-race` 定向测试及完整 Go 测试均通过。
+
+### 2026-08-20 — Goal continuation 的 Go 路径必须先验证文件存在
+
+- Symptom: VenomSpider 勘察期间一次 Go workdir 少写了 `me_work`，另一次把不存在的 `player_combat.go` 当作实现文件读取；另有一次 poison 对照命令把 Go 路径混入 Legacy workdir，均产生非零调用。
+- Root cause: 手工重敲绝对 workdir/文件名，且在跨仓库对照时没有先按当前仓库建立路径闭包；错误调用中的部分输出不能作为证据。
+- Prevention: 继续 Goal 时先用当前仓库根目录的 `rg --files` 核验文件，再执行 `sed`；每个调用只允许当前仓库路径，Legacy/Go 对照必须拆成独立成功调用，任何非零或混合路径输出整体作废。
+- Verification: 后续 Legacy 与 Go 基线均由独立成功调用重读；VenomSpider 实现经定向、race、全量测试、vet 和 build 门禁通过。
+
+### 2026-08-20 — MonsterObject 子类必须单独审计构造器可观察状态
+
+- Symptom: VenomSpider 首轮完整目标迁移已覆盖攻击/目标/poison，但复核 Legacy 子类发现其构造器调用 `MonsterObject`，Go 物化路径尚未像 SandWorm 一样随机化出生朝向。
+- Root cause: 先关注被攻击方向会在 `Attack` 中被重算，误把构造时朝向视为不可观察；忽略了 bootstrap/出生包在攻击前会暴露该状态。
+- Prevention: 每个 Monster AI 批次都要分别核对子类构造器、`Spawn`/bootstrap、respawn 与第一次攻击前状态；凡继承基类随机/固定字段，都添加独立物化断言，不因运行时后续覆盖而跳过。
+- Verification: AI=100 物化测试断言朝向始终为 0–7；VenomSpider 定向、race、全量测试、vet 和 build 均通过。

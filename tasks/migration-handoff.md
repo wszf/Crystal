@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `8e75cad2 docs: record BoneLord migration handoff`，本批增加 AI=35 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `a894f47 feat(p5): complete SandWorm AI` | AI=35 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `30ce1dd7 docs: record SandWorm migration handoff`，本批增加 AI=100 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `7397c43 feat(p5): complete VenomSpider AI` | AI=100 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -650,6 +650,36 @@ C# 文件。
 - `go test -race ./cmd/crystal-server -run 'SandWorm' -count=1 -timeout=120s`
 - `go test ./cmd/crystal-server -run 'SandWorm|BoneLord|BoneSpearman|ToxicGhoul' -count=1 -timeout=180s`
 - `go test ./... -count=1 -timeout=300s`
+- `go vet ./...`
+- `go build ./...`
+- Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
+
+## 本次完成的 P5 批次（VenomSpider AI=100）
+
+本批将 Legacy `VenomSpider` 从已有 Player 目标子切片收口为完整的三类目标与
+客户端可观察行为：
+
+- AI=100 接入专用 common-population 处理路径；物化保留 `MonsterObject` 构造器的
+  随机 0–7 朝向，继承目标搜索、攻击/移动冷却和 `ShockTime` 清理语义。
+- 目标搜索和 `LineAttack` 逐格使用 Cell insertion order 的首个有效目标，支持
+  Player、owned Monster、Hero；保留两格 parity-shaped 几何、Type 0 `ObjectAttack`、
+  300ms ActionTime、独立 AttackSpeed 冷却以及每格 50ms 距离延迟。
+- 延迟命中使用 `MACAgility`，在 Player、owned Monster、Hero 三类目标上重新验证
+  地图、存活、归属和攻击资格；实际命中后施加 Green poison（8/5/1000ms），保持
+  Player/Hero 两次抵抗检查与 Monster 一次抵抗检查的 Legacy 顺序。
+- Go 世界测试覆盖构造朝向、搜索、三类投影、几何、Cell 顺序、距离延迟、DC/Luck、
+  poison 随机边界和死亡目标取消；认证 `net.Pipe` transcript 覆盖 bootstrap、
+  `ObjectAttack`、400ms 命中、Green 首跳、包序和最终 HP。
+
+Go 实现、测试和迁移矩阵已提交为 `7397c43 feat(p5): complete VenomSpider AI`；
+本批未修改任何 C# 文件。
+
+本批新增并通过以下门禁：
+
+- `go test ./cmd/crystal-server -run 'VenomSpider' -count=1 -timeout=180s`
+- `go test -race ./cmd/crystal-server -run 'VenomSpider' -count=1 -timeout=180s`
+- `go test ./cmd/crystal-server -run 'VenomSpider|SandWorm|BoneSpearman|BoneLord|SpittingSpider|ToxicGhoul' -count=1 -timeout=240s`
+- `go test ./... -count=1 -timeout=360s`
 - `go vet ./...`
 - `go build ./...`
 - Go 仓库提交前 `git diff --check` 与 tracked/staged/untracked `.cs` 零变化检查。
