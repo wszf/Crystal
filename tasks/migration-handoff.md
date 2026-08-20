@@ -1050,6 +1050,42 @@ Go 实现、测试和矩阵已提交为
 `TestSessionOmaMageRangeSlowFrozenTranscript`；摘要和 lessons 已按实际 race 栈归因，
 未出现 YinDevilNode 生产文件或测试栈，不修改无关生产代码。
 
+## 本次完成的 P5 批次（OmaKing AI=43）
+
+本批完成 Legacy `OmaKing` 的继承目标、近身/远程攻击和延迟结算：
+
+- AI=43 接入 common population，保留构造时随机方向、继承 `FindTarget` 的目标保留/Cell
+  顺序和 7 格 inclusive ranged gate；目标在 action/attack cooldown 期间仍按 Legacy
+  `ProcessTarget` 继续移动。
+- 近身 parity-shaped 两格分支按 `Next(3)>0` 选择，广播 `ObjectAttack Type=0`，先对一格
+  范围执行 level-gap 与 MagicResist 门禁，再执行 3–5 格 push、八分之一 Paralysis
+  admission，最后使用两格 `LineAttack` 生成逐格 50ms 加 300ms 的 ACAgility 延迟动作。
+- 远程/同格分支广播 `ObjectAttack Type=1`，使用 inclusive Luck/DC/MC power，固定 500ms
+  命中并追加 `AttackSpeed+500ms` 冷却；`CompleteAttack` 忽略原始 action 目标，按当前
+  OmaKing 位置重新扫描七格 Player/owned Monster/Hero，并用 MAC 或 ACAgility 结算每个
+  当前可攻击对象。
+- Go 专用目标 gate 保留 Legacy wild-Monster 对 Player safe-zone/NoFight 的调用顺序，
+  同时覆盖隐藏目标、目标重验、value-map Monster 写回、push 包序和会话 cooldown
+  `ObjectWalk` 副作用。
+
+Go 实现、测试和矩阵已提交为
+`bd62ffa feat(p5): complete OmaKing AI`；本批未修改任何 C# 文件。
+
+本批新增并通过：
+
+- `go test ./cmd/crystal-server -run '^(TestGameWorldOmaKing|TestSessionOmaKingRangedAreaTranscript)$' -count=3 -timeout=240s`
+- `go test -race ./cmd/crystal-server -run 'OmaKing' -count=5 -timeout=600s`
+- `go test ./... -count=1 -timeout=900s`
+- `go vet ./...`
+- `go build ./...`
+
+完整 `go test -race ./... -count=1 -timeout=900s` 本批实际命中
+`TestSessionDarkBodySpawnAndRecallTranscript`、
+`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 与
+`TestSessionKirinIceThrustTranscript`；race 栈属于既有智能生物、GuildBuff/装备共享状态
+和 Kirin ticker/随机回调，未出现 OmaKing 文件或测试栈，具体分类已写入
+`tasks/lessons.md`。
+
 ## 当前质量门禁
 
 AI=36 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：

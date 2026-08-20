@@ -5981,3 +5981,24 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 失败栈仍属于既有 GuildBuff/装备状态、Kirin 实时 ticker/随机回调和 OmaMage session 维护 tick，未进入 AI=41/42 生产代码或测试。
 - Prevention: 每批保留目标定向 race、全仓普通和完整 race；完整 race 只按本次实际测试名/栈归因，非本批并发问题写入交接而不修改迁移实现。
 - Verification: AI=41/42 race `-count=5`、全仓普通、`go vet ./...` 与 `go build ./...` 通过；完整 race 摘要未出现 YinDevilNode 文件或测试栈。
+
+### 2026-08-20 — AI=43 OmaKing 随机顺序与延迟 AOE 必须按 Legacy override 重建
+
+- Symptom: OmaKing 初版实现遗漏 `PoisonTarget` 内层 `SC -> PoisonResist(10) -> Next(1)`；近身测试还先把地图边界目标放在可继续 push 的位置，导致 line action 缺失；认证 transcript 预期为空，却收到 cooldown 期间的 `ObjectWalk`。
+- Root cause: 只迁移了外层 `Next(8)` 分支，没有展开被调用 helper 的随机流；测试几何没有同时约束 push 终点与 LineAttack 首格；Legacy `ProcessTarget` 在 300ms action 解锁而 Attack cooldown 未到时仍会 `MoveTo`。
+- Prevention: 新 AI 把嵌套 helper 的随机调用按调用栈完整列出；push/line fixture 使用实际地图边界；每个延迟 transcript 单独推进 impact 后的下一次 AI tick，并断言合法移动包。OmaKing `CompleteAttack` 必须按当前节点位置重新扫描七格 AOE，不能只命中 admission 目标。
+- Verification: 修正后 OmaKing close/push/paralysis、ranged AOE rescan 和 authenticated transcript 连续通过，包级编译与全仓普通测试保持通过。
+
+### 2026-08-20 — AI=43 初次编译必须先统一随机返回类型
+
+- Symptom: OmaKing level-gap admission 首次包级编译把 `int` 的随机返回值直接与 `int32` level gap 比较，Go 编译在行为测试前失败。
+- Root cause: 新增 helper 时没有沿现有 `monsterAIRollLocked` 签名核对返回类型。
+- Prevention: 新 AI patch 后立即运行 `gofmt` 和 `go test ./cmd/crystal-server -run '^$' -count=1`；跨统计类型比较显式转换，不把编译失败当作行为证据。
+- Verification: 显式转换后最小编译、AI=43 世界/会话测试通过。
+
+### 2026-08-20 — AI=43 全包 race 必须记录本次实际失败集合
+
+- Symptom: 本批完整 `go test -race ./... -count=1 -timeout=900s` 命中 `TestSessionDarkBodySpawnAndRecallTranscript`、`TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 与 `TestSessionKirinIceThrustTranscript`；OmaKing 定向 race 未失败。
+- Root cause: race 栈仍落在既有智能生物会话、GuildBuff/装备共享状态和 Kirin ticker/随机回调，未进入 OmaKing 文件或测试。
+- Prevention: handoff 记录每批实际失败名；目标定向 race、普通全包、完整 race 分开执行，非本批栈只分类记录，不为其修改迁移实现。
+- Verification: OmaKing race `-count=5`、全仓普通、`go vet ./...` 与 `go build ./...` 通过；完整 race 过滤摘要未出现 OmaKing。
