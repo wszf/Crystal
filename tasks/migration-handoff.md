@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `0ab2c1e docs: record MutatedManworm migration handoff`，本批增加 AI=31/32 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `9d15529 feat(p5): complete RightGuard and LeftGuard AI` | AI=31/32 生产、测试、矩阵已提交；提交后干净 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `0ab2c1e docs: record MutatedManworm migration handoff`，本批增加 AI=33 交接更新 | 本次 handoff 与 lessons 更新随本批文档提交 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `f04430f feat(p5): complete MinotaurKing AI` | AI=33 生产、测试、矩阵已提交；提交后干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40 以及 RightGuard/LeftGuard AI=31/32 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32 以及 MinotaurKing AI=33 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -87,6 +87,7 @@
 - `aa61479 feat(p5): migrate Shinsu AI`
 - `fe56473 feat(p5): migrate KingScorpion AI`
 - `9d15529 feat(p5): complete RightGuard and LeftGuard AI`
+- `f04430f feat(p5): complete MinotaurKing AI`
 
 ## 最近完成的 P5 批次
 
@@ -864,9 +865,47 @@ Go 实现、测试和矩阵已提交为
 AI=31/32。OmaMage 单次 race 可通过但 `-count=5` 重现，普通测试通过，故保留为
 既有全包 race 阻塞项，不修改本批生产代码。
 
+## 本次完成的 P5 批次（MinotaurKing AI=33）
+
+本批实现 Legacy `MinotaurKing` 的完整三类目标和客户端可观察范围攻击行为：
+
+- AI=33 接入 Go common population 与独立 AI 分支；继承 RightGuard 的目标投影和
+  搜索语义，但使用六格同地图攻击范围，并严格在 `CanAttack` 通过后才执行范围判断
+  和移动，因此攻击冷却期间保留目标且不移动。
+- 近身路径发送 `ObjectAttack`，300ms 后按 Legacy MAC+Agility 结算；远程路径发送
+  `ObjectRangeAttack`，固定 500ms 后按 MAC 且不做 Agility 命中检查，攻击冷却额外
+  保留 500ms 的 RightGuard 投射节奏。
+- 延迟命中时重新验证当前锚点仍可攻击、仍在地图上；随后以锚点的当前位置执行
+  Legacy `FindAllTargets(3, ...)` 方形扫描，保留 Cell insertion order，并投影
+  Player/owned Monster/Hero。初始六格距离只在攻击创建时检查，锚点后来移远不会
+  自动取消，死亡/不可攻击才会取消整次范围命中。
+- 世界测试覆盖三类目标、近身/远程字段和时序、命中时加入范围目标、死亡锚点取消、
+  冷却期间不移动；认证 `net.Pipe` transcript 覆盖 bootstrap、`ObjectRangeAttack`、
+  延迟 `Struck/ObjectStruck/DamageIndicator/HealthChanged` 包序和最终 HP。
+
+Go 实现、测试和矩阵已提交为
+`f04430f feat(p5): complete MinotaurKing AI`；本批未修改任何 C# 文件。
+
+本批新增并通过：
+
+- `go test ./cmd/crystal-server -run 'TestGameWorldMinotaurKing|TestSessionMinotaurKing' -count=1`
+- `go test -race ./cmd/crystal-server -run 'MinotaurKing' -count=3 -timeout=300s`
+- `go test ./cmd/crystal-server -count=1 -timeout=600s`
+- `go test ./... -count=1 -timeout=900s`
+- `go vet ./...`
+- `go build ./...`
+
+完整 `go test -race ./cmd/crystal-server -count=1 -timeout=600s` 仍未全绿：本次实际
+命中既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、
+`TestSessionKirinIceThrustTranscript` 与
+`TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff` 的数据竞争；race
+栈分别落在装备 buff reconciliation、Kirin 随机回调和 Blink map-transition buff
+ticker，未进入 AI=33 生产代码或会话夹具。该全包 race 继续作为既有门禁问题记录，不
+修改本批生产代码；具体复盘已写入 `tasks/lessons.md`。
+
 ## 当前质量门禁
 
-AI=28 本批新增并通过以下门禁：
+AI=33 本批新增并通过以上门禁；历史批次的累计门禁记录仍保留如下：
 
 - `go test ./cmd/crystal-server -run 'ToxicGhoul' -count=1 -timeout=120s`
 - `go test -race ./cmd/crystal-server -run 'ToxicGhoul' -count=5 -timeout=600s`

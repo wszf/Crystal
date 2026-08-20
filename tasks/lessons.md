@@ -5861,3 +5861,19 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: race 并发维护路径触达了非本批的共享状态和 OmaMage transcript 随机记录；失败栈未进入 RightGuard/LeftGuard 代码。
 - Prevention: 每批同时跑目标 race、普通全包和 full race；full race 新失败先单独 `-run` 与多次 `-count` 复跑并检查栈，再决定是否属于本批，不能因时间相邻修改生产代码。
 - Verification: RightGuard/LeftGuard `-race -run ... -count=3` 通过；OmaMage 普通测试通过、单次 race 偶尔通过但 race `-count=5` 重现，full race 失败栈仍只指向既有测试/维护路径，已移交 handoff。
+
+### 2026-08-20 — MinotaurKing 延迟范围攻击只在命中时重验目标有效性
+
+- Symptom: 新增 AI=33 测试把远程攻击的锚点目标移出初始 6 格范围后，仍收到范围命中通知，测试错误地判定该攻击应失效。
+- Root cause: Legacy `MinotaurKing.CompleteRangeAttack` 在延迟结算时只检查锚点仍是可攻击目标、仍在当前地图且仍有节点，然后以锚点当前位置执行 `FindAllTargets(3, ...)`；它不会再次检查初始攻击距离。
+- Prevention: 移植延迟攻击时分离“攻击时的距离门禁”和“命中时的目标有效性门禁”；目标移远仍应按当前锚点结算，死亡、跨地图或不可攻击才应使整次范围攻击失效。
+- Verification: 将测试改为在命中前杀死锚点后，AI=33 定向世界/会话测试验证无命中；代码仍保持攻击创建时 6 格限制与命中时 3 格扫描。
+- Strengthening after recurrence: 修正失效夹具后首次重跑仍保留旧的 HP=100 终态断言，导致测试以预期错误失败；改动状态的测试必须同步检查新的终态语义。
+- Verification after recurrence: 断言改为 HP=0 后，AI=33 定向世界/会话测试通过。
+
+### 2026-08-20 — AI=33 全包 race 仍需按本次实际失败栈归因
+
+- Symptom: AI=33 批次的 `go test -race ./cmd/crystal-server -count=1 -timeout=600s` 失败，命中 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`、`TestSessionKirinIceThrustTranscript` 与 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`；AI=33 定向 race 未失败。
+- Root cause: race 栈分别落在既有装备 buff reconciliation、Kirin transcript 随机回调和 Blink map-transition buff ticker 的并发读写，没有进入 MinotaurKing 生产路径或其会话夹具。
+- Prevention: 每批保留目标定向 race 与完整 race；完整 race 失败时记录当前实际测试集合和栈归属，不能用上一批的失败名单替代，也不能为非本批并发栈修改迁移实现。
+- Verification: `go test -race ./cmd/crystal-server -run 'MinotaurKing' -count=3 -timeout=300s` 通过；普通 cmd/全仓库测试、`go vet ./...` 与 `go build ./...` 通过；完整 race 输出未出现 AI=33 文件或测试栈。
