@@ -20,6 +20,20 @@
 - Keep `tasks/lessons.md` concise and actionable. Its recommended size limit is
   50 KB or 500 lines.
 
+## Migration agent models and orchestration
+
+- Run the main migration agent with `gpt-5.6-sol` and `high` reasoning effort.
+- Run subagents with `gpt-5.6-luna` and `max` reasoning effort by default.
+- Explicit subagent spawn settings must preserve this model split unless the user
+  requests a different model for that task. Do not silently substitute models.
+- The main agent owns migration-matrix selection, architecture decisions,
+  integration, final verification, documentation, and commits.
+- Delegate only bounded, independent work. Give each writing subagent a disjoint
+  file/authority scope; use read-only subagents for Legacy tracing and review;
+  return concise evidence summaries instead of raw logs or broad source dumps.
+- Close completed subagent threads promptly so they do not consume concurrency
+  or keep stale migration context alive.
+
 ## Migration language boundary
 
 - Treat every `.cs` file in both the original Crystal repository and the Go migration repository as a read-only comparison baseline: do not add, modify, rename, or delete C# files.

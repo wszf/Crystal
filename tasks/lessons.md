@@ -22,8 +22,8 @@ duplicate.
 
 - Symptom: 猜测目录、空 glob、裸反引号、错误正则或未闭合字符串导致勘察失败。
 - Root cause: 依赖 shell 隐式展开和记忆中的文件布局，没有先验证最小查询。
-- Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；所有 `rg` 选项必须放在 `--` 前，`--` 后只能放 pattern/路径。
-- Verification: 独立运行最小查询，确认退出码、命中文件和匹配范围后再组合；本次归档检索因把 `--glob` 放到 `--` 后失败，修正参数顺序后重新验证。
+- Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；所有 `rg` 选项必须放在 `--` 前，`--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用语言模块前先核对运行时版本/可用性，并优先让目标程序自身解析配置。
+- Verification: `rg` 选项、`path` 覆盖 `PATH`、未命中 glob 和 zsh 标量命令替换均已最小重跑；本批 archive 检索从失败的裸 `*.json`/换行标量改为直接 `rg --glob` 后零错误完成；Python 3.9 缺少 `tomllib` 时改由实际 Codex CLI 解析配置。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -44,7 +44,7 @@ duplicate.
 - Symptom: helper 不存在、receiver 遗漏、返回值数量错误、字段或常量名称猜错。
 - Root cause: 依据相似模块、Legacy 名称或“应该对称”推断 Go API。
 - Prevention: 先读取声明、receiver、参数顺序、返回值、领域类型和包级符号，再接线。
-- Verification: 新调用接入后立即运行包级只编译门禁。
+- Verification: 新调用接入后立即运行包级只编译门禁；本批测试夹具误写不存在的 `worldMagic.Spell` 字段后由编译器立即拦截，复读声明并改用实际 `Level` 字段后定向测试通过。
 
 ### 2026-08-21 C06 — 行为判断前先通过 Go 语法、类型和 vet 门禁
 

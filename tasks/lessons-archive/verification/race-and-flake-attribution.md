@@ -179,3 +179,9 @@
 - Prevention: 每批保留目标定向 race、普通全包和完整 race；完整 race 只按当前运行的实际测试名/栈归因，非本批并发问题写入交接而不修改迁移实现。
 - Verification: AI=49/50 定向 race、`go test ./...`、`go vet ./...` 和 `go build ./...` 通过；完整 race 输出未出现 ThunderElement/GreatFoxSpirit 文件或测试栈。
 
+### 2026-08-21 — AI=54 普通全仓与完整 race 按实际栈隔离既有失败
+
+- Symptom: `go test ./... -count=1 -timeout=900s` 两次命中 `TestSessionOmaMageRangeSlowFrozenTranscript` 的随机边界 `[2 1]`/`[1]`；`go test -race ./... -count=1 -timeout=1800s` 同时命中该失败和 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的装备 Buff reconciliation 数据竞争。
+- Root cause: OmaMage 真实 session maintenance 会额外消费随机；GuildBuff 栈在 `player_spell_buffs.go:742,824` 与测试读取 `intelligent_creature_items.go:549` 之间竞争。两者均未进入 DragonStatue 生产文件、测试或状态面。
+- Prevention: 保留目标定向 race、无排除普通全仓、完整 race 和精确单测复跑四层证据；既有失败只能按当前栈归因，不修改无关迁移代码，也不能把带排除项的通过冒充完整门禁通过。
+- Verification: AI=54 定向 race `-count=5`、最终服务端普通全包、`go vet ./...`、`go build ./...` 均通过；排除精确 OmaMage 既有失败后 `go test ./...` 通过，完整 race 输出未出现 AI=54 文件或测试栈。
