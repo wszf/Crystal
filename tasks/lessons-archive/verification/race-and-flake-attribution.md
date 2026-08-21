@@ -199,3 +199,10 @@
 - Root cause: 既有在线装备 Buff reconciliation 与会话读取竞争、Hiding 会话装备统计并发读取，以及 OmaMage 真实 session maintenance 的随机调用边界，均不经过 HumanAssassin 生产路径。
 - Prevention: 以当前 HEAD 的完整 race 实际测试名和栈更新 handoff；保留 AI=59 定向 race 作为本批门禁，不为无关并发问题修改当前 AI，也不能用带排除项的通过替代完整 race。
 - Verification: `go test -race ./cmd/crystal-server -run 'DarkBody|HumanAssassin' -count=3 -timeout=600s` 通过；无排除项普通 `go test ./...`、`go vet ./...` 和 `go build ./...` 通过，完整 race 输出未出现 AI=59 文件或测试栈。
+
+### 2026-08-22 — AI=70 全包 race 必须按当前实际失败集合归因
+
+- Symptom: 本批 `go test -race ./... -count=1 -timeout=900s` 失败于 `TestSessionDarkBodySpawnAndRecallTranscript` 的 `reconcileEquipmentSpecialBuffsLocked`/`calculatePlayerEquipmentStatsForMount` 并发读写，以及 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的既有 `player_spell_buffs.go`/共享 session fixture race；没有 AI=70 文件或测试栈。
+- Root cause: 失败均位于既有装备 Buff reconciliation、DarkBody 会话统计和 GuildBuff 共享 fixture，并发读取/写入不经过 Hugger 生产路径；AI=70 定向 race 自身通过。
+- Prevention: 每批保留 AI 定向普通/race、普通全仓、完整 race、vet/build 四层证据；完整 race 只按当前实际测试名和栈归因，不沿用旧清单，也不为非本批并发问题修改迁移代码。
+- Verification: `go test ./cmd/crystal-server -run 'PoisonHugger|Hugger' -count=10 -timeout=600s`、`go test -race ./cmd/crystal-server -run 'PoisonHugger|Hugger' -count=3 -timeout=600s`、普通 `go test ./...`、`go vet ./...`、`go build ./...` 均通过；完整 race 输出未出现 AI=70 栈。

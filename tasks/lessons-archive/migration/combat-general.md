@@ -304,3 +304,10 @@
 - Root cause: 没有直接复用 Legacy `PoisonTarget` 的 `Random.Next(weight) < PoisonResist` 顺序，也没有把 admission、impact、poison first tick 三个时间边界分开；测试夹具未冻结 expiry 时刻的 action/attack timers。
 - Prevention: Monster Green poison 固定先取 SC/DC 伤害，再按 `< resistance`、`Next(chance)` 判断；新挂入的延迟毒物显式设置 `TickAt = impact + Tick`；expiry equality 先隔离同 tick 的攻击动作，再单独验证严格 `now > expiry`。
 - Verification: Go AI=69 production-entry tests 现覆盖 zero/non-zero resistance、`TickAt`/首次毒伤边界、strict expiry equality、逐目标 DC action、Player/owned-Monster/Hero damage、普通 `-count=10` 与 race `-count=3`，均通过。
+
+### 2026-08-22 — AI=70 Hugger death action must rescan and roll at impact
+
+- Symptom: AI=70 的行为容易被 AI=69 PoisonHugger 的“死亡时捕获目标/伤害”实现覆盖，导致隐藏目标被漏掉、死亡后新增目标不受击，或每个目标共享同一次 DC 抽样；邻接攻击还可能在攻击者死亡后因通用 dead gate 丢失延迟命中。
+- Root cause: Legacy `Hugger.Die` 只排入一个无目标的 `DelayedType.Die`，`CompleteDeath` 在 +500ms 以 `FindAllTargets(1, CurrentLocation, false)` 重新扫描，并在循环内逐目标取 DC、命中失败即提前返回；其普通 `CompleteAttack` 也不检查攻击者是否仍存活。
+- Prevention: Hugger 使用独立的 `HuggerDeath`/`Hugger` delayed-action discriminator；死亡 resolver 只在 impact 读取当前 Cell insertion order、保留 hidden=false sight gate、每目标独立 DC/SC poison 与 value-map 写回；普通 Hugger 命中在 attacker-dead gate 前解析。不要复用 PoisonHugger 的 admission-time action 列表。
+- Verification: Go `hugger.go`/`hugger_test.go` 覆盖严格五分钟边界、邻接 `ObjectAttack`/300ms ACAgility、+500ms 隐藏目标扫描、owned-Monster/Hero 投影、Green poison 和 repeated/race production-entry tests；普通全仓、vet、build 通过。

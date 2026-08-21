@@ -15,8 +15,8 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `e7514b36 docs: hand off HumanAssassin migration` | 本批迁移 archive/handoff 文档已由 `e7514b36` 提交；`agents.md`、`tasks/lessons.md` 与 `tasks/goal-task.md` 保留工作树既有变更 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `0e558d0 fix(p5): preserve PoisonHugger search gates` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`，AI=68 为 `7e5d6f3`，AI=69 功能为 `a76c2de`、搜索门禁修正为 `0e558d0`；`.cs` 零变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `afd0431a docs: record PoisonHugger gate fix` | AI=70 本批 Legacy handoff/archive 文档待本次提交；`agents.md`、`tasks/lessons.md` 与 `tasks/goal-task.md` 保留工作树既有变更 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `ab72623 feat(p5): complete Hugger AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`，AI=68 为 `7e5d6f3`，AI=69 搜索门禁修正为 `0e558d0`，AI=70 为 `ab72623`；`.cs` 零变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33、FrostTiger AI=34、ThunderElement AI=49 GreatFoxSpirit AI=50、Dragon/EvilMir AI=52/53、DragonStatue AI=54、HumanWizard AI=55 以及 Trainer AI=56 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性、HumanWizard owner-MP/owner-appearance/inspection/persistence 和 net.Pipe transcript；Trainer 以确定性 world production-entry tests 覆盖玩家/Hero/owned-pet、AC/MAC、AttackBonus、owner-root、miss、poison/DPS、切换/超时、Healing ChangeHP 和 value-map writeback；TownArcher AI=57 已补 common population、route-only movement、Player-only red-PK/GM/Hidden/CoolEye/level admission、strict FearTime、inclusive ten-cell range、ObjectRangeAttack、Luck/DC、500ms+distance×50ms 延迟 ACAgility、respawn direction reset 和 impact revalidation；HumanAssassin AI=59 已补 owner-derived stats/appearance、two-cell movement、delayed ACAgility、cumulative threshold、strict lifetime explosion 和 recall/logout lifecycle；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增 AI=70 Hugger 的邻接攻击/死亡爆炸与 poison 生命周期，并新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33、FrostTiger AI=34、ThunderElement AI=49 GreatFoxSpirit AI=50、Dragon/EvilMir AI=52/53、DragonStatue AI=54、HumanWizard AI=55 以及 Trainer AI=56 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性、HumanWizard owner-MP/owner-appearance/inspection/persistence 和 net.Pipe transcript；Trainer 以确定性 world production-entry tests 覆盖玩家/Hero/owned-pet、AC/MAC、AttackBonus、owner-root、miss、poison/DPS、切换/超时、Healing ChangeHP 和 value-map writeback；TownArcher AI=57 已补 common population、route-only movement、Player-only red-PK/GM/Hidden/CoolEye/level admission、strict FearTime、inclusive ten-cell range、ObjectRangeAttack、Luck/DC、500ms+distance×50ms 延迟 ACAgility、respawn direction reset 和 impact revalidation；HumanAssassin AI=59 已补 owner-derived stats/appearance、two-cell movement、delayed ACAgility、cumulative threshold、strict lifetime explosion 和 recall/logout lifecycle；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -98,12 +98,14 @@
 - `60a97c9 feat(p5): complete Trainer AI`
 - `7e5d6f3 feat(p5): complete Football AI`
 - `a76c2de feat(p5): complete PoisonHugger AI`
+- `ab72623 feat(p5): complete Hugger AI`
 
 - AI=57 TownArcher 批次已由 Go 提交 `2c5171a` 收口；`town_archer.go` 与 `town_archer_test.go` 已覆盖 Legacy admission/search/route/attack/impact 调用链和 production-entry world tests。
 - AI=59 HumanAssassin 批次已由 Go 提交 `a9488a3` 收口：`human_assassin.go` 及 DarkBody/ordinary-pet/world/hero 接线与测试；Legacy `HumanAssassin`/`DarkBody` Spawn、ProcessAI、Walk、Attack、Delayed ACAgility、ExplosionDie、GetInfo、logout capture 调用链已核对，Go 通过确定性 world tests 与认证 DarkBody `net.Pipe` transcript。
 - AI=67 DarkDevourer 批次已由 Go 提交 `3649bc7` 收口：`dark_devourer.go` 与 common-population/action 接线；Legacy Player/owned-Monster/Hero projection、Cell insertion-order search、GM/Hidden/CoolEye/Hallucination gates、inclusive `ViewRange`、plain-AC melee、same-cell/remote `ObjectRangeAttack`、Luck-aware DC/SC、Effect=1 Green poison、delayed impact 与 map/target revalidation 均由确定性 production-entry world tests 覆盖。
 - AI=68 Football 批次已由 Go 提交 `7e5d6f3` 收口：`football.go`/`football_test.go` 与 common-population、player/Hero、warrior、delayed range/magic、ordinary-pet 和 death 接线；Legacy 四次推球、无效地形反向、阻挡消耗尝试、边界停止、计时器重置、命中时移动、miss 不移动、无伤害和 no-op Die 均由 deterministic production-entry world tests 覆盖。
 - AI=69 PoisonHugger 批次已由 Go 提交 `a76c2de` 收口，后由 `0e558d0` 修正搜索门禁：`poison_hugger.go`/`poison_hugger_test.go` 与 common-population、继承搜索/生命周期、Player/owned-Monster/Hero Cell-order 目标投影、严格五分钟 expiry、同格死亡、五格范围、1/5 ranged admission、失败分支双重移动、ObjectRangeAttack、距离×50ms+500ms ACAgility 延迟、半秒死亡爆炸逐目标 DC capture、当前目标重验和 Green poison TickAt 接线；production-entry tests 覆盖 expiry equality、玩家/宠物/Hero 死亡爆炸、随机/移动/毒物/value-map writeback，并通过普通 `-count=10` 与 race `-count=3` 定向门禁。
+- AI=70 Hugger 批次已由 Go 提交 `ab72623` 收口：`hugger.go`/`hugger_test.go` 与 common population、继承搜索/生命周期、邻接 `ObjectAttack`、300ms delayed ACAgility、严格五分钟 expiry、单个 +500ms impact-time radius-one death action、hidden target、Player/owned-Monster/Hero projection、逐目标 DC/SC poison、早停和 value-map writeback；production-entry tests 通过普通 `-count=10` 与 race `-count=3`。
 
 ## 最近完成的 P5 批次
 
@@ -119,11 +121,11 @@ Go 提交 `e29e1f9`/`71323ce` 完成 Dragon、EvilMir 与 EvilMirBody 的生产�
 - TownArcher 保留 Legacy 的 Player-only 红名搜索、GM/Hidden/CoolEye/等级门禁、十格含边界/同格范围、FearTime 与 CanAttack 严格时序、无路不移动/越界恢复出生方向、ObjectRangeAttack，以及 500ms+距离×50ms 的延迟 ACAgility 命中；`town_archer_test.go` 覆盖 production-entry 门禁、payload、impact 重验和 route movement。
 - HumanAssassin AI=59 保留 common/ordinary-pet population、主人派生战斗属性/外观、严格两秒 Spawn boundary、两格优先/一格 fallback movement、stacking search、近战 ACAgility delayed impact、累计 500 DC death(Type=2)、严格 `now > 10s` 的 16-cell owner explosion、召回爆炸及 logout non-persistence；world tests 覆盖 movement packet type、impact invalidation、插入顺序/plain AC geometry、阈值死亡和 persistence gate。
 
-AI=57 批次已由 Go 提交 `2c5171a` 收口，AI=59 已由 Go 提交 `a9488a3` 收口，AI=68 已由 Go 提交 `7e5d6f3` 收口；本批未修改任何 `.cs` 文件。Go 功能提交与 Legacy 文档提交分开进行。主 Agent 使用 `gpt-5.6-sol/high`，只读 review subagents 使用 `gpt-5.6-luna/max`；该模型拆分已写入 `agents.md`。
+AI=57 批次已由 Go 提交 `2c5171a` 收口，AI=59 已由 Go 提交 `a9488a3` 收口，AI=68 已由 Go 提交 `7e5d6f3` 收口，AI=70 已由 Go 提交 `ab72623` 收口；本批未修改任何 `.cs` 文件。Go 功能提交与 Legacy 文档提交分开进行。主 Agent 使用 `gpt-5.6-sol/high`，只读 review subagents 使用 `gpt-5.6-luna/max`；该模型拆分已写入 `agents.md`。
 
 ## 当前质量门禁
 
-AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssassin、AI=67 DarkDevourer 与当前 AI=68 Football 定向门禁通过：
+AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssassin、AI=67 DarkDevourer、AI=68 Football 与当前 AI=70 Hugger 定向门禁通过：
 
 - `go test ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`（AI=56 基线）
 - `go test -race ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`（AI=56 基线）
@@ -135,18 +137,20 @@ AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssa
 - `go test -race ./cmd/crystal-server -run 'DarkDevourer' -count=3 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'Football' -count=10 -timeout=300s`
 - `go test -race ./cmd/crystal-server -run 'Football' -count=3 -timeout=300s`
+- `go test ./cmd/crystal-server -run 'PoisonHugger|Hugger' -count=10 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'PoisonHugger|Hugger' -count=3 -timeout=600s`
 - `go test ./cmd/crystal-server -count=1 -timeout=600s`（本次通过；`TestSessionOmaMageRangeSlowFrozenTranscript` 单独 `-count=10` 亦通过，历史随机边界失败仍保留为基线证据）
-- `go test ./... -count=1 -timeout=900s`（AI=68 文档/测试追加后通过）
-- `go test -race ./... -count=1 -timeout=900s`（失败于既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/共享 session fixture race，以及 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]`；未进入 AI=68 文件及测试；保留既有 AI=59/67 相关排除项记录）
+- `go test ./... -count=1 -timeout=900s`（AI=70 文档/测试追加后通过）
+- `go test -race ./... -count=1 -timeout=900s`（失败于既有 `TestSessionDarkBodySpawnAndRecallTranscript` 的装备 Buff/stat 并发读写，以及 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/共享 session fixture race；本次未复现 OmaMage 边界失败，未进入 AI=70 文件及测试；保留既有 AI=59/67 相关排除项记录）
 - `go vet ./...`
 - `go build ./...`
 - `gofmt`、`git diff --check` 与两仓 tracked/staged/untracked `.cs` 零变化门禁
 
-无排除项的普通全仓测试本次通过；历史 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]` 失败证据仍保留，不能据此宣告该测试已稳定。完整 race 的失败仍只在上述既有共享 session/装备/rand 路径，未进入 AI=68 代码或测试；未修改无关模块掩盖失败。
+无排除项的普通全仓测试本次通过；完整 race 的当前失败仍只在上述既有 DarkBody/装备统计与 GuildBuff 共享 session/装备路径，未进入 AI=70 代码或测试；未修改无关模块掩盖失败。
 
 ## 建议的下一条迁移线
 
-AI=56/57/59/68/69 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
+AI=56/57/59/68/69/70 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
 1. 继续 P5 通用 monster AI，按 `docs/migration-matrix.md` 中下一个仍 pending
    的 AI/target sub-slice 排序；AI=57 TownArcher 与 AI=59 HumanAssassin 已完成，下一批逐项确认可生成入口、隐藏/移动/目标
