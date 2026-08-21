@@ -22,8 +22,14 @@
 
 ## Migration agent models and orchestration
 
+- At the start of every migration session, read `tasks/goal-task.md`, the current
+  `tasks/migration-handoff.md`, and the Go migration matrix before selecting or
+  resuming a batch.
 - Run the main migration agent with `gpt-5.6-sol` and `high` reasoning effort.
 - Run subagents with `gpt-5.6-luna` and `max` reasoning effort by default.
+- Prefer the custom `luna_worker` agent for bounded, independent delegated work;
+  use another agent only when the task explicitly requires a different role or
+  model capability.
 - Explicit subagent spawn settings must preserve this model split unless the user
   requests a different model for that task. Do not silently substitute models.
 - The main agent owns migration-matrix selection, architecture decisions,
@@ -33,6 +39,17 @@
   return concise evidence summaries instead of raw logs or broad source dumps.
 - Close completed subagent threads promptly so they do not consume concurrency
   or keep stale migration context alive.
+
+## Context compaction and rollover
+
+- If context compaction is imminent, context is insufficient to close the current
+  batch, or a rollover trigger is reached, stop implementation and write a
+  durable handoff before compaction. Include both repository roots, branches and
+  HEADs, complete tracked/staged/untracked status, owned files, test exit codes
+  and failure attribution, matrix row, uncommitted work, and the next recovery
+  command; verify it against both worktrees and request a new session.
+- Do not treat an automatically generated compacted summary as the migration
+  record.
 
 ## Migration language boundary
 
