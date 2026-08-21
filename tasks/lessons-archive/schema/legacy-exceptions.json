@@ -1,0 +1,26 @@
+[
+  {
+    "id": "legacy-000080",
+    "missing_standard_fields": [
+      "verification"
+    ],
+    "title": "2026-08-13 — Conquest Siege 的运行实体语义必须按实际 Gate 类型迁移"
+  },
+  {
+    "id": "legacy-000081",
+    "missing_standard_fields": [
+      "verification"
+    ],
+    "title": "2026-08-15 — 跨仓库检索参数不得携带另一仓库路径（AI=135 复发）"
+  },
+  {
+    "id": "legacy-000481",
+    "missing_standard_fields": [
+      "symptom",
+      "root cause",
+      "prevention",
+      "verification"
+    ],
+    "title": "2026-08-18 — OmaMage 随机边界基线仍须独立分类"
+  }
+]

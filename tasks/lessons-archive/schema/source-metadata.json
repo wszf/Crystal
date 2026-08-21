@@ -1,0 +1,11 @@
+{
+  "archive_target_bytes": 98304,
+  "archive_target_entries": 150,
+  "archived_at": "2026-08-21",
+  "preamble_byte_length": 94,
+  "preamble_sha256": "f90d6c63d1f54fca1896dabd3e9f23d6bbad5a45db7ebb3b8b4b8d98e034519d",
+  "source_byte_length": 758558,
+  "source_lesson_count": 831,
+  "source_path": "tasks/lessons.md",
+  "source_sha256": "b963696a04e184cb418d76f0fda9b16a9c417f048a8a367b9b105f6a733d6f8b"
+}
