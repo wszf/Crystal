@@ -15,7 +15,7 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD (docs: formalize migration handoff and compaction safety)` | AI=71 文档、archive 与 compact-safety 规则已提交；工作树 clean；无 `.cs` 变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD (AI=71 handoff docs)` | AI=71 文档、archive 与 compact-safety 规则已提交；工作树 clean；无 `.cs` 变化 |
 | Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `4d28326 feat(p5): complete Behemoth AI` | AI=71 功能/测试/矩阵已提交；工作树 clean；既有 AI=52/53 至 AI=70 提交保持不变；无 `.cs` 变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；当前两仓工作树均应保持 clean。
