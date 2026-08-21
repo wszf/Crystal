@@ -185,3 +185,17 @@
 - Root cause: OmaMage 真实 session maintenance 会额外消费随机；GuildBuff 栈在 `player_spell_buffs.go:742,824` 与测试读取 `intelligent_creature_items.go:549` 之间竞争。两者均未进入 DragonStatue 生产文件、测试或状态面。
 - Prevention: 保留目标定向 race、无排除普通全仓、完整 race 和精确单测复跑四层证据；既有失败只能按当前栈归因，不修改无关迁移代码，也不能把带排除项的通过冒充完整门禁通过。
 - Verification: AI=54 定向 race `-count=5`、最终服务端普通全包、`go vet ./...`、`go build ./...` 均通过；排除精确 OmaMage 既有失败后 `go test ./...` 通过，完整 race 输出未出现 AI=54 文件或测试栈。
+
+### 2026-08-22 — AI=59 全仓 race 失败必须排除既有 GuildBuff/OmaMage 栈
+
+- Symptom: `go test -race ./... -count=1 -timeout=900s` 失败于 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/共享 session fixture race，并于 `TestSessionOmaMageRangeSlowFrozenTranscript` 的既有随机边界 `[2 1]`/期望 `[1]`；没有 AI=59 栈。
+- Root cause: 共享在线 Buff slice 的既有并发读写和 OmaMage 测试的随机调用边界，与 HumanAssassin 生产路径无关。
+- Prevention: 保留 AI=59 定向 race 作为本批门禁；全仓 race 按实际测试名/栈归因，不为无关路径修改当前 AI。
+- Verification: `go test -race ./cmd/crystal-server -run 'DarkBody|HumanAssassin' -count=3 -timeout=600s` 通过；普通 `go test ./...`、`go vet ./...` 和 `go build ./...` 通过。
+
+### 2026-08-22 — AI=59 全仓 race 必须记录当前实际失败集合
+
+- Symptom: 当前 `go test -race ./... -count=1 -timeout=900s` 失败于 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go:742,824`/共享 session fixture race、`TestSessionHidingTranscriptPersistenceAndExpiry` 的 `reconcileEquipmentSpecialBuffsLocked` 与 `calculatePlayerEquipmentStatsForMount` 并发读写，以及 `TestSessionOmaMageRangeSlowFrozenTranscript` 的随机边界 `[2 1]`/期望 `[1]`；没有 AI=59 栈。
+- Root cause: 既有在线装备 Buff reconciliation 与会话读取竞争、Hiding 会话装备统计并发读取，以及 OmaMage 真实 session maintenance 的随机调用边界，均不经过 HumanAssassin 生产路径。
+- Prevention: 以当前 HEAD 的完整 race 实际测试名和栈更新 handoff；保留 AI=59 定向 race 作为本批门禁，不为无关并发问题修改当前 AI，也不能用带排除项的通过替代完整 race。
+- Verification: `go test -race ./cmd/crystal-server -run 'DarkBody|HumanAssassin' -count=3 -timeout=600s` 通过；无排除项普通 `go test ./...`、`go vet ./...` 和 `go build ./...` 通过，完整 race 输出未出现 AI=59 文件或测试栈。

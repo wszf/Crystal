@@ -649,3 +649,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Prevention: 手工插入实体后显式推进 `nextObjectID`；父/子清理遍历始终跳过自身 ID，并从 authoritative map 回读 child 状态。
 - Verification: 修正 fixture 与生产防护后 TrapRock 隐藏/显形/三子岩石/移动死亡测试通过，未再出现递归栈增长。
 
+
+### 2026-08-22 — AI=59 HumanAssassin 夹具修改必须先写回 map value
+
+- Symptom: HumanAssassin movement/attack fixture 已把 clone 移到目标邻格，但 production-entry tick 仍按旧坐标执行，导致预期 `ObjectAttack` 变成 `ObjectWalk`，延迟 action 未入队。
+- Root cause: 测试从 `map[uint32]worldMonster` 复制 value 后修改局部变量，随后 helper 又从 map 重新读取并覆盖了坐标；不是 AI 的距离或攻击门禁错误。
+- Prevention: 任何 value-map 实体修改后，在调用会重新读取 map 的 helper 前立即写回；测试 failure 输出同时保留权威 map 坐标、目标 ID、动作队列和 transcript。
+- Verification: AI=59 movement、cumulative threshold、delayed impact/invalidation、explosion insertion/plain-AC、logout tests 通过；定向普通测试 `-count=10` 与 race `-count=3` 通过。
