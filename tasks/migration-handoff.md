@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `853de2d0 chore: compact and archive project lessons` | 本次 `agents.md`、lessons、archive 与 handoff 更新待独立文档提交 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `b374fd5 feat(p5): complete HumanWizard AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`；工作树干净 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `60a97c9 feat(p5): complete Trainer AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`；工作树干净 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -40,7 +40,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33、FrostTiger AI=34、ThunderElement AI=49 GreatFoxSpirit AI=50、Dragon/EvilMir AI=52/53 以及 DragonStatue AI=54、HumanWizard AI=55 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性、HumanWizard owner-MP/owner-appearance/inspection/persistence 和 net.Pipe transcript；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33、FrostTiger AI=34、ThunderElement AI=49 GreatFoxSpirit AI=50、Dragon/EvilMir AI=52/53、DragonStatue AI=54、HumanWizard AI=55 以及 Trainer AI=56 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性、HumanWizard owner-MP/owner-appearance/inspection/persistence 和 net.Pipe transcript；Trainer 以确定性 world production-entry tests 覆盖玩家/Hero/owned-pet、AC/MAC、AttackBonus、owner-root、miss、poison/DPS、切换/超时、Healing ChangeHP 和 value-map writeback；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
@@ -95,10 +95,11 @@
 - `71323ce test(p5): verify Dragon session compatibility`
 - `f53167c feat(p5): complete DragonStatue AI`
 - `b374fd5 feat(p5): complete HumanWizard AI`
+- `60a97c9 feat(p5): complete Trainer AI`
 
 ## 最近完成的 P5 批次
 
-Go 提交 `e29e1f9`/`71323ce` 完成 Dragon、EvilMir 与 EvilMirBody 的生产行为和真实会话验证；`f53167c` 完成 AI=54 `DragonStatue`，`b374fd5` 完成 AI=55 `HumanWizard`：
+Go 提交 `e29e1f9`/`71323ce` 完成 Dragon、EvilMir 与 EvilMirBody 的生产行为和真实会话验证；`f53167c` 完成 AI=54 `DragonStatue`，`b374fd5` 完成 AI=55 `HumanWizard`，`60a97c9` 完成 AI=56 `Trainer`：
 
 - DragonStatue 保留 common population、出生/respawn 方向钳制、永久静止但继承 push/blocking，以及 Player/owned-Monster/Hero/Hallucination 目标搜索；
 - DragonStatue 锁定 300ms 动作、500ms live-target 半径二 MAC 延迟攻击、逐目标 DC/Luck、Shock-after-queue、睡眠后已排队命中、Struck 无伤害与 SpellObject poison follow-ups；
@@ -106,26 +107,28 @@ Go 提交 `e29e1f9`/`71323ce` 完成 Dragon、EvilMir 与 EvilMirBody 的生产�
 - HumanWizard 注册 common/ordinary-pet population，保留固定 Down 方向、六格 ThunderBolt、Fear/撤退、主人跟随、Player/Monster/Hero 投影与 300ms/500ms 延迟边界；
 - HumanWizard 的伤害、毒伤和治疗通过 `ChangeHP` 转移给主人 MP；主人每秒扣 10 MP，耗尽后宠物以 `ObjectDied(Type=1)` 清理；owner class/gender/hair/light/weapon/armour/wing 外观通过 `ObjectPlayer` 投影，首次 Spawned 的 `Extra=false`；
 - HumanWizard 的 Mirroring、inspection owner resolution、logout/relogin persistence 及真实认证 `net.Pipe` spawn/logout/relogin transcript 已覆盖。
+- Trainer 保留 common population 但静态禁止移动、攻击和 roam；玩家、Hero、owned pet、延迟 ranged/magic 及 queued owned-monster 命中均走独立 AC/MAC 边界，命中不改变 HP/death/loot/普通 struck-health 副作用；Trainer chat、AttackBonus、miss、毒伤/DPS、owner-root、攻击者切换和严格 `>5s` 平均输出均由确定性 world tests 锁定。Hero 使用自身 ObjectID/AttackBonus 且不把 Trainer chat 泄露给 owner；链式 owned monster 可解析到根玩家；Healing 通过真实 `resolveMassHealingActionLocked` 的 `ChangeHP` 统计路径验证，未生成满血 Trainer 的伪 regen。
 
 本批 Go 提交后工作树干净，未修改任何 `.cs` 文件。主 Agent 使用 `gpt-5.6-sol/high`，只读 review subagents 使用 `gpt-5.6-luna/max`；该模型拆分已写入 `agents.md`。
 
 ## 当前质量门禁
 
-AI=55 HumanWizard/Mirroring 批次通过：
+AI=55 HumanWizard/Mirroring 与 AI=56 Trainer 批次通过：
 
-- `go test ./cmd/crystal-server -run 'HumanWizard|Mirroring' -count=20 -timeout=300s`
-- `go test -race ./cmd/crystal-server -run 'HumanWizard|Mirroring' -count=5 -timeout=300s`
-- `go test ./cmd/crystal-server -count=1 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`
+- `go test -race ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`
+- `go test ./cmd/crystal-server -count=1 -timeout=600s`（本次通过；`TestSessionOmaMageRangeSlowFrozenTranscript` 单独 `-count=10` 亦通过，历史随机边界失败仍保留为基线证据）
 - `go test ./... -count=1 -timeout=900s -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'`
+- `go test -race ./... -count=1 -timeout=900s -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'`（仅既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 及共享 session fixture race；栈位于 `player_spell_buffs.go`/`intelligent_creature_items.go`，未进入 Trainer）
 - `go vet ./...`
 - `go build ./...`
 - `gofmt`、`git diff --check` 与两仓 tracked/staged/untracked `.cs` 零变化门禁
 
-无排除项的普通全仓测试仍有既有 `TestSessionOmaMageRangeSlowFrozenTranscript` 基线失败，随机边界记录为 `[2 1]`、期望 `[1]`；该测试单独重复运行亦可复现。完整 `go test -race ./...` 的既有失败包括 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 与其他共享 session fixture 数据竞争，栈位于 `player_spell_buffs.go`/`intelligent_creature_items.go` 等既有路径；这些失败均未进入 AI=55 代码，未修改无关模块掩盖失败，精确证据保留在 lessons archive。
+无排除项的普通全仓测试本次通过；历史 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]` 失败证据仍保留，不能据此宣告该测试已稳定。完整 race 的失败仍只在上述既有共享 session 路径，未进入 AI=56 代码；未修改无关模块掩盖失败。
 
 ## 建议的下一条迁移线
 
-AI=55 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
+AI=56 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
 1. 继续 P5 通用 monster AI，按 `docs/migration-matrix.md` 中下一个仍 pending
    的 AI/target sub-slice 排序；AI=55 之后逐项确认可生成入口、隐藏/移动/目标门禁和攻击
