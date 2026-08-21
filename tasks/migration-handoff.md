@@ -15,22 +15,22 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `954698fb docs: hand off Hugger migration` | AI=71 文档、archive 与 compact-safety 规则在本次工作树；`agents.md` 与 `tasks/goal-task.md` 也含本批规则变更；无 `.cs` 变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD (docs: formalize migration handoff and compaction safety)` | AI=71 文档、archive 与 compact-safety 规则已提交；工作树 clean；无 `.cs` 变化 |
 | Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `4d28326 feat(p5): complete Behemoth AI` | AI=71 功能/测试/矩阵已提交；工作树 clean；既有 AI=52/53 至 AI=70 提交保持不变；无 `.cs` 变化 |
 
-新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
+新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；当前两仓工作树均应保持 clean。
 
 迁移状态的权威明细位于 Go 仓库的 `docs/migration-matrix.md`；`README.md` 是当前实现能力的长说明。
 
 ## AI=71 Behemoth 当前批次恢复点
 
-- Go AI=71 已由提交 `4d28326 feat(p5): complete Behemoth AI` 收口，提交后工作树 clean；Legacy 文档仍待本次提交。
-- Legacy 未提交文件：`agents.md`、`tasks/goal-task.md`、`tasks/migration-handoff.md`、`tasks/lessons-archive/migration/combat-general.md`；均为文档，未触碰 `.cs`。
+- Go AI=71 已由提交 `4d28326 feat(p5): complete Behemoth AI` 收口；Legacy AI=71/compact-safety 文档已由本仓库当前 HEAD 提交，两个工作树均 clean。
+- Legacy 本批提交范围：`agents.md`、`tasks/goal-task.md`、`tasks/migration-handoff.md`、`tasks/lessons-archive/migration/combat-general.md`；均为文档，未触碰 `.cs`。
 - 已通过：`go test ./cmd/crystal-server -run 'Behemoth' -count=10 -timeout=300s`；`go test -race ./cmd/crystal-server -run 'Behemoth' -count=3 -timeout=300s`。
 - 最新 `go test ./... -count=1 -timeout=900s` 未通过，唯一失败为既有 `TestSessionOmaMageRangeSlowFrozenTranscript`（随机边界 `[2 1]` vs `[1]`），失败栈未进入 AI=71 文件；其余包通过。
 - 最新 `go test -race ./... -count=1 -timeout=900s` 未通过，失败为既有 `TestSessionDarkBodySpawnAndRecallTranscript`（`player_spell_buffs.go`/装备统计共享状态 race）和 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`（`player_spell_buffs.go`/共享 session fixture race），均未进入 AI=71 文件或测试。
 - 已通过：`go test ./cmd/crystal-server -run '^$' -count=1`、`go build ./...`、`go vet ./...`、`git diff --check`；`internal/worlddata` defaults 夹具已同步修正。
-- 下一恢复命令：在 Legacy 提交本批 handoff/archive/compact-safety 文档；随后重新核验两仓状态、HEAD、完整 `.cs` 三项检查及 AI=71 定向门禁，并记录两个提交 hash。
+- 下一恢复命令：新 Session 重新读取本文件和 Go 矩阵，从下一个仍未完成的 P5 AI/target sub-slice 继续；不要把 AI=71 批次或本 Goal 标为整体完成。
 
 ## 当前 Goal 状态
 
