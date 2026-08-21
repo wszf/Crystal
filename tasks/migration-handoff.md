@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `e7514b36 docs: hand off HumanAssassin migration` | 本批迁移 archive/handoff 文档已由 `e7514b36` 提交；`agents.md`、`tasks/lessons.md` 与 `tasks/goal-task.md` 保留工作树既有变更 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `7e5d6f3 feat(p5): complete Football AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`，AI=68 为 `7e5d6f3`；`.cs` 零变化 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `a76c2de feat(p5): complete PoisonHugger AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`，AI=68 为 `7e5d6f3`；`.cs` 零变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -97,11 +97,13 @@
 - `b374fd5 feat(p5): complete HumanWizard AI`
 - `60a97c9 feat(p5): complete Trainer AI`
 - `7e5d6f3 feat(p5): complete Football AI`
+- `a76c2de feat(p5): complete PoisonHugger AI`
 
 - AI=57 TownArcher 批次已由 Go 提交 `2c5171a` 收口；`town_archer.go` 与 `town_archer_test.go` 已覆盖 Legacy admission/search/route/attack/impact 调用链和 production-entry world tests。
 - AI=59 HumanAssassin 批次已由 Go 提交 `a9488a3` 收口：`human_assassin.go` 及 DarkBody/ordinary-pet/world/hero 接线与测试；Legacy `HumanAssassin`/`DarkBody` Spawn、ProcessAI、Walk、Attack、Delayed ACAgility、ExplosionDie、GetInfo、logout capture 调用链已核对，Go 通过确定性 world tests 与认证 DarkBody `net.Pipe` transcript。
 - AI=67 DarkDevourer 批次已由 Go 提交 `3649bc7` 收口：`dark_devourer.go` 与 common-population/action 接线；Legacy Player/owned-Monster/Hero projection、Cell insertion-order search、GM/Hidden/CoolEye/Hallucination gates、inclusive `ViewRange`、plain-AC melee、same-cell/remote `ObjectRangeAttack`、Luck-aware DC/SC、Effect=1 Green poison、delayed impact 与 map/target revalidation 均由确定性 production-entry world tests 覆盖。
 - AI=68 Football 批次已由 Go 提交 `7e5d6f3` 收口：`football.go`/`football_test.go` 与 common-population、player/Hero、warrior、delayed range/magic、ordinary-pet 和 death 接线；Legacy 四次推球、无效地形反向、阻挡消耗尝试、边界停止、计时器重置、命中时移动、miss 不移动、无伤害和 no-op Die 均由 deterministic production-entry world tests 覆盖。
+- AI=69 PoisonHugger 批次已由 Go 提交 `a76c2de` 收口：`poison_hugger.go`/`poison_hugger_test.go` 与 common-population、继承搜索/生命周期、Player/owned-Monster/Hero Cell-order 目标投影、严格五分钟 expiry、同格死亡、五格范围、1/5 ranged admission、失败分支双重移动、ObjectRangeAttack、距离×50ms+500ms ACAgility 延迟、半秒死亡爆炸逐目标 DC capture、当前目标重验和 Green poison TickAt 接线；production-entry tests 覆盖 expiry equality、玩家/宠物/Hero 死亡爆炸、随机/移动/毒物/value-map writeback，并通过普通 `-count=10` 与 race `-count=3` 定向门禁。
 
 ## 最近完成的 P5 批次
 
@@ -144,7 +146,7 @@ AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssa
 
 ## 建议的下一条迁移线
 
-AI=56/57/59/68 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
+AI=56/57/59/68/69 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
 1. 继续 P5 通用 monster AI，按 `docs/migration-matrix.md` 中下一个仍 pending
    的 AI/target sub-slice 排序；AI=57 TownArcher 与 AI=59 HumanAssassin 已完成，下一批逐项确认可生成入口、隐藏/移动/目标

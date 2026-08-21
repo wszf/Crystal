@@ -297,3 +297,10 @@
 - Prevention: 先定义 `trapRockAttackedLocked` 状态转换，再在 Player normal/Warrior/Magic 与通用 Monster damage helpers 前置调用；父/子状态变化必须写回 value map。
 - Verification: TrapRock 受击世界测试覆盖 parent immediate death、child arms parent、Magic/Monster 编译接线，定向包测试通过。
 
+
+### 2026-08-22 — AI=69 PoisonHugger death poison must preserve resistance order and TickAt
+
+- Symptom: 初版 PoisonHugger death resolver 把 `roll >= resistance` 当成抵抗，导致零抗性目标永远不挂 Green；随后零值 `TickAt` 又让同一 world tick 立即消耗首跳毒伤，测试把命中后的 HP/Poison 列表判错。expiry equality 测试还在同一 tick 先入队 ranged action，随后误把尚未到期的 `CanAttack` 冷却当成 expiry 失败。
+- Root cause: 没有直接复用 Legacy `PoisonTarget` 的 `Random.Next(weight) < PoisonResist` 顺序，也没有把 admission、impact、poison first tick 三个时间边界分开；测试夹具未冻结 expiry 时刻的 action/attack timers。
+- Prevention: Monster Green poison 固定先取 SC/DC 伤害，再按 `< resistance`、`Next(chance)` 判断；新挂入的延迟毒物显式设置 `TickAt = impact + Tick`；expiry equality 先隔离同 tick 的攻击动作，再单独验证严格 `now > expiry`。
+- Verification: Go AI=69 production-entry tests 现覆盖 zero/non-zero resistance、`TickAt`/首次毒伤边界、strict expiry equality、逐目标 DC action、Player/owned-Monster/Hero damage、普通 `-count=10` 与 race `-count=3`，均通过。
