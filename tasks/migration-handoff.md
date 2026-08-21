@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `e7514b36 docs: hand off HumanAssassin migration` | 本批迁移 archive/handoff 文档已由 `e7514b36` 提交；`agents.md`、`tasks/lessons.md` 与 `tasks/goal-task.md` 保留工作树既有变更 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `a9488a3 feat(p5): complete HumanAssassin AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`；`.cs` 零变化 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `3649bc7 feat(p5): complete DarkDevourer AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`；`.cs` 零变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -99,6 +99,7 @@
 
 - AI=57 TownArcher 批次已由 Go 提交 `2c5171a` 收口；`town_archer.go` 与 `town_archer_test.go` 已覆盖 Legacy admission/search/route/attack/impact 调用链和 production-entry world tests。
 - AI=59 HumanAssassin 批次已由 Go 提交 `a9488a3` 收口：`human_assassin.go` 及 DarkBody/ordinary-pet/world/hero 接线与测试；Legacy `HumanAssassin`/`DarkBody` Spawn、ProcessAI、Walk、Attack、Delayed ACAgility、ExplosionDie、GetInfo、logout capture 调用链已核对，Go 通过确定性 world tests 与认证 DarkBody `net.Pipe` transcript。
+- AI=67 DarkDevourer 批次已由 Go 提交 `3649bc7` 收口：`dark_devourer.go` 与 common-population/action 接线；Legacy Player/owned-Monster/Hero projection、Cell insertion-order search、GM/Hidden/CoolEye/Hallucination gates、inclusive `ViewRange`、plain-AC melee、same-cell/remote `ObjectRangeAttack`、Luck-aware DC/SC、Effect=1 Green poison、delayed impact 与 map/target revalidation 均由确定性 production-entry world tests 覆盖。
 
 ## 最近完成的 P5 批次
 
@@ -118,7 +119,7 @@ AI=57 批次已由 Go 提交 `2c5171a` 收口，AI=59 已由 Go 提交 `a9488a3`
 
 ## 当前质量门禁
 
-AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher 与当前 AI=59 HumanAssassin 定向门禁通过：
+AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssassin 与当前 AI=67 DarkDevourer 定向门禁通过：
 
 - `go test ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`（AI=56 基线）
 - `go test -race ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`（AI=56 基线）
@@ -126,9 +127,11 @@ AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher 与当前 AI=59 H
 - `go test -race ./cmd/crystal-server -run 'TownArcher' -count=5 -timeout=300s`
 - `go test ./cmd/crystal-server -run 'DarkBody|HumanAssassin' -count=10 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'DarkBody|HumanAssassin' -count=3 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'DarkDevourer' -count=10 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'DarkDevourer' -count=3 -timeout=600s`
 - `go test ./cmd/crystal-server -count=1 -timeout=600s`（本次通过；`TestSessionOmaMageRangeSlowFrozenTranscript` 单独 `-count=10` 亦通过，历史随机边界失败仍保留为基线证据）
-- `go test ./... -count=1 -timeout=900s`（通过）
-- `go test -race ./... -count=1 -timeout=900s`（失败于既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/共享 session fixture race、`TestSessionHidingTranscriptPersistenceAndExpiry` 的装备状态并发读写，以及 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]`；未进入 AI=59 文件或测试）
+- `go test ./... -count=1 -timeout=900s`（AI=67 文档/测试追加后通过）
+- `go test -race ./... -count=1 -timeout=900s`（失败于既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/共享 session fixture race、`TestSessionHidingTranscriptPersistenceAndExpiry` 的装备状态并发读写，以及 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]`；未进入 AI=59 或 AI=67 文件及测试）
 - `go vet ./...`
 - `go build ./...`
 - `gofmt`、`git diff --check` 与两仓 tracked/staged/untracked `.cs` 零变化门禁
