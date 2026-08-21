@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `e7514b36 docs: hand off HumanAssassin migration` | 本批迁移 archive/handoff 文档已由 `e7514b36` 提交；`agents.md`、`tasks/lessons.md` 与 `tasks/goal-task.md` 保留工作树既有变更 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `a76c2de feat(p5): complete PoisonHugger AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`，AI=68 为 `7e5d6f3`；`.cs` 零变化 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `a76c2de feat(p5): complete PoisonHugger AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`，AI=68 为 `7e5d6f3`，AI=69 为 `a76c2de`；`.cs` 零变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
