@@ -11,26 +11,71 @@
 - 可以共享运行时和测试矩阵的功能应成组迁移，但不能牺牲行为等价、竞态安全和回归覆盖。
 - 每批完成后更新迁移矩阵、运行质量门禁并 Git 提交；整体迁移未达到 100% 前不得标记最终 Goal 完成。
 
+## Compact 硬门禁
+
+- 每次 context compact 前，立即停止实现和测试，先写入或刷新本文件；不得
+  把自动生成的 compact 摘要当作迁移记录。
+- Handoff 必须记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、
+  本批所属文件、测试退出码及失败归因、矩阵行、未提交工作和恢复命令；写完
+  后回读并与两仓实际状态核对。
+- Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
+  compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
+
 ## 仓库快照
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD (AI=71 handoff docs)` | AI=71 文档、archive 与 compact-safety 规则已提交；工作树 clean；无 `.cs` 变化 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `4d28326 feat(p5): complete Behemoth AI` | AI=71 功能/测试/矩阵已提交；工作树 clean；既有 AI=52/53 至 AI=70 提交保持不变；无 `.cs` 变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD` (`docs(migration): enforce compact handoff gate`) | 文档交接已提交，工作树 clean；无 `.cs` 变化 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `4239ef3 feat(p5): complete LightTurtle AI` | AI=74 已提交，工作树 clean；无 staged、无 `.cs` 变化 |
 
-新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；当前两仓工作树均应保持 clean。
+新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；不要把矩阵 Complete 或历史测试记录误判为当前工作树和当前门禁已验证。
 
 迁移状态的权威明细位于 Go 仓库的 `docs/migration-matrix.md`；`README.md` 是当前实现能力的长说明。
 
-## AI=71 Behemoth 当前批次恢复点
+## 最近完成批次：AI=74 LightTurtle
 
-- Go AI=71 已由提交 `4d28326 feat(p5): complete Behemoth AI` 收口；Legacy AI=71/compact-safety 文档已由本仓库当前 HEAD 提交，两个工作树均 clean。
-- Legacy 本批提交范围：`agents.md`、`tasks/goal-task.md`、`tasks/migration-handoff.md`、`tasks/lessons-archive/migration/combat-general.md`；均为文档，未触碰 `.cs`。
-- 已通过：`go test ./cmd/crystal-server -run 'Behemoth' -count=10 -timeout=300s`；`go test -race ./cmd/crystal-server -run 'Behemoth' -count=3 -timeout=300s`。
-- 最新 `go test ./... -count=1 -timeout=900s` 未通过，唯一失败为既有 `TestSessionOmaMageRangeSlowFrozenTranscript`（随机边界 `[2 1]` vs `[1]`），失败栈未进入 AI=71 文件；其余包通过。
-- 最新 `go test -race ./... -count=1 -timeout=900s` 未通过，失败为既有 `TestSessionDarkBodySpawnAndRecallTranscript`（`player_spell_buffs.go`/装备统计共享状态 race）和 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`（`player_spell_buffs.go`/共享 session fixture race），均未进入 AI=71 文件或测试。
-- 已通过：`go test ./cmd/crystal-server -run '^$' -count=1`、`go build ./...`、`go vet ./...`、`git diff --check`；`internal/worlddata` defaults 夹具已同步修正。
-- 下一恢复命令：新 Session 重新读取本文件和 Go 矩阵，从下一个仍未完成的 P5 AI/target sub-slice 继续；不要把 AI=71 批次或本 Goal 标为整体完成。
+- Go 已由提交 `4239ef3 feat(p5): complete LightTurtle AI` 收口，涉及
+  `light_turtle.go`、`light_turtle_test.go`、`light_turtle_session_test.go`、
+  `monster_ai.go`、`world.go` 和 `docs/migration-matrix.md`；Go 工作树 clean。
+- 已通过：`gofmt`；`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=600s`；
+  `go test ./cmd/crystal-server -run 'LightTurtle' -count=10 -timeout=600s`；
+  `go test -race ./cmd/crystal-server -run 'LightTurtle' -count=3 -timeout=600s`；
+  `go vet ./...`；`go build ./...`；`git diff --check`。
+- `go test ./cmd/crystal-server -count=1 -timeout=900s` 与
+  `go test ./... -count=1 -timeout=900s` 均未通过，唯一领域失败为既有
+  `TestSessionOmaMageRangeSlowFrozenTranscript`（实际随机边界 `[2 1]`，期望
+  `[1]`）；单独 `-run '^TestSessionOmaMageRangeSlowFrozenTranscript$' -count=10`
+  亦复现，栈未进入 AI=74 文件或测试；其余 Go 包通过。
+- `go test -race ./... -count=1 -timeout=900s` 未通过，实际失败为既有
+  `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`（
+  `player_spell_buffs.go`/`intelligent_creature_items.go` 与共享 session fixture
+  race）以及 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`
+  （`player_spell_buffs.go` 与 `teleport_magic_session_test.go` 的 buff/packet
+  并发 race）；两个栈均未进入 AI=74 文件或测试，不修改无关模块掩盖。
+- 本批范围是 common population、AI dispatch/action 接线、随机构造方向、两种
+  `ObjectAttack` 分支、延迟目标/map 重验、Player/owned-Monster/Hero 投影、
+  Green poison 和认证 `net.Pipe` transcript；Legacy C# 仍为只读基线。
+- Legacy 本次文档工作树仍为 `agents.md`、`tasks/goal-task.md`、
+  `tasks/lessons-archive/migration/combat-general.md`、`tasks/lessons.md` 和
+  本 handoff；tracked/staged/untracked `.cs` 均为空。
+
+## 最近完成批次：AI=73 TurtleKing
+
+- Legacy 当前未提交文件：`agents.md`、`tasks/goal-task.md`、`tasks/lessons.md`、`tasks/lessons-archive/migration/combat-general.md`、`tasks/migration-handoff.md`；均为文档，未触碰 `.cs`。
+- Go 本批提交：`e2033e82b2fd2528aa4879a58489d3fc286dce31 feat(p5): complete TurtleKing AI`，涉及 TurtleKing 实现/测试、monster population/dispatch、settings/world schema、matrix 和 FinialTurtle poison helper；Go 工作树 clean。
+- 已通过：`gofmt`；`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=600s`；`go test ./cmd/crystal-server -run 'TurtleKing' -count=10 -timeout=600s`；`go test -race ./cmd/crystal-server -run 'TurtleKing' -count=3 -timeout=600s`；`go test ./cmd/crystal-server -count=1 -timeout=900s`；`go test ./... -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；`git diff --check`。
+- 最新 `go test -race ./... -count=1 -timeout=900s` 仅失败于既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`；race 栈在 `player_spell_buffs.go` 的 equipment-stat 与共享 session fixture 读写，未进入 AI=73 文件或测试；其余包通过。该失败不是本批回归，不修改无关模块掩盖。
+- AI=73 production-entry tests 覆盖五阶段召唤、配置名/front fallback、30-child cap、spawn gate/cooldown movement、Player/owned-Monster/Hero 搜索与伤害、close DC line、close/long-range Type=1 `CompleteRangeAttack` area、target/attacker teleport、effect/poison、延迟 target/map revalidation、attacker-dead queued hit、observer fan-out 和 authenticated `net.Pipe` ranged transcript。
+- 下一恢复命令：新 Session 重新读取本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，确认两仓实际状态后，从矩阵中下一个仍 pending 的 P5 AI/target sub-slice 继续；不要把 P5 或整体 Goal 标为完成。
+
+## AI=72 FinialTurtle 上一批恢复点
+
+- Go AI=72 已由提交 `12ac311 feat(p5): complete FinialTurtle AI` 收口；Legacy AI=72/archive/handoff 文档仍与当前 compact-safety 文档一起处于本仓库未提交文档变更中，未触碰 `.cs`。
+- Legacy 本批文档范围：`tasks/migration-handoff.md`、`tasks/lessons-archive/migration/combat-general.md`；均为文档，未触碰 `.cs`。
+- 已通过：`go test ./cmd/crystal-server -run 'FinialTurtle' -count=10 -timeout=600s`；`go test -race ./cmd/crystal-server -run 'FinialTurtle' -count=3 -timeout=600s`；`go test ./cmd/crystal-server -count=1 -timeout=600s`；`go test ./... -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；`git diff --check`。
+- 最新 `go test -race ./... -count=1 -timeout=900s` 未通过，唯一失败为既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`，栈在 `player_spell_buffs.go` 装备统计与共享 session fixture 的并发读写，未进入 AI=72 文件或测试；其余包通过。
+- AI=72 测试覆盖 common population、两秒 Spawned gate、随机构造方向、六格 admission、相邻 DC/远程 MC、Player/owned-Monster/Hero、延迟 target/map 重验、攻击者死亡后仍结算、Slow/Frozen 双 poison、冷却期 `ObjectWalk` 与认证 `net.Pipe` transcript。
+- 下一恢复命令：新 Session 重新读取本文件和 Go 矩阵，从下一个仍未完成的 P5 AI/target sub-slice 继续；不要把 AI=72 批次或本 Goal 标为整体完成。
 
 ## 当前 Goal 状态
 
@@ -57,7 +102,7 @@
 | P9 Guild/War/Territory/Conquest | In progress | 公会核心、仓库、进度/Buff、战争、领地和完整 Conquest runtime/NPC/assets 子簇已迁移；P9 其余范围尚未统一收口。 |
 | P10 Mail/Market/Auction/Rental/GameShop | In progress | 五个主要经济功能簇均已有协议、事务、在线通知、持久化和竞态测试，但阶段仍未宣告完整。 |
 | P11 Fishing/Awakening/Ranking/Intelligent Creature/Misc | In progress | Fishing、Awakening、Ranking、Intelligent Creature 功能簇已迁移；聊天物品链接已按库存/解锁 Storage/已召唤 HeroInventory 授权并展开定义；`RequestUserName`/`UserName` 已补齐全局角色名查询、缺失静默和协议探针；共享 HarvestMonster carcass 生命周期与 Deer AI=1/2 逃跑移动已迁移；其他 miscellaneous 系统待补。 |
-| P12 恢复/备份/部署 | Pending | 最终 restart equivalence、生产化 smoke test、备份与部署尚未开始。 |
+| P12 恢复/备份/部署 | In progress | 已有生产化 TCP startup/shutdown/restart smoke 与 Legacy checkpoint 恢复；完整 restart equivalence、备份与部署仍待完成。 |
 
 ## 已交付的重要能力
 
@@ -131,11 +176,11 @@ Go 提交 `e29e1f9`/`71323ce` 完成 Dragon、EvilMir 与 EvilMirBody 的生产�
 - TownArcher 保留 Legacy 的 Player-only 红名搜索、GM/Hidden/CoolEye/等级门禁、十格含边界/同格范围、FearTime 与 CanAttack 严格时序、无路不移动/越界恢复出生方向、ObjectRangeAttack，以及 500ms+距离×50ms 的延迟 ACAgility 命中；`town_archer_test.go` 覆盖 production-entry 门禁、payload、impact 重验和 route movement。
 - HumanAssassin AI=59 保留 common/ordinary-pet population、主人派生战斗属性/外观、严格两秒 Spawn boundary、两格优先/一格 fallback movement、stacking search、近战 ACAgility delayed impact、累计 500 DC death(Type=2)、严格 `now > 10s` 的 16-cell owner explosion、召回爆炸及 logout non-persistence；world tests 覆盖 movement packet type、impact invalidation、插入顺序/plain AC geometry、阈值死亡和 persistence gate。
 
-AI=57 批次已由 Go 提交 `2c5171a` 收口，AI=59 已由 Go 提交 `a9488a3` 收口，AI=68 已由 Go 提交 `7e5d6f3` 收口，AI=70 已由 Go 提交 `ab72623` 收口；本批未修改任何 `.cs` 文件。Go 功能提交与 Legacy 文档提交分开进行。主 Agent 使用 `gpt-5.6-sol/high`，只读 review subagents 使用 `gpt-5.6-luna/max`；该模型拆分已写入 `agents.md`。
+AI=57 批次已由 Go 提交 `2c5171a` 收口，AI=59 已由 Go 提交 `a9488a3` 收口，AI=68 已由 Go 提交 `7e5d6f3` 收口，AI=70 已由 Go 提交 `ab72623` 收口，AI=74 已由 Go 提交 `4239ef3` 收口；本批未修改任何 `.cs` 文件。Go 功能提交与 Legacy 文档提交分开进行。主 Agent 使用 `gpt-5.6-sol/high`，只读 review subagents 使用 `gpt-5.6-luna/max`；该模型拆分已写入 `agents.md`。
 
 ## 当前质量门禁
 
-AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssassin、AI=67 DarkDevourer、AI=68 Football 与当前 AI=70 Hugger 定向门禁通过：
+AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssassin、AI=67 DarkDevourer、AI=68 Football、AI=70 Hugger 与 AI=74 LightTurtle 定向门禁通过：
 
 - `go test ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`（AI=56 基线）
 - `go test -race ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`（AI=56 基线）
@@ -149,22 +194,24 @@ AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssa
 - `go test -race ./cmd/crystal-server -run 'Football' -count=3 -timeout=300s`
 - `go test ./cmd/crystal-server -run 'PoisonHugger|Hugger' -count=10 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'PoisonHugger|Hugger' -count=3 -timeout=600s`
-- `go test ./cmd/crystal-server -count=1 -timeout=600s`（本次通过；`TestSessionOmaMageRangeSlowFrozenTranscript` 单独 `-count=10` 亦通过，历史随机边界失败仍保留为基线证据）
-- `go test ./... -count=1 -timeout=900s`（AI=70 文档/测试追加后通过）
-- `go test -race ./... -count=1 -timeout=900s`（失败于既有 `TestSessionDarkBodySpawnAndRecallTranscript` 的装备 Buff/stat 并发读写，以及 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/共享 session fixture race；本次未复现 OmaMage 边界失败，未进入 AI=70 文件及测试；保留既有 AI=59/67 相关排除项记录）
+- `go test ./cmd/crystal-server -run 'LightTurtle' -count=10 -timeout=600s`
+- `go test -race ./cmd/crystal-server -run 'LightTurtle' -count=3 -timeout=600s`
+- `go test ./cmd/crystal-server -count=1 -timeout=900s`（失败于既有 `TestSessionOmaMageRangeSlowFrozenTranscript` 的随机边界 `[2 1]` vs `[1]`；单独 `-count=10` 亦复现，未进入 AI=74）
+- `go test ./... -count=1 -timeout=900s`（同一既有 OmaMage 随机边界失败；其余包通过）
+- `go test -race ./... -count=1 -timeout=900s`（失败于既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/`intelligent_creature_items.go` 共享 session race，以及 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff` 的 buff/packet race；均未进入 AI=74）
 - `go vet ./...`
 - `go build ./...`
 - `gofmt`、`git diff --check` 与两仓 tracked/staged/untracked `.cs` 零变化门禁
 
-无排除项的普通全仓测试本次通过；完整 race 的当前失败仍只在上述既有 DarkBody/装备统计与 GuildBuff 共享 session/装备路径，未进入 AI=70 代码或测试；未修改无关模块掩盖失败。
+无排除项的普通全仓测试本次未通过，失败归因已记录为既有 OmaMage 随机边界；完整 race 的当前失败归因已记录为既有 GuildBuff 与 Blink buff/packet 并发问题，均未进入 AI=74 代码或测试；未修改无关模块掩盖失败。
 
 ## 建议的下一条迁移线
 
-AI=56/57/59/68/69/70 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
+AI=56/57/59/68/69/70/71/72/73/74 已完成（AI=74 已提交）；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
 1. 继续 P5 通用 monster AI，按 `docs/migration-matrix.md` 中下一个仍 pending
    的 AI/target sub-slice 排序；AI=57 TownArcher 与 AI=59 HumanAssassin 已完成，下一批逐项确认可生成入口、隐藏/移动/目标
-   门禁和攻击 resolver；AI=68 Football 已完成，下一批继续按矩阵选择仍 pending 的 AI/target sub-slice；RootSpider/BugBag 已在此前批次完成。
+   门禁和攻击 resolver；AI=68 Football、AI=71 Behemoth、AI=72 FinialTurtle、AI=73 TurtleKing、AI=74 LightTurtle 已完成；随后继续按矩阵选择仍 pending 的 AI/target sub-slice；RootSpider/BugBag 已在此前批次完成。
 2. 每批从一个可独立验证的 AI 行为簇开始，同时覆盖公式、冷却、延迟动作/目标重验、玩家/宠物/Hero/Monster 投影、包序和 net.Pipe transcript；不要仅凭怪物名称推断行为。
 3. 对已完成的玩家法术差集继续保持机械校验；若发现真实主动入口缺口，再从 Legacy 施法入口、命中 resolver、Buff/Poison 创建点建立准确的 `spell -> effect -> side effects` 表后成批迁移。
 4. 之后再处理 P5 的 fly/wall validation、高级 PvP/Group combat、persistent respawn state 和完整 packet-order closure。
@@ -188,7 +235,7 @@ sed -n '1,180p' docs/migration-matrix.md
 go test ./cmd/crystal-server -run '^$' -count=1
 ```
 
-随后在新 Session 创建上文完整 Goal，并从“建议的下一条迁移线”开始。不要修改任何 C# 文件。
+如果 compact 后 Goal 仍为 active，则沿用同一个 Goal，从本 handoff 的恢复点开始；仅当系统没有可恢复的 Goal 状态时才按上文目标重建。不要仅因新 Session 或 compact 创建新 Goal，也不要修改任何 C# 文件。
 
 ## 每批提交前固定检查
 

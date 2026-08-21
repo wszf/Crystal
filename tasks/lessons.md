@@ -15,8 +15,8 @@ duplicate.
 
 - Symptom: Go/Legacy 路径混入同一调用，出现部分成功输出、尾部失败或错误目标。
 - Root cause: 把工作目录、仓库根和参数列表分开考虑，并复用了另一仓库的路径。
-- Prevention: 一次调用只属于一个仓库；先核验 `git rev-parse --show-toplevel`，参数只允许该根下已存在的路径；切换仓库必须新开调用；不得以只读、并行或减少往返为例外。
-- Verification: 命令零退出且所有路径属于同一根；任一读取失败、非零退出或混合根调用时，丢弃该调用的全部输出（包括前面成功的片段），不得用于实现、测试归因或文档。
+- Prevention: 一次调用只属于一个仓库；先核验 `git rev-parse --show-toplevel`，参数只允许该根下已存在的路径；切换仓库必须新开调用；不得在当前 workdir 中用 `git -C`、绝对路径或脚本参数指向另一仓库；不得以只读、并行或减少往返为例外。
+- Verification: 命令零退出且所有路径属于同一根；任一读取失败、非零退出或混合根调用时，丢弃该调用的全部输出（包括前面成功的片段），不得用于实现、测试归因或文档。本轮跨仓库 status 审计因混入另一根路径作废，随后已拆成两次单仓调用重跑。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -206,3 +206,10 @@ duplicate.
 - Root cause: lessons 同时承担事故日志、交接记录和长期规则；归档职责不清，索引器把 `AI=52/53` 当成单 ID。
 - Prevention: 复发项强化同一 canonical；功能特定或历史事实进入对应 archive 文件；已归档证据只追加不删除，冻结的 legacy 分片不得改写；manifest 的 `ai_ids` 必须收录复合标题中的每个 ID；active 达到 50 KB 或 500 行前归档。
 - Verification: active 每条规则跨批次可用且通过大小门禁；manifest 可按任一复合 AI ID 定位冻结原始块，831 个 legacy 历史块仍可无损重建。
+
+### 2026-08-22 C29 — compact 前必须完成并校验 durable handoff
+
+- Symptom: 自动 compact 摘要遗漏当前未提交批次、仓库状态或失败归因，恢复后的信息与预期不一致。
+- Root cause: 把 compact 摘要当成迁移记录，或只在“快要 compact”之后才补 handoff，导致 compact 前没有可核验的完整状态边界。
+- Prevention: 每次 compact 前立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`，记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
+- Verification: `agents.md` 与 `tasks/goal-task.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续。
