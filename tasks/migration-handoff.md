@@ -16,7 +16,7 @@
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
 | Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `e7514b36 docs: hand off HumanAssassin migration` | 本批迁移 archive/handoff 文档已由 `e7514b36` 提交；`agents.md`、`tasks/lessons.md` 与 `tasks/goal-task.md` 保留工作树既有变更 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `3649bc7 feat(p5): complete DarkDevourer AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`；`.cs` 零变化 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `7e5d6f3 feat(p5): complete Football AI` | AI=52/53 为 `e29e1f9`，Dragon session 验证为 `71323ce`，AI=54 为 `f53167c`，AI=55 为 `b374fd5`，AI=56 为 `60a97c9`，AI=57 为 `2c5171a`，AI=59 为 `a9488a3`，AI=67 为 `3649bc7`，AI=68 为 `7e5d6f3`；`.cs` 零变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准。本文件提交后，Legacy 仓库 HEAD 会比表中的交接前基线多一个文档提交。
 
@@ -96,10 +96,12 @@
 - `f53167c feat(p5): complete DragonStatue AI`
 - `b374fd5 feat(p5): complete HumanWizard AI`
 - `60a97c9 feat(p5): complete Trainer AI`
+- `7e5d6f3 feat(p5): complete Football AI`
 
 - AI=57 TownArcher 批次已由 Go 提交 `2c5171a` 收口；`town_archer.go` 与 `town_archer_test.go` 已覆盖 Legacy admission/search/route/attack/impact 调用链和 production-entry world tests。
 - AI=59 HumanAssassin 批次已由 Go 提交 `a9488a3` 收口：`human_assassin.go` 及 DarkBody/ordinary-pet/world/hero 接线与测试；Legacy `HumanAssassin`/`DarkBody` Spawn、ProcessAI、Walk、Attack、Delayed ACAgility、ExplosionDie、GetInfo、logout capture 调用链已核对，Go 通过确定性 world tests 与认证 DarkBody `net.Pipe` transcript。
 - AI=67 DarkDevourer 批次已由 Go 提交 `3649bc7` 收口：`dark_devourer.go` 与 common-population/action 接线；Legacy Player/owned-Monster/Hero projection、Cell insertion-order search、GM/Hidden/CoolEye/Hallucination gates、inclusive `ViewRange`、plain-AC melee、same-cell/remote `ObjectRangeAttack`、Luck-aware DC/SC、Effect=1 Green poison、delayed impact 与 map/target revalidation 均由确定性 production-entry world tests 覆盖。
+- AI=68 Football 批次已由 Go 提交 `7e5d6f3` 收口：`football.go`/`football_test.go` 与 common-population、player/Hero、warrior、delayed range/magic、ordinary-pet 和 death 接线；Legacy 四次推球、无效地形反向、阻挡消耗尝试、边界停止、计时器重置、命中时移动、miss 不移动、无伤害和 no-op Die 均由 deterministic production-entry world tests 覆盖。
 
 ## 最近完成的 P5 批次
 
@@ -115,11 +117,11 @@ Go 提交 `e29e1f9`/`71323ce` 完成 Dragon、EvilMir 与 EvilMirBody 的生产�
 - TownArcher 保留 Legacy 的 Player-only 红名搜索、GM/Hidden/CoolEye/等级门禁、十格含边界/同格范围、FearTime 与 CanAttack 严格时序、无路不移动/越界恢复出生方向、ObjectRangeAttack，以及 500ms+距离×50ms 的延迟 ACAgility 命中；`town_archer_test.go` 覆盖 production-entry 门禁、payload、impact 重验和 route movement。
 - HumanAssassin AI=59 保留 common/ordinary-pet population、主人派生战斗属性/外观、严格两秒 Spawn boundary、两格优先/一格 fallback movement、stacking search、近战 ACAgility delayed impact、累计 500 DC death(Type=2)、严格 `now > 10s` 的 16-cell owner explosion、召回爆炸及 logout non-persistence；world tests 覆盖 movement packet type、impact invalidation、插入顺序/plain AC geometry、阈值死亡和 persistence gate。
 
-AI=57 批次已由 Go 提交 `2c5171a` 收口，AI=59 已由 Go 提交 `a9488a3` 收口；本批未修改任何 `.cs` 文件。Go 功能提交与 Legacy 文档提交分开进行。主 Agent 使用 `gpt-5.6-sol/high`，只读 review subagents 使用 `gpt-5.6-luna/max`；该模型拆分已写入 `agents.md`。
+AI=57 批次已由 Go 提交 `2c5171a` 收口，AI=59 已由 Go 提交 `a9488a3` 收口，AI=68 已由 Go 提交 `7e5d6f3` 收口；本批未修改任何 `.cs` 文件。Go 功能提交与 Legacy 文档提交分开进行。主 Agent 使用 `gpt-5.6-sol/high`，只读 review subagents 使用 `gpt-5.6-luna/max`；该模型拆分已写入 `agents.md`。
 
 ## 当前质量门禁
 
-AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssassin 与当前 AI=67 DarkDevourer 定向门禁通过：
+AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssassin、AI=67 DarkDevourer 与当前 AI=68 Football 定向门禁通过：
 
 - `go test ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`（AI=56 基线）
 - `go test -race ./cmd/crystal-server -run 'Trainer|HumanWizard' -count=5 -timeout=300s`（AI=56 基线）
@@ -129,22 +131,24 @@ AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssa
 - `go test -race ./cmd/crystal-server -run 'DarkBody|HumanAssassin' -count=3 -timeout=600s`
 - `go test ./cmd/crystal-server -run 'DarkDevourer' -count=10 -timeout=600s`
 - `go test -race ./cmd/crystal-server -run 'DarkDevourer' -count=3 -timeout=600s`
+- `go test ./cmd/crystal-server -run 'Football' -count=10 -timeout=300s`
+- `go test -race ./cmd/crystal-server -run 'Football' -count=3 -timeout=300s`
 - `go test ./cmd/crystal-server -count=1 -timeout=600s`（本次通过；`TestSessionOmaMageRangeSlowFrozenTranscript` 单独 `-count=10` 亦通过，历史随机边界失败仍保留为基线证据）
-- `go test ./... -count=1 -timeout=900s`（AI=67 文档/测试追加后通过）
-- `go test -race ./... -count=1 -timeout=900s`（失败于既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/共享 session fixture race、`TestSessionHidingTranscriptPersistenceAndExpiry` 的装备状态并发读写，以及 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]`；未进入 AI=59 或 AI=67 文件及测试）
+- `go test ./... -count=1 -timeout=900s`（AI=68 文档/测试追加后通过）
+- `go test -race ./... -count=1 -timeout=900s`（失败于既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go`/共享 session fixture race，以及 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]`；未进入 AI=68 文件及测试；保留既有 AI=59/67 相关排除项记录）
 - `go vet ./...`
 - `go build ./...`
 - `gofmt`、`git diff --check` 与两仓 tracked/staged/untracked `.cs` 零变化门禁
 
-无排除项的普通全仓测试本次通过；历史 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]` 失败证据仍保留，不能据此宣告该测试已稳定。完整 race 的失败仍只在上述既有共享 session/装备/rand 路径，未进入 AI=56、AI=57 或 AI=59 代码；未修改无关模块掩盖失败。
+无排除项的普通全仓测试本次通过；历史 `TestSessionOmaMageRangeSlowFrozenTranscript` 随机边界 `[2 1]`/期望 `[1]` 失败证据仍保留，不能据此宣告该测试已稳定。完整 race 的失败仍只在上述既有共享 session/装备/rand 路径，未进入 AI=68 代码或测试；未修改无关模块掩盖失败。
 
 ## 建议的下一条迁移线
 
-AI=56/57/59 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
+AI=56/57/59/68 已完成；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 
 1. 继续 P5 通用 monster AI，按 `docs/migration-matrix.md` 中下一个仍 pending
    的 AI/target sub-slice 排序；AI=57 TownArcher 与 AI=59 HumanAssassin 已完成，下一批逐项确认可生成入口、隐藏/移动/目标
-   门禁和攻击 resolver；RootSpider/BugBag 已在此前批次完成。
+   门禁和攻击 resolver；AI=68 Football 已完成，下一批继续按矩阵选择仍 pending 的 AI/target sub-slice；RootSpider/BugBag 已在此前批次完成。
 2. 每批从一个可独立验证的 AI 行为簇开始，同时覆盖公式、冷却、延迟动作/目标重验、玩家/宠物/Hero/Monster 投影、包序和 net.Pipe transcript；不要仅凭怪物名称推断行为。
 3. 对已完成的玩家法术差集继续保持机械校验；若发现真实主动入口缺口，再从 Legacy 施法入口、命中 resolver、Buff/Poison 创建点建立准确的 `spell -> effect -> side effects` 表后成批迁移。
 4. 之后再处理 P5 的 fly/wall validation、高级 PvP/Group combat、persistent respawn state 和完整 packet-order closure。
