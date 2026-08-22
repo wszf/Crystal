@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；persisted combat SpellToggle bootstrap 批次已提交）
+最后更新：2026-08-23（Asia/Singapore；server Notice bootstrap 批次已提交）
 
 ## 迁移目标与硬边界
 
@@ -23,7 +23,71 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
-## 当前 active 批次（persisted combat SpellToggle bootstrap 已收口）
+## 当前 active 批次（server Notice bootstrap 已收口）
+
+恢复时间：2026-08-23；沿用同一个 active Goal。本批继续机械核对 Legacy
+`PlayerObject.StartGameSuccess` 与 Go `serveWithConfig`，选出 P1/P2/P3 的
+dependency-ready 条件 bootstrap 差集：Legacy 在 Notice 文件更新时间严格晚于角色
+`LastLogoutDate` 时，于角色物品定义前发送 `UpdateNotice`；Go 同时缺少该包与真实会话
+日期写入。该切片已由 Go 提交 `be5c355 feat(p3): restore server notice bootstrap`
+原子收口；P1/P2/P3 与整体 Goal 仍为 In progress。
+
+- Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master`，本批文档提交 parent `28c87d2a docs(migration): record persisted combat
+  toggles`（提交后以 `git log -1 --oneline` 为准）；本批 owned 文档为
+  `tasks/lessons.md`、`tasks/lessons-archive/migration/protocol-session-wire.md` 与本
+  handoff，无其他文件；提交后工作树 clean，tracked/staged/untracked `.cs` 均为空。
+- Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，HEAD `be5c355 feat(p3): restore server notice bootstrap`；提交后工作树 clean，
+  无 staged/untracked，tracked/staged/untracked `.cs` 均为空。
+- Legacy 权威行为：`Settings.LoadNotice` 从 `./Envir/Notice.txt` 读取 UTF-8 行，非空文件
+  记录 `GetLastWriteTime`，保留当前 `string.Compare(line, "TITLE", false) > 0`、
+  `Contains("=")`、`Split('=')[1]` 与逐正文行追加 `\r\n` 的怪癖；
+  `StartGameSuccess` 仅在 Message 非 whitespace 且 `LastUpdate > Info.LastLogoutDate` 时，
+  于 StartGame/欢迎与 guild 校验之后、`GetItemInfo` 之前 enqueue
+  `S.UpdateNotice`。wire 为 ordinal 272 与连续两个 .NET string（Title、Message）。
+  Player 构造写 `LastLoginDate=Envir.Now`，`StopGame` 写 `LastLogoutDate=Envir.Now`，
+  `ToSelectInfo` 将后者投影为 `LastAccess`。
+- Go 实现：`internal/config` 新增 Legacy-compatible Notice loader 与
+  `CRYSTAL_NOTICE_PATH`；`internal/protocol` 新增 ordinal 272、payload/parser；probe 固定
+  向量与网络 bootstrap 接受该包；auth 新增 login/logout date authority；StartGame 在
+  pre-item boundary 按严格时间门禁发包，并在成功进入、显式登出、observer takeover、
+  断线 cleanup 的 JSON/checkpoint 边界写日期。
+- Go 本批 16 个 owned 文件：`cmd/crystal-server/main.go`、`main_test.go`、
+  `notice_bootstrap.go`、`notice_bootstrap_test.go`；`internal/auth/service.go`、
+  `service_test.go`；`internal/config/config.go`、`notice.go`、`notice_test.go`；
+  `internal/probe/network.go`、`vectors.go`；`internal/protocol/packet.go`、
+  `packet_test.go`、`notice.go`、`notice_test.go`；`docs/migration-matrix.md`。
+- 测试覆盖：loader BOM/CRLF/missing/empty/title 怪癖与 timestamp reset；strict equality
+  admission；固定 wire/malformed payload；auth JSON 与 SelectInfo LastAccess；真实认证
+  `net.Pipe` 首登公告→显式登出→JSON restart→不重复公告→断线 checkpoint。
+- 已通过（退出码 0）：owned Go 文件 `gofmt -d`；五包最小只编译；focused 普通
+  `-count=10`；focused race `-count=3`；`go test ./cmd/crystal-server -count=1
+  -timeout=900s`；`go test ./... -count=1 -timeout=900s`；`go test -race ./...
+  -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；
+  `go run ./cmd/crystal-protocol-probe -mode vectors`；`git diff --check`。
+- 失败/修正证据：一次 Go workdir 读取误带 Legacy Settings 路径，整次输出按 C01 作废
+  并拆仓重跑；Notice loader 初稿错误地用 `UTC()` 代替 timestamp 清零，主 Agent review
+  后改为显式 zero 并由 missing/empty 测试锁定；矩阵复合 patch 第二 hunk 因陈旧正文
+  失败，已复读物理行、独立核验第一 hunk、单独重跑第二 hunk并通过 diff check。
+- Subagent 状态：spawn tool 的模型列表不提供要求的 `luna_worker`/
+  `gpt-5.6-luna`，因此未静默替换；主 Agent 完成 tracing、实现、审查和验证。
+- 矩阵行：P1/P2/P3 已增加 Notice file/config、UpdateNotice wire/session、
+  login/logout timestamp authority 与 restart/relogin evidence；三阶段仍 In progress。
+- 下一恢复命令：新 Session 回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 与 Go
+  `docs/migration-matrix.md`，分别核对两仓 clean status/HEAD；从矩阵选择下一个
+  dependency-ready pending 子切片，优先继续机械核对 Legacy/Go StartGame packet 差集，
+  但不得重复 BaseStats、persisted SpellToggle 或 server Notice bootstrap。
+
+### 本批提交边界
+
+- Go 原子提交 `be5c355` 仅包含上述 16 个 production/test/probe/matrix 文件；Legacy
+  文档提交仅包含上述三个 Markdown。两仓提交前后均按完整 status、diff check 和
+  tracked/staged/untracked `.cs` 审计。
+- 当前批次已完成且可安全切换，但整体 Goal 未完成；下一 Session 必须重新选择 pending
+  子切片，不得重复 BaseStats、persisted SpellToggle 或 server Notice bootstrap。
+
+## 历史批次快照（persisted combat SpellToggle bootstrap 已收口）
 
 恢复时间：2026-08-23；沿用同一个 active Goal。本批从 Legacy
 `PlayerObject.StartGameSuccess` 与 Go `serveWithConfig` 的真实登录调用链选出一个明确、

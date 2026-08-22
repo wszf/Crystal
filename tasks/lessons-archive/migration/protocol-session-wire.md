@@ -268,3 +268,10 @@
 - Root cause: 把 `BaseStat.Calculate` 的 `Gain == 0` 计算短路误当成 INI/wire 字段规范化，并把通用 Mana 公式套到 Wizard 特例；同时只审查了 loader/公式 helper，没有沿 `Settings -> HumanObject/HeroObject.RefreshLevelStats -> SendBaseStats` 的完整 authority 链检查所有消费者。
 - Prevention: 自定义公式测试必须分别断言原始 profile/wire 字段和计算结果；逐项代入 Health/Mana/Weight/Stat 及 Warrior/Wizard/Taoist 分支；配置 profile 作为 runtime-only authority，在 player enter、Hero summon、equipment calculation 和对应 BaseStats packet 四个边界显式传播，并用 `json:"-"` 锁定不落盘。
 - Verification: 修正两项测试期望后，五职业默认、custom INI 顺序/数字零 fallback、四公式/Max/Gain==0、player runtime/cap/authenticated bootstrap、Hero runtime/packet/authenticated summon 和 transient JSON 测试普通 `-count=10`、race `-count=3` 均通过；全仓普通重跑、完整 race、vet 和 build 退出 0。
+
+### 2026-08-23 — Notice bootstrap 必须以登出时间 authority 保证只投递一次
+
+- Symptom: Go 已保留 `SelectInfo.LastAccess` 和 `LastLoginDate` 字段，却没有在真实 StartGame/StopGame 生命周期更新它们；若只增加 `UpdateNotice` 包，旧公告会在每次重登重复发送。实现初稿还用 `c.NoticeLastUpdate.UTC()` 作为 loader reset，重复加载缺失文件时会错误保留旧时间。
+- Root cause: 把账户导入字段视为静态兼容元数据，没有追踪 Legacy `PlayerObject` 构造、`StartGameSuccess`、`StopGame` 与 `CharacterInfo.ToSelectInfo` 的完整 authority 链；同时把时间 location 规范化误当成零值清理。
+- Prevention: 条件 bootstrap 必须同时迁移 seed 的写入生命周期；公告 admission 使用非空 Message 且严格 `Notice.LastUpdate > LastLogoutDate`，StartGame 写 `LastLoginDate`，显式登出、observer takeover 和断线 cleanup 在 JSON/checkpoint 前写 `LastAccess`；optional loader 每次先显式清空 payload 与 timestamp，再处理 missing/empty 文件。协议必须锁定 ordinal、完整 payload、网络 probe 和 pre-item FIFO 边界。
+- Verification: Go 配置测试锁定 BOM、CR/LF、`string.Compare`/`Split('=')[1]` 怪癖、missing/empty reset 和文件时间；ordinal 272 固定向量与 malformed parser 通过；authenticated `net.Pipe` 首登→公告→显式登出→JSON restart→不重复公告→断线 checkpoint transcript 普通 `-count=10`、race `-count=3` 通过，全仓普通/race、vet、build 和 Go probe vectors 均退出 0。
