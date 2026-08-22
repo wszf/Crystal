@@ -25,7 +25,7 @@
 
 恢复时间：2026-08-22；旧 handoff 的快照已过期，不能覆盖当前工作树。当前仍沿用同一个 active Goal，批次为 P5 AI=76 `HellSlasher`，Go 代码、测试和 Legacy/Go 原子提交均已完成。矩阵中的 AI=76 行已标 `Complete`，本批最终证据如下。
 
-- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD `030f9f08 docs(migration): record HellSlasher handoff`；完整状态为 `M tasks/lessons.md`，无 staged 或 untracked 文件。AI=76 的 feature-specific lesson 和本 handoff 已提交；`tasks/lessons.md` 的既有 active-lessons 修改不是本批范围，必须保留。
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD（本 handoff 提交，前一文档提交为 `030f9f08 docs(migration): record HellSlasher handoff`）；完整状态为 `M tasks/lessons.md`，无 staged 或 untracked 文件。AI=76 的 feature-specific lesson 和本 handoff 已提交；`tasks/lessons.md` 的既有 active-lessons 修改不是本批范围，必须保留。
 - Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `d17bbdc feat(p5): complete HellSlasher AI`；`git status --short --branch` clean，无 staged 或 untracked 文件。本批 6 个 Go 文件和矩阵已由该提交收口。
 - 本批 Go 所属文件就是提交 `d17bbdc` 的 6 个文件；Legacy 不应修改任何 `.cs`，也不应覆盖其现有 `tasks/lessons.md` 改动。
 - 本批 Go 验证退出码均为 0：`gofmt`；`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=600s`；`go test ./cmd/crystal-server -run 'HellSlasher' -count=10 -timeout=600s`；`go test -race ./cmd/crystal-server -run 'HellSlasher' -count=3 -timeout=600s`；`go test ./cmd/crystal-server -count=1 -timeout=900s`；`go test ./... -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；`git diff --check`。完整 `go test -race ./... -count=1 -timeout=900s` 退出码为 1，唯一实际测试失败为既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`，race 栈位于 `player_spell_buffs.go:742` 与 `intelligent_creature_items.go:549` 的共享 session fixture equipment-stat 读写，未进入 AI=76 文件或测试；不修改无关模块掩盖。
