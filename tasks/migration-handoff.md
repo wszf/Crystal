@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；AI=49 ThunderElement 批次提交后）
+最后更新：2026-08-23（Asia/Singapore；GuildBuff 完整 race 门禁收口后）
 
 ## 迁移目标与硬边界
 
@@ -24,6 +24,26 @@
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
 ## 当前 active 批次（从实际两仓状态重建）
+
+恢复时间：2026-08-23；当前仍沿用同一个 active Goal。本批处理完整 race
+门禁中唯一可复现的 GuildBuff session 断言竞态：测试从 world 解锁后的浅复制
+`worldPlayer` 读取共享 `Character.Buffs`/`Stats`，与后台装备 Buff reconciliation
+并发。整体 Goal 仍未完成，不因质量批次完成宣告迁移完成。
+
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD 为本批 handoff 提交（以 `git log -1 --oneline` 为准）；本批两个文档已提交，工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。
+- Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `f0fa908 test(p9): lock GuildBuff runtime snapshot`；本批测试修复已提交，工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。
+- 本批 Go 所属文件仅为 `cmd/crystal-server/guild_buffs_session_test.go`；Legacy 所属文件仅为 `tasks/lessons-archive/verification/race-and-flake-attribution.md` 与本 handoff；未修改任何 Go 生产实现或 C#。
+- 根因与修复：`playerByCharacterIndex` 只复制运行时外壳，测试断言改为在 `world.mu` 内用 `playerByCharacterIndexLocked` 读取 `Stats`，并用 `cloneProtocolCharacterBuffs` 深复制 Buff 后再解锁；具体证据已追加至 race archive。
+- 已通过（退出码 0）：目标测试普通 `-count=10`、目标 `-race -count=10`；`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；`git diff --check`；全量普通 `go test ./... -count=1 -timeout=900s`；完整 `go test -race ./... -count=1 -timeout=900s`。
+- 恢复命令：新 Session 先回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，分别核对两仓 status/HEAD；Go `f0fa908` 与本批 Legacy handoff 提交均已完成，从矩阵选择下一个仍未完成且边界明确的 P5/P1/P2/P4/P6/P7/P9/P10/P11/P12 批次；不得因 compact、文档批次、质量批次或单个 AI 完成重开/重建/重置 Goal。
+
+### 本批质量门禁与提交边界
+
+- Go 功能提交 `f0fa908` 只包含 `cmd/crystal-server/guild_buffs_session_test.go`；不得把 Legacy 文档混入 Go 提交。
+- Legacy 文档提交只包含 `tasks/lessons-archive/verification/race-and-flake-attribution.md` 与本 handoff；不得暂存或提交任何 `.cs` 文件。
+- 提交前后均须分别执行两仓的 `git diff --check`、tracked/staged/untracked `.cs` 审计和完整 `git status --short --branch`；完整普通/race 通过证据必须保留。
+
+## 历史批次快照（2026-08-23 AI=49 ThunderElement）
 
 恢复时间：2026-08-23；当前仍沿用同一个 active Goal。矩阵中 P5 AI=49
 `ThunderElement` 的领域行为已有 deterministic 覆盖，本批补齐真实认证

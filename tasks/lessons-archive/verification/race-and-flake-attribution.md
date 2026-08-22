@@ -206,3 +206,10 @@
 - Root cause: 失败均位于既有装备 Buff reconciliation、DarkBody 会话统计和 GuildBuff 共享 fixture，并发读取/写入不经过 Hugger 生产路径；AI=70 定向 race 自身通过。
 - Prevention: 每批保留 AI 定向普通/race、普通全仓、完整 race、vet/build 四层证据；完整 race 只按当前实际测试名和栈归因，不沿用旧清单，也不为非本批并发问题修改迁移代码。
 - Verification: `go test ./cmd/crystal-server -run 'PoisonHugger|Hugger' -count=10 -timeout=600s`、`go test -race ./cmd/crystal-server -run 'PoisonHugger|Hugger' -count=3 -timeout=600s`、普通 `go test ./...`、`go vet ./...`、`go build ./...` 均通过；完整 race 输出未出现 AI=70 栈。
+
+### 2026-08-23 — GuildBuff race 必须在锁内复制运行时快照
+
+- Symptom: 完整 `go test -race ./... -count=1 -timeout=900s` 唯一失败为 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`；race 栈位于 `player_spell_buffs.go:742,824` 与测试在 `intelligent_creature_items.go:549` 读取在线玩家 Buff。
+- Root cause: `playerByCharacterIndex` 只在锁内复制 `worldPlayer` 外壳，返回的 `Character.Buffs`/`Stats` 仍引用 world-owned 共享数据；测试解锁后读取它们，与后台 tick 的装备 Buff reconciliation 并发。
+- Prevention: 测试或会话断言需要读取在线实体时，必须在 world 锁内读取标量并深复制 Buff/map/slice；不得把浅复制的运行时实体当作无锁快照。
+- Verification: 将 GuildBuff 断言改为 `playerByCharacterIndexLocked` 锁内读取 `Stats`，并用 `cloneProtocolCharacterBuffs` 复制 Buff 后再解锁；目标测试普通/race `-count=10` 及完整 `go test -race ./... -count=1 -timeout=900s` 均通过。
