@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-22（Asia/Singapore）
+最后更新：2026-08-22（Asia/Singapore；ArcherSummon 门禁完成后）
 
 ## 迁移目标与硬边界
 
@@ -14,7 +14,8 @@
 ## Compact 硬门禁
 
 - 每次 context compact 前，立即停止实现和测试，先写入或刷新本文件；不得
-  把自动生成的 compact 摘要当作迁移记录。
+  把自动生成的 compact 摘要当作迁移记录。收到 compaction、上下文上限或
+  rollover 信号本身就触发该门禁，不得等到压缩完成后再补 handoff。
 - Handoff 必须记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、
   本批所属文件、测试退出码及失败归因、矩阵行、未提交工作和恢复命令；写完
   后回读并与两仓实际状态核对。
@@ -23,22 +24,33 @@
 
 ## 当前 active 批次（从实际两仓状态重建）
 
-恢复时间：2026-08-22；当前仍沿用同一个 active Goal。P5 AI=78 `HellCannibal` target-kind 扩展已由 Go 提交 `1315c13 feat(p5): complete HellCannibal AI` 收口；下一依赖就绪批次选为 P5 AI=79 `HellKeeper`。本 handoff 记录当前恢复点，不因 AI=78 完成或 compact 宣告整体 Goal 完成。
+恢复时间：2026-08-22；当前仍沿用同一个 active Goal。上一批 P5 AI=8 `AxeSkeleton` 的 Player/owned-Monster/Hero target-kind 扩展已由 Go 提交 `3920886 feat(p5): complete AxeSkeleton target projections` 收口；整体 Goal 仍未完成。本批 P5 AI=60/61/62/63 ArcherSummon（`VampireSpider`/`SpittingToad`/`SnakeTotem`/`CharmedSnake`）已由 Go 提交 `f195d89 feat(p5): complete archer summon target projections` 收口；不因 compact 或单批完成宣告整体 Goal 完成。
 
-- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD（本 handoff 提交；parent `a23686cf docs(migration): keep HellSlasher handoff self-describing`）；完整状态为 `M tasks/lessons-archive/verification/fixtures-and-transcripts-01.md`、`M tasks/lessons.md`，无 staged 或 untracked 文件。AI=78 历史教训已提交，本恢复点为文档；Legacy 不应修改任何 `.cs`。
-- Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `1315c13 feat(p5): complete HellCannibal AI`；工作树 clean，无 staged 或 untracked 文件。
-- AI=78 所属文件已由 `1315c13` 原子收口：`hell_cannibal.go`、`hell_cannibal_test.go`、`hell_cannibal_session_test.go`、`monster_ai.go`、`world.go` 和 `docs/migration-matrix.md`；不得回滚或覆盖该提交。
-- AI=78 Go 证据：最小编译、HellCannibal 普通 `-count=10`/race `-count=3`、HellSlasher/HellPirate/HellCannibal 相关回归普通 `-count=5`/race `-count=3`、`go test ./... -count=1 -timeout=900s`、`go vet ./...`、`go build ./...`、gofmt 和 diff-check 均通过。完整 `go test -race ./... -count=1 -timeout=900s` 退出码为 1，实际失败为既有 `TestSessionDarkBodySpawnAndRecallTranscript` 的 `player_spell_buffs.go:742` 与 `equipment_transactions.go:779` 共享 equipment-stat race，以及既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go:742` 与 `intelligent_creature_items.go:549` race；均未进入 AI=78 文件或测试，不修改无关模块掩盖。
-- 下一批 Legacy 范围：只读 tracing `Server/MirObjects/Monsters/HellKeeper.cs`、`MonsterObject.cs` 及直接共享调用链；Go 仅新增/修改 AI=79 所属文件和必要矩阵/测试接线，不得把 Legacy 文档变更混入 Go 功能提交。
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD 为本 handoff 文档提交（parent `53d9cd58 docs(migration): refresh HellCannibal handoff snapshot`）；本仓工作树 clean，无 staged/untracked；本批提交内容均为文档，未修改 `.cs`。
+- Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `f195d89 feat(p5): complete archer summon target projections`；本批三个文件已原子提交，工作树 clean，无 staged/untracked。
+- 本批 Go 所属文件为上述三个文件；Legacy tracing 范围为 `Server/MirObjects/Monsters/VampireSpider.cs`、`SpittingToad.cs`、`SnakeTotem.cs`、`CharmedSnake.cs`、`HumanObject.cs` ArcherSummon/DelayedAction 调用链及直接共享 helper。Legacy C# 仍为只读基线。
+- 本批已覆盖 Cell-first/insertion-order 搜索、Player/Monster/Hero target kind、CanFly/NoPets/召唤限制、两段 practice/500ms materialization、召回坐标、Vampire/Toad/SnakeTotem/CharmedSnake 生命周期、SnakeTotem child aggro/数量限制、独立 CharmedSnake AliveTime、Legacy Monster/Player death-burst race 边界、Toad `ObjectTurn -> ObjectRangeAttack` 顺序，以及 impact 时 Hidden 不再新增门禁。
+- 本批已运行并通过：`go test ./cmd/crystal-server -run '^$' -count=1`；`go test ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes|CharmedSnake' -count=10 -timeout=600s`；对应 `-race -count=3`；`go test ./cmd/crystal-server -count=1 -timeout=900s`；`go test ./... -count=1 -timeout=900s`；`go test ./cmd/crystal-server -run '^TestSessionSummonVampireTranscriptUsesDelayedPracticeAndSpawn$' -count=10` 及对应 `-race -count=3`；`go vet ./...`；`go build ./...`；`git diff --check`。
+- 本次 `go test -race ./... -count=1 -timeout=900s` 失败的唯一实际测试为既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`；race 栈位于 `player_spell_buffs.go:742` 与 `intelligent_creature_items.go:549` 的共享 session/equipment-stat 读写，未进入本批文件或测试；未修改无关模块掩盖该失败。
 - 两仓当前 tracked/staged/untracked `.cs` 审计均为空。
-- 恢复命令：回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，分别核对两仓实际状态；沿用同一个 active Goal，完成 AI=79 Legacy tracing 后实现并测试 HellKeeper，再更新矩阵和本 handoff。普通/完整 race 失败须按实际栈归因，不得修改无关模块掩盖；Compact 后仍沿用同一个 active Goal，不得仅因 compact 或新 Session 重开 Goal。
+- 恢复命令：回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，核对两仓实际状态；两仓本批提交均已完成，提交后 `.cs` 审计为空；随后沿用同一个 active Goal，从矩阵下一个仍 pending 的 P5 AI/target sub-slice 继续，不得因 compact 或新 Session 重开 Goal。
+
+### 本批质量门禁与提交边界
+
+- Go 功能提交只允许包含 `cmd/crystal-server/archer_summons.go`、
+  `cmd/crystal-server/archer_summons_test.go` 和
+  `docs/migration-matrix.md`；不得把 Legacy 文档混入 Go 提交。
+- Legacy 文档提交只允许包含本仓当前已存在的文档变更；不得暂存或提交任何
+  `.cs` 文件。提交前后均须按下方固定命令审计 tracked/staged/untracked `.cs`。
+- 完整 race 的既有失败保留在 handoff 中，不得为通过全量 race 修改无关的
+  GuildBuff/session 代码。
 
 ## 仓库快照
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD`（本 handoff 提交；parent `a23686cf`） | 2 个既有文档文件未提交；无 staged/untracked、无 `.cs` 变化 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `1315c13 feat(p5): complete HellCannibal AI` | AI=78 已提交，工作树 clean；无 staged/untracked、无 `.cs` 变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD（本 handoff 文档提交；parent 53d9cd58）` | 工作树 clean；无 staged/untracked、无 `.cs` 变化 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `f195d89 feat(p5): complete archer summon target projections` | ArcherSummon 批次已原子提交；工作树 clean，无 staged/untracked、无 `.cs` 变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；不要把矩阵 Complete 或历史测试记录误判为当前工作树和当前门禁已验证。
 
@@ -218,7 +230,7 @@ Go 提交 `e29e1f9`/`71323ce` 完成 Dragon、EvilMir 与 EvilMirBody 的生产�
 
 AI=57 批次已由 Go 提交 `2c5171a` 收口，AI=59 已由 Go 提交 `a9488a3` 收口，AI=68 已由 Go 提交 `7e5d6f3` 收口，AI=70 已由 Go 提交 `ab72623` 收口，AI=74 已由 Go 提交 `4239ef3` 收口；本批未修改任何 `.cs` 文件。Go 功能提交与 Legacy 文档提交分开进行。主 Agent 使用 `gpt-5.6-sol/high`，只读 review subagents 使用 `gpt-5.6-luna/max`；该模型拆分已写入 `agents.md`。
 
-## 当前质量门禁
+## 历史质量门禁（AI=74 及更早批次）
 
 AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssassin、AI=67 DarkDevourer、AI=68 Football、AI=70 Hugger 与 AI=74 LightTurtle 定向门禁通过：
 
@@ -245,7 +257,7 @@ AI=55 HumanWizard/Mirroring、AI=56 Trainer、AI=57 TownArcher、AI=59 HumanAssa
 
 无排除项的普通全仓测试本次未通过，失败归因已记录为既有 OmaMage 随机边界；完整 race 的当前失败归因已记录为既有 GuildBuff 与 Blink buff/packet 并发问题，均未进入 AI=74 代码或测试；未修改无关模块掩盖失败。
 
-## 建议的下一条迁移线
+## 历史建议的迁移线（已由当前 ArcherSummon 批次覆盖）
 
 AI=56/57/59/68/69/70/71/72/73/74 已完成（AI=74 已提交）；下一条仍优先继续 P5，因为最近批次已经建立了稳定的魔法/Buff/延迟动作/状态生命周期基础设施：
 

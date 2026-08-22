@@ -131,21 +131,22 @@ open a new session. A rollover is never a reason to mark the Goal Complete.
 ### Context-compaction safety
 
 Compaction is a hard handoff boundary, not a point at which the model may defer
-bookkeeping. **Before every context compaction**, stop implementation and write
-or refresh `tasks/migration-handoff.md`. If the current batch cannot be closed
-safely, stop code changes and tests first and record the smallest complete
-handoff. It must include both repository roots, branches and HEADs, complete
-tracked/staged/untracked status, exact files owned by the batch, tests and exit
-codes, failure attribution, uncommitted changes, the current matrix row, and the
-next recovery command.
+bookkeeping. **Before every context compaction**, and as soon as the system
+signals imminent compaction, a context-limit rollover, or a new-session
+boundary, stop implementation and write or refresh `tasks/migration-handoff.md`.
+If the current batch cannot be closed safely, stop code changes and tests first
+and record the smallest complete handoff. It must include both repository roots,
+branches and HEADs, complete tracked/staged/untracked status, exact files owned
+by the batch, tests and exit codes, failure attribution, uncommitted changes,
+the current matrix row, and the next recovery command.
 
 Read the handoff back and verify it against both worktrees before compaction.
 The handoff is the durable migration record. An automatically generated compacted
 summary is untrusted context and must not replace or override the handoff. After
 compaction, continue the same active Goal from the verified handoff; do not
-reopen or recreate the Goal solely because compaction occurred. If no verified
-handoff exists, stop implementation and reconstruct one from both repositories
-before proceeding.
+reopen or recreate the Goal, and do not call Goal creation/reset merely to
+recover from compaction or a new session. If no verified handoff exists, stop
+implementation and reconstruct one from both repositories before proceeding.
 
 ## Definition of done
 

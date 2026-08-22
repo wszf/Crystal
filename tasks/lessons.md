@@ -16,14 +16,14 @@ duplicate.
 - Symptom: Go/Legacy 路径混入同一调用，出现部分成功输出、尾部失败或错误目标。
 - Root cause: 把工作目录、仓库根和参数列表分开考虑，并复用了另一仓库的路径。
 - Prevention: 一次调用只属于一个仓库；先核验 `git rev-parse --show-toplevel`，参数只允许该根下已存在的路径；切换仓库必须新开调用；不得在当前 workdir 中用 `git -C`、绝对路径或脚本参数指向另一仓库；不得以只读、并行或减少往返为例外。
-- Verification: 命令零退出且所有路径属于同一根；任一读取失败、非零退出或混合根调用时，丢弃该调用的全部输出（包括前面成功的片段），不得用于实现、测试归因或文档。本轮跨仓库 status 审计因混入另一根路径作废，随后已拆成两次单仓调用重跑。
+- Verification: 命令零退出且所有路径属于同一根；任一读取失败、非零退出或混合根调用时，丢弃该调用的全部输出（包括前面成功的片段），不得用于实现、测试归因或文档。本轮跨仓库 status 审计因混入另一根路径作废，随后已拆成两次单仓调用重跑；本批一次 Legacy workdir 混入 Go 文件路径的只读调用同样整体作废，随后按仓库拆开重跑；本轮 Legacy 方向核对命令再次混入 Go 相对路径，整次输出作废，随后按仓库边界重跑。 本轮一次 Legacy 读取调用误附 Go 相对路径，整次输出再次作废并已拆分重跑；一次委派消息误将已选 AI=8 写成 AI=80，相关 AI=80 tracing 已明确丢弃并按 AI=8 重做。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
 - Symptom: 猜测目录、空 glob、裸反引号、错误正则或未闭合字符串导致勘察失败。
 - Root cause: 依赖 shell 隐式展开和记忆中的文件布局，没有先验证最小查询。
 - Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；所有 `rg` 选项必须放在 `--` 前，`--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名或 zsh 只读特殊参数（如 `status`）；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用 CLI 子命令前按对应 `--help` 核对全局与子命令选项位置；数据库对象名必须从实际 schema 复制，禁止查看 schema 后仍使用惯例名称猜测；调用语言模块前先核对运行时版本/可用性，并优先让目标程序自身解析配置。
-- Verification: `rg` 选项、`path` 覆盖 `PATH`、未命中 glob 和 zsh 标量命令替换均已最小重跑；本批 archive 检索从失败的裸 `*.json`/换行标量改为直接 `rg --glob` 后零错误完成；Python 3.9 缺少 `tomllib` 时改由实际 Codex CLI 解析配置；Codex 验证脚本将只读 `status` 改为 `rc`，并把全局 approval 选项移到 `exec` 前后成功执行；Goal 数据库查询从猜测的 `goals` 改为 schema 中实际的 `thread_goals` 后成功核对字段约束。
+- Verification: `rg` 选项、`path` 覆盖 `PATH`、未命中 glob 和 zsh 标量命令替换均已最小重跑；本批 archive 检索从失败的裸 `*.json`/换行标量改为直接 `rg --glob` 后零错误完成；Python 3.9 缺少 `tomllib` 时改由实际 Codex CLI 解析配置；Codex 验证脚本将只读 `status` 改为 `rc`，并把全局 approval 选项移到 `exec` 前后成功执行；Goal 数据库查询从猜测的 `goals` 改为 schema 中实际的 `thread_goals` 后成功核对字段约束；本批从 `cmd/crystal-server` 子目录误用根级 `./cmd/crystal-server` 失败后，改用 `go test .`，并将仓库根/命令包路径作为同一最小验证。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -86,7 +86,7 @@ duplicate.
 - Symptom: 遗漏 `Next(1)`、混淆排他/包含上界，或初始化、后台和延迟阶段额外消费随机数。
 - Root cause: 只按业务分支记录随机，没有展开嵌套 helper、构造、命中和防御抽样。
 - Prevention: 按调用栈列出每次随机调用、顺序、阶段和 bound，并使用记录型确定性源。
-- Verification: 分阶段断言随机序列，并重复普通/race 测试确认稳定。
+- Verification: 分阶段断言随机序列，并重复普通/race 测试确认稳定；AI=77 HellPirate 的延迟命中还核对了固定范围 `Random.Next(1)`，确定性 hook 不再把合法的 unit-bound 消费误报为失败。
 
 ### 2026-08-21 C12 — 人工时钟必须隔离所有后台 tick 和全局时间源
 
@@ -211,5 +211,5 @@ duplicate.
 
 - Symptom: 自动 compact 摘要遗漏当前未提交批次、仓库状态或失败归因，恢复后的信息与预期不一致。
 - Root cause: 把 compact 摘要当成迁移记录，或只在“快要 compact”之后才补 handoff，导致 compact 前没有可核验的完整状态边界。
-- Prevention: 每次 compact 前立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`，记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
-- Verification: `agents.md` 与 `tasks/goal-task.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续。
+- Prevention: 每次 compact 前，或收到 compaction/上下文上限/rollover 信号时，立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`，记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
+- Verification: `agents.md`、`tasks/goal-task.md` 和 `tasks/migration-handoff.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续。

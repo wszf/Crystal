@@ -690,6 +690,14 @@
 - Verification: 删除未使用变量后，后续将以包级编译、SandWorm 定向测试和完整 Go 门禁确认该测试实际执行并保持绿色。
 - Strengthening after recurrence: AI=77 HellPirate 测试再次声明未使用的 `impact`，说明仅在测试结束前检查不足；新增每个分支的结果变量后，必须在同一 patch 中写入 HP、packet ID 或 payload 断言，并在继续扩展测试前运行仅编译门禁。
 - Verification after strengthening: 本次复发在 `go test ./cmd/crystal-server -run '^$' -count=1` 阶段被捕获，修正前未执行行为测试；后续修复后将再次运行包级编译和 AI=77 定向测试。
+- Symptom: AI=77 HellPirate 的 Fullmoon 目标/会话测试只允许注入 `Next(3)`，命中阶段实际收到 `Next(1)` 后失败。
+- Root cause: Legacy `GetAttackPower` 及固定范围防御路径仍会消费 `Random.Next(1)`；测试 hook 只建模了分支选择，漏掉了延迟 impact 的固定范围抽样。
+- Prevention: 确定性随机 hook 必须按 admission、延迟 impact 和每个防御/毒物 helper 的完整调用流接受所有实际 bound；`Next(1)` 不能被测试断言误判为非法调用。
+- Verification after strengthening: 修复 hook 后 `go test ./cmd/crystal-server -run '^$' -count=1`、HellPirate 普通 `-count=10`、race `-count=3` 及认证 Fullmoon transcript 普通 `-count=5`/race `-count=3` 均通过。
+- Symptom: 为确认 AI=77 target-kind 生产入口和 Cell insertion order，把直接 attack-helper 测试改为 `world.tick` 后，Fullmoon 的同格目标从低 ObjectID 玩家变为先插入的 owned Monster，旧断言失败。
+- Root cause: 测试仍按 detached map 的 ObjectID 顺序理解 `Cell.Objects`，没有把生产入口、真实插入顺序和每格首目标作为同一判据。
+- Prevention: target-kind/延迟动作测试必须驱动生产 `world.tick`；混合目标夹具显式调用 `recordObjectCellInsertionLocked`，并断言先插入对象的 `TargetKind`、HP 和 observer transcript，而不是依赖 map/ObjectID 顺序。
+- Verification after strengthening: AI=77 定向测试在转换为 production-entry 后通过，混合同格目标确认先插入 owned Monster 被 Fullmoon 选中；随后重新运行包级编译、普通 HellPirate 测试和 race HellPirate 测试。
 
 ### 2026-08-15 — Monster AI opt-in 排除 fixture 必须避开已支持 AI 值
 
@@ -841,4 +849,3 @@
 - Root cause: 确定性 `monsterAIRoll` 夹具只列出了分支和部分旧调用的上界，且测试把延迟动作完成时刻与该 tick 后续 poison 调度边界混为一谈。
 - Prevention: 新增 AI 测试先记录完整随机调用序列（分支、伤害、抗性、chance、毒值），夹具必须为每个实际上界提供确定值；延迟命中 transcript 同时投影命中、同 tick 移动和状态首跳，再断言 `Elapsed` 与包序。
 - Verification: 加入 `Next(10)` 的固定返回并将 Red poison 的首跳期望改为 `Elapsed=1` 后，包级编译和全部 CatShaman 定向测试通过。
-
