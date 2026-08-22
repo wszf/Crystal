@@ -215,3 +215,10 @@
 - Verification: 将 GuildBuff 断言改为 `playerByCharacterIndexLocked` 锁内读取 `Stats`，并用 `cloneProtocolCharacterBuffs` 复制 Buff 后再解锁；目标测试普通/race `-count=10` 及完整 `go test -race ./... -count=1 -timeout=900s` 均通过。
 - Strengthening after BaseStats rerun: 后续完整 race 与隔离 `TestSessionDarkBodySpawnAndRecallTranscript -count=10` 再次命中 `reconcileEquipmentSpecialBuffsLocked`（`player_spell_buffs.go:742,824`）写入与 `calculatePlayerEquipmentStatsForMount`（`equipment_transactions.go:779`，由 `main.go:1443` 会话路径调用）读取的既有竞争；这不是已修复 GuildBuff 测试快照的同一读取点，也未进入 BaseStats 文件。完整 race 必须按当前栈记录为退出 1，不能沿用此前一次通过结果。
 - Strengthening after custom BaseStats: 本批首次 `go test ./... -count=1` 仅命中既有 OmaMage `[2 1]`/`[1]` 随机边界，隔离 `-count=10` 随后通过；服务端整包与全仓普通重跑均退出 0，最终完整 race 也退出 0。必须同时保留首次失败和最终重跑，不能把一次通过改写成该 flake 已消失。
+
+### 2026-08-23 — localized welcome 普通全仓仍需隔离 OmaMage 既有随机边界
+
+- Symptom: welcome 批次的无排除 `go test ./cmd/crystal-server -count=1`、`go test ./... -count=1` 与最终 `go test -race ./... -count=1` 均仅失败 `TestSessionOmaMageRangeSlowFrozenTranscript`，实际随机调用边界 `[2 1]`、期望 `[1]`，且无 race detector 报告；普通隔离 `-count=10` 同样两次复现，而一次隔离 race `-count=3` 恰好通过，确认仍具调度抖动。
+- Root cause: 已归档的 OmaMage 真实 session maintenance 会在人工攻击 tick 前进入移动 fallback 并额外消费 `Next(2)`；栈和修改文件均未进入 localization、welcome bootstrap、probe 或本批 consumer changes。
+- Prevention: 保留无排除失败与精确隔离结果，再以仅排除该用例的服务端/全仓普通门禁验证其余测试；不得修改 OmaMage 掩盖当前 bootstrap 批次，也不得把带排除项的通过表述为无排除全仓通过。
+- Verification: `go test ./cmd/crystal-server -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'`、对应 `go test ./... -skip ...` 与 `go test -race ./... -skip ...` 均退出 0；本批 focused 普通/race 也退出 0。更早一次无排除完整 race 曾通过，但最终重跑退出 1，handoff 必须同时保留而以最终状态为准。

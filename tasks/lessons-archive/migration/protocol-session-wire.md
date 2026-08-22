@@ -275,3 +275,10 @@
 - Root cause: 把账户导入字段视为静态兼容元数据，没有追踪 Legacy `PlayerObject` 构造、`StartGameSuccess`、`StopGame` 与 `CharacterInfo.ToSelectInfo` 的完整 authority 链；同时把时间 location 规范化误当成零值清理。
 - Prevention: 条件 bootstrap 必须同时迁移 seed 的写入生命周期；公告 admission 使用非空 Message 且严格 `Notice.LastUpdate > LastLogoutDate`，StartGame 写 `LastLoginDate`，显式登出、observer takeover 和断线 cleanup 在 JSON/checkpoint 前写 `LastAccess`；optional loader 每次先显式清空 payload 与 timestamp，再处理 missing/empty 文件。协议必须锁定 ordinal、完整 payload、网络 probe 和 pre-item FIFO 边界。
 - Verification: Go 配置测试锁定 BOM、CR/LF、`string.Compare`/`Split('=')[1]` 怪癖、missing/empty reset 和文件时间；ordinal 272 固定向量与 malformed parser 通过；authenticated `net.Pipe` 首登→公告→显式登出→JSON restart→不重复公告→断线 checkpoint transcript 普通 `-count=10`、race `-count=3` 通过，全仓普通/race、vet、build 和 Go probe vectors 均退出 0。
+
+### 2026-08-23 — localized welcome 必须同步 loader、probe 与全部 StartGame 消费器
+
+- Symptom: compact 后 review 发现未提交 welcome loader 直接对 Go struct `json.Unmarshal`，会拒绝 .NET `File.ReadAllText` 已去除的 UTF-8 BOM，并错误接受 Legacy `System.Text.Json` 默认不接受的小写根键 `text`；同时生产网络 probe 在 `StartGame` 后仍直接进入旧 bootstrap state machine，会把新增的合法 `Server.Chat(Hint)` 当成意外包。
+- Root cause: 把“沿用现有 Chat ordinal/payload”误当成无需更新协议消费者，只机械修改了 server tests；配置层也只验证了字段值，没有对照文件解码与属性名匹配语义。
+- Prevention: 每个 server-first bootstrap 变更必须机械枚举生产 probe 和所有发送 `ClientStartGame` 的手写 consumer；配置 JSON 必须分别核对 BOM、根属性大小写、未知 key、malformed/missing fallback 和环境/INI path authority，不能依赖 Go 默认 decoder 恰好可用。
+- Verification: Go loader 现去除 UTF-8 BOM、精确读取 `Text` 并只覆盖 `GameName`/`Welcome`；网络 probe 强制消费并解析 post-StartGame Hint，测试使用非 ASCII payload 并拒绝非 Hint。config/server/probe focused 普通 `-count=10` 与 race `-count=3`、排除既有 OmaMage 的全仓普通/race、vet、build、probe vectors 与 diff check 均退出 0；无排除普通与最终完整 race 仅命中同一 OmaMage 随机边界且未报告数据竞争。所有 22 个直接 `ClientStartGame` 文件已机械枚举并覆盖。

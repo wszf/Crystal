@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；server Notice bootstrap 批次已提交）
+最后更新：2026-08-23（Asia/Singapore；localized welcome bootstrap 已提交）
 
 ## 迁移目标与硬边界
 
@@ -23,7 +23,81 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
-## 当前 active 批次（server Notice bootstrap 已收口）
+## 当前 active 批次（localized welcome bootstrap 已收口）
+
+本节是在 context compact 后按两仓实际 worktree 重建的 durable boundary；compact 摘要
+仅提示“welcome-bootstrap 未提交批次正在写 handoff”，没有保留可信的完整 status 或测试
+退出码，因此以下内容以恢复后的 `git status`、diff 和只读 Legacy 调用链复核为准。在本节
+写入并回读前已停止所有实现与测试。恢复后已完成 review、修正与全部门禁；Go 原子提交
+`7e10f9f feat(p3): restore localized welcome bootstrap` 与本 Legacy 文档提交均已收口。
+
+- Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master`，本批文档提交 parent 为
+  `f00b27db docs(migration): record server notice bootstrap`（提交后 HEAD 以
+  `git log -1 --oneline` 为准）；四个 owned 文档为 `tasks/lessons.md`、
+  `tasks/lessons-archive/migration/protocol-session-wire.md`、
+  `tasks/lessons-archive/verification/race-and-flake-attribution.md` 与本 handoff。提交后工作树
+  clean，无 staged/untracked，tracked/staged/untracked `.cs` 均为空。
+- Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，HEAD `7e10f9f feat(p3): restore localized welcome bootstrap`；提交后工作树 clean，
+  无 staged/untracked，tracked/staged/untracked `.cs` 均为空。
+- 当前切片：P1/P3 `StartGameSuccess` localized welcome bootstrap。Legacy 在成功
+  `S.StartGame(Result=4)` 后无条件调用 `ReceiveChat(Welcome(GameName), ChatType.Hint)`，该包
+  位于 TestServer-only greeting/GameMaster side effect、invalid-guild repair、Notice 与
+  item/map/user bootstrap 之前。`Settings` 从 `[General] Language` 选择
+  `Localization/<Language>.json`；`GameLanguage.LoadServerLanguage` 以 built-in English map
+  为底，只覆盖已知 key，missing file 会写默认文件，malformed JSON 被吞掉。当前 Go 切片
+  只迁移客户端可见的 `GameName`/`Welcome` 子集；TestServer greeting/GameMaster 行为与其余
+  localization keys 明确留待后续，不得把 P1/P3 标为 Complete。
+- Go production/config/matrix owned 文件（4 个 tracked + 2 个 untracked）：
+  `cmd/crystal-server/main.go`、`cmd/crystal-server/welcome_bootstrap.go`、
+  `internal/config/config.go`、`internal/config/localization.go`、
+  `internal/probe/network.go`、`docs/migration-matrix.md`。实现新增 `Config.Language`、显式
+  localization path override、built-in `ServerText`、BOM-aware/case-sensitive JSON overlay、
+  `playerWelcomeBootstrapPacket` 和 probe 的 mandatory Hint 消费，并在成功
+  `ServerStartGame` 后立即发送现有 `ServerChat`/`ChatHint` payload。
+- Go test owned 文件（2 个 untracked + 21 个 tracked）：
+  `cmd/crystal-server/welcome_bootstrap_test.go`、`internal/config/localization_test.go`、
+  `internal/probe/network_test.go`、
+  `cmd/crystal-server/main_test.go`、`conquest_npc_actions_test.go`、`conquest_test.go`、
+  `default_npc_session_test.go`、`equipment_session_test.go`、`guilds_session_test.go`、
+  `hero_seal_session_test.go`、`intelligent_creature_visibility_test.go`、
+  `mail_session_test.go`、`mounts_session_test.go`、`npc_item_session_test.go`、
+  `quests_session_test.go`、`refine_logout_test.go`、`refine_session_test.go`、
+  `relationships_session_test.go`、`repair_session_test.go`、`shop_session_test.go`、
+  `storage_session_test.go`、`trade_session_test.go`、`use_item_session_test.go`。这些修改为
+  localized helper/session 测试及既有手写 StartGame consumer 的新 server-first 包消费。
+- Review 修正：初稿 Go JSON decoder 会拒绝 .NET 已去除的 UTF-8 BOM、错误接受小写根键
+  `text`，且生产 network probe 没有消费新 server-first Chat；现已按 Legacy
+  `File.ReadAllText`/`System.Text.Json` 语义与完整探针 state machine 修正并补测试。
+- 已通过（退出码 0）：owned Go 文件 `gofmt -d`；server/config/probe 最小只编译；
+  config/server/probe focused 普通 `-count=10` 与 race `-count=3`；probe 新非 Hint 拒绝测试；
+  `go test ./cmd/crystal-server -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$' -count=1
+  -timeout=900s`；对应 `go test ./... -skip ...`；`go test -race ./... -skip ...`；
+  `go vet ./...`；`go build ./...`；`go run ./cmd/crystal-protocol-probe -mode vectors`；
+  `git diff --check`。22 个直接发送 `ClientStartGame` 的文件已机械枚举，所有 consumer 均由
+  服务端整包与完整 race（排除下述唯一 flake）执行。
+- 已知排除项：无排除 `go test ./cmd/crystal-server -count=1` 与两次无排除
+  `go test ./... -count=1` 均退出 1，唯一失败为既有
+  `TestSessionOmaMageRangeSlowFrozenTranscript` 的随机边界 `[2 1]`/期望 `[1]`；普通隔离
+  `-count=10` 退出 1 并两次复现。较早一次无排除完整 race 退出 0，但最终
+  `go test -race ./... -count=1 -timeout=900s` 退出 1，同样只命中 OmaMage assertion、无 race
+  detector 报告；隔离 race `-count=3` 恰好退出 0，排除该用例的最终完整 race 退出 0。
+  失败栈未进入本批文件，未修改 OmaMage 掩盖。
+- Subagent：可用 spawn model 列表不提供要求的 `luna_worker`/`gpt-5.6-luna`，故未静默
+  替换；主 Agent 完成恢复、Legacy tracing、review、修正、验证、文档与提交。
+- 下一步：新 Session 分别核对两仓 clean status/HEAD 与三类 `.cs` 审计，再从 matrix 选择
+  下一个 dependency-ready StartGame 差集。不要重复 BaseStats、SpellToggle、Notice 或
+  localized welcome bootstrap。
+
+### 本批提交边界
+
+- Go 提交 `7e10f9f` 仅包含上述 29 个 owned 文件（25 tracked 修改 + 4 个原 untracked）；
+  提交后工作树 clean。
+- Legacy 文档提交仅包含上述四个 owned Markdown；提交后工作树 clean，所有 `.cs` 继续只读。
+- 整体 Goal 仍 active；当前切片已验证并提交，P1/P3 均保持 In progress。
+
+## 历史批次快照（server Notice bootstrap 已收口）
 
 恢复时间：2026-08-23；沿用同一个 active Goal。本批继续机械核对 Legacy
 `PlayerObject.StartGameSuccess` 与 Go `serveWithConfig`，选出 P1/P2/P3 的
