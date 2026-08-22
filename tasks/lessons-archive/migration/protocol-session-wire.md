@@ -289,3 +289,10 @@
 - Root cause: 把同名 GameMaster 概念合并：Legacy TestServer 分支只发送 `GameIsTestMode -> GameMasterMode` 并切换瞬态 `GMGameMaster`，而 `IsGM` 来自账户管理员 authority，只有后者才生成 GameMaster Buff/options 并开放管理命令。
 - Prevention: StartGame 条件分支分别记录 packet FIFO、runtime-only flag、账户权限和 Buff 投影；TestServer 的非管理员模式只进入玩家/怪物 `IsAttackTarget` 门禁，不写回角色，也不凭空获得 admin capability。生产 probe 在不知道远端配置时只接受零条或完整两条 Hint，拒绝半对。
 - Verification: Go localization 覆盖两个新 key 及 English fallback；authenticated `net.Pipe` 锁定 `StartGame -> Welcome -> TestMode Hint -> GameMasterMode Hint -> map/bootstrap`，并在 KeepAlive barrier 后回读 runtime flag；player/monster target tests 锁定模式开关，probe 接受 0/2 且拒绝 1。focused 普通 `-count=10`、race `-count=3`、服务端整包、全仓普通/race、vet、build、probe vectors 与 diff check 全部退出 0。
+
+### 2026-08-23 — 管理员 GameMaster bootstrap 必须锁定完整重复包序与旧 consumer
+
+- Symptom: 管理员 `IsGM`/GameMaster Buff 实现的定向测试通过后，服务端整包唯一失败为 `TestObserverAdminChatBypassesPermissionsAndGlobalGate`：通用 mail bootstrap helper 在 `GuildBuffList` 返回，合法的末尾 `AddBuff(GameMaster)` 未消费，随后被误当成 observer bootstrap；review 还发现生产 probe 虽把测试命名为“zero/one/two tail”，实现却会无限接受 AddBuff，并错误接受没有前置 restore 的单独 RemoveBuff。
+- Root cause: 把 `GuildBuffList` 当成稳定 game-loop 屏障，没有按 Legacy `restore Buffs -> final UpdateGMBuff` 展开管理员条件包；probe 只校验单包类型，没有建模 fresh admin、stored admin、TestServer admin 与 revoked authority 四种精确状态机。
+- Prevention: 对每种 authority/config/persisted-state 组合列出 owner/nearby 的完整包序：fresh admin 一个 final AddBuff，stored admin restore+final，TestServer admin early+restore+final，revoked non-admin restore+remove；新增条件 bootstrap 后机械更新所有会 seed AdminAccount 的旧 consumer，并用 KeepAlive 作为尾部屏障。probe 必须要求一个合法 option 值、已知 bit、最多两个 tail 包，且 RemoveBuff 只能紧跟一个 restore AddBuff。
+- Verification: 旧 observer transcript 已显式消费并断言 private final GameMaster AddBuff；probe 新增 missing/unknown options、third AddBuff、standalone removal 与 add-after-removal 拒绝测试。GameMaster/required-group/observer focused 普通 `-count=10`、四包 focused race `-count=3`、服务端整包、全仓普通重跑、完整 race、vet、build、probe vectors、gofmt 与 diff check 均退出 0；首次全仓普通仅命中既有 `TestSessionHallucinationTranscript` 30 秒 pipe flake，隔离 `-count=10` 与后续服务端/全仓重跑均退出 0，未修改该无关模块。

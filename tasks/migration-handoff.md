@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；TestServer StartGame 切片已提交）
+最后更新：2026-08-23（Asia/Singapore；管理员 GameMaster startup 切片已提交收口）
 
 ## 迁移目标与硬边界
 
@@ -23,7 +23,66 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
-## 当前 active 批次（TestServer StartGame 已收口）
+## 最近完成批次（管理员 GameMaster startup，已收口）
+
+本节从 compact 后 handoff 与两仓实际状态恢复，并以当前源码、Legacy 调用链和重新运行的
+完整门禁为 authority。恢复时 handoff 只记录 11 个 Go 文件，但实际 worktree 已包含
+required-group 与认证 session 测试；现已逐文件 review、补齐旧 consumer 和 probe 状态机，
+没有 reset、stash、checkout、clean 或覆盖任何既有工作。
+
+- Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master`，HEAD `8fd79aef3d5868109743bdd8ba065d13309064bb`，分支
+  `master...origin/master [ahead 406]`；当前 tracked 修改仅
+  `tasks/migration-handoff.md` 与
+  `tasks/lessons-archive/migration/protocol-session-wire.md`，无 staged/untracked。
+  tracked/staged/untracked `.cs` 均为空，`git diff --check` 退出 0。
+- Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，HEAD `ed29535c60d8bd96663035bfb584bd8195235634`
+  (`ed29535 feat(p3): restore administrator GameMaster bootstrap`)；提交后工作树 clean，
+  无 staged/untracked，tracked/staged/untracked `.cs` 均为空，`git diff --check` 退出 0。
+- Legacy ruling：`Account.AdminAccount` 在 `PlayerObject.Load` 中建立 runtime `IsGM`；管理员
+  绕过 `AllowStartGame=false` 及 RequiredGroup 登录/移动/传送/持续 enforcement。
+  `UpdateGMBuff` 将 `GMGameMaster`/`Observer`/`GMNeverDie` 编为 1/2/4 bits，并通过
+  `AddBuff(GameMaster, duration=0, values: byte)` 发送 infinite Buff type 100；可见性来自
+  `[Optional] GameMasterEffect`。fresh admin 在 StartGame 尾部发送一次，stored admin 先
+  restore 再 final update；TestServer admin 在两条 Hint 后 early update，再 restore 和
+  final update；revoked non-admin 先 restore stale Buff，再由 `ProcessBuffs` RemoveBuff。
+- Go 实现：管理员 authority 与 TestServer `GameMasterMode` 分离；支持 start/required-group
+  bypass、GameMasterEffect INI/env、type/options wire 常量、pre-entry ObjectID reservation、
+  owner/nearby AddBuff 和 visible ObjectPlayer snapshot、durable upsert/relogin、revocation
+  removal，以及生产 probe 的 early packet和严格 zero/one/two tail KeepAlive 状态机。
+  交互式 GM toggles、ranking suppression 和其他管理员命令/capability 明确仍 pending。
+- 测试覆盖：固定 AddBuff payload；world upsert/字段保留/recipient/persist/order/revocation/
+  ObjectID/snapshot；管理员 start gate 与 required-group bypass；认证 fresh、TestServer
+  owner+nearby 三次包序、stored relogin、revoked authority；受影响 admin observer consumer；
+  config 默认/INI/env/error；probe early、zero/one/two、restore+remove、malformed/type/options/
+  invalid sequence 及完整 authenticated network transcript。
+- 已通过（退出码 0）：四包最小只编译；server GameMaster/required-group/observer focused
+  普通 `-count=10`；config/protocol/probe focused 普通 `-count=10`；四包 focused race
+  `-count=3`；`go test ./cmd/crystal-server -count=1 -timeout=900s`；最终
+  `go test ./... -count=1 -timeout=900s`；`go test -race ./... -count=1 -timeout=900s`；
+  `go vet ./...`；`go build ./...`；`go run ./cmd/crystal-protocol-probe -mode vectors`；
+  owned-file `gofmt -d`、`git diff --check` 与两仓三类 `.cs` 门禁。
+- 失败归因与修正：首次服务端整包退出 1，唯一失败为 admin observer 测试未消费合法 final
+  GameMaster AddBuff，已补显式消费/断言，随后 focused 与两次服务端整包退出 0。首次全仓
+  普通重跑退出 1，唯一失败为既有 `TestSessionHallucinationTranscript` 30 秒 pipe timeout；
+  隔离 `-count=10`、后续服务端整包和全仓普通均退出 0，栈未进入本批文件，未修改无关模块。
+  Review 同时将 probe 从无限宽松 tail 收紧为 Legacy 正常路径的最多两个包与 remove 顺序。
+- 矩阵：P1/P3/P4/P5 已记录本切片，四阶段继续 In progress；整体 Goal 不得标为完成。
+- Subagent：恢复时关闭遗留 Hooke 线程；当前会话的 spawn schema 未热加载 `luna_worker` 且
+  不提供 `gpt-5.6-luna`，因此按规则未用其他模型静默替代。主 Agent完成恢复、Legacy ruling、
+  review、集成修正、门禁、matrix 与 handoff。
+- 下一恢复命令：提交 Legacy 两个 Markdown 后，重新核对两仓 clean status/HEAD 与三类
+  `.cs` 门禁。新 Session 从矩阵选择下一项，优先继续交互式 GM toggles、ranking
+  suppression 或其他明确 dependency-ready 的管理员差集，不得重复本 startup 切片。
+
+### 本批提交边界
+
+- Go 原子提交 `ed29535` 只包含上述 16 个 owned 文件；提交后工作树 clean。
+- Legacy 文档提交只允许本 handoff 与 protocol-session-wire archive；整体 Goal 继续 active，
+  P1/P3/P4/P5 均保持 In progress。
+
+## 历史批次快照（TestServer StartGame 已收口）
 
 本批从 compact 硬门的“仅选定”边界恢复，完成 Legacy 可达性追踪后把两种 GameMaster
 authority 拆开：本原子切片只迁移 TestServer 普通账户的两条 Hint 与瞬态
