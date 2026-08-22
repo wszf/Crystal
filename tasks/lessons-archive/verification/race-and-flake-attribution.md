@@ -214,3 +214,4 @@
 - Prevention: 测试或会话断言需要读取在线实体时，必须在 world 锁内读取标量并深复制 Buff/map/slice；不得把浅复制的运行时实体当作无锁快照。
 - Verification: 将 GuildBuff 断言改为 `playerByCharacterIndexLocked` 锁内读取 `Stats`，并用 `cloneProtocolCharacterBuffs` 复制 Buff 后再解锁；目标测试普通/race `-count=10` 及完整 `go test -race ./... -count=1 -timeout=900s` 均通过。
 - Strengthening after BaseStats rerun: 后续完整 race 与隔离 `TestSessionDarkBodySpawnAndRecallTranscript -count=10` 再次命中 `reconcileEquipmentSpecialBuffsLocked`（`player_spell_buffs.go:742,824`）写入与 `calculatePlayerEquipmentStatsForMount`（`equipment_transactions.go:779`，由 `main.go:1443` 会话路径调用）读取的既有竞争；这不是已修复 GuildBuff 测试快照的同一读取点，也未进入 BaseStats 文件。完整 race 必须按当前栈记录为退出 1，不能沿用此前一次通过结果。
+- Strengthening after custom BaseStats: 本批首次 `go test ./... -count=1` 仅命中既有 OmaMage `[2 1]`/`[1]` 随机边界，隔离 `-count=10` 随后通过；服务端整包与全仓普通重跑均退出 0，最终完整 race 也退出 0。必须同时保留首次失败和最终重跑，不能把一次通过改写成该 flake 已消失。

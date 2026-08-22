@@ -260,3 +260,10 @@
 - Verification: 所有手写消费者现将 `BaseStatsInfo` 固定在 active quest 之后、被动对象之前；协议/探针/服务端定向重复与 race、服务端整包、全仓普通/race、vet、build 和 diff 检查均退出 0。
 - Strengthening after review: “五职业默认公式完整匹配”不能只比较每类 count、first 和 last；`base_stats_test.go` 现逐项比较全部 55 个 `BaseStat` 记录及九个 cap，避免中间项类型、公式、Gain 或 GainRate 漂移而测试仍通过。
 - Strengthening after final gate: 强化公式测试后的定向普通/race、全仓普通、vet、build 均通过；完整 race 后续命中已归档的 `TestSessionDarkBodySpawnAndRecallTranscript` 装备 Buff reconciliation 竞争，栈未进入 BaseStats production/protocol/probe/tests，不能继续沿用“本次完整 race 退出 0”的旧快照。
+
+### 2026-08-23 — BaseStats 配置必须分离序列化字段、计算短路与 runtime authority
+
+- Symptom: 自定义 BaseStats 首次定向测试把 `Gain == 0` 的记录误期望为同时清零 `GainRate/Max`，并把 Wizard Mana 公式在 level 10 的结果误算成 112 而非 129；恢复时还发现未提交实现只加载配置，却遗漏 `serveWithConfig`、player bootstrap packet 与 `heroCharacter` profile 传播。
+- Root cause: 把 `BaseStat.Calculate` 的 `Gain == 0` 计算短路误当成 INI/wire 字段规范化，并把通用 Mana 公式套到 Wizard 特例；同时只审查了 loader/公式 helper，没有沿 `Settings -> HumanObject/HeroObject.RefreshLevelStats -> SendBaseStats` 的完整 authority 链检查所有消费者。
+- Prevention: 自定义公式测试必须分别断言原始 profile/wire 字段和计算结果；逐项代入 Health/Mana/Weight/Stat 及 Warrior/Wizard/Taoist 分支；配置 profile 作为 runtime-only authority，在 player enter、Hero summon、equipment calculation 和对应 BaseStats packet 四个边界显式传播，并用 `json:"-"` 锁定不落盘。
+- Verification: 修正两项测试期望后，五职业默认、custom INI 顺序/数字零 fallback、四公式/Max/Gain==0、player runtime/cap/authenticated bootstrap、Hero runtime/packet/authenticated summon 和 transient JSON 测试普通 `-count=10`、race `-count=3` 均通过；全仓普通重跑、完整 race、vet 和 build 退出 0。

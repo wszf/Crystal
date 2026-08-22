@@ -121,7 +121,7 @@ duplicate.
 - Symptom: HP、MP、伤害、费用、持续时间或随机 bound 按直觉计算错误。
 - Root cause: 忽略等级、派生属性、钳制、中间状态、协议宽度或当前库存。
 - Prevention: 逐项代入生产公式，明确单位和整数类型，并从夹具真实字段推导。
-- Verification: 同时断言中间值、最终值和对应通知，而不是只检查单个结果。
+- Verification: 同时断言中间值、最终值和对应通知，而不是只检查单个结果；本批 BaseStats 测试首次把 Wizard Mana 特例误算并把 `Gain == 0` 的计算短路误当成字段清零，修正后按原始 profile 与逐分支计算分别验收。
 
 ### 2026-08-21 C17 — 协议变更必须同步 ordinal、布局、方向和完整 payload
 
@@ -212,4 +212,4 @@ duplicate.
 - Symptom: 自动 compact 摘要遗漏当前未提交批次、仓库状态或失败归因，恢复后的信息与预期不一致。
 - Root cause: 把 compact 摘要当成迁移记录，或只在“快要 compact”之后才补 handoff，导致 compact 前没有可核验的完整状态边界。
 - Prevention: 每次 compact 前，或收到 compaction/上下文上限/rollover 信号时，立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`；即使当前批次只有 Markdown/文档变更也必须执行。记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
-- Verification: `agents.md`、`tasks/goal-task.md` 和 `tasks/migration-handoff.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续。
+- Verification: `agents.md`、`tasks/goal-task.md` 和 `tasks/migration-handoff.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续；本次 compact 摘要声称已刷新，但 handoff 仍写 Go clean、实际却有 8 tracked + 2 untracked，因此已停止实现/测试并从两仓重建后才恢复。
