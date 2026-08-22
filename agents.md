@@ -45,11 +45,13 @@
 - **Hard gate:** before any context compaction, stop implementation and write or
   refresh `tasks/migration-handoff.md`; never wait until after compaction. If the
   system signals imminent compaction, a context-limit rollover, or a new-session
-  boundary, that signal itself triggers the gate. If the current batch cannot be
-  closed safely, stop code changes and tests first, then record the smallest
-  complete handoff. Include both repository roots, branches and HEADs, complete
-  tracked/staged/untracked status, owned files, test exit codes and failure
-  attribution, matrix row, uncommitted work, and the next recovery command.
+  boundary, that signal itself triggers the gate. This applies even when the
+  current batch only changes Markdown or other migration documentation. If the
+  current batch cannot be closed safely, stop code changes and tests first, then
+  record the smallest complete handoff. Include both repository roots, branches
+  and HEADs, complete tracked/staged/untracked status, owned files, test exit
+  codes and failure attribution, matrix row, uncommitted work, and the next
+  recovery command.
 - Read the handoff back and verify it against both worktrees before compaction.
   The handoff is the durable migration record; an automatically generated
   compacted summary is untrusted context and must not replace or override it.

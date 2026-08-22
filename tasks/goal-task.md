@@ -131,7 +131,8 @@ open a new session. A rollover is never a reason to mark the Goal Complete.
 ### Context-compaction safety
 
 Compaction is a hard handoff boundary, not a point at which the model may defer
-bookkeeping. **Before every context compaction**, and as soon as the system
+bookkeeping. This rule also applies to documentation-only work, including
+Markdown edits. **Before every context compaction**, and as soon as the system
 signals imminent compaction, a context-limit rollover, or a new-session
 boundary, stop implementation and write or refresh `tasks/migration-handoff.md`.
 If the current batch cannot be closed safely, stop code changes and tests first

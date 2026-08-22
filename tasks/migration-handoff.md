@@ -13,8 +13,9 @@
 
 ## Compact 硬门禁
 
-- 每次 context compact 前，立即停止实现和测试，先写入或刷新本文件；不得
-  把自动生成的 compact 摘要当作迁移记录。收到 compaction、上下文上限或
+- 每次 context compact 前，立即停止实现和测试，先写入或刷新本文件；即使
+  当前批次只有 Markdown/文档变更也必须执行。不得把自动生成的 compact 摘要当作
+  迁移记录。收到 compaction、上下文上限或
   rollover 信号本身就触发该门禁，不得等到压缩完成后再补 handoff。
 - Handoff 必须记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、
   本批所属文件、测试退出码及失败归因、矩阵行、未提交工作和恢复命令；写完
@@ -26,7 +27,7 @@
 
 恢复时间：2026-08-22；当前仍沿用同一个 active Goal。上一批 P5 AI=60/61/62/63 ArcherSummon（`VampireSpider`/`SpittingToad`/`SnakeTotem`/`CharmedSnake`）已由 Go 提交 `f195d89 feat(p5): complete archer summon target projections` 收口；本批 P9 Conquest Gate/Wall 阻挡几何回归测试已由 Go 提交 `d09cbe9 test(p9): cover conquest gate blocking geometry` 收口。整体 Goal 仍未完成，不因 compact 或单批完成宣告整体 Goal 完成。
 
-- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`；本 handoff 提交的 parent 为 `f02c30c7 docs(migration): refresh archer summon handoff`，提交后工作树 clean，无 staged/untracked；本批仅修改文档，未修改 `.cs`。
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`；本 handoff 提交的 parent 为 `4a9242a0 docs(migration): record conquest structure handoff`，提交后工作树 clean，无 staged/untracked；本批仅修改文档，未修改 `.cs`。
 - Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `d09cbe9 test(p9): cover conquest gate blocking geometry`；本批两个文件已原子提交，工作树 clean，无 staged/untracked。
 - 本批 Go 所属文件为 `cmd/crystal-server/conquest_structures_test.go`、`docs/migration-matrix.md`；Legacy tracing 范围为 `Server/MirObjects/ConquestObject.cs`、`Server/MirObjects/Monsters/CastleGate.cs`、`Gate.cs`、`Wall.cs`、`Siege.cs` 及地图阻挡/进入检查调用链。Legacy C# 仍为只读基线。
 - 本批覆盖四种 Legacy Gate `BlockArray` 的逐项偏移顺序、关闭 Gate 的扩展阻挡格与父 Gate 反查、Wall 仅阻挡自身格、非自身格可进入，以及 Gate 打开后扩展阻挡清理；现有 Conquest 生产逻辑未新增 C# 或 Go 生产文件。
@@ -46,7 +47,7 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD（本 handoff 文档提交；parent f02c30c7）` | 本批文档提交后工作树 clean；无 staged/untracked、无 `.cs` 变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD（本 handoff 文档提交；parent 4a9242a0）` | 本批文档提交后工作树 clean；无 staged/untracked、无 `.cs` 变化 |
 | Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `d09cbe9 test(p9): cover conquest gate blocking geometry` | Conquest Gate/Wall 回归批次已原子提交；工作树 clean，无 staged/untracked、无 `.cs` 变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；不要把矩阵 Complete 或历史测试记录误判为当前工作树和当前门禁已验证。

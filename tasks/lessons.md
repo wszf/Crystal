@@ -211,5 +211,5 @@ duplicate.
 
 - Symptom: 自动 compact 摘要遗漏当前未提交批次、仓库状态或失败归因，恢复后的信息与预期不一致。
 - Root cause: 把 compact 摘要当成迁移记录，或只在“快要 compact”之后才补 handoff，导致 compact 前没有可核验的完整状态边界。
-- Prevention: 每次 compact 前，或收到 compaction/上下文上限/rollover 信号时，立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`，记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
+- Prevention: 每次 compact 前，或收到 compaction/上下文上限/rollover 信号时，立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`；即使当前批次只有 Markdown/文档变更也必须执行。记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
 - Verification: `agents.md`、`tasks/goal-task.md` 和 `tasks/migration-handoff.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续。
