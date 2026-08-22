@@ -25,7 +25,7 @@
 
 恢复时间：2026-08-22；当前仍沿用同一个 active Goal。P5 AI=78 `HellCannibal` target-kind 扩展已由 Go 提交 `1315c13 feat(p5): complete HellCannibal AI` 收口；下一依赖就绪批次选为 P5 AI=79 `HellKeeper`。本 handoff 记录当前恢复点，不因 AI=78 完成或 compact 宣告整体 Goal 完成。
 
-- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD `a23686cf docs(migration): keep HellSlasher handoff self-describing`；完整状态为 `M tasks/lessons-archive/ai/075-099.md`、`M tasks/lessons-archive/verification/fixtures-and-transcripts-01.md`、`M tasks/lessons.md`、`M tasks/migration-handoff.md`，无 staged 或 untracked 文件。AI=78 历史教训和本恢复点均为文档；Legacy 不应修改任何 `.cs`。
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD（本 handoff 提交；parent `a23686cf docs(migration): keep HellSlasher handoff self-describing`）；完整状态为 `M tasks/lessons-archive/verification/fixtures-and-transcripts-01.md`、`M tasks/lessons.md`，无 staged 或 untracked 文件。AI=78 历史教训已提交，本恢复点为文档；Legacy 不应修改任何 `.cs`。
 - Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `1315c13 feat(p5): complete HellCannibal AI`；工作树 clean，无 staged 或 untracked 文件。
 - AI=78 所属文件已由 `1315c13` 原子收口：`hell_cannibal.go`、`hell_cannibal_test.go`、`hell_cannibal_session_test.go`、`monster_ai.go`、`world.go` 和 `docs/migration-matrix.md`；不得回滚或覆盖该提交。
 - AI=78 Go 证据：最小编译、HellCannibal 普通 `-count=10`/race `-count=3`、HellSlasher/HellPirate/HellCannibal 相关回归普通 `-count=5`/race `-count=3`、`go test ./... -count=1 -timeout=900s`、`go vet ./...`、`go build ./...`、gofmt 和 diff-check 均通过。完整 `go test -race ./... -count=1 -timeout=900s` 退出码为 1，实际失败为既有 `TestSessionDarkBodySpawnAndRecallTranscript` 的 `player_spell_buffs.go:742` 与 `equipment_transactions.go:779` 共享 equipment-stat race，以及既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go:742` 与 `intelligent_creature_items.go:549` race；均未进入 AI=78 文件或测试，不修改无关模块掩盖。
@@ -37,7 +37,7 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD` (`a23686cf docs(migration): keep HellSlasher handoff self-describing`) | 4 个文档文件未提交；无 staged/untracked、无 `.cs` 变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD`（本 handoff 提交；parent `a23686cf`） | 2 个既有文档文件未提交；无 staged/untracked、无 `.cs` 变化 |
 | Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `1315c13 feat(p5): complete HellCannibal AI` | AI=78 已提交，工作树 clean；无 staged/untracked、无 `.cs` 变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；不要把矩阵 Complete 或历史测试记录误判为当前工作树和当前门禁已验证。
