@@ -30,12 +30,10 @@
 提交。
 
 - Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
-  `master`，恢复时先按上一 handoff 提交文档
-  `e17b441451d681c1f90d46a9e00c7c5d737072e8`
-  (`e17b4414 docs(migration): record administrator bootstrap`)；当前分支
-  `master...origin/master [ahead 407]`，tracked 修改仅 `tasks/lessons.md`、
-  `tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff，无 staged/untracked；
-  tracked/staged/untracked `.cs` 均为空，`git diff --check` 退出 0。
+  `master`，HEAD `0d0d255596681731b613d0f0f57c191c15ccfdfb`
+  (`0d0d2555 docs(migration): record interactive GameMaster mode`)；当前分支
+  `master...origin/master [ahead 408]`，tracked 修改仅本 handoff 的 post-commit 状态刷新，
+  无 staged/untracked；tracked/staged/untracked `.cs` 均为空，`git diff --check` 退出 0。
 - Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
   `main`，HEAD `3e85ec4c4268bc4a24e5ec8cc0ff7a96ef58775c`
   (`3e85ec4 feat(p3): restore interactive GameMaster mode`)；提交后工作树 clean，
@@ -67,9 +65,9 @@
   `spawn_agent` schema 仍未热加载该 custom agent，且可选 model 仍不含 `gpt-5.6-luna`；
   已在执行前公开说明并按规则未用其他模型冒充。新 Session 重载后继续优先尝试
   `luna_worker`。
-- 下一恢复命令：分别核对两仓 clean status/HEAD 与三类 `.cs` 门禁，回读矩阵后选择
-  `@SUPERMAN`、`@OBSERVER` 或 ranking closure 中一个 dependency-ready 原子切片；不得重复
-  startup 或本 `@GAMEMASTER` 切片。
+- 下一恢复命令：先提交本 handoff 的 post-commit 状态刷新，再分别核对两仓 clean
+  status/HEAD 与三类 `.cs` 门禁；回读矩阵后选择 `@SUPERMAN`、`@OBSERVER` 或 ranking
+  closure 中一个 dependency-ready 原子切片；不得重复 startup 或本 `@GAMEMASTER` 切片。
 
 ### 本批提交边界
 
@@ -77,7 +75,8 @@
   `cmd/crystal-server/game_master.go`、`game_master_test.go`、
   `game_master_session_test.go`、`main.go`、`internal/config/localization.go`、
   `localization_test.go` 与 `docs/migration-matrix.md`。
-- Legacy 文档提交只允许 `tasks/lessons.md`、本 handoff 与 protocol-session-wire archive；
+- Legacy 文档提交 `0d0d2555` 只包含 `tasks/lessons.md`、本 handoff 与
+  protocol-session-wire archive；当前仅本 handoff 的精确 post-commit 状态刷新未提交。
   整体 Goal 继续 active，P1/P3/P5 均保持 In progress。
 
 ## 历史批次快照（管理员 GameMaster startup，已收口）
