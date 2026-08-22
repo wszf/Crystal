@@ -23,15 +23,15 @@
 
 ## 当前 active 批次（从实际两仓状态重建）
 
-恢复时间：2026-08-22；旧 handoff 的快照已过期，不能覆盖当前工作树。当前仍沿用同一个 active Goal，批次为 P5 AI=76 `HellSlasher`，Go 代码、测试和 Go 原子提交已完成，Legacy 文档提交待完成。矩阵中的 AI=76 行已标 `Complete`，本批最终证据如下。
+恢复时间：2026-08-22；旧 handoff 的快照已过期，不能覆盖当前工作树。当前仍沿用同一个 active Goal，批次为 P5 AI=76 `HellSlasher`，Go 代码、测试和 Legacy/Go 原子提交均已完成。矩阵中的 AI=76 行已标 `Complete`，本批最终证据如下。
 
-- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD `c6c94480 docs(migration): record WitchDoctor handoff`；完整状态为 `M tasks/lessons-archive/ai/075-099.md`、`M tasks/lessons.md`、`M tasks/migration-handoff.md`，无 staged 或 untracked 文件。AI=76 的 feature-specific lesson 在 archive；`tasks/lessons.md` 的既有 active-lessons 修改不是本批范围，必须保留。
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD `030f9f08 docs(migration): record HellSlasher handoff`；完整状态为 `M tasks/lessons.md`，无 staged 或 untracked 文件。AI=76 的 feature-specific lesson 和本 handoff 已提交；`tasks/lessons.md` 的既有 active-lessons 修改不是本批范围，必须保留。
 - Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `d17bbdc feat(p5): complete HellSlasher AI`；`git status --short --branch` clean，无 staged 或 untracked 文件。本批 6 个 Go 文件和矩阵已由该提交收口。
 - 本批 Go 所属文件就是提交 `d17bbdc` 的 6 个文件；Legacy 不应修改任何 `.cs`，也不应覆盖其现有 `tasks/lessons.md` 改动。
 - 本批 Go 验证退出码均为 0：`gofmt`；`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=600s`；`go test ./cmd/crystal-server -run 'HellSlasher' -count=10 -timeout=600s`；`go test -race ./cmd/crystal-server -run 'HellSlasher' -count=3 -timeout=600s`；`go test ./cmd/crystal-server -count=1 -timeout=900s`；`go test ./... -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；`git diff --check`。完整 `go test -race ./... -count=1 -timeout=900s` 退出码为 1，唯一实际测试失败为既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`，race 栈位于 `player_spell_buffs.go:742` 与 `intelligent_creature_items.go:549` 的共享 session fixture equipment-stat 读写，未进入 AI=76 文件或测试；不修改无关模块掩盖。
 - 两仓当前 tracked/staged/untracked `.cs` 审计均为空。
 - 当前 AI=76 修正包括：保留 Legacy `CanAttack` 不含 Shock 的语义，但在非攻击范围分支先清空 target、停止移动；移除旧的玩家-only 重复攻击实现，统一 Player/owned-Monster/Hero resolver；补充远距 Shock 回归和 Dazed close/halfmoon poison、范围广播断言。
-- 恢复/提交命令：先回读本文件和 Go 提交 `d17bbdc`；在 Legacy 仅暂存 `tasks/lessons-archive/ai/075-099.md` 与本 handoff，保留 `tasks/lessons.md` 未提交；提交后分别核对两仓 HEAD、完整 status、`git diff --check` 与三项 `.cs` 审计。Compact 后仍沿用同一个 active Goal；若 Legacy 文档尚未提交则从上述状态恢复，不得重开 Goal。
+- 恢复命令：回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，分别核对两仓当前状态；沿用同一个 active Goal，从矩阵中选择下一个依赖就绪且未完成的 P5 子切片。Compact 后仍沿用同一个 active Goal，不得仅因 compact 或新 Session 重开 Goal。
 
 ## 仓库快照
 
