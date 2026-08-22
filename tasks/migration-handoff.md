@@ -25,12 +25,40 @@
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD` (`docs(migration): enforce compact handoff gate`) | 文档交接已提交，工作树 clean；无 `.cs` 变化 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `4239ef3 feat(p5): complete LightTurtle AI` | AI=74 已提交，工作树 clean；无 staged、无 `.cs` 变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD` (`01ca51d7 docs(migration): enforce compact handoff gate`) | AI=75 交接文档待提交；仅 archive/handoff 文档变化；无 `.cs` 变化 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `7801232 feat(p5): complete WitchDoctor AI` | AI=75 已提交，工作树 clean；无 staged/untracked、无 `.cs` 变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；不要把矩阵 Complete 或历史测试记录误判为当前工作树和当前门禁已验证。
 
 迁移状态的权威明细位于 Go 仓库的 `docs/migration-matrix.md`；`README.md` 是当前实现能力的长说明。
+
+## 最近完成批次：AI=75 WitchDoctor
+
+- Go 已由提交 `7801232 feat(p5): complete WitchDoctor AI` 收口，涉及
+  `witch_doctor.go`、`witch_doctor_test.go`、`witch_doctor_session_test.go`、
+  `monster_ai.go`、`world.go` 和 `docs/migration-matrix.md`；Go 工作树 clean。
+- 已通过：`gofmt`；`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=600s`；
+  `go test ./cmd/crystal-server -run 'WitchDoctor' -count=10 -timeout=600s`；
+  `go test -race ./cmd/crystal-server -run 'WitchDoctor' -count=3 -timeout=600s`；
+  `go test ./cmd/crystal-server -count=1 -timeout=900s`；
+  `go test ./... -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；
+  `git diff --check`。
+- `go test -race ./... -count=1 -timeout=900s` 未通过，实际失败仅为既有
+  `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`（
+  `player_spell_buffs.go`/`intelligent_creature_items.go` 与共享 session fixture
+  的 equipment-stat race）以及 `TestSessionBlinkTranscriptIncludesDelayedMapChangeEffectAndBuff`
+  （`player_spell_buffs.go` 与 `teleport_magic_session_test.go` 的 buff/packet race）；
+  两个栈均未进入 AI=75 文件或测试，不修改无关模块掩盖。
+- 本批覆盖 common population/dispatch、Legacy 基类随机方向、cell-order 搜索、
+  六格含同格 FearTime/撤退与 Shock 门禁、Player/owned-Monster/Hero 投影、
+  self-heal、1/5 teleport 及 effect-5 visibility、MACAgility 延迟命中、
+  safe-zone 目标重验和认证 `net.Pipe` ranged transcript。
+- Legacy 本批文档范围：`tasks/lessons-archive/migration/combat-general.md` 与
+  本 handoff；均为文档，未触碰 `.cs`。Legacy 当前 tracked/staged/untracked `.cs`
+  均为空。
+- 下一恢复命令：新 Session 重新读取本文件、`tasks/goal-task.md`、
+  `tasks/lessons.md` 和 Go `docs/migration-matrix.md`，分别核对两仓实际状态，
+  再从矩阵中选择下一个仍 pending 的 P5 子切片；不要把 P5 或整体 Goal 标为完成。
 
 ## 最近完成批次：AI=74 LightTurtle
 
@@ -95,7 +123,7 @@
 | P2 账户与密码 | In progress | 登录、账户创建、改密、StoragePassword、导入账户和 SelectInfo 已迁移；直接二进制写回及完整 NPC 访问仍待完成。 |
 | P3 角色与 StartGame | In progress | 角色列表/创建/删除、运行时字段、有效/无效出生点、基础属性与登出持久化已有覆盖，尚未按完整客户端启动流程宣告完成。 |
 | P4 地图/移动/可见性 | In progress | 多版本地图、碰撞/门、玩家/NPC/怪物可见性、地图切换、普通/私聊及聊天物品链接授权展开和多项地图门禁已迁移；完整 bootstrap 仍待完成。 |
-| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增 AI=70 Hugger 的邻接攻击/死亡爆炸与 poison 生命周期，并新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33、FrostTiger AI=34、ThunderElement AI=49 GreatFoxSpirit AI=50、Dragon/EvilMir AI=52/53、DragonStatue AI=54、HumanWizard AI=55 以及 Trainer AI=56 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性、HumanWizard owner-MP/owner-appearance/inspection/persistence 和 net.Pipe transcript；Trainer 以确定性 world production-entry tests 覆盖玩家/Hero/owned-pet、AC/MAC、AttackBonus、owner-root、miss、poison/DPS、切换/超时、Healing ChangeHP 和 value-map writeback；TownArcher AI=57 已补 common population、route-only movement、Player-only red-PK/GM/Hidden/CoolEye/level admission、strict FearTime、inclusive ten-cell range、ObjectRangeAttack、Luck/DC、500ms+distance×50ms 延迟 ACAgility、respawn direction reset 和 impact revalidation；HumanAssassin AI=59 已补 owner-derived stats/appearance、two-cell movement、delayed ACAgility、cumulative threshold、strict lifetime explosion 和 recall/logout lifecycle；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
+| P5 战斗/技能/怪物/掉落 | In progress | 已完成核心近战、远程、PvP 基础、多个单体/区域魔法、九个自增益 Buff、FrostCrunch 状态、基础属性、掉落树和持久化；最近批次新增 AI=75 WitchDoctor、AI=70 Hugger 的邻接攻击/死亡爆炸与 poison 生命周期，并新增玩家 TrapHexagon、SummonVampire/SummonToad/SummonSnakes、CannibalPlant、Guard、Tao Guard、Deer AI=1/2、Tree AI=3、EvilCentipede AI=14、WoomaTaurus AI=11、RedMoonEvil AI=13、Shinsu AI=18、BugBagMaggot AI=12/RootSpider AI=39/BombSpider AI=40、RightGuard/LeftGuard AI=31/32、MinotaurKing AI=33、FrostTiger AI=34、ThunderElement AI=49 GreatFoxSpirit AI=50、Dragon/EvilMir AI=52/53、DragonStatue AI=54、HumanWizard AI=55 以及 Trainer AI=56 的 Legacy admission、目标捕获、延迟/生命周期、AI/伤害/逃跑、静态/Observer 可见性、HumanWizard owner-MP/owner-appearance/inspection/persistence 和 net.Pipe transcript；Trainer 以确定性 world production-entry tests 覆盖玩家/Hero/owned-pet、AC/MAC、AttackBonus、owner-root、miss、poison/DPS、切换/超时、Healing ChangeHP 和 value-map writeback；TownArcher AI=57 已补 common population、route-only movement、Player-only red-PK/GM/Hidden/CoolEye/level admission、strict FearTime、inclusive ten-cell range、ObjectRangeAttack、Luck/DC、500ms+distance×50ms 延迟 ACAgility、respawn direction reset 和 impact revalidation；HumanAssassin AI=59 已补 owner-derived stats/appearance、two-cell movement、delayed ACAgility、cumulative threshold、strict lifetime explosion 和 recall/logout lifecycle；剩余技能/Buff、飞行/墙体规则、高级 PvP/组队战斗、其他通用/特殊怪物 AI、持久重生状态及完整包序仍待迁移。 |
 | P6 物品/装备/维修/强化/制作 | In progress | 背包、装备、Storage、Trade、Repair、Refine、Craft 和基础 Use/Delete/Drop/Pickup 已有完整功能簇；尚未对整个 P6 做 100% 等价收口。 |
 | P7 NPC/商店/任务/脚本 | In progress | NPC 可见性、传送、核心脚本动作/控制流、商店/BuyBack、Quest 生命周期及回调已迁移；剩余脚本/商店动作和完整包序待完成。 |
 | P8 Group/Hero/Pet/Mount/Social | Complete | Group、Hero、普通战斗宠物、Mount、好友/黑名单、婚姻和导师体系已完成并有领域、协议、会话及持久化证据。 |
