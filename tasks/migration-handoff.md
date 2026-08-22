@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-22（Asia/Singapore；ArcherSummon 门禁完成后）
+最后更新：2026-08-22（Asia/Singapore；Conquest Gate/Wall 阻挡回归收口后）
 
 ## 迁移目标与硬边界
 
@@ -24,33 +24,30 @@
 
 ## 当前 active 批次（从实际两仓状态重建）
 
-恢复时间：2026-08-22；当前仍沿用同一个 active Goal。上一批 P5 AI=8 `AxeSkeleton` 的 Player/owned-Monster/Hero target-kind 扩展已由 Go 提交 `3920886 feat(p5): complete AxeSkeleton target projections` 收口；整体 Goal 仍未完成。本批 P5 AI=60/61/62/63 ArcherSummon（`VampireSpider`/`SpittingToad`/`SnakeTotem`/`CharmedSnake`）已由 Go 提交 `f195d89 feat(p5): complete archer summon target projections` 收口；不因 compact 或单批完成宣告整体 Goal 完成。
+恢复时间：2026-08-22；当前仍沿用同一个 active Goal。上一批 P5 AI=60/61/62/63 ArcherSummon（`VampireSpider`/`SpittingToad`/`SnakeTotem`/`CharmedSnake`）已由 Go 提交 `f195d89 feat(p5): complete archer summon target projections` 收口；本批 P9 Conquest Gate/Wall 阻挡几何回归测试已由 Go 提交 `d09cbe9 test(p9): cover conquest gate blocking geometry` 收口。整体 Goal 仍未完成，不因 compact 或单批完成宣告整体 Goal 完成。
 
-- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD 为本 handoff 文档提交（parent `53d9cd58 docs(migration): refresh HellCannibal handoff snapshot`）；本仓工作树 clean，无 staged/untracked；本批提交内容均为文档，未修改 `.cs`。
-- Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `f195d89 feat(p5): complete archer summon target projections`；本批三个文件已原子提交，工作树 clean，无 staged/untracked。
-- 本批 Go 所属文件为上述三个文件；Legacy tracing 范围为 `Server/MirObjects/Monsters/VampireSpider.cs`、`SpittingToad.cs`、`SnakeTotem.cs`、`CharmedSnake.cs`、`HumanObject.cs` ArcherSummon/DelayedAction 调用链及直接共享 helper。Legacy C# 仍为只读基线。
-- 本批已覆盖 Cell-first/insertion-order 搜索、Player/Monster/Hero target kind、CanFly/NoPets/召唤限制、两段 practice/500ms materialization、召回坐标、Vampire/Toad/SnakeTotem/CharmedSnake 生命周期、SnakeTotem child aggro/数量限制、独立 CharmedSnake AliveTime、Legacy Monster/Player death-burst race 边界、Toad `ObjectTurn -> ObjectRangeAttack` 顺序，以及 impact 时 Hidden 不再新增门禁。
-- 本批已运行并通过：`go test ./cmd/crystal-server -run '^$' -count=1`；`go test ./cmd/crystal-server -run 'ArcherSummon|SummonSnakes|CharmedSnake' -count=10 -timeout=600s`；对应 `-race -count=3`；`go test ./cmd/crystal-server -count=1 -timeout=900s`；`go test ./... -count=1 -timeout=900s`；`go test ./cmd/crystal-server -run '^TestSessionSummonVampireTranscriptUsesDelayedPracticeAndSpawn$' -count=10` 及对应 `-race -count=3`；`go vet ./...`；`go build ./...`；`git diff --check`。
-- 本次 `go test -race ./... -count=1 -timeout=900s` 失败的唯一实际测试为既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`；race 栈位于 `player_spell_buffs.go:742` 与 `intelligent_creature_items.go:549` 的共享 session/equipment-stat 读写，未进入本批文件或测试；未修改无关模块掩盖该失败。
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`；本 handoff 提交的 parent 为 `f02c30c7 docs(migration): refresh archer summon handoff`，提交后工作树 clean，无 staged/untracked；本批仅修改文档，未修改 `.cs`。
+- Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `d09cbe9 test(p9): cover conquest gate blocking geometry`；本批两个文件已原子提交，工作树 clean，无 staged/untracked。
+- 本批 Go 所属文件为 `cmd/crystal-server/conquest_structures_test.go`、`docs/migration-matrix.md`；Legacy tracing 范围为 `Server/MirObjects/ConquestObject.cs`、`Server/MirObjects/Monsters/CastleGate.cs`、`Gate.cs`、`Wall.cs`、`Siege.cs` 及地图阻挡/进入检查调用链。Legacy C# 仍为只读基线。
+- 本批覆盖四种 Legacy Gate `BlockArray` 的逐项偏移顺序、关闭 Gate 的扩展阻挡格与父 Gate 反查、Wall 仅阻挡自身格、非自身格可进入，以及 Gate 打开后扩展阻挡清理；现有 Conquest 生产逻辑未新增 C# 或 Go 生产文件。
+- 本批已通过：`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=900s`；`go test ./cmd/crystal-server -run 'TestConquestGate|TestConquestStructure' -count=10 -timeout=600s`；对应 `-race -count=3`；`go test ./cmd/crystal-server -run 'Conquest|conquest' -count=1 -timeout=900s`；对应 `-race -count=3`；`go vet ./...`；`go build ./...`；`git diff --check`。
+- `go test ./cmd/crystal-server -count=1 -timeout=900s` 与 `go test ./... -count=1 -timeout=900s` 均未通过，唯一领域失败为既有 `TestSessionOmaMageRangeSlowFrozenTranscript`（`oma_mage_session_test.go:145`，实际 attack-roll bounds `[2 1]`，期望 `[1]`），栈未进入本批文件或测试；未修改无关模块掩盖。
+- `go test -race ./... -count=1 -timeout=900s` 未通过，实际失败为既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`；race 栈位于 `player_spell_buffs.go:742` 与 `intelligent_creature_items.go:549` 的共享 session/equipment-stat 读写，未进入本批文件或测试；未修改无关模块掩盖。
 - 两仓当前 tracked/staged/untracked `.cs` 审计均为空。
-- 恢复命令：回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，核对两仓实际状态；两仓本批提交均已完成，提交后 `.cs` 审计为空；随后沿用同一个 active Goal，从矩阵下一个仍 pending 的 P5 AI/target sub-slice 继续，不得因 compact 或新 Session 重开 Goal。
+- 恢复命令：回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，分别核对两仓实际状态；沿用同一个 active Goal，从矩阵核对后的下一个仍 pending 的 P5 AI/target 或其他明确子切片继续，不得因 compact 或新 Session 重开、重建或 reset Goal。
 
 ### 本批质量门禁与提交边界
 
-- Go 功能提交只允许包含 `cmd/crystal-server/archer_summons.go`、
-  `cmd/crystal-server/archer_summons_test.go` 和
-  `docs/migration-matrix.md`；不得把 Legacy 文档混入 Go 提交。
-- Legacy 文档提交只允许包含本仓当前已存在的文档变更；不得暂存或提交任何
-  `.cs` 文件。提交前后均须按下方固定命令审计 tracked/staged/untracked `.cs`。
-- 完整 race 的既有失败保留在 handoff 中，不得为通过全量 race 修改无关的
-  GuildBuff/session 代码。
+- Go 功能提交只包含 `cmd/crystal-server/conquest_structures_test.go` 和 `docs/migration-matrix.md`；不得把 Legacy 文档混入 Go 提交。
+- Legacy 本批只提交 `tasks/migration-handoff.md`；不得暂存或提交任何 `.cs` 文件。提交前后均须按下方固定命令审计 tracked/staged/untracked `.cs`。
+- 完整普通测试的既有 OmaMage 随机边界失败和完整 race 的 GuildBuff/session 共享状态失败保留在 handoff 中，不得为通过全量门禁修改无关模块。
 
 ## 仓库快照
 
 | 仓库 | 路径 | 分支 | 当前基线 | 交接前状态 |
 |---|---|---|---|---|
-| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD（本 handoff 文档提交；parent 53d9cd58）` | 工作树 clean；无 staged/untracked、无 `.cs` 变化 |
-| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `f195d89 feat(p5): complete archer summon target projections` | ArcherSummon 批次已原子提交；工作树 clean，无 staged/untracked、无 `.cs` 变化 |
+| Legacy Crystal | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal` | `master` | `HEAD（本 handoff 文档提交；parent f02c30c7）` | 本批文档提交后工作树 clean；无 staged/untracked、无 `.cs` 变化 |
+| Go migration | `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer` | `main` | `d09cbe9 test(p9): cover conquest gate blocking geometry` | Conquest Gate/Wall 回归批次已原子提交；工作树 clean，无 staged/untracked、无 `.cs` 变化 |
 
 新 Session 应以实际 `git status --short --branch` 和 `git log -1 --oneline` 为准；不要把矩阵 Complete 或历史测试记录误判为当前工作树和当前门禁已验证。
 
