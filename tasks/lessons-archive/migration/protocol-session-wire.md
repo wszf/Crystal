@@ -251,3 +251,12 @@
 - Prevention: 区分攻击者源坐标与目标 payload；每个远程 effect 都以 GreatFox 自身地图/坐标调用 observer fan-out，并在会话 transcript 覆盖接收者矩阵。
 - Verification: `TestSessionGreatFoxRangeAttackTranscript` 锁定 `ObjectRangeAttack -> ObjectEffect` 及源坐标，AI=50 定向普通/race 测试通过。
 
+
+### 2026-08-23 — 新增登录 bootstrap 包必须覆盖所有手写消费器并先补测试 import
+
+- Symptom: `BaseStatsInfo` 首次定向编译因新断言使用 `reflect.DeepEqual` 却遗漏 `reflect` import；修正后服务端整包测试又有多组 NPC/Guild/Conquest/Shop/Relationship 手写 bootstrap 消费器把合法的新 ordinal 163 当成意外包。
+- Root cause: 只更新了生产包序和通用 `startGameBootstrapForTest`/mail helper，没有在首次整包运行前机械枚举所有独立的显式 expected 列表与 switch；测试补丁也未先复核新增符号对应的 import。
+- Prevention: 任何共享 bootstrap 包变更先用相邻稳定包（本次为 `MentorUpdate`、active quest、visible object、`TimeOfDay`）检索全部测试消费器，按 Legacy FIFO 边界一次性更新；新增测试引用后立即运行包级只编译，再运行定向测试和整包测试。
+- Verification: 所有手写消费者现将 `BaseStatsInfo` 固定在 active quest 之后、被动对象之前；协议/探针/服务端定向重复与 race、服务端整包、全仓普通/race、vet、build 和 diff 检查均退出 0。
+- Strengthening after review: “五职业默认公式完整匹配”不能只比较每类 count、first 和 last；`base_stats_test.go` 现逐项比较全部 55 个 `BaseStat` 记录及九个 cap，避免中间项类型、公式、Gain 或 GainRate 漂移而测试仍通过。
+- Strengthening after final gate: 强化公式测试后的定向普通/race、全仓普通、vet、build 均通过；完整 race 后续命中已归档的 `TestSessionDarkBodySpawnAndRecallTranscript` 装备 Buff reconciliation 竞争，栈未进入 BaseStats production/protocol/probe/tests，不能继续沿用“本次完整 race 退出 0”的旧快照。

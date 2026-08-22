@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；GuildBuff 完整 race 门禁收口后）
+最后更新：2026-08-23（Asia/Singapore；BaseStatsInfo 登录 bootstrap 批次已提交）
 
 ## 迁移目标与硬边界
 
@@ -25,23 +25,26 @@
 
 ## 当前 active 批次（从实际两仓状态重建）
 
-恢复时间：2026-08-23；当前仍沿用同一个 active Goal。本批处理完整 race
-门禁中唯一可复现的 GuildBuff session 断言竞态：测试从 world 解锁后的浅复制
-`worldPlayer` 读取共享 `Character.Buffs`/`Stats`，与后台装备 Buff reconciliation
-并发。整体 Goal 仍未完成，不因质量批次完成宣告迁移完成。
+恢复时间：2026-08-23；当前仍沿用同一个 active Goal。本批从 Legacy
+`PlayerObject.StartGameSuccess -> SendBaseStats` 真实 FIFO 调用链确认 Go 登录缺少
+客户端可见的 `BaseStatsInfo`，并完成默认五职业公式/上限 wire 与 bootstrap 原子
+切片。整体 Goal 仍未完成；自定义 `BaseStats*.ini`/`HeroBaseStats*.ini` 加载和运行时
+公式应用仍是明确 pending，不把本批扩大宣告为 P3/P5 完成。
 
-- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD 为本批 handoff 提交（以 `git log -1 --oneline` 为准）；本批两个文档已提交，工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。
-- Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `f0fa908 test(p9): lock GuildBuff runtime snapshot`；本批测试修复已提交，工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。
-- 本批 Go 所属文件仅为 `cmd/crystal-server/guild_buffs_session_test.go`；Legacy 所属文件仅为 `tasks/lessons-archive/verification/race-and-flake-attribution.md` 与本 handoff；未修改任何 Go 生产实现或 C#。
-- 根因与修复：`playerByCharacterIndex` 只复制运行时外壳，测试断言改为在 `world.mu` 内用 `playerByCharacterIndexLocked` 读取 `Stats`，并用 `cloneProtocolCharacterBuffs` 深复制 Buff 后再解锁；具体证据已追加至 race archive。
-- 已通过（退出码 0）：目标测试普通 `-count=10`、目标 `-race -count=10`；`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；`git diff --check`；全量普通 `go test ./... -count=1 -timeout=900s`；完整 `go test -race ./... -count=1 -timeout=900s`。
-- 恢复命令：新 Session 先回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，分别核对两仓 status/HEAD；Go `f0fa908` 与本批 Legacy handoff 提交均已完成，从矩阵选择下一个仍未完成且边界明确的 P5/P1/P2/P4/P6/P7/P9/P10/P11/P12 批次；不得因 compact、文档批次、质量批次或单个 AI 完成重开/重建/重置 Goal。
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD 为本 handoff 文档提交（parent `85d99f596d32440ca40f5cbb5455637ddd383acf`，以 `git log -1 --oneline` 为准）；本批四个文档已原子提交，工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。
+- Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `d9bb14b feat(p3): restore base stats bootstrap`；本批 30 个 owned 文件已原子提交，工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。
+- Legacy 权威对照：`Shared/Enums.cs` 的 `BaseStatsInfo=163`/`HeroBaseStatsInfo=164`；`Shared/ServerPackets.cs` 与 `Shared/BaseStats.cs` 的 `Job + Int32 count + BaseStat records + Stats caps` 布局和五职业默认公式；`PlayerObject.StartGameSuccess` 在 active quest 之后、`GetObjectsPassive` 之前调用 `SendBaseStats`；`HeroObject.SendBaseStats` 发送公式配置而非当前等级计算快照。
+- Go 生产实现：新增 `ServerBaseStatsInfo=163`、共享 BaseStats 编解码器、五职业完整默认公式及九个非零 cap；登录在 active quest 后、任何被动对象/公会可见性之前发送 player `BaseStatsInfo`；既有 Hero 包从错误的等级快照改为同一默认公式配置。协议 probe 拒绝缺失/乱序/畸形 BaseStats，并新增固定 wire vector。
+- Go 本批 owned 文件：`cmd/crystal-server/base_stats.go`、`base_stats_test.go`、`main.go`、`main_test.go`、`heroes.go`、`mail_session_test.go`，以及因共享 bootstrap 包序必须同步的 `conquest_npc_actions_test.go`、`conquest_test.go`、`default_npc_session_test.go`、`equipment_session_test.go`、`guilds_session_test.go`、`npc_item_session_test.go`、`quests_session_test.go`、`refine_logout_test.go`、`refine_session_test.go`、`relationships_session_test.go`、`repair_session_test.go`、`shop_session_test.go`、`storage_session_test.go`、`trade_session_test.go`、`use_item_session_test.go`；`internal/protocol/packet.go`、`packet_test.go`、`hero.go`、`hero_test.go`；`internal/probe/network.go`、`network_test.go`、`vectors.go`、`vectors_test.go`；`docs/migration-matrix.md`。
+- 已通过（退出码 0）：`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=900s`；强化后的 BaseStats/登录/Hero 定向普通 `-count=10`；对应 `-race -count=3`；`go test ./internal/protocol ./internal/probe -run 'BaseStats|FixedVectors|Bootstrap' -count=10 -timeout=900s`；`go test ./... -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；`git diff --check`；owned Go 文件 `gofmt -d` 零输出。
+- 失败与修复证据：首次定向编译因新增 `reflect.DeepEqual` 漏 import 退出 1；补 import 后通过。首次服务端整包因多个独立手写 bootstrap 消费器未接受新 ordinal 163 退出 1；机械枚举并按 active quest→BaseStats→passive object 顺序同步后通过。主 Agent review 发现五职业测试仅抽样 count/first/last，已强化为逐项比较全部 55 个公式记录与九个 cap。最终无排除完整 `go test -race ./... -count=1 -timeout=900s` 退出 1，唯一失败为既有 `TestSessionDarkBodySpawnAndRecallTranscript`：`player_spell_buffs.go:742,824` 的 ticker 写入与 `equipment_transactions.go:779`/`main.go:1443` 会话读取竞争；隔离同测试 `-race -count=10` 也退出 1，栈未进入 BaseStats production/protocol/probe/tests，未修改无关模块掩盖。对应证据已追加至 protocol-session-wire 与 race attribution archive。
+- 恢复命令：本批 Go 提交 `d9bb14b` 已完成；Legacy 文档提交后，从矩阵选择下一个 dependency-ready pending 项，优先处理自定义 BaseStats INI/运行时公式，或其他明确 P1/P3/P4/P5/P6/P7/P9/P10/P11/P12 子切片。完整 race 的 DarkBody 竞争是当前已知独立缺陷，选择下一批时可按矩阵依赖与风险决定是否先收口；不得因本批或会话切换重开/重建/reset Goal。
 
-### 本批质量门禁与提交边界
+### 本批提交边界
 
-- Go 功能提交 `f0fa908` 只包含 `cmd/crystal-server/guild_buffs_session_test.go`；不得把 Legacy 文档混入 Go 提交。
-- Legacy 文档提交只包含 `tasks/lessons-archive/verification/race-and-flake-attribution.md` 与本 handoff；不得暂存或提交任何 `.cs` 文件。
-- 提交前后均须分别执行两仓的 `git diff --check`、tracked/staged/untracked `.cs` 审计和完整 `git status --short --branch`；完整普通/race 通过证据必须保留。
+- Go 原子提交只包含上述 BaseStats production/protocol/probe/tests/matrix 文件；不得混入其他功能或任何 `.cs`。
+- Legacy 文档提交已只包含 `tasks/lessons.md`、`tasks/lessons-archive/migration/protocol-session-wire.md`、`tasks/lessons-archive/verification/race-and-flake-attribution.md` 与 `tasks/migration-handoff.md`，未包含任何 `.cs`。
+- 提交前后必须分别复核两仓完整 status、`git diff --check`、tracked/staged/untracked `.cs` 审计；本批完整普通通过，完整 race 当前按上述 DarkBody 既有栈记录为退出 1。
 
 ## 历史批次快照（2026-08-23 AI=49 ThunderElement）
 
