@@ -18,6 +18,7 @@ duplicate.
 - Prevention: 一次调用只属于一个仓库；先核验 `git rev-parse --show-toplevel`，参数只允许该根下已存在的路径；切换仓库必须新开调用；不得在当前 workdir 中用 `git -C`、绝对路径或脚本参数指向另一仓库；不得以只读、并行或减少往返为例外。
 - Verification: 命令零退出且所有路径属于同一根；任一读取失败、非零退出或混合根调用时，丢弃该调用的全部输出（包括前面成功的片段），不得用于实现、测试归因或文档。 本次 BaseStats 审查又在 Go workdir 的只读调用中误带 Legacy `Shared/Data/Stat.cs`，整次输出已丢弃并按两仓分别重跑。本轮跨仓库 status 审计因混入另一根路径作废，随后已拆成两次单仓调用重跑；本批一次 Legacy workdir 混入 Go 文件路径的只读调用同样整体作废，随后按仓库拆开重跑；本轮 Legacy 方向核对命令再次混入 Go 相对路径，整次输出作废，随后按仓库边界重跑。 本轮一次 Legacy 读取调用误附 Go 相对路径，整次输出再次作废并已拆分重跑；一次委派消息误将已选 AI=8 写成 AI=80，相关 AI=80 tracing 已明确丢弃并按 AI=8 重做；本轮两次继续勘察时又把 Legacy lesson/archive 路径或 Go 源码路径混入对侧 workdir，相关调用输出均作废，随后已按仓库分别重跑。 本 Session 首次恢复读取又在 Legacy workdir 的同一命令中加入 Go migration-matrix 绝对路径；整次约 8 万 token 输出已作废，并按两仓独立调用重新读取。 本批 Notice 勘察又在 Go workdir 的同一读取中附带 Legacy `Server/Settings.cs`，整次输出立即作废，随后分别在 Go 与 Legacy 根重跑并只采用独立结果。
 - Strengthening after localized-welcome recovery: compact 后首个启动读取再次把 Go matrix 绝对路径放入 Legacy 调用；该调用全部输出已作废，随后两仓 status、文档和 matrix 均以独立 workdir 重跑，并以重建 handoff 为恢复 authority。
+- Strengthening after TestServer/GameMaster selection: compact 硬门恢复时又在单次启动审计中通过 `git -C` 混读两仓；该调用全部输出已作废。后续只在对应 `workdir` 内使用相对路径，并分别重跑 Legacy 文档/status/C# 门禁与 Go matrix/status/C# 门禁后才刷新 handoff。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -26,6 +27,7 @@ duplicate.
 - Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；所有 `rg` 选项必须放在 `--` 前，`--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名或 zsh 只读特殊参数（如 `status`）；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用 CLI 子命令前按对应 `--help` 核对全局与子命令选项位置；数据库对象名必须从实际 schema 复制，禁止查看 schema 后仍使用惯例名称猜测；调用语言模块前先核对运行时版本/可用性，并优先让目标程序自身解析配置；修改含非 ASCII 的文档时优先使用 `apply_patch`，若必须用脚本 here-doc，先最小验证解释器与源码编码。
 - Verification: `rg` 选项、`path` 覆盖 `PATH`、未命中 glob 和 zsh 标量命令替换均已最小重跑；本批 archive 检索从失败的裸 `*.json`/换行标量改为直接 `rg --glob` 后零错误完成；Python 3.9 缺少 `tomllib` 时改由实际 Codex CLI 解析配置；Codex 验证脚本将只读 `status` 改为 `rc`，并把全局 approval 选项移到 `exec` 前后成功执行；Goal 数据库查询从猜测的 `goals` 改为 schema 中实际的 `thread_goals` 后成功核对字段约束；本批从 `cmd/crystal-server` 子目录误用根级 `./cmd/crystal-server` 失败后，改用 `go test .`，并将仓库根/命令包路径作为同一最小验证；本 Session Legacy `/usr/bin/python3` 拒绝含中文的 here-doc 后，确认 Python 3.9.6 并改用 `apply_patch` 零错误写入文档。
 - Strengthening after localized-welcome review: 再次猜测仓库根存在 `Localization/` 导致 `rg` 读取报错；整次调用证据已丢弃，随后先用根级 `rg --files` 定位实际 tracked localization fixtures，确认 server 根目录文件由运行时生成而非仓库资产。
+- Strengthening after TestServer bootstrap: Go 勘察再次把不存在的 `world_player*.go` 作为未引用 glob 交给 zsh，并有数次让预期“零匹配”的 `rg` 在 `set -e` 下终止调用；相关调用输出均作废。后续先用 `rg --files` 定位文件，并仅在“零匹配本身是有效答案”时显式使用 `rg ... || true`，实现、测试和文档只采用零退出的重跑结果。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -215,3 +217,10 @@ duplicate.
 - Root cause: 把 compact 摘要当成迁移记录，或只在“快要 compact”之后才补 handoff，导致 compact 前没有可核验的完整状态边界。
 - Prevention: 每次 compact 前，或收到 compaction/上下文上限/rollover 信号时，立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`；即使当前批次只有 Markdown/文档变更也必须执行。记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
 - Verification: `agents.md`、`tasks/goal-task.md` 和 `tasks/migration-handoff.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续；本次 compact 摘要声称已刷新，但 handoff 仍写 Go clean、实际却有 8 tracked + 2 untracked，因此已停止实现/测试并从两仓重建后才恢复。
+
+### 2026-08-23 C30 — Subagent 模型不可用时必须在执行前显式说明
+
+- Symptom: 整个批次未使用 subagent，用户只能在事后从结果推断原因，容易误认为主 Agent 忽略了既定的 `luna_worker`/`gpt-5.6-luna` 分工。
+- Root cause: 工具发现确认当前 spawn override 列表不提供要求的 worker/model；为遵守“不得静默替换”而改由主 Agent 本地执行，但只把原因写进 plan/handoff，没有在开始 tracing 前用清晰的用户可见说明建立预期。
+- Prevention: 每批开始先发现并核对 subagent 工具、角色、model 和 reasoning effort；可用时把非关键路径的 bounded 独立工作委派并记录 agent ID/范围，不可用时在本地执行前立即明确说明缺失项、禁止替代规则和 fallback。不得既不委派也不解释，也不得用其他模型静默冒充指定 worker。
+- Verification: 本批实际 spawn model 列表只有 `codex-auto-review`、`deepseek-v4-flash`、`deepseek-v4-pro`、`gpt-5.3-codex-spark`、`gpt-5.4`，不含 `luna_worker` 或 `gpt-5.6-luna`；因此未生成 agent ID。后续 handoff 必须记录实际 agent ID/模型/范围，或记录执行前已公开的不可用证据。

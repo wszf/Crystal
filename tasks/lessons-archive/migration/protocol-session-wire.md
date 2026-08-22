@@ -282,3 +282,10 @@
 - Root cause: 把“沿用现有 Chat ordinal/payload”误当成无需更新协议消费者，只机械修改了 server tests；配置层也只验证了字段值，没有对照文件解码与属性名匹配语义。
 - Prevention: 每个 server-first bootstrap 变更必须机械枚举生产 probe 和所有发送 `ClientStartGame` 的手写 consumer；配置 JSON 必须分别核对 BOM、根属性大小写、未知 key、malformed/missing fallback 和环境/INI path authority，不能依赖 Go 默认 decoder 恰好可用。
 - Verification: Go loader 现去除 UTF-8 BOM、精确读取 `Text` 并只覆盖 `GameName`/`Welcome`；网络 probe 强制消费并解析 post-StartGame Hint，测试使用非 ASCII payload 并拒绝非 Hint。config/server/probe focused 普通 `-count=10` 与 race `-count=3`、排除既有 OmaMage 的全仓普通/race、vet、build、probe vectors 与 diff check 均退出 0；无排除普通与最终完整 race 仅命中同一 OmaMage 随机边界且未报告数据竞争。所有 22 个直接 `ClientStartGame` 文件已机械枚举并覆盖。
+
+### 2026-08-23 — TestServer bootstrap 必须分离配置、瞬态模式与管理员 authority
+
+- Symptom: Go 已读取 `[General] TestServer` 并把它用于部分特殊命令，但成功 StartGame 仍缺少 Legacy 的两条 Hint，玩家也没有 `Chat("@GAMEMASTER")` 所建立的攻击目标免疫；直接把账户 `AdminAccount` 当作替代会错误扩大权限和持久化语义。
+- Root cause: 把同名 GameMaster 概念合并：Legacy TestServer 分支只发送 `GameIsTestMode -> GameMasterMode` 并切换瞬态 `GMGameMaster`，而 `IsGM` 来自账户管理员 authority，只有后者才生成 GameMaster Buff/options 并开放管理命令。
+- Prevention: StartGame 条件分支分别记录 packet FIFO、runtime-only flag、账户权限和 Buff 投影；TestServer 的非管理员模式只进入玩家/怪物 `IsAttackTarget` 门禁，不写回角色，也不凭空获得 admin capability。生产 probe 在不知道远端配置时只接受零条或完整两条 Hint，拒绝半对。
+- Verification: Go localization 覆盖两个新 key 及 English fallback；authenticated `net.Pipe` 锁定 `StartGame -> Welcome -> TestMode Hint -> GameMasterMode Hint -> map/bootstrap`，并在 KeepAlive barrier 后回读 runtime flag；player/monster target tests 锁定模式开关，probe 接受 0/2 且拒绝 1。focused 普通 `-count=10`、race `-count=3`、服务端整包、全仓普通/race、vet、build、probe vectors 与 diff check 全部退出 0。

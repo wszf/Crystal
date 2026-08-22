@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；localized welcome bootstrap 已提交）
+最后更新：2026-08-23（Asia/Singapore；TestServer StartGame 切片已提交）
 
 ## 迁移目标与硬边界
 
@@ -23,7 +23,67 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
-## 当前 active 批次（localized welcome bootstrap 已收口）
+## 当前 active 批次（TestServer StartGame 已收口）
+
+本批从 compact 硬门的“仅选定”边界恢复，完成 Legacy 可达性追踪后把两种 GameMaster
+authority 拆开：本原子切片只迁移 TestServer 普通账户的两条 Hint 与瞬态
+`GMGameMaster` 攻击免疫；管理员账户 `IsGM`、GameMaster Buff/options 与交互式命令留待
+独立批次。Go 功能提交 `375fa60 feat(p3): restore test server bootstrap` 已收口。
+
+- Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master`，本批文档提交 parent `d471d1b3dd8648ef343442764d215037595f95eb`
+  (`d471d1b docs(migration): record localized welcome bootstrap`)；owned 文档为
+  `tasks/lessons.md`、`tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff。
+  提交前 tracked/staged/untracked `.cs` 均为空。
+- Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，HEAD `375fa60 feat(p3): restore test server bootstrap`；提交后工作树 clean，
+  无 staged/untracked，tracked/staged/untracked `.cs` 均为空。
+- Legacy 权威链：`StartGameSuccess` 在 `StartGame(Result=4) -> localized Welcome` 后，若
+  `Settings.TestServer` 为 true，依次调用 `ReceiveChat(GameIsTestMode, Hint)` 与
+  `Chat("@GAMEMASTER")`。后者从默认 false 切换 `GMGameMaster=true`、发送
+  `GameMasterMode` Hint；该 flag 只在两种 `PlayerObject.IsAttackTarget` 重载中拒绝
+  Human/Monster 攻击。非管理员 TestServer 玩家不会获得 `IsGM`、GM Buff 或管理权限，
+  flag 也不写入 CharacterInfo。
+- Go 实现：扩展 localization 的 `GameIsTestMode`/`GameMasterMode` English fallback 与
+  case-sensitive overlay；成功 StartGame 在 welcome 后按固定顺序发送两条条件 Hint；
+  `worldPlayer.GameMasterMode` 仅由本次 runtime entry seed，player-vs-player 与通用 monster
+  target gate 均拒绝该目标。生产 probe 允许零条或完整两条 TestServer Hint，拒绝单条，
+  且仍要求它们位于 Notice/item/map 之前。
+- Go owned 文件共 11 个：`cmd/crystal-server/main.go`、`main_test.go`、
+  `monster_ai.go`、`welcome_bootstrap.go`、`world.go`、
+  `test_server_bootstrap_test.go`；`internal/config/localization.go`、
+  `localization_test.go`；`internal/probe/network.go`、`network_test.go`；
+  `docs/migration-matrix.md`。
+- 已通过（退出码 0）：三包最小只编译；config/server/probe focused 普通
+  `-count=10` 与 race `-count=3`；`go test ./cmd/crystal-server -count=1
+  -timeout=900s`；`go test ./... -count=1 -timeout=900s`；`go test -race ./...
+  -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；
+  `go run ./cmd/crystal-protocol-probe -mode vectors`；owned-file `gofmt -d` 与
+  `git diff --check`。本批没有失败测试或排除项。
+- 测试证据：helper 锁定 localized payload；authenticated `net.Pipe` 锁定
+  `StartGame -> Welcome -> TestMode -> GameMasterMode -> map/bootstrap`，KeepAlive barrier
+  后回读 runtime flag；world tests 同时覆盖玩家与怪物 target gate 的 on/off；probe tests
+  覆盖 0/2 接受与 1 拒绝。
+- 矩阵：P1/P3/P5 已记录配置、FIFO、runtime target gate 与 probe 证据，三个阶段仍
+  In progress。管理员 `IsGM` startup、GM Buff/options、`@GAMEMASTER` 交互切换和完整
+  startup closure 明确 pending。
+- Subagent：暴露的 spawn model 列表仍不提供要求的 `luna_worker`/
+  `gpt-5.6-luna`，因此未静默替换；主 Agent 完成 tracing、架构拆分、实现、验证、文档和提交。
+- 工作流修正：compact 恢复首调用混仓已按 C01 作废；Go 勘察的未引用 glob 与预期零匹配
+  `rg` 在 `set -e` 下失败，相关调用同样全部作废并按 `rg --files`/明确 `|| true` 重跑；
+  C01/C02 已强化。
+- 下一恢复：分别核对两仓 clean status/HEAD 和三类 `.cs` 审计，再从 matrix 选择下一个
+  dependency-ready 子切片。若继续 StartGame，优先只读追踪管理员 `IsGM` 构造、
+  `UpdateGMBuff` 的精确 AddBuff 次数/顺序、GameMasterEffect 可见性、ranking/required-group
+  bypass 与交互式命令，不得把本批普通 TestServer 模式误当成 admin authority。
+
+### 当前提交边界
+
+- Go 原子提交 `375fa60` 仅包含上述 11 个文件；提交前后均完成完整 status、diff check
+  与 `.cs` 审计。
+- Legacy 文档提交只包含上述三个 Markdown。整体 Goal 继续 active，P1/P3/P5 均未完成。
+
+## 历史批次快照（localized welcome bootstrap 已收口）
 
 本节是在 context compact 后按两仓实际 worktree 重建的 durable boundary；compact 摘要
 仅提示“welcome-bootstrap 未提交批次正在写 handoff”，没有保留可信的完整 status 或测试
