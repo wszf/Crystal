@@ -803,3 +803,10 @@
   Recurrence evidence: 下一批筛查时又把 Legacy 相对路径放进了 Go workdir，命令未读到任何对侧文件；该调用输出已作废。
   Strengthened prevention: 仓库切换时同时更换 `workdir` 与相对路径前缀，命令正文只允许当前仓库已确认存在的路径；跨仓库研究必须拆成两个独立调用，不能以“当前目录下不存在”代替切换仓库。
 
+
+### 2026-08-23 — ThunderElement 会话转录读取世界状态必须持有 world 锁
+
+- Symptom: 新增 AI=49 ThunderElement authenticated `net.Pipe` transcript 的普通定向测试通过，但 `-race` 报告测试 goroutine 读取 `monsterAttackActions`/玩家 HP 与服务端 tick goroutine 写入并发。
+- Root cause: 会话 transcript 在手动 tick 后直接读取 world map、攻击动作队列和最终 HP，忽略了连接维护/世界 tick 仍可并发运行；`net.Pipe` 包序正确不等于无锁世界快照可直接读取。
+- Prevention: 测试只通过 world 锁读取或复制 map/队列快照；手动 tick 返回值用于协议断言，最终领域状态另在锁内回读，不能直接访问共享实体或 slice。
+- Verification: 增加锁内快照后，ThunderElement 会话测试普通 `-count=10`、定向 `-race -count=3` 及 AI=49/50 组合门禁通过；完整 race 失败栈未进入该测试。

@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-22（Asia/Singapore；Conquest Gate/Wall 阻挡回归收口后）
+最后更新：2026-08-23（Asia/Singapore；AI=49 ThunderElement 批次提交后）
 
 ## 迁移目标与硬边界
 
@@ -24,6 +24,30 @@
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
 ## 当前 active 批次（从实际两仓状态重建）
+
+恢复时间：2026-08-23；当前仍沿用同一个 active Goal。矩阵中 P5 AI=49
+`ThunderElement` 的领域行为已有 deterministic 覆盖，本批补齐真实认证
+`net.Pipe` 攻击 transcript 与矩阵证据；整体 Goal 仍未完成，不因本批完成宣告
+P5 或整体迁移完成。
+
+- Legacy 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支 `master`，HEAD 为本批 handoff 提交（以 `git log -1 --oneline` 为准）；本批两个文档已提交，工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。
+- Go 仓库实际状态：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，HEAD `ab4e382 test(p5): add ThunderElement session transcript`；本批两个文件已原子提交，工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。
+- 本批 Go 所属文件仅为 `cmd/crystal-server/thunder_element_session_test.go` 与 `docs/migration-matrix.md`；Legacy 所属文件仅为 `tasks/lessons-archive/verification/fixtures-and-transcripts-02.md` 与本 handoff。未修改任何 C# 或 Go 生产实现。
+- 本批 Legacy 对照范围为 `Server/MirObjects/Monsters/ThunderElement.cs`、`Server/MirObjects/MonsterObject.cs` 的 `Process`/`CompleteAttack`/`Attacked`/`Pushed` 调用链，以及共享 Player MAC damage/notification serializer；保留 `CompleteAttack` 先完成全部目标 `Attacked`、再广播 `ObjectAttack` 的顺序。
+- 本批 Go transcript 覆盖真实 StartGame bootstrap 的 `ObjectMonster(AI=49)`、AI admission 的 300ms 延迟动作、impact-time radius-two rescan、Player `Struck -> ObjectStruck -> DamageIndicator -> HealthChanged` 及最后的 `ObjectAttack`，并断言 HP 100→80、动作队列清理和精确 payload。
+- 已通过（退出码 0）：`gofmt`；`go test ./cmd/crystal-server -run '^$' -count=1 -timeout=900s`；`go test ./cmd/crystal-server -run '^TestSessionThunderElementAttackTranscript$' -count=10 -timeout=600s`；对应 `-race -count=3`；`go test ./cmd/crystal-server -run 'ThunderElement|GreatFoxSpirit' -count=10 -timeout=600s`；对应 `-race -count=3`；`go vet ./...`；`go build ./...`；`git diff --check`。
+- 全量普通门禁 `go test ./... -count=1 -timeout=900s` 退出码 0，所有包通过。
+- 无排除完整 race 门禁 `go test -race ./... -count=1 -timeout=900s` 退出码 1；实际唯一失败为既有 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff`（`player_spell_buffs.go:742,824` 与 `intelligent_creature_items.go:549` 的共享 session/equipment-stat race），未进入 AI=49 文件或测试，未修改无关模块掩盖。
+- 本批曾因 transcript 直接读取未加锁的 `monsterAttackActions`/HP 触发一次定向 race；已改为锁内复制快照，并将 symptom/root cause/prevention/verification 追加至 `tasks/lessons-archive/verification/fixtures-and-transcripts-02.md`；最终 AI=49/50 定向 race 未复现本批 race。
+- 恢复命令：新 Session 先回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 和 Go `docs/migration-matrix.md`，分别核对两仓 status/HEAD；本批 Go `ab4e382` 与 Legacy handoff 提交均已提交，随后从矩阵中选择下一个仍未完成的 P5 明确子切片或其他 dependency-ready 项；不得因 compact、文档批次或单个 AI 完成重开/重建/重置 Goal。
+
+### 本批质量门禁与提交边界
+
+- Go 功能提交 `ab4e382` 只包含 `cmd/crystal-server/thunder_element_session_test.go` 与 `docs/migration-matrix.md`；不得把 Legacy 文档混入 Go 提交。
+- Legacy 文档提交只包含 `tasks/lessons-archive/verification/fixtures-and-transcripts-02.md` 与 `tasks/migration-handoff.md`；不得暂存或提交任何 `.cs` 文件。
+- 提交前后均须分别执行两仓的 `git diff --check`、tracked/staged/untracked `.cs` 审计和完整 `git status --short --branch`；全量普通/race 的既有失败必须保留在 handoff，不得为通过全量门禁修改无关模块。
+
+## 历史批次快照（2026-08-22 Conquest Gate/Wall 阻挡回归）
 
 恢复时间：2026-08-22；当前仍沿用同一个 active Goal。上一批 P5 AI=60/61/62/63 ArcherSummon（`VampireSpider`/`SpittingToad`/`SnakeTotem`/`CharmedSnake`）已由 Go 提交 `f195d89 feat(p5): complete archer summon target projections` 收口；本批 P9 Conquest Gate/Wall 阻挡几何回归测试已由 Go 提交 `d09cbe9 test(p9): cover conquest gate blocking geometry` 收口。整体 Goal 仍未完成，不因 compact 或单批完成宣告整体 Goal 完成。
 
