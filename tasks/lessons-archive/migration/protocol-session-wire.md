@@ -260,6 +260,7 @@
 - Verification: 所有手写消费者现将 `BaseStatsInfo` 固定在 active quest 之后、被动对象之前；协议/探针/服务端定向重复与 race、服务端整包、全仓普通/race、vet、build 和 diff 检查均退出 0。
 - Strengthening after review: “五职业默认公式完整匹配”不能只比较每类 count、first 和 last；`base_stats_test.go` 现逐项比较全部 55 个 `BaseStat` 记录及九个 cap，避免中间项类型、公式、Gain 或 GainRate 漂移而测试仍通过。
 - Strengthening after final gate: 强化公式测试后的定向普通/race、全仓普通、vet、build 均通过；完整 race 后续命中已归档的 `TestSessionDarkBodySpawnAndRecallTranscript` 装备 Buff reconciliation 竞争，栈未进入 BaseStats production/protocol/probe/tests，不能继续沿用“本次完整 race 退出 0”的旧快照。
+- Strengthening after conditional-packet recurrence: persisted combat `SpellToggle` 被加在 `GuildBuffList` 后时，首轮组合定向测试无输出挂起；隔离 `TestSessionHalfMoonAttackTranscriptAndPersistence` 后在 30 秒超时栈中确认 client 正写攻击请求、server 正写未消费的 bootstrap toggle，形成 `net.Pipe` write/write deadlock。根因是通用 helper 在 `GuildBuffList` 返回后，已有 HalfMoon/Thrusting/DoubleSlash/FatalSword 与 observer 夹具仍假设 bootstrap 已结束。新增条件式 server-first 包时，除检索包 ID 消费器外，还必须机械检索所有会使条件成立的状态 seed API/字段；直接 `net.Pipe` 客户端必须在发请求前逐包 drain，带后台 reader 的客户端也必须在 barrier 前验证并消费。四个 warrior transcript、target observer bootstrap 与新全四-toggle transcript 已显式消费固定顺序；定向普通 `-count=10`、race `-count=3`、服务端整包、全仓普通/race、vet、build 均通过。
 
 ### 2026-08-23 — BaseStats 配置必须分离序列化字段、计算短路与 runtime authority
 

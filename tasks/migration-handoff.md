@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；自定义 BaseStats 配置/runtime 批次已提交）
+最后更新：2026-08-23（Asia/Singapore；persisted combat SpellToggle bootstrap 批次已提交）
 
 ## 迁移目标与硬边界
 
@@ -23,7 +23,73 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
-## 当前 active 批次（custom BaseStats 已收口）
+## 当前 active 批次（persisted combat SpellToggle bootstrap 已收口）
+
+恢复时间：2026-08-23；沿用同一个 active Goal。本批从 Legacy
+`PlayerObject.StartGameSuccess` 与 Go `serveWithConfig` 的真实登录调用链选出一个明确、
+dependency-ready 的 P3/P5 bootstrap 差集：Go 已持久化四个战斗模式，但登录时未像
+Legacy 一样恢复对应 `SpellToggle` 包。该切片已由 Go 提交
+`c066802 feat(p3): restore persisted combat toggles` 原子收口；P3、P5 与整体 Goal 仍为
+In progress，不因本批完成而重开、reset 或标记 Complete。
+
+- Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master`，本批文档提交 parent 为
+  `8d69694a docs(migration): record configured base stats`（提交后以
+  `git log -1 --oneline` 为准）；本批 owned 文档为 `tasks/lessons.md`、
+  `tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff。提交前无任何
+  其他 tracked/staged/untracked 文件，tracked/staged/untracked `.cs` 均为空。
+- Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，HEAD `c066802 feat(p3): restore persisted combat toggles`；提交后工作树 clean，
+  无 staged/untracked，tracked/staged/untracked `.cs` 均为空。
+- Legacy 权威行为：`StartGameSuccess` 在 `DefaultNPC -> GuildBuffList` 后按固定顺序检查
+  `Info.Thrusting`、`Info.HalfMoon`、`Info.CrossHalfMoon`、`Info.DoubleSlash`；只为 true
+  项发送 `S.SpellToggle(ObjectID, Spell, CanUse=true)`，随后才恢复普通宠物。Server
+  serializer 为 `UInt32 ObjectID + Byte Spell + Boolean CanUse`。
+- Go 实现：新增 `playerSpellToggleBootstrapPackets`，按相同固定顺序过滤 false 状态并
+  使用当前 world ObjectID；`serveWithConfig` 在 guild-buff definition bootstrap 后、
+  mailbox/pet/buff/Hero 恢复前逐包写出。既有 ClientSpellToggle handler、auth JSON/Legacy
+  bridge 字段继续作为持久化 authority，没有新增 schema 或 C#。
+- Go 本批六个提交文件：`cmd/crystal-server/main.go`、
+  `spell_toggle_bootstrap.go`、`spell_toggle_bootstrap_test.go`、
+  `warrior_attack_session_test.go`、`observer_session_test.go` 与
+  `docs/migration-matrix.md`。
+- 新测试覆盖：helper 的 disabled omission 与 partial fixed order；真实认证 `net.Pipe`
+  StartGame 在 `GuildBuffList` 后依次恢复四个精确 payload，并通过 KeepAlive 确认无额外
+  toggle；既有 HalfMoon/Thrusting/DoubleSlash/FatalSword 和 observer transcript 明确
+  消费新增条件式 server-first 包。
+- 已通过（退出码 0）：owned Go 文件 `gofmt -d`；最小/首次 focused 测试；上述完整
+  toggle/warrior/observer 集合普通 `-count=10`；对应 race `-count=3`；
+  `go test ./cmd/crystal-server -count=1 -timeout=900s`；
+  `go test ./... -count=1 -timeout=900s`；
+  `go test -race ./... -count=1 -timeout=900s`；`go vet ./...`；`go build ./...`；
+  `git diff --check` 与两仓 `.cs` 审计。
+- 失败与修复证据：首轮组合定向命令因旧测试未消费新 toggle 而无输出挂起，手工中断
+  退出 1；隔离 HalfMoon 后 30 秒超时退出 1，栈显示 client 在写 Attack、server 在
+  `main.go` toggle write，确认 `net.Pipe` write/write deadlock。根因是只按 packet ID
+  检索消费者，没有同时检索使条件包出现的 `UpdateCharacterSpellToggle` seed。修复四个
+  warrior 与 observer consumer 后，隔离、重复、race、服务端整包和全仓门禁全部通过；
+  symptom/root/prevention/verification 已强化到 protocol-session-wire archive。
+- 工作流证据：本 Session 首次恢复读取误把 Go matrix 绝对路径放入 Legacy 命令，整次
+  输出按 C01 作废并按两仓重跑；一次含中文 Python here-doc 在执行前被源码编码拒绝，
+  确认解释器后改用 `apply_patch`，并强化 C02。两个失败均未产生 C# 或未归属代码变更。
+- Subagent 状态：可用 spawn tool 未提供要求的 `luna_worker`/`gpt-5.6-luna`，因此没有
+  静默替换模型；主 Agent 完成 batch selection、tracing、实现、审查、验证、文档和提交。
+- 矩阵行：P3/P5 已增加 persisted four-mode `SpellToggle` StartGame restoration 与精确
+  GuildBuff boundary 证据；两个阶段仍保持 In progress。
+- 下一恢复命令：新 Session 回读本文件、`tasks/goal-task.md`、`tasks/lessons.md` 与 Go
+  `docs/migration-matrix.md`，分别核对两仓 clean status/HEAD；从矩阵选择下一个
+  dependency-ready pending 子切片，优先继续机械核对 Legacy/Go StartGame packet 差集，
+  但不得再次选择已完成的 BaseStats 或 persisted combat-toggle bootstrap。
+
+### 本批提交边界
+
+- Go 原子提交 `c066802` 仅包含上述六个 production/test/matrix 文件；未混入无关修复或
+  任何 `.cs`。
+- Legacy 文档提交仅包含上述三个 Markdown 文件；提交前后均按完整 status、
+  `git diff --check` 与 tracked/staged/untracked `.cs` 审计。
+- 当前批次已完成且可安全切换；下一批必须重新选择并建立新的 owned-file boundary。
+
+## 历史批次快照（custom BaseStats 已收口）
 
 恢复时间：2026-08-23；当前继续沿用同一个 active Goal。compact 后发现上一版
 handoff 仍声称 Go clean，但实际有 8 个 tracked 修改和 2 个 untracked 文件，因此先
