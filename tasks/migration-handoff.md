@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；管理员 GameMaster startup 切片已提交收口）
+最后更新：2026-08-23（Asia/Singapore；交互式 `@GAMEMASTER` 切片已提交收口）
 
 ## 迁移目标与硬边界
 
@@ -23,7 +23,64 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
-## 最近完成批次（管理员 GameMaster startup，已收口）
+## 最近完成批次（交互式 `@GAMEMASTER`，已收口）
+
+本批从已提交的管理员 startup 边界继续，只迁移 Legacy `Chat("@GAMEMASTER")`
+交互切换；`@SUPERMAN`、`@OBSERVER`、ranking closure 和其他管理员命令未混入本原子
+提交。
+
+- Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master`，恢复时先按上一 handoff 提交文档
+  `e17b441451d681c1f90d46a9e00c7c5d737072e8`
+  (`e17b4414 docs(migration): record administrator bootstrap`)；当前分支
+  `master...origin/master [ahead 407]`，tracked 修改仅 `tasks/lessons.md`、
+  `tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff，无 staged/untracked；
+  tracked/staged/untracked `.cs` 均为空，`git diff --check` 退出 0。
+- Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，HEAD `3e85ec4c4268bc4a24e5ec8cc0ff7a96ef58775c`
+  (`3e85ec4 feat(p3): restore interactive GameMaster mode`)；提交后工作树 clean，
+  无 staged/untracked，tracked/staged/untracked `.cs` 均为空。
+- Legacy ruling：命令名大小写不敏感；runtime `IsGM` 或 `Settings.TestServer` 才能执行。
+  每次先翻转瞬态 `GMGameMaster`，向本人发送本地化 `GameMasterMode` 或 `NormalMode`
+  `Chat(Hint)`，再调用 `UpdateGMBuff`。普通 TestServer 玩家因 `IsGM=false` 不生成 Buff；
+  管理员将 GameMaster bit 与 Observer/Superman bits 合并为一个 value，owner AddBuff 后按
+  `GameMasterEffect` 可见性广播。该 mode 控制玩家与怪物 target gate，但不是管理员 authority。
+- Go 实现：localization 增加 `NormalMode` English fallback/精确 overlay；生产聊天路由接入
+  `@GAMEMASTER`；world lock 内完成权限、切换与 Hint，管理员保留其他 option bits，按
+  `Hint -> owner AddBuff -> nearby AddBuff -> persistence` 排序；TestServer-only 分支只改变
+  runtime `GameMasterMode`，不创建 Buff、不推进 durable revision。
+- 测试覆盖：world tests 锁定未授权拒绝、TestServer transient-only、管理员 option 保留、
+  recipient/可见性/persist 顺序；authenticated `net.Pipe` 锁定大小写命令、localized
+  enable/disable Hint、精确 AddBuff tail、KeepAlive 屏障、logout persistence，以及 relogin
+  时 stored GameMaster bit 先 restore、随后按新 runtime 默认值 final reset；TestServer 普通
+  账户两次切换均证明没有 AddBuff 或持久化管理员状态。
+- 已通过（退出码 0）：两包最小只编译；config/server focused 普通 `-count=10`；focused
+  race `-count=3`；`go test ./cmd/crystal-server -count=1 -timeout=900s`；最终
+  `go test ./... -count=1 -timeout=900s`；`go test -race ./... -count=1 -timeout=900s`；
+  `go vet ./...`；`go build ./...`；`go run ./cmd/crystal-protocol-probe -mode vectors`；
+  owned-file `gofmt -d`、`git diff --check` 与两仓三类 `.cs` 门禁。无排除项。
+- 失败归因与修正：首次 focused 调用退出 1，唯一失败为新 TestServer session fixture 沿用
+  `AllowStartGame=false` 默认值，普通非管理员正确收到 StartGame result 0；显式设置
+  `AllowStartGame=true` 后 focused、重复、race 与全部门禁均退出 0，未修改生产 gate。
+- 矩阵：P1/P3/P5 已记录本切片，三阶段继续 In progress；整体 Goal 不得标为完成。
+- Subagent：虽然 `luna_worker` 已复制到当前 `$CODEX_HOME/agents`，本已启动会话的
+  `spawn_agent` schema 仍未热加载该 custom agent，且可选 model 仍不含 `gpt-5.6-luna`；
+  已在执行前公开说明并按规则未用其他模型冒充。新 Session 重载后继续优先尝试
+  `luna_worker`。
+- 下一恢复命令：分别核对两仓 clean status/HEAD 与三类 `.cs` 门禁，回读矩阵后选择
+  `@SUPERMAN`、`@OBSERVER` 或 ranking closure 中一个 dependency-ready 原子切片；不得重复
+  startup 或本 `@GAMEMASTER` 切片。
+
+### 本批提交边界
+
+- Go 原子提交 `3e85ec4` 只包含 7 个 owned 文件：
+  `cmd/crystal-server/game_master.go`、`game_master_test.go`、
+  `game_master_session_test.go`、`main.go`、`internal/config/localization.go`、
+  `localization_test.go` 与 `docs/migration-matrix.md`。
+- Legacy 文档提交只允许 `tasks/lessons.md`、本 handoff 与 protocol-session-wire archive；
+  整体 Goal 继续 active，P1/P3/P5 均保持 In progress。
+
+## 历史批次快照（管理员 GameMaster startup，已收口）
 
 本节从 compact 后 handoff 与两仓实际状态恢复，并以当前源码、Legacy 调用链和重新运行的
 完整门禁为 authority。恢复时 handoff 只记录 11 个 Go 文件，但实际 worktree 已包含

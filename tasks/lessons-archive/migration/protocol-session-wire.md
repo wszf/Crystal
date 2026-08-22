@@ -296,3 +296,10 @@
 - Root cause: 把 `GuildBuffList` 当成稳定 game-loop 屏障，没有按 Legacy `restore Buffs -> final UpdateGMBuff` 展开管理员条件包；probe 只校验单包类型，没有建模 fresh admin、stored admin、TestServer admin 与 revoked authority 四种精确状态机。
 - Prevention: 对每种 authority/config/persisted-state 组合列出 owner/nearby 的完整包序：fresh admin 一个 final AddBuff，stored admin restore+final，TestServer admin early+restore+final，revoked non-admin restore+remove；新增条件 bootstrap 后机械更新所有会 seed AdminAccount 的旧 consumer，并用 KeepAlive 作为尾部屏障。probe 必须要求一个合法 option 值、已知 bit、最多两个 tail 包，且 RemoveBuff 只能紧跟一个 restore AddBuff。
 - Verification: 旧 observer transcript 已显式消费并断言 private final GameMaster AddBuff；probe 新增 missing/unknown options、third AddBuff、standalone removal 与 add-after-removal 拒绝测试。GameMaster/required-group/observer focused 普通 `-count=10`、四包 focused race `-count=3`、服务端整包、全仓普通重跑、完整 race、vet、build、probe vectors、gofmt 与 diff check 均退出 0；首次全仓普通仅命中既有 `TestSessionHallucinationTranscript` 30 秒 pipe flake，隔离 `-count=10` 与后续服务端/全仓重跑均退出 0，未修改该无关模块。
+
+### 2026-08-23 — 交互式 GameMaster mode 必须分离权限、瞬态状态与 Buff authority
+
+- Symptom: Legacy `@GAMEMASTER` 同时允许管理员和 TestServer 普通账户，但只有管理员的 `UpdateGMBuff` 会生成/持久化 AddBuff；新 authenticated TestServer fixture 首次又因沿用 `AllowStartGame=false` 默认值而收到合法的 StartGame result 0，未到达目标命令。
+- Root cause: 容易把全局 TestServer capability、runtime `GMGameMaster` 目标免疫、账户 `IsGM` authority 和 GameMaster durable Buff 合并；测试还把“TestServer 可执行命令”误推成“普通账户自动绕过 AllowStartGame”。
+- Prevention: 命令切片显式列四层：`IsGM || TestServer` permission、先发 localized mode Hint、所有合法调用都切瞬态 target gate、仅 `IsGM` 才更新 option-preserving AddBuff/可见广播/persistence。普通 TestServer session fixture 必须单独开启 `AllowStartGame`，不得扩大生产 start gate 修测试。
+- Verification: world tests 覆盖未授权、TestServer transient-only、管理员 Observer/Superman bit 保留和 `Hint -> owner -> nearby -> persist`；authenticated admin/TestServer transcripts 覆盖 enable/disable、无额外 tail、logout/relogin restore/final reset；修正 fixture 后 focused 普通 `-count=10`、race `-count=3`、服务端/全仓普通、完整 race、vet、build、probe vectors、gofmt 和 diff check 全部退出 0。
