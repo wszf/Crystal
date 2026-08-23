@@ -1,10 +1,9 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 03:35 (Asia/Singapore)
+Last updated: 2026-08-24 03:38 (Asia/Singapore)
 
-This replace-in-place snapshot closes `LOC-P1-CATALOG-001` in committed Go and
-routes the dependency-ready `LOG-P1-CATEGORY-001`. LOG writes remain gated only
-until the enclosing Legacy control commit is clean.
+This replace-in-place snapshot records the corrected cross-repository transition
+from completed LOC to active `LOG-P1-CATEGORY-001`. No LOG code is modified.
 
 ## Goal and control-plane state
 
@@ -16,15 +15,15 @@ nine unfinished finite leaves.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch before the enclosing control commit:
-  `master...origin/master [ahead 422]`.
-- Observed HEAD: `a20d2a8d2ff7be81b13856f4d54b07de8ce9ec3e`
-  (`docs(migration): expand P1 catalog loader authority`).
-- Expected enclosing subject: `docs(migration): route P1 logging categories`.
+- Branch before the enclosing correction commit:
+  `master...origin/master [ahead 423]`.
+- Observed HEAD: `17e65658781e05ff83e4304277902d26635eb17f`
+  (`docs(migration): route P1 logging categories`).
+- Expected enclosing subject: `docs(migration): reconcile P1 logging route`.
   Recovery may observe exactly this one documentation commit delta.
 - Staged and untracked files: none.
-- Tracked modifications are exactly `tasks/lessons.md`,
-  `tasks/migration-active.md`, and this handoff after its replacement.
+- Tracked modifications are exactly `tasks/lessons.md` and this handoff after
+  its replacement.
 - `AGENTS.md` and tracked `agents.md` remain one hard-linked inode; every C# file
   remains unchanged.
 
@@ -32,16 +31,16 @@ nine unfinished finite leaves.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
 - Branch: `main`.
-- HEAD: `d21681845090f0030e8f214628fd9aa3d60172b7`
-  (`feat(config): complete Legacy server text catalog`).
+- HEAD: `a3721cf8c08f3b10ea35987849278b36575347cf`
+  (`docs(migration): activate P1 logging categories`).
 - Worktree, staged files, and untracked files are clean.
-- Matrix marks LOC catalog Complete, P1 scope-frozen/In progress, and nine named
-  residual leaves.
+- Matrix marks LOC Complete, LOG category Active, P1 scope-frozen/In progress,
+  and nine named residual leaves.
 
 ## Active leaf and protected work
 
-- Active leaf: `LOG-P1-CATEGORY-001` for routing only until the expected Legacy
-  commit is clean.
+- Active leaf: `LOG-P1-CATEGORY-001`; writes remain gated only until the expected
+  Legacy correction commit is clean.
 - Outcome: production wiring for Server/Chat/Debug queue+file and Player/Spawn
   file-only logging with Legacy category, cap, layout, and sink-failure behavior.
 - Matrix anchors: `### 2026-08-24 P1 finite closure inventory`, the LOG category
