@@ -50,6 +50,7 @@ duplicate.
 - Strengthening after P1 matrix reconciliation: 用记忆中的整句搜索实际跨行的 matrix prose 得到空行号，随后把负数范围交给 BSD `sed` 并 exit 1；恢复审计又把预期可为零的 archive `rg` 裸放在 `set -e` 下，并在 Go 定位中使用未引用 shell glob。相关调用均已作废并以稳定单行片段、显式接收 `rg` 退出 0/1、已确认精确路径重跑。不得对空搜索结果做算术，不得把“零匹配”或“glob 恰好命中”当成 argv 已验证。
 - Strengthening after `CFG-P1-CONTRACT-001` tracing: 查找 Legacy startup consumers 时再次把可能零匹配的 `rg` 裸放在 `set -e` 调用中，整次零输出结果已作废；随后先声明零匹配有效、显式接收退出码 0/1，并扩大到已验证的 `.cs` 路径后定位真实 `Server.MirForms/Program.cs` 入口。凡搜索“可能不存在的限定写法”必须在命令成形时就使用 0/1 分支，不能等退出 1 后补救。
 - Strengthening after `LOC-P1-CATALOG-001` discovery: Active Index 将 `server_text_catalog*.go` 列为允许新建文件，主线程却在枚举只返回现有 localization 两文件后仍把这两个未来路径交给 `wc`，调用退出 1 且整次输出作废。清单中的 write authority 不等于文件已存在；每个候选必须以本次 `rg --files` 结果分类为 existing/new，只有 existing 才能进入读取参数。
+- Strengthening after `LOC-P1-CATALOG-001` integration: 主审已有固定 argv 规则后仍把 `--glob` 放在 `rg --` 之后，调用 exit 2 且全部输出作废；随后清理本批测试生成文件时又把 `rm -f` 拼进补丁/测试复合命令，整次在执行前被策略拒绝。已分别以选项前置的 `rg` 和只删除精确自有文件的 `apply_patch` 零退出重跑；今后发送前同时机械检查 `rg` 的 `--` 边界和复合命令是否含被禁止的清理动作。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 

@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 02:56 (Asia/Singapore)
+Last verified: 2026-08-24 03:33 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,27 +39,24 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `LOC-P1-CATALOG-001`
-- Status: `Active` for routing; CFG is committed at Go
-  `fbc69d25f3577ac7d2f16be17bbdbeba10722285`, and LOC writes remain gated only
+- Leaf ID: `LOG-P1-CATEGORY-001`
+- Status: `Active` for routing; LOC catalog is committed at Go
+  `d21681845090f0030e8f214628fd9aa3d60172b7`, and LOG writes remain gated only
   until this control transition is committed and both repositories are clean.
-- Outcome: provide the exact Legacy 768-key server default catalog and English/
-  Chinese overlay behavior without importing client-only UI localization.
+- Outcome: wire the existing Go logging manager through production and preserve
+  Legacy Server/Chat/Debug queue and Server/Chat/Debug/Player/Spawn file behavior.
 - Go matrix anchors to read: `### 2026-08-24 P1 finite closure inventory`, the
-  `LOC-P1-CATALOG-001` row, and the row beginning `| P1 |` only.
-- Legacy read authority: `Shared/Language.cs`,
-  `Server.MirForms/Localization/English.json`,
-  `Server.MirForms/Localization/Chinese.json`, and bounded startup/lookup
-  consumers required to rule unknown/malformed/fallback behavior.
-- Go write authority: `internal/config/localization.go`,
-  `internal/config/localization_test.go`,
-  `internal/config/server_text_catalog.go`, and
-  `internal/config/server_text_catalog_test.go`, plus only the bounded
-  localization-load invocation in `internal/config/config.go` needed to
-  distinguish Legacy Setup startup from the documented empty-path Go extension.
-- Forbidden scope: feature call-site migration, client UI catalogs, network,
-  logging, lifecycle, unrelated config parsing, broad matrix edits, and C#
-  changes.
+  `LOG-P1-CATEGORY-001` row, and the row beginning `| P1 |` only.
+- Legacy read authority: `Server/Logger.cs`, `Server/MessageQueue.cs`,
+  `Server.MirForms/SMain.cs`, `Server/MirObjects/Player/Reporting.cs`,
+  `Server/MirEnvir/Map.cs`, `Server.MirForms/log4net.config`, and only bounded
+  category-specific startup/dequeue consumers needed to rule queue/file order.
+- Go write authority: `internal/logging/logging.go`,
+  `internal/logging/logging_test.go`, bounded logging setup/calls in
+  `cmd/crystal-server/main.go`, and new `cmd/crystal-server/runtime_logging.go`
+  plus `runtime_logging_test.go`.
+- Forbidden scope: broad call-site closure, localization, network gates/status/
+  HTTP, lifecycle redesign, unrelated config, persistence, protocol, and C#.
 
 `CFG-P1-CONTRACT-001` is Complete in the verified Go candidate. Exact-case and
 first-match INI behavior, UInt16 fallback/write-back, default production path,
@@ -68,35 +65,41 @@ startup-visible failures are locked by focused/repeated/race tests. Its required
 unexcluded integration run reproduced the established OmaMage flake; the
 precisely excluded rerun and vet/build passed as recorded in the handoff.
 
+`LOC-P1-CATALOG-001` is Complete at Go `d21681845090f0030e8f214628fd9aa3d60172b7`.
+The complete 768-key defaults, exact 766-key English/Chinese assets, two active
+English fallbacks, placeholders, unknown/malformed/rewrite/generation behavior,
+startup loading, repeated tests, focused race, and integration attribution are
+locked by Go-only production/test evidence.
+
 `DISC-P1-CLOSURE` is Complete in committed control. A bounded
 main-agent audit and independent read-only `luna_worker` review both found no
 missing, duplicate, cross-phase, or non-observable P1 child. Static evidence
 locks 768 default server keys, 981 direct lookups/765 used keys/three unused
 aliases, 142 MessageQueue business invocations, and four direct Player/Spawn/
-Server logger sites. P1 has ten unfinished leaves and two completed audit items;
+Server logger sites. P1 has nine unfinished leaves and three completed findings;
 this is a P1 denominator only, not a project percentage.
 
 ### Protected Go ownership
 
-- CFG is committed at Go `fbc69d25f3577ac7d2f16be17bbdbeba10722285`;
-  the Go worktree is clean and no CFG path remains protected.
-- Current protected Legacy control paths are recorded in the handoff; the LOC
+- LOC is committed at Go `d21681845090f0030e8f214628fd9aa3d60172b7`;
+  the Go worktree is clean and no LOC path remains protected.
+- Current protected Legacy control paths are recorded in the handoff; the LOG
   write set remains gated until this routing commit is clean.
 - Later P1 leaves may share files only serially. The one active leaf owns the
   exact paths above; no subagent may expand them.
 
 ### Remaining acceptance work
 
-- [ ] Generate the exact 768-key server default catalog in Go-native form and
-      prove its key count against Legacy declarations.
-- [ ] Lock the English/Chinese server asset key sets, exact values, and composite
-      format placeholder signatures without modifying either Legacy JSON file.
-- [ ] Match unknown key, missing file, malformed JSON/value, empty catalog, and
-      unwritable generated-file behavior at the production localization entry.
-- [ ] Preserve the active missing-Chinese-key English fallback and distinguish it
-      from unknown server keys and client-only UI Text/Enum assets.
-- [ ] Prove startup loading and environment path overrides with focused/repeated
-      catalog tests; add focused race only if shared mutable state is introduced.
+- [ ] Lock Legacy category/file mapping, log levels, append layouts, directory and
+      filename behavior, and the exact three GUI-equivalent queue authorities.
+- [ ] Preserve 100-entry Server/Chat/Debug queue caps while file writes continue
+      after saturation; prove Player/Spawn remain file-only.
+- [ ] Wire one real production Server, Chat, Debug, Player, and Spawn event through
+      the manager without claiming broad business call-site closure.
+- [ ] Prove startup/open/write/close and partial sink failure behavior without
+      holding unrelated server locks across disk I/O.
+- [ ] Run focused production logging tests, repeated queue tests, focused race,
+      and the standard Leaf gate.
 
 ### P1 frozen child registry
 
@@ -107,9 +110,9 @@ selected now.
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `CFG-P1-CONTRACT-001` | Complete | — | `internal/config/{config.go,config_test.go,p1_contract_test.go}`; bounded `cmd/crystal-server/main.go`; new `cmd/crystal-server/p1_config_startup_test.go` | focused/repeated config + startup |
-| `LOC-P1-CATALOG-001` | Active | CFG (Complete) | `internal/config/{localization.go,localization_test.go,server_text_catalog.go,server_text_catalog_test.go}` plus bounded `config.go` loader invocation | catalog/static + startup |
+| `LOC-P1-CATALOG-001` | Complete | CFG (Complete) | `internal/config/{localization.go,localization_test.go,server_text_catalog.go,server_text_catalog_test.go}` plus bounded `config.go` loader invocation | catalog/static + startup |
 | `LOC-P1-CALLSITE-CLOSURE-001` | Ready | LOC catalog + P2-P11 feature closure | new `docs/p1-localization-callsite-ledger.md`; new `internal/config/localization_coverage_test.go`; matrix evidence only | static ledger + owning transcripts + phase integration |
-| `LOG-P1-CATEGORY-001` | Ready | CFG | `internal/logging/{logging.go,logging_test.go}`; `cmd/crystal-server/main.go`; new `runtime_logging.go`/`runtime_logging_test.go` | focused/repeated/race |
+| `LOG-P1-CATEGORY-001` | Active | CFG | `internal/logging/{logging.go,logging_test.go}`; `cmd/crystal-server/main.go`; new `runtime_logging.go`/`runtime_logging_test.go` | focused/repeated/race |
 | `LOG-P1-CALLSITE-CLOSURE-001` | Ready | LOG category + P2-P11 feature closure | new `docs/p1-logging-callsite-ledger.md`; new `cmd/crystal-server/logging_coverage_test.go`; matrix evidence only | static ledger + representative integration |
 | `NET-P1-GATES-001` | Ready | CFG | `cmd/crystal-server/main.go`, `main_test.go`; new `connection_gates.go`/`connection_gates_test.go` | deterministic TCP/repeated/race |
 | `NET-P1-STATUS-001` | Ready | CFG | `cmd/crystal-server/main.go`; new `status_service.go`/`status_service_test.go` | TCP cadence/shutdown/race |
