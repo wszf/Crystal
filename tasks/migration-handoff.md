@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；`@SUPERMAN` Go 提交已完成，Legacy 文档待提交）
+最后更新：2026-08-23（Asia/Singapore；`@SUPERMAN` 两仓提交已收口）
 
 ## 迁移目标与硬边界
 
@@ -23,7 +23,7 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
-## 当前已完成批次（交互式 `@SUPERMAN`，Go 已提交）
+## 最近完成批次（交互式 `@SUPERMAN`，已收口）
 
 本批从 compact 后重建的 34 文件未验证补丁恢复，先由两个边界明确的
 `luna_worker` 完成只读 Legacy tracing 与 Go review，再由主 Agent 按 Legacy 调用链裁决、
@@ -31,10 +31,11 @@
 混入本原子切片。
 
 - Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
-  `master`，HEAD `03274059faea246c6c5adcd2a186455bd30104ce`
-  (`03274059 docs(migration): refresh interactive GameMaster handoff`)；当前 tracked 修改为
-  `tasks/lessons.md`、`tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff，
-  无 staged/untracked；tracked/staged/untracked `.cs` 均为空，`git diff --check` 退出 0。
+  `master`，功能文档提交 `cc848b9824020b1dec9206f3aeda632c09509bc0`
+  (`cc848b98 docs(migration): record interactive Superman mode`)；该提交包含
+  `tasks/lessons.md`、`tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff。
+  提交后工作树 clean，无 staged/untracked；tracked/staged/untracked `.cs` 均为空，
+  `git diff --check` 退出 0。本段 post-commit 刷新将作为独立 handoff 提交。
 - Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
   `main`，HEAD `901e6213df8240ba498eb1e00529cf72857a9de2`
   (`901e621 feat(p3): restore interactive Superman mode`)；提交包含 35 个文件：
@@ -89,14 +90,14 @@
   vital 写入口与 persistence/notification 风险。两个线程均未写文件、未测试、未提交，
   结果已由主 Agent review 后关闭。
 - 矩阵范围：P1/P3/P5 已记录本切片，三阶段继续 `In progress`；整体 Goal 继续 active。
-- 下一恢复命令：提交 Legacy 三个 owned Markdown，再核对两仓 post-commit status/HEAD 与
-  三类 `.cs` 门禁。新 Session 从 `@OBSERVER`、ranking closure 或矩阵其他
-  dependency-ready 子切片选择一个，不得重复 `@SUPERMAN`。
+- 下一恢复命令：新 Session 分别核对两仓 clean status/HEAD 与三类 `.cs` 门禁，完整读取
+  Go 矩阵后从 `@OBSERVER`、ranking closure 或其他 dependency-ready 子切片选择一个，
+  不得重复 `@SUPERMAN`。
 
 ### 本批提交边界
 
-- Go 原子提交 `901e621` 只包含上述 35 个文件；Legacy 文档提交只允许 active lessons、
-  protocol-session-wire archive 与本 handoff。
+- Go 原子提交 `901e621` 只包含上述 35 个文件；Legacy 文档提交 `cc848b98` 只包含
+  active lessons、protocol-session-wire archive 与本 handoff。
 - 禁止 reset、stash、checkout、clean、覆盖其他工作或修改任何 `.cs`。整体 Goal 未完成。
 
 ## 最近完成批次（交互式 `@GAMEMASTER`，已收口）
