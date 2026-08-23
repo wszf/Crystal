@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；交互式 `@GAMEMASTER` 切片已提交收口）
+最后更新：2026-08-23（Asia/Singapore；`@SUPERMAN` Go 提交已完成，Legacy 文档待提交）
 
 ## 迁移目标与硬边界
 
@@ -23,6 +23,82 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
+## 当前已完成批次（交互式 `@SUPERMAN`，Go 已提交）
+
+本批从 compact 后重建的 34 文件未验证补丁恢复，先由两个边界明确的
+`luna_worker` 完成只读 Legacy tracing 与 Go review，再由主 Agent 按 Legacy 调用链裁决、
+修正共享 vital 边界并完成全部门禁。`@OBSERVER`、ranking closure 和其他管理员命令未
+混入本原子切片。
+
+- Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master`，HEAD `03274059faea246c6c5adcd2a186455bd30104ce`
+  (`03274059 docs(migration): refresh interactive GameMaster handoff`)；当前 tracked 修改为
+  `tasks/lessons.md`、`tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff，
+  无 staged/untracked；tracked/staged/untracked `.cs` 均为空，`git diff --check` 退出 0。
+- Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，HEAD `901e6213df8240ba498eb1e00529cf72857a9de2`
+  (`901e621 feat(p3): restore interactive Superman mode`)；提交包含 35 个文件：
+  `cmd/crystal-server/conquest_archers.go`、`counter_attack.go`、
+  `counter_attack_test.go`、`curse_test.go`、`dark_oma_king.go`、`earth_golem.go`、
+  `energy_shield.go`、`energy_shield_test.go`、`flying_statue.go`、`game_master.go`、
+  `game_master_session_test.go`、`game_master_test.go`、`general_meow_meow.go`、
+  `healing_circle.go`、`hell_lord.go`、`hiding_buffs_test.go`、`horned_commander.go`、
+  `main.go`、`manectric_blest.go`、`mass_healing_test.go`、`plague.go`、`poison.go`、
+  `reincarnation.go`、`scaly_beast.go`、`soul_fireball_test.go`、
+  `special_item_modes_test.go`、`stone_golem.go`、`support_buffs_test.go`、
+  `tucson_general.go`、`ultimate_enhancer_test.go`、`warrior_attack.go`、`world.go`、
+  `internal/config/localization.go`、`localization_test.go` 与
+  `docs/migration-matrix.md`。提交后工作树 clean，无 staged/untracked；
+  tracked/staged/untracked `.cs` 均为空。提交统计为 749 insertions、179 deletions。
+- Legacy ruling：`@SUPERMAN` 只在 Game stage 可达，命令大小写不敏感且忽略额外参数；
+  permission 为 `IsGM || Settings.TestServer`。合法调用严格执行
+  `GMNeverDie toggle -> localized InvincibleMode/NormalMode Hint -> UpdateGMBuff`；普通
+  TestServer 玩家只有瞬态 flag 与 Hint，管理员才把 GameMaster/Observer/Superman 的
+  1/2/4 bits 合并为 Buff type 100，按 owner→可见 nearby→persistence 更新。Buff 可持久，
+  runtime `GMNeverDie` 不持久；重登先 restore stored Buff，再按 false runtime final reset。
+  `HumanObject.ChangeHP` 先执行 Protection→`ChangeMP`，随后两种 vital 的非零请求均在
+  上/下限处理后由 GMNeverDie 强制回满；零 MP 负扣仍发 HealthChanged，regen indicator
+  仍显示请求恢复量，整数运算保持 .NET 默认 unchecked 怪癖。
+- Go 实现：新增 `worldPlayer.SupermanMode`、localized `InvincibleMode`、生产聊天路由、
+  option-preserving administrator Buff projection 与 TestServer transient-only 分支；共享
+  `ChangeHP`/`ChangeMP`/`SetHP` helper 覆盖 Protection、over-cap/zero notification、
+  Superman refill，并接入 NPC vital、item recovery、mana cost、普通/特殊玩家伤害、poison、
+  healing、Vampirism、EnergyShield 与 Reincarnation。主审发现 helper 初稿未自行执行
+  Protection redirect，已在 `world.go` 修正并把 world test 改为直接验证共享入口。
+- 测试覆盖：world tests 锁定未授权、TestServer-only、管理员其他 option 保留、
+  Hint/owner/nearby/persist 顺序、Protection、同终值通知、lethal monster/poison 与共享
+  clamp 怪癖；authenticated `net.Pipe` 锁定 localized enable/disable、AddBuff tail、HP/MP
+  包、logout durable option、relogin restore/final reset 和 TestServer 无持久状态。
+- 已通过（退出码 0）：两包最小只编译；config `ServerLanguage` 普通 `-count=10`；server
+  `Superman|LegacyVitalChange` 普通 `-count=10` 与 race `-count=3`；服务端整包；最终
+  `go test ./... -count=1 -timeout=900s`；最终 `go test -race ./... -count=1
+  -timeout=900s`；`go vet ./...`；`go build ./...`；
+  `go run ./cmd/crystal-protocol-probe -mode vectors`；owned-file gofmt、
+  `git diff --check` 与两仓三类 `.cs` 门禁。
+- 失败归因：首次全仓普通退出 1，唯一失败为既有
+  `TestSessionYinDevilNodeTranscript/42` 的通知 `[]` vs `[84]`；隔离 `-count=20` 与随后
+  服务端整包、全仓普通均退出 0。首次完整 race 退出 1，唯一失败为 handoff 已记录的
+  `TestSessionOmaMageRangeSlowFrozenTranscript` 随机 bound `[2 1]` vs `[1]`；隔离普通可过、
+  race 可复现，随后未改无关文件的完整 race 重跑退出 0。两者栈均未进入本批文件。
+- Review 裁决：Go 只读 review 报告的 `int32` overflow、near-full healing indicator 与
+  Plague zero-MP notification 均经主 Agent 回读 Legacy 后确认为原版行为，未按常规直觉
+  “修正”；唯一采纳并修复的是共享 ChangeHP 缺失 Protection redirect。
+- Subagent：`01a02be7-cab3-7f00-916f-706bbc3de6a7`（Faraday，`luna_worker`）只读追踪
+  Legacy `@SUPERMAN`/GMNeverDie/UpdateGMBuff/ChangeHP/ChangeMP；
+  `01a02be8-fe07-70c0-9fdf-8617a6c21e30`（Noether，`luna_worker`）只读审查 Go 34 文件
+  vital 写入口与 persistence/notification 风险。两个线程均未写文件、未测试、未提交，
+  结果已由主 Agent review 后关闭。
+- 矩阵范围：P1/P3/P5 已记录本切片，三阶段继续 `In progress`；整体 Goal 继续 active。
+- 下一恢复命令：提交 Legacy 三个 owned Markdown，再核对两仓 post-commit status/HEAD 与
+  三类 `.cs` 门禁。新 Session 从 `@OBSERVER`、ranking closure 或矩阵其他
+  dependency-ready 子切片选择一个，不得重复 `@SUPERMAN`。
+
+### 本批提交边界
+
+- Go 原子提交 `901e621` 只包含上述 35 个文件；Legacy 文档提交只允许 active lessons、
+  protocol-session-wire archive 与本 handoff。
+- 禁止 reset、stash、checkout、clean、覆盖其他工作或修改任何 `.cs`。整体 Goal 未完成。
+
 ## 最近完成批次（交互式 `@GAMEMASTER`，已收口）
 
 本批从已提交的管理员 startup 边界继续，只迁移 Legacy `Chat("@GAMEMASTER")`
@@ -30,10 +106,11 @@
 提交。
 
 - Legacy 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
-  `master`，HEAD `0d0d255596681731b613d0f0f57c191c15ccfdfb`
-  (`0d0d2555 docs(migration): record interactive GameMaster mode`)；当前分支
-  `master...origin/master [ahead 408]`，tracked 修改仅本 handoff 的 post-commit 状态刷新，
-  无 staged/untracked；tracked/staged/untracked `.cs` 均为空，`git diff --check` 退出 0。
+  `master`，HEAD `03274059faea246c6c5adcd2a186455bd30104ce`
+  (`03274059 docs(migration): refresh interactive GameMaster handoff`)；compact 后恢复时
+  tracked 修改为 `tasks/lessons.md` 中本地 Codex strict-config 验证教训，以及本 handoff
+  的恢复刷新，无 staged/untracked；tracked/staged/untracked `.cs` 均为空。前一份
+  post-commit handoff 已由 `03274059` 提交，不再待提交。
 - Go 仓库：根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
   `main`，HEAD `3e85ec4c4268bc4a24e5ec8cc0ff7a96ef58775c`
   (`3e85ec4 feat(p3): restore interactive GameMaster mode`)；提交后工作树 clean，
@@ -61,13 +138,14 @@
   `AllowStartGame=false` 默认值，普通非管理员正确收到 StartGame result 0；显式设置
   `AllowStartGame=true` 后 focused、重复、race 与全部门禁均退出 0，未修改生产 gate。
 - 矩阵：P1/P3/P5 已记录本切片，三阶段继续 In progress；整体 Goal 不得标为完成。
-- Subagent：虽然 `luna_worker` 已复制到当前 `$CODEX_HOME/agents`，本已启动会话的
-  `spawn_agent` schema 仍未热加载该 custom agent，且可选 model 仍不含 `gpt-5.6-luna`；
-  已在执行前公开说明并按规则未用其他模型冒充。新 Session 重载后继续优先尝试
-  `luna_worker`。
-- 下一恢复命令：先提交本 handoff 的 post-commit 状态刷新，再分别核对两仓 clean
-  status/HEAD 与三类 `.cs` 门禁；回读矩阵后选择 `@SUPERMAN`、`@OBSERVER` 或 ranking
-  closure 中一个 dependency-ready 原子切片；不得重复 startup 或本 `@GAMEMASTER` 切片。
+- Subagent：`luna_worker` 已复制到当前 `$CODEX_HOME/agents`；本恢复会话将在选批前
+  重新发现 `spawn_agent` schema，并只在工具实际提供 custom agent 或
+  `gpt-5.6-luna/max` 时委派，不会用其他模型冒充。
+- 恢复核对未运行 Go 测试；最近已完成批次的退出码 0 证据仍见下文。当前 owned 文件仅
+  Legacy `tasks/lessons.md` 与本 handoff；尚未选择或开始新的 Go 实现批次。
+- 下一恢复命令：继续完整读取 Go 矩阵并核对 `luna_worker` 可用性，然后只选择
+  `@SUPERMAN`、`@OBSERVER` 或 ranking closure 中一个 dependency-ready 原子切片；不得
+  重复 startup 或本 `@GAMEMASTER` 切片。
 
 ### 本批提交边界
 
@@ -76,8 +154,9 @@
   `game_master_session_test.go`、`main.go`、`internal/config/localization.go`、
   `localization_test.go` 与 `docs/migration-matrix.md`。
 - Legacy 文档提交 `0d0d2555` 只包含 `tasks/lessons.md`、本 handoff 与
-  protocol-session-wire archive；当前仅本 handoff 的精确 post-commit 状态刷新未提交。
-  整体 Goal 继续 active，P1/P3/P5 均保持 In progress。
+  protocol-session-wire archive；后续 post-commit 状态刷新已由 `03274059` 单独提交。
+  当前仅本地 Codex 验证 lesson 与 compact 后恢复 handoff 未提交；整体 Goal 继续 active，
+  P1/P3/P5 均保持 In progress。
 
 ## 历史批次快照（管理员 GameMaster startup，已收口）
 

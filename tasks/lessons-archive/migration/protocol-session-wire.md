@@ -303,3 +303,10 @@
 - Root cause: 容易把全局 TestServer capability、runtime `GMGameMaster` 目标免疫、账户 `IsGM` authority 和 GameMaster durable Buff 合并；测试还把“TestServer 可执行命令”误推成“普通账户自动绕过 AllowStartGame”。
 - Prevention: 命令切片显式列四层：`IsGM || TestServer` permission、先发 localized mode Hint、所有合法调用都切瞬态 target gate、仅 `IsGM` 才更新 option-preserving AddBuff/可见广播/persistence。普通 TestServer session fixture 必须单独开启 `AllowStartGame`，不得扩大生产 start gate 修测试。
 - Verification: world tests 覆盖未授权、TestServer transient-only、管理员 Observer/Superman bit 保留和 `Hint -> owner -> nearby -> persist`；authenticated admin/TestServer transcripts 覆盖 enable/disable、无额外 tail、logout/relogin restore/final reset；修正 fixture 后 focused 普通 `-count=10`、race `-count=3`、服务端/全仓普通、完整 race、vet、build、probe vectors、gofmt 和 diff check 全部退出 0。
+
+### 2026-08-23 — 交互式 Superman 必须统一 HumanObject vital 边界并保留怪癖
+
+- Symptom: `@SUPERMAN` 的 Hint/Buff 测试已能通过，但 Go 仍有多条玩家 HP/MP 生产路径直接赋值；初次共享 helper 又只实现上下限和 GMNeverDie refill，遗漏了 `ChangeHP` 在负值时先走 Protection→`ChangeMP` 的完整重定向。只读 review 还把零 MP Plague 发包、治疗显示请求量和 `int32` 回绕按常规工程直觉标成缺陷。
+- Root cause: Legacy 的 `GMNeverDie` 不是单一 combat gate，而位于 `HumanObject.ChangeHP`、`ChangeMP`、`SetHP` 的共享状态提交边界；Protection 又先于 GMNeverDie。与此同时，把“更合理的客户端显示/数值安全”误当成行为等价，会抹掉原版明确存在的通知和 unchecked 算术怪癖。
+- Prevention: 交互命令必须分离 `IsGM || TestServer` permission、runtime-only Superman flag、localized Hint、管理员 GameMaster option projection 与持久化。所有玩家 vital 写入口按 `ChangeHP`/`ChangeMP`/`SetHP`/直接 Die 分类；共享 `ChangeHP` 自身负责 Protection redirect，damage resolver 只决定死亡与通知。Review finding 必须回读 Legacy 入口和项目编译设置后裁决。
+- Verification: 两个 `luna_worker` 分别完成 Legacy 调用链和 Go 34 文件只读审查；主审确认 `Hint -> owner AddBuff -> nearby AddBuff -> persist`、TestServer transient-only、stored Buff restore 后 runtime final reset，以及 Plague/regen/unchecked 怪癖。world 与 authenticated `net.Pipe` tests 覆盖权限、option 保留、Protection、HP/MP refill、lethal monster/poison、logout/relogin；focused 普通 `-count=10`、race `-count=3`、服务端整包、全仓普通、完整 race 重跑、vet、build 与 probe vectors 均退出 0。首次全仓普通命中既有 YinDevilNode 通知 flake，首次完整 race 命中既有 OmaMage 随机边界；隔离/后续完整重跑通过，未修改无关模块。
