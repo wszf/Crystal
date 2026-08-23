@@ -326,3 +326,10 @@
 - Prevention: 迁移 .NET 数值 TryParse 时先列出符号、空白、范围、overflow、culture 和失败默认值；对 byte 命令 token 使用有符号解析后显式约束 `0..255`，失败保留 out 参数默认 0，而不是按 Go 目标类型猜 parser。
 - Verification: `hair_command.go` 改用 `ParseInt(..., 16)` 加 `0..255` 门禁；domain tests 锁定 `+8`、255、负数、256 和非法值，管理员、TestServer 与未授权 authenticated session 锁定权限、静默包序及 live/auth 状态；focused 普通 `-count=10` 与 race `-count=3` 退出 0。
 - Strengthening after read-only review: TestServer transcript 初稿以初始 Hair=0 发送非法值并仍断言 0，未授权 no-op 也能通过，无法证明配置权限分支真实执行；改用有效非零值 7，并让独立未授权 session 保持原值。管理员 JSON relogin 还必须消费 stored restore 与 final projection 两个 AddBuff，再以 KeepAlive 锁定没有残余 bootstrap tail。
+
+### 2026-08-23 — 交互式 `@ALLOWTRADE` transcript 必须隔离 ticker、冷却和默认值伪证据
+
+- Symptom: 未提交 session test 用真实 world ticker、source 端裸 `ReadFrame` 和无界 done 等待；最终 relogin 断言的 AllowTrade=false 又与角色默认值相同。主审补上 disabled gate 后，首次 focused 测试退出 1：第二次 `TradeRequest` 在 1ms `TradeDelay` 内被合法静默丢弃，测试等待 System chat 超时，而失败清理期间才出现临时目录已删除后的 SaveJSON 噪声。
+- Root cause: 把“不常触发的全局 ticker”“很短的真实冷却”和“最终字段等于默认值”当成稳定测试环境；同时没有区分首个 assertion timeout 与 defer/临时目录清理后的次生日志。裸 socket/done 等待还会把缺包回归拖到全局测试超时。
+- Prevention: 精确 `net.Pipe` transcript 在 bootstrap 后停止并等待 world ticker；双方都启动 reader，所有预期包和 session shutdown 都使用有界 channel。非冷却测试将 `TradeDelay` 显式设为零，而冷却语义由独立测试负责。持久化/relogin 必须以非默认正值收口，并在同一会话分别证明 enabled request、disabled rejection 和最终 re-enabled restore；失败归因以首个测试行和退出码为准，忽略 teardown 后的次生路径日志。
+- Verification: transcript 现以 private System chat + KeepAlive barrier 锁定大小写/额外参数，验证 enabled invitation、refusal、disabled trade gate、live/auth/JSON 三层状态，并以最终 AllowTrade=true logout/reload/relogin 排除默认值伪通过；source/target/relogin reader、ticker stop 与 5s shutdown barrier 消除裸等待。最小两包编译、focused 首次修正重跑、普通 `-count=10`、race `-count=3` 及全部 Trade 普通 `-count=5`/race `-count=3` 均退出 0。

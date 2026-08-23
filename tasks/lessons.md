@@ -21,6 +21,7 @@ duplicate.
 - Strengthening after TestServer/GameMaster selection: compact 硬门恢复时又在单次启动审计中通过 `git -C` 混读两仓；该调用全部输出已作废。后续只在对应 `workdir` 内使用相对路径，并分别重跑 Legacy 文档/status/C# 门禁与 Go matrix/status/C# 门禁后才刷新 handoff。
 - Strengthening after Superman recovery: 连续两次在 Go `workdir` 的上下文读取中追加 Legacy 相对路径，导致前段成功输出与尾部路径失败混杂；两次调用全部作废。此后构造命令前先把每个路径按仓库分类，命令文本只允许出现当前 `git rev-parse --show-toplevel` 下的相对路径；跨仓证据必须拆成相邻但独立的工具调用，并分别要求零退出后才可采用。
 - Strengthening after Observer recovery: 新 Session 首次门禁读取又在 Legacy `workdir` 中追加 Go matrix 路径，整次 9 万余 token 输出已作废；随后 `agents.md`、三份 Legacy 文档、双仓 status/`.cs` 门禁与 Go matrix 全部按单仓调用重跑。恢复时还发现 handoff 声称 Go clean、实际已有 5 tracked + 2 untracked Observer 文件，因此在重建 handoff 前停止实现和测试。
+- Strengthening after ALLOWTRADE recovery: compact 后首个恢复读取再次在 Legacy `workdir` 中拼入 Go matrix 绝对路径，约 9.7 万 token 的整次输出已作废；随后按仓库分别完整重读启动文档与 matrix。恢复审计又发现 handoff 声称 Go clean、实际已有 3 tracked + 3 untracked ALLOWTRADE 文件，因此在补写并回读准确 handoff 前继续停止实现和测试。以后恢复命令必须先按仓库写成两个独立命令块，再逐块调用，禁止在一个 shell 字符串中“顺便”读取对侧文件。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 

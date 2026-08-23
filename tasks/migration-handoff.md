@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；交互式 `@HAIR` 已收口）
+最后更新：2026-08-23（Asia/Singapore；交互式 `@ALLOWTRADE` Go 功能已提交）
 
 ## 迁移目标与硬边界
 
@@ -22,6 +22,54 @@
   后回读并与两仓实际状态核对。
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
+
+## 最近完成批次（交互式 `@ALLOWTRADE`，Go 功能已提交）
+
+- compact 摘要漏掉实际 Go 补丁且旧 handoff 错写 Go clean；恢复审计发现 3 tracked +
+  3 untracked ALLOWTRADE 文件后立即停止实现/测试，按两仓分别重读启动材料、完整 matrix、
+  status/HEAD 和三类 `.cs`，先重建并回读 durable boundary 后才继续。本次启动时又误把 Go
+  matrix 拼入 Legacy 调用，整次约 9.7 万 token 输出已作废并强化 C01。
+- Legacy ruling：Game-stage `PlayerObject.Chat` 对所有 live players 开放大小写不敏感的
+  `@ALLOWTRADE`，额外参数忽略；命令直接翻转持久 `CharacterInfo.AllowTrade`，只向本人发送
+  一条 localized `Chat(System)`（`AllowTradeNow`/`NoLongerAllowTrade`）。该字段同时是后续
+  `TradeRequest` target gate，并经现有 character save/load 保留；主审已核对 Chat parser、
+  `Info.AllowTrade` property、TradeRequest gate、Language defaults 与 DB read/write 链。
+- Go 实现：world lock 内原子 toggle 并生成 private System notification；Game-stage route
+  同步 session identity、auth authority 与 JSON checkpoint；localization 增加两个精确 English
+  fallback/overlay key。domain test 锁定 recipient/type/text、enabled/disabled gate；双玩家
+  authenticated `net.Pipe` 锁定 mixed-case/额外参数、邀请/拒绝、disabled rejection、
+  live/auth/JSON、logout/reload 与最终非默认 true relogin。
+- `luna_worker` Lorentz (`01a02d7f-3e4c-7042-aedb-0e28c25fa211`) 只读审查 authority/
+  concurrency/session fixture，未写文件或运行测试；无生产 correctness finding。其 medium
+  裸 socket/done 等待与 low ticker 污染 finding 已修正为双 reader、5s 有界 shutdown 和
+  bootstrap 后同步 stop ticker，线程已关闭。主审另将最终 relogin 从默认 false 改为明确
+  re-enable 后的 true，避免伪通过。
+- 首次 focused 普通退出 1：新增第二次 TradeRequest 在 test-only 1ms `TradeDelay` 内被合法
+  静默丢弃，`trade_command_session_test.go:179` 等待 System chat 超时；失败后日志中的临时
+  JSON 路径错误来自 teardown，不是首因。该非冷却测试已显式使用零延迟，修正和 prevention
+  写入 `tasks/lessons-archive/migration/protocol-session-wire.md`。
+- 已通过（退出码 0）：两包最小编译；focused
+  `TradePermission|AllowTradeCommand|ServerLanguage` 普通首次修正、`-count=10` 与 race
+  `-count=3`；全部 Trade 普通 `-count=5` 与 race `-count=3`；服务端整包；
+  `go test ./... -count=1 -timeout=900s`；`go test -race ./... -count=1 -timeout=900s`；
+  `go vet ./...`；`go build ./...`；`go run ./cmd/crystal-protocol-probe -mode vectors`；
+  owned gofmt、`git diff --check` 与双仓三类 `.cs` 门禁。本批最终全量无排除、无失败。
+- Go 仓根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，
+  提交 `a052d771d29a37c766b20d64cd8518ab94c47260`
+  (`a052d77 feat(p6): restore interactive ALLOWTRADE command`)。owned 七文件为
+  `cmd/crystal-server/main.go`、`trade_command.go`、`trade_command_test.go`、
+  `trade_command_session_test.go`、`internal/config/localization.go`、
+  `localization_test.go` 与 `docs/migration-matrix.md`；提交统计 434 insertions、19 deletions，
+  提交后工作树 clean，无 staged/untracked，三类 `.cs` 为空。
+- Legacy 仓根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master...origin/master [ahead 413]`，HEAD
+  `c481fd9dcfae778fef0141296d27f7b1a4ad47ed`。owned 文档为 `tasks/lessons.md`、
+  `tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff；当前仅三份 tracked
+  修改，无 staged/untracked，三类 `.cs` 为空。
+- matrix 已更新 P1 localization、P3 character preference/interactive command 与 P6 Trade
+  admission；三个阶段继续 `In progress`，整体 Goal 继续 active。下一恢复命令：只暂存并
+  提交上述三份 Legacy 文档，随后回写实际 Legacy commit/clean 状态并再次分别核对两仓
+  status/HEAD/三类 `.cs`；不得把 P1/P3/P6 或整体 Goal 标为完成。
 
 ## 最近完成批次（交互式 `@HAIR`，已收口）
 
@@ -56,13 +104,14 @@
   insertions、1 deletion，提交后工作树 clean，无 staged/untracked，三类 `.cs` 为空。
   矩阵仅更新 P3，阶段仍 `In progress`。
 - Legacy 仓根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
-  `master...origin/master [ahead 412]`，提交前 HEAD
-  `49e8504f9002c53e567869f156668c421e6c9ad5`；tracked 修改为本 handoff 与
-  `tasks/lessons-archive/migration/protocol-session-wire.md`，无 staged/untracked，三类
-  `.cs` 为空；本次 Legacy 文档提交只包含这两份文件。
-- 下一恢复命令：完成并核对 Legacy 两文件文档提交后，刷新本段为 post-commit 状态；新
-  Session 分别核对双仓 status/HEAD/三类 `.cs` 并读取 Go matrix，再从明确 pending、
-  dependency-ready 子切片选择。不要重复 `@HAIR`，也不要把 P3 或整体 Goal 标为完成。
+  `master...origin/master [ahead 413]`，文档提交
+  `c481fd9dcfae778fef0141296d27f7b1a4ad47ed`
+  (`c481fd9d docs(migration): record interactive HAIR command`) 只包含本 handoff 与
+  `tasks/lessons-archive/migration/protocol-session-wire.md`。提交后工作树 clean，无
+  staged/untracked，三类 `.cs` 为空；本段 post-commit 刷新后仅本 handoff 为 tracked 修改。
+- 下一恢复命令：新 Session 分别核对双仓 status/HEAD/三类 `.cs` 并读取 Go matrix，再从
+  明确 pending、dependency-ready 子切片选择。不要重复 `@HAIR`，也不要把 P3 或整体
+  Goal 标为完成。
 
 ## 最近完成批次（交互式 `@OBSERVER`，已收口）
 
