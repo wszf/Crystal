@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 04:07 (Asia/Singapore)
+Last updated: 2026-08-24 04:12 (Asia/Singapore)
 
 This replace-in-place snapshot closes the committed LOG leaf and routes the
 next bounded P1 leaf. The Goal remains active.
@@ -15,12 +15,13 @@ registered children: five Complete and seven unfinished.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master...origin/master [ahead 424]`.
+- Branch before the enclosing route-reconciliation commit:
+  `master...origin/master [ahead 425]`.
 - HEAD before the enclosing control commit:
-  `4cf76bfe47f6a321440f509f8a7ec06629903b5a`
-  (`docs(migration): reconcile P1 logging route`).
-- Tracked modifications are exactly `tasks/lessons.md`,
-  `tasks/migration-active.md`, and this handoff after replacement.
+  `381fa931167e9a9c4f1d564b81c004445ec0b693`
+  (`docs(migration): complete P1 logging categories`).
+- Tracked modifications are exactly `tasks/lessons.md` and this handoff after
+  replacement; expected subject is `docs(migration): reconcile P1 network route`.
 - Staged and untracked files: none.
 - `AGENTS.md` and tracked `agents.md` remain one hard-linked inode; all tracked,
   staged, and untracked C# gates are empty.
@@ -29,8 +30,8 @@ registered children: five Complete and seven unfinished.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
 - Branch: `main`; HEAD:
-  `0b7a68078e5bc4b182534ca5a5db7260b45267c7`
-  (`feat(logging): complete P1 category wiring`).
+  `1878cad4b9e1e91214d7756c767180dc45db49ac`
+  (`docs(migration): activate P1 network gates`).
 - Worktree, staged files, and untracked files are clean.
 - All tracked, staged, and untracked C# gates are empty.
 
@@ -72,8 +73,8 @@ All commands below ran in the Go root and exited 0:
 
 ## Active leaf and protected work
 
-- Active leaf: `NET-P1-GATES-001`; NET writes remain gated until the Legacy
-  control commit is clean.
+- Active leaf: `NET-P1-GATES-001`; the matrix and Active Index now both say
+  Active. NET writes remain gated until the expected Legacy correction is clean.
 - Outcome: timed IP blocking, MaxUser/MaxIP admission/release, idle read timeout,
   MaxPacket reset/rejection, and exact disconnect/log boundaries.
 - Matrix anchors: P1 finite inventory, `NET-P1-GATES-001`, and the P1 stage row.
@@ -94,8 +95,8 @@ All commands below ran in the Go root and exited 0:
 ## Exact recovery sequence
 
 1. Run `tasks/check-migration-control.sh`, verify both repositories and all six
-   C# gates separately, then commit only the three Legacy control paths with
-   subject `docs(migration): complete P1 logging categories`.
+   C# gates separately, then commit only `tasks/lessons.md` and this handoff with
+   the expected route-reconciliation subject.
 2. Verify the expected one-commit Legacy delta and both clean worktrees; refresh
    this handoff only if unexpected state remains.
 3. Once both worktrees are clean, read only the named NET anchors, search the
