@@ -56,6 +56,7 @@ duplicate.
 - Strengthening after `LOG-P1-CATEGORY-001` tracing: 同一批三次把 `--glob` 放到 `rg --` 之后，导致有效前段与 exit 2 混杂；每次整调用均作废并用 `rg [options] -e pattern -- paths` 重跑。发送任何 `rg` 前必须先按固定四段模板目检，禁止从自然语言顺序临时拼 argv。
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
+- Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 

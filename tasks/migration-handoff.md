@@ -17,12 +17,11 @@ HTTP-service leaf, and keeps the persistent full migration Goal active.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch before this control commit: `master...origin/master [ahead 430]`.
+- Branch before this control commit: `master...origin/master [ahead 431]`.
 - HEAD before this control commit:
-  `098863a7c38fd2fb4d163a8aa79c555028c19a9d`
-  (`docs(migration): complete P1 network gates`).
-- Expected owned delta is `tasks/lessons.md`,
-  `tasks/lessons-archive/misc.md`, `tasks/migration-active.md`, and this handoff.
+  `3b16e2bbefdc351a2037285d2639307c3836dda5`
+  (`docs(migration): complete P1 status monitor`).
+- Expected owned delta is `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff.
   Index and untracked files were otherwise empty before this snapshot.
 - `AGENTS.md` and tracked `agents.md` remain one hard-linked inode.
 - Tracked, staged, and untracked C# gates are empty.
@@ -31,8 +30,8 @@ HTTP-service leaf, and keeps the persistent full migration Goal active.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
 - Branch: `main`; HEAD:
-  `269590b97f8f4f37d2387541a69981783fcc548b`
-  (`feat(network): restore Legacy status monitor`).
+  `88b0e15771a909c18c64dd4040c12264251f5349`
+  (`docs(migration): bound P1 HTTP auth adapter`).
 - Worktree, index, and untracked set are clean.
 - Tracked, staged, and untracked C# gates are empty.
 
@@ -78,13 +77,15 @@ production runtime entry are included in both repeated and focused-race sets.
 - Legacy read authority: bounded `Server/Utils/HttpService.cs`,
   `Server/Utils/HttpServer.cs`, and only direct `Envir` lifecycle and endpoint
   account/chat/name-list consumers.
-- Go write authority: bounded `cmd/crystal-server/main.go`, plus new
-  `http_service.go` and `http_service_test.go`.
+- Go write authority: bounded `cmd/crystal-server/main.go`, new
+  `http_service.go`/`http_service_test.go`, and bounded
+  `internal/auth/service.go`/`service_test.go` account metadata adapter.
 - Forbidden: status/game-gate redesign, broad lifecycle, UI, unrelated
   persistence/protocol, logging/localization closure, and C#.
-- Unresolved decisions: exact trusted-IP derivation, request parsing/response
-  bytes and status codes, endpoint side-effect authority/order, and stop/error
-  behavior must be ruled from the bounded Legacy chain before code changes.
+- Unresolved decisions now narrow to framework-dependent default headers,
+  escaping/duplicate-query behavior, POST connection lifetime, and cross-
+  platform rooted-path/newline projection. The source-ruled request bodies,
+  metadata, side effects, recipient order, and lifecycle are finite.
 
 ## Quiescence
 
@@ -95,13 +96,11 @@ production runtime entry are included in both repeated and focused-race sets.
 
 ## Exact recovery sequence
 
-1. Recheck control schema, Legacy diff/C# gates, and commit only the four owned
-   Legacy documentation files.
-2. Read only the named HTTP matrix anchors and bounded Legacy HTTP files/ranges;
-   search the lessons archive with `NET-P1-HTTP-001`, `HttpService`,
-   `HttpServer`, trusted IP, endpoint, POST, and shutdown.
-3. Delegate one bounded read-only Legacy/Go comparison, derive the finite
-   request/response/side-effect/lifecycle checklist, then create only
-   `http_service.go` and `http_service_test.go` before bounded `main.go` wiring.
+1. Recheck control schema, both worktrees, and all six C# gates; commit only the
+   updated active lesson, Active Index, and this handoff.
+2. Implement the already traced finite HTTP contract in the newly authorized
+   files; keep framework-dependent behavior explicit in tests and evidence.
+3. Review the bounded auth metadata adapter and HTTP service before production
+   `main.go` wiring; do not expand into P2-P4 feature redesign.
 4. Run focused/repeated/race and the standard Leaf/integration gate; update
    matrix/index/handoff and commit each repository separately.

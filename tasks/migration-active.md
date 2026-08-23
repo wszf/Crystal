@@ -50,7 +50,8 @@ Keep this file at or below 300 lines and 32 KiB.
   `Server/Utils/HttpServer.cs`, plus only direct `Envir` startup/stop and endpoint
   account/chat/name-list consumers.
 - Go write authority: bounded HTTP setup/calls in `cmd/crystal-server/main.go`,
-  plus new `http_service.go` and `http_service_test.go`.
+  new `http_service.go`/`http_service_test.go`, and the traced bounded account
+  creation-metadata adapter in `internal/auth/service.go`/`service_test.go`.
 - Forbidden scope: status/game gate redesign, broad process lifecycle, UI,
   unrelated persistence/protocol, logging/localization closure, and C#.
 
@@ -100,7 +101,8 @@ this is a P1 denominator only, not a project percentage.
 - [ ] Match `/`, `/newaccount`, `/addnamelist`, `/broadcast`, unknown path,
       malformed/query/error, and POST-visible response/side-effect behavior.
 - [ ] Reuse existing account, chat, and NPC/name-list authorities without
-      redesigning their owning P2-P4 features.
+      redesigning their owning P2-P4 features; lock HTTP creation IP/index/time
+      metadata and the available JSON/checkpoint persistence path.
 - [ ] Drive real HTTP production-entry tests, repeated/focused race, and the
       standard Leaf gate.
 
@@ -119,7 +121,7 @@ selected now.
 | `LOG-P1-CALLSITE-CLOSURE-001` | Ready | LOG category + P2-P11 feature closure | new `docs/p1-logging-callsite-ledger.md`; new `cmd/crystal-server/logging_coverage_test.go`; matrix evidence only | static ledger + representative integration |
 | `NET-P1-GATES-001` | Complete | CFG | `cmd/crystal-server/main.go`, `main_test.go`; new `connection_gates.go`/`connection_gates_test.go` | deterministic TCP/repeated/race |
 | `NET-P1-STATUS-001` | Complete | CFG | `cmd/crystal-server/main.go`; new `status_service.go`/`status_service_test.go` | TCP cadence/shutdown/race |
-| `NET-P1-HTTP-001` | Active | CFG + P2/P3/P4 authorities | `cmd/crystal-server/main.go`; new `http_service.go`/`http_service_test.go` | HTTP integration/shutdown/race |
+| `NET-P1-HTTP-001` | Active | CFG + P2/P3/P4 authorities | `cmd/crystal-server/main.go`; new `http_service.go`/`http_service_test.go`; bounded `internal/auth/service.go`/`service_test.go` adapter | HTTP integration/shutdown/persistence/race |
 | `OPS-P1-LIFECYCLE-001` | Ready | NET status + HTTP | `cmd/crystal-server/main.go`, `main_test.go`; new `process_lifecycle_test.go` | failure injection + integration/full race |
 | `OPS-P1-DEPLOY-001` | Ready | all other P1 leaves | `README.md`; new `cmd/crystal-server/deployment_test.go`; matrix evidence | fresh package + full unexcluded gates |
 | `NOTICE-P1-EDGE-001` | Complete | — | none | existing notice/session evidence |
