@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-23 21:40 (Asia/Singapore)
+Last verified: 2026-08-24 00:20 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -9,13 +9,15 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Progress semantics
 
-- One main leaf may be `Active`.
-- A phase is scope-frozen only after its closure audit has converted every vague
+- One main implementation leaf may be `Active`.
+- A phase is scope-frozen only after its closure audit converts every vague
   residual into finite child leaves.
-- `Complete` phase labels are not a project percentage; leaf counts become a
-  useful burn-down only after scope freeze.
-- Current project ETA and percentage are intentionally `Unavailable`: eleven
-  phases still require finite closure inventories.
+- Scope is frozen phase by phase; the whole project's remaining inventory does
+  not need to be calculated in one up-front pass.
+- `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
+  are publishable only for a scope-frozen phase.
+- Current project-wide ETA and percentage remain `Unavailable` while eleven
+  phases still have open closure inventories.
 
 ## Phase routing summary
 
@@ -37,81 +39,74 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `OPS-P1-P3-P4-UTILITY-001`
-- Status: `Active` (implementation paused only while the control plane is being
-  optimized; this is not an external blocker)
-- Outcome: finish Legacy-equivalent Game-stage `@TIME`, `@ROLL`, and `@MAP`
-  command handling, current-culture formatting/casing, recipient projection,
-  protocol ordering, and authenticated transcript coverage.
-- Go matrix anchors to read: stage table rows beginning `| P1 |`, `| P3 |`,
-  `| P4 |`, and `| P8 |`; search those fixed row prefixes instead of reading
-  the complete 3223-line matrix.
-- Legacy evidence anchors: command dispatch and `@TIME`/`@ROLL`/`@MAP` handling,
-  current-culture `ToUpper`/composite formatting, Group/System Chat recipients,
-  observer forwarding, and FormatException behavior.
+- Leaf ID: `DISC-P1-CLOSURE`
+- Status: `Active` (selected for recovery routing; no discovery command has run
+  since the actual compaction signal)
+- Outcome: enumerate the finite residual P1 configuration, localization,
+  logging/lifecycle, and deployment behaviors into stable child leaf IDs.
+- Go matrix anchors to read: row beginning `| P1 |`; its exact residual phrases
+  `remaining language keys`, `category-specific business call-site coverage`,
+  and `deployment validation`; only directly linked P1 headings found from those
+  anchors.
+- Authority boundary: Legacy and Go sources needed to prove each candidate P1
+  behavior are read-only during inventory. Discovery may write only
+  `tasks/migration-active.md`, `tasks/migration-handoff.md`, and the bounded P1
+  inventory/evidence portion of Go `docs/migration-matrix.md`.
+- Forbidden during this discovery leaf: functional implementation, broad matrix
+  or source-tree dumps, other-phase expansion, percentage/ETA publication, and
+  declaring P1 scope-frozen before every residual has a finite child leaf.
+
+The immediately prior leaf `OPS-P1-P3-P4-UTILITY-001` is Complete at Go commit
+`5bce7c28c162296d27b61db60897d1b23a80c91e` (`feat(p3): restore public utility
+commands`). It updated the 2026-08-24 utility paragraph and P1/P3/P4/P8 rows;
+P1/P3/P4 remain In progress and P8 remains Complete.
 
 ### Protected Go ownership
 
-Do not reset, stash, checkout, clean, delete, move, or overwrite these files:
-
-- tracked: `cmd/crystal-server/main.go`
-- tracked: `cmd/crystal-server/observer.go`
-- tracked: `cmd/crystal-server/world.go`
-- tracked: `internal/config/config.go`
-- tracked: `internal/config/localization.go`
-- tracked: `internal/config/localization_test.go`
-- untracked: `cmd/crystal-server/utility_command.go`
-- untracked: `cmd/crystal-server/utility_command_session_test.go`
-- untracked: `cmd/crystal-server/utility_command_test.go`
-- untracked: `internal/config/culture.go`
-- untracked: `internal/config/culture_test.go`
-- untracked: `legacy_composite_format.go`
+- The Go worktree is clean; there is no uncommitted functional file to protect.
+- During this discovery leaf the only permitted Go write is the bounded P1
+  inventory/evidence portion of `docs/migration-matrix.md`.
+- Functional Go ownership must be assigned to finite child leaves before any
+  implementation begins.
 
 ### Remaining acceptance work
 
-- [ ] Main-agent review of all twelve protected files.
-- [ ] Decide the minimal package boundary for the root-level 892-line formatter
-      prototype; do not wire, move, or delete it before review.
-- [ ] Lock current-culture command casing, including Turkish `i` behavior.
-- [ ] Lock time, integer, percent, alignment, escaped-brace, custom numeric, and
-      FormatException behavior actually reachable by the three commands.
-- [ ] Verify `@TIME`, `@ROLL`, and `@MAP` production routing, private/group/system
-      recipients, observer forwarding, and packet FIFO.
-- [ ] Run the leaf compile/focused/repeated/relevant-race gates.
-- [ ] Run an integration gate because this leaf crosses config, session routing,
-      observer projection, and shared command infrastructure.
-- [ ] Update the authoritative Go matrix and this index, refresh the concise
-      handoff, and make atomic Go/Legacy commits.
+- [ ] Enumerate each P1 residual as an observable behavior, not a vague module.
+- [ ] Give every child a stable ID, matrix anchor, Legacy entry point, dependency
+      boundary, owned files, acceptance evidence, and required test tier.
+- [ ] Separate independent children from shared lifecycle/startup architecture.
+- [ ] Reconcile duplicate or already-complete evidence instead of creating work
+      from stale prose.
+- [ ] Mark P1 scope-frozen only when a bounded search proves no unnamed residual
+      remains; otherwise retain a finite follow-up discovery child.
+- [ ] Select exactly one dependency-ready child as the next `Active` batch and
+      refresh the handoff before any production write.
 
 ## Scope-freeze discovery queue
 
-These rows are inventory audits, not permission to implement broad unnamed
-scope. Each audit must produce finite child leaf IDs and matrix anchors.
+These are registered phase-local inventory audits, not permission to implement
+broad unnamed scope.
 
 | Leaf ID | Phase | Status | Required output |
 |---|---|---|---|
-| `DISC-P1-CLOSURE` | P1 | Discovery | finite config/log/lifecycle/deployment residuals |
-| `DISC-P2-CLOSURE` | P2 | Discovery | finite account/NPC-access/restart residuals |
-| `DISC-P3-CLOSURE` | P3 | Discovery | finite startup/admin/ranking residuals |
-| `DISC-P4-CLOSURE` | P4 | Discovery | finite map/bootstrap/visibility residuals |
-| `DISC-P5-CLOSURE` | P5 | Discovery | finite spell/combat/AI/respawn/packet residuals |
-| `DISC-P6-CLOSURE` | P6 | Discovery | finite item/equipment/craft residuals |
-| `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script residuals |
-| `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory residuals |
-| `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system residuals |
-| `DISC-P11-CLOSURE` | P11 | Discovery | finite miscellaneous-system residuals |
-| `DISC-P12-CLOSURE` | P12 | Discovery | finite persistence/backup/deployment residuals |
+| `DISC-P1-CLOSURE` | P1 | Active | finite config/localization/log/lifecycle/deployment children |
+| `DISC-P2-CLOSURE` | P2 | Discovery | finite account/NPC-access/restart children |
+| `DISC-P3-CLOSURE` | P3 | Discovery | finite startup/admin/ranking children |
+| `DISC-P4-CLOSURE` | P4 | Discovery | finite map/bootstrap/visibility children |
+| `DISC-P5-CLOSURE` | P5 | Discovery | finite spell/combat/AI/respawn/packet children |
+| `DISC-P6-CLOSURE` | P6 | Discovery | finite item/equipment/craft children |
+| `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
+| `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |
+| `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system children |
+| `DISC-P11-CLOSURE` | P11 | Discovery | finite miscellaneous-system children |
+| `DISC-P12-CLOSURE` | P12 | Discovery | finite persistence/backup/deployment children |
 
 ## Selection protocol
 
-1. Finish or safely close the active leaf before activating another writing
-   batch.
-2. When no leaf is active, choose one dependency-ready finite leaf from the
-   already indexed anchors. Before closing the current leaf, register that next
-   leaf and its anchors. If no finite item is known, activate one
-   `DISC-Px-CLOSURE` row and search only that phase's row/headings to materialize
-   child leaves; do not use an empty queue as permission to read the full matrix.
-3. Record its ID, outcome, matrix anchors, owned files, acceptance evidence, and
-   gate tier here before implementation.
+1. Verify this index and the current handoff against each repository separately.
+2. Resume only the one `Active` phase-local closure leaf; do not inventory all
+   remaining phases up front.
+3. Close discovery by registering finite children, then activate one
+   dependency-ready child before production changes begin.
 4. Keep only current routing state here. Completed details belong in the matrix
-   and Git history, not appended below.
+   and Git history, not as appended narratives.

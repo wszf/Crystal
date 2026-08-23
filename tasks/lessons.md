@@ -26,6 +26,7 @@ duplicate.
 - Strengthening after utility-command compact continuation: 恢复命令再次把绝对 Go matrix 搜索拼进 Legacy 文档读取，导致整次 10 万余 token 输出作废。以后启动阶段先只执行 Legacy 固定清单并结束调用；收到其零退出结果后，才在新的 Go `workdir` 调用中读取 matrix，禁止用一条复合 shell 命令跨越仓库边界。
 - Strengthening after 18:24 utility-command rollover: 本次接续仍在 Legacy 启动读取中直接 `cat` 绝对 Go matrix，整次 10 万余 token 输出再次作废；随后不仅按仓拆开，还把超过输出上限的 matrix 区段进一步缩小重读到无截断。恢复模板必须物理拆成两个独立工具调用，且大文件必须按可完整返回的小段读取；“命令零退出”不能替代“输出完整可见”。
 - Strengthening after fourth utility-command compact: 本次恢复首调用又在 Legacy 文档读取末尾追加了对侧 Go 根的绝对 `find`，整次输出按 C01 作废；随后先以纯 Legacy 调用完整重读启动文档，再以纯 Go 调用分块重读 3223 行 matrix。恢复时禁止在第一仓命令中承担任何对侧“定位”工作；若 matrix 区段发生输出截断，该区段也必须整体作废并缩小范围重读。
+- Strengthening after bounded-control recovery: 控制面已经明确禁止跨仓后，首次恢复调用仍把绝对 Go matrix 路径附在 Legacy 文档读取后，约 8 万 token 输出再次全部作废。随后已物理拆成 Legacy 启动/状态与 Go 状态/matrix 两组调用，并以三项指纹核对十二文件未变。以后发送恢复命令前必须先做“命令文本内是否出现另一仓根”的机械检查，不能只检查 `workdir`。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -43,6 +44,7 @@ duplicate.
 - Strengthening after utility-command hard-gate process audit: 首个进程检查因使用临时文件后 `rm -f` 被执行策略在启动前拒绝；第二个正则又匹配了自身命令行中的诊断文本，两个结果均作废。随后改用 `ps -Ao pid=,comm=,args=` 并只按 `comm` 精确匹配 `go`/`crystal-server`，零退出确认无残留进程。进程审计不得依赖临时文件清理，也不得用会命中自身正则或输出文案的全文匹配。
 - Strengthening after Goal model audit: 已有上述禁令后，Codex 配置验证仍再次使用 `mktemp` 后 `rm -f`，在启动前被策略拒绝；随后又凭记忆在错误数据库查询 `thread_goals`、并猜错时间戳列名，导致多次非零和部分输出作废。根因是没有在执行前把旧 lesson 转换成当前命令的机械检查。以后只读诊断默认用 shell command substitution 捕获 stdout/stderr，不创建需清理的临时文件；数据库先 `find` 定位当前 `$CODEX_HOME`，再用 `sqlite_master`/`pragma_table_info` 独立零退出确认库、表和列，每个尚未确认的查询必须单独调用。此次已用无临时文件的 `app-server --strict-config ... </dev/null` 验证 `gpt-5.6-sol/ultra` 退出 0，并从 Codex Box 的实际 `goals_1.sqlite`/`state_5.sqlite` 零退出回读 Goal 与线程模型状态。
 - Strengthening after Goal pause audit: 已有上述 schema 防猜规则后，首次 `pragma_table_info` 投影仍直接使用未引用的 SQLite 关键字列 `notnull`，两个查询退出 1，整次输出作废。以后 schema 勘察第一步固定为独立的 `SELECT * FROM pragma_table_info(...)`；完整回读真实列名后才允许自定义投影，关键字列必须引用。随后已分别零退出回读 `thread_goals` 与 continuation-deferral schema，再查询指定 Goal。
+- Strengthening after utility-command main review: 同一轮连续把 `--glob` 放到 `rg --` 之后、使用未验证 shell glob，并把不存在的目录加入搜索；相关调用均作废后按现有路径重跑。每次 `rg` 必须按固定 argv 模板构造：所有选项与 `-e` 在前，单个 `--` 居中，已验证路径在后；不得用尾部 `|| true` 掩盖语法/路径错误，只有事先声明“零匹配即有效答案”时才允许它。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -244,6 +246,8 @@ duplicate.
 - Root cause: 工具发现确认当前 spawn override 列表不提供要求的 worker/model；为遵守“不得静默替换”而改由主 Agent 本地执行，但只把原因写进 plan/handoff，没有在开始 tracing 前用清晰的用户可见说明建立预期。
 - Prevention: 每批开始先发现并核对 subagent 工具、角色、model 和 reasoning effort；可用时把非关键路径的 bounded 独立工作委派并记录 agent ID/范围，不可用时在本地执行前立即明确说明缺失项、禁止替代规则和 fallback。不得既不委派也不解释，也不得用其他模型静默冒充指定 worker。
 - Verification: 本批实际 spawn model 列表只有 `codex-auto-review`、`deepseek-v4-flash`、`deepseek-v4-pro`、`gpt-5.3-codex-spark`、`gpt-5.4`，不含 `luna_worker` 或 `gpt-5.6-luna`；因此未生成 agent ID。后续 handoff 必须记录实际 agent ID/模型/范围，或记录执行前已公开的不可用证据。
+- Strengthening after Luna availability recovery: 当前工具已提供固定 `luna_worker` 角色，但首次同时传 `agent_type=luna_worker` 与 `fork_context=true` 被 API 拒绝且未生成 agent。固定角色今后使用独立完整 prompt 且省略 full-history fork；成功返回精确 agent ID 后才算委派成立。本轮已按该形式成功启动 formatter writer 与 Legacy read-only auditor。
+- Strengthening after formatter review interruption: 主 Agent 看到 worker 最后一次写入后迟迟未返回且无 `go` 进程，误用 `interrupt=true` 催收报告，恰好打断两个 helper 签名的同步修改，留下可复现编译错误。以后不得仅因报告延迟中断仍为 active 的 writer；先继续非重叠工作并正常等待，确需停止时先发非中断的收尾请求。任何中断/停止后的工作树一律视为未验证，立即运行最小编译并由主 Agent 修复、复审和重测。本轮两个签名错误已由 `go test ... -run '^$'` 捕获，formatter 全量定向测试随后恢复为 exit 0。
 
 ### 2026-08-23 C31 — Goal rollover 是 durable checkpoint，不是 blocker
 
@@ -251,6 +255,7 @@ duplicate.
 - Root cause: 把仓库自定义的 token/rollout/compact 会话卫生阈值误判为外部 impasse；安全 handoff 已完成、工具仍可用，却没有从恢复点做有意义工作，因而机械满足了三轮 blocked audit。
 - Prevention: token 数、rollout 大小、compact 次数、性能下降和“偏好新 Session”只作观测，不得独立触发 checkpoint 循环、停止或状态变化；只有真实 compaction/context-limit/new-session 信号才触发冻结、handoff 与关闭 subagents。handoff 核验后同一 Goal 的下一自动续跑必须恢复工作。不得仅因会话卫生阈值 pause Goal 或调用 `update_goal(status="blocked")`；只有平台或外部状态实际阻止任何有意义进展并连续满足 blocked audit 时才可标 blocked。
 - Verification: 指定 rollout 无 `turn_aborted`，末尾事件明确显示两次自动 continuation 后的第三轮 `update_goal({"status":"blocked"})`；Goal 无 token budget、无 continuation deferral，停止前工具与 handoff 均可用。`agents.md`、`tasks/goal-task.md` 与当前 handoff 已同步为 checkpoint-not-blocker 规则。
+- Strengthening after the utility-command compaction: 收到真实 compact 信号时虽然停止了实现和测试，但 compact 在 durable handoff 写入前发生，自动摘要只留下“现在准备刷新”的意图；恢复后旧 handoff 仍声称十二文件未变，而实际已有十五文件。真实信号到达后的第一项工具动作必须是写入并回读当前 handoff，不得先输出叙述性进度；若平台仍先行 compact，下一 turn 必须把摘要视为不可信并从双仓重建，完成核验前不得实现或测试。本次已按当前 status、指纹、进程和 `.cs` 门禁重建。
 
 ### 2026-08-23 C32 — 迁移控制面不得反向吞噬实现上下文
 
@@ -258,3 +263,4 @@ duplicate.
 - Root cause: 把详细 matrix、append-only handoff、事故历史和每叶全仓门禁同时当成启动上下文；每次 compact 都完整重读 3223 行 matrix 与全部旧 checkpoint，形成“文档越大→更快 compact→再次全读”的自放大循环。十三个宽阶段又不是有限分母，无法给出可信百分比或 ETA。
 - Prevention: `migration-handoff.md` 只保留当前快照并限制为 250 行/24 KiB；独有未提交历史一次性归档，启动永不读 archive；使用 `migration-active.md` 注册唯一 active leaf、精确 matrix anchors 和 scope-freeze discovery leaves；compact 后只读 active+handoff 并核验状态；每叶运行 focused leaf gate，全仓普通/race 按有上限的 integration cadence 运行，阶段/Goal 收口仍要求新鲜无排除全量门禁；主线程禁止 broad dump。
 - Verification: 旧 1421 行 handoff 已逐字复制到 `tasks/migration-handoff-archive/2026-08-23-2055-pre-control-plane-optimization.md` 后改为短快照；`tasks/check-migration-control.sh` 对 handoff、active index、goal contract、agents 和 active lessons 执行行数/字节/必需标题门禁；Go 十二个未提交文件在优化中保持原样，双仓 `.cs` 三类审计为空。
+- Strengthening after utility leaf closure: 将 active index 的固定 `## Active batch` 改成语义更自然的 `## Current routing`，并同步改名 handoff 标题，导致控制脚本按设计 exit 1。控制文档的标题和唯一字段是可执行 schema，不是可自由改写的 prose；批次切换必须保留脚本要求的精确标题/字段，并用唯一 Active discovery leaf 表达“实现已闭合、下一步只清点”。修复后必须先让控制脚本 exit 0，再采用任何后续回读或提交结论。
