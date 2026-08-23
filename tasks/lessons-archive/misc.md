@@ -702,3 +702,9 @@
 - Prevention: 任何 AI 的移动与攻击同 tick 分支都必须把移动 helper 的通知按 Legacy 顺序追加到返回值；测试同时断言坐标、`ObjectWalk` 和后续攻击。
 - Verification: `TestGameWorldThunderElementAdmissionMovesThenAttacksAndRescans` 固定移动包后，AI=49 定向普通测试及 `-race -count=3` 通过。
 
+### 2026-08-24 — NET-P1-GATES-001 integration findings
+
+- Symptom: 首版 gate candidate 遗漏账号/角色创建的 24 小时 IP block、普通 shutdown reason 0、MaxUser 满载时 fatal wake、500 ms receive-disconnect grace、同一 receive 中 valid+malformed 的原子丢弃、成功连接日志和 IPv6 `Split(':')[0]`；日志测试还用非同步 `bytes.Buffer` 触发 race。
+- Root cause: 只迁移 listener 与单帧 reader 的明显限制，把 `ConnectionLogs`、StopNetwork、异步 ReceiveData 批次边界和 Disconnecting 延迟误当成后续 lifecycle/logging 范围；测试按帧而不是按一次 8 KiB receive 建模。
+- Prevention: 网络 gate leaf 必须枚举所有 IPBlocks 写点和 direct consumers；把 accept re-arm、receive callback、packet queue、disconnect grace、shutdown reason 与日志顺序作为一个有限状态机；共享日志 sink 使用同步 writer。
+- Verification: 主审逐项裁决并实现 account/character 阈值怪癖、fatal wake、reason 0、原子 receive parser、绝对 idle deadline、500 ms grace、Legacy enum history/IP authority和同步日志测试；focused `-count=20`、focused race `-count=5`、fresh unexcluded full tests/full race/vet/build 均通过。

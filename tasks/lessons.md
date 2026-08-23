@@ -55,6 +55,7 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` integration: 主审已有固定 argv 规则后仍把 `--glob` 放在 `rg --` 之后，调用 exit 2 且全部输出作废；随后清理本批测试生成文件时又把 `rm -f` 拼进补丁/测试复合命令，整次在执行前被策略拒绝。已分别以选项前置的 `rg` 和只删除精确自有文件的 `apply_patch` 零退出重跑；今后发送前同时机械检查 `rg` 的 `--` 边界和复合命令是否含被禁止的清理动作。
 - Strengthening after `LOG-P1-CATEGORY-001` tracing: 同一批三次把 `--glob` 放到 `rg --` 之后，导致有效前段与 exit 2 混杂；每次整调用均作废并用 `rg [options] -e pattern -- paths` 重跑。发送任何 `rg` 前必须先按固定四段模板目检，禁止从自然语言顺序临时拼 argv。
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
+- Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -65,6 +66,7 @@ duplicate.
 - Strengthening after Goal continuity patch: 一个补丁同时修改互为 hard link 的 `AGENTS.md` 与 `agents.md`；首个 hunk 已经同步改变两个路径，第二个 hunk 因旧正文消失而失败，形成“调用失败但修改已落地”。以后 patch 前先用 `ls -li`/`git ls-files` 核对别名与 inode；hard link 只修改一个 tracked canonical 路径，并在失败后立即独立回读全部别名和 Git 状态。本次已确认两路径仍共享 inode、内容均为 Sol Ultra/checkpoint-not-blocker，Git 只跟踪 canonical `agents.md` 变化。
 - Strengthening after P1 inventory insertion: 一次四-hunk matrix 补丁因旧段落物理换行与草稿不一致而整体失败；随后已独立确认没有部分写入，再把新段插入、P1 单行精确替换和两个小 prose hunk 分开发送并逐项 `git diff --check`。长表插入与陈旧 prose 修订不得共用一个补丁事务；先复读每个唯一锚点，失败后先查 status/目标标记再重试。
 - Strengthening after `LOG-P1-CATEGORY-001` wiring: 一个三-hunk 主文件补丁因其中 `stage = stageGame` 上下文未匹配而整体失败；随后 handoff 刷新又把只存在于 Active Index 的 ownership 正文当成 handoff 锚点。两次均确认零部分写入后按目标文件实际物理行拆成独立 hunk。跨越数千行或相邻控制文档的接线都必须逐文件复读并拆事务，不能因相似语义而复用锚点。
+- Strengthening after NET closure: 单行日志补丁夹带不连续的陈旧上下文而失败；确认零写入后复读并用最小 hunk 成功。不得把记忆中的远端行拼进单行补丁。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -88,6 +90,7 @@ duplicate.
 - Root cause: 一次写入过多逻辑，在编译失败时仍试图分析生产语义。
 - Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；显式转换不同领域类型，再进入行为测试。
 - Verification: 最小编译、定向测试和 `go vet` 分层通过。
+- Strengthening after NET frame-reader integration: 替换返回类型时漏改三个消费者，测试重构又留了未使用 import，均由只编译门禁捕获。接口变更先列声明与全部调用点，同一补丁改完后立即 gofmt/compile。
 
 ### 2026-08-21 C07 — 全量、race 和环境失败必须按实际栈归因
 
@@ -199,6 +202,7 @@ duplicate.
 - Verification: 用生产入口测试覆盖可达路径、历史怪癖和关键失败分支。本批只读 review 把 Plague 在零 MP 时仍发 `HealthChanged`、治疗接近满血时显示请求恢复量、`int32` unchecked 运算列为风险；主审回读 `Map.CompleteMagic`、`HumanObject.ProcessRegen/ChangeMP` 和项目 overflow 配置后确认三者均为 Legacy 行为，未按直觉“修正”，并保留对应边界测试。
 - Strengthening after P1 config compatibility: 既有 `TestVersionCheckingRequiresAFile` 首次失败，因为测试把 Go 的 fail-fast 规则当成权威；Legacy `LoadVersion` 实际跳过缺失路径并保留空 hash 列表，启用版本检查时由客户端 gate 全部拒绝。测试已改为锁定空列表/全拒绝，缺失、空白、多文件和 partial MD5 定向/重复/race 全通过。任何“更严格更安全”的配置错误都必须先由 Legacy loader 和消费者共同裁决。
 - Strengthening after `NET-P1-GATES-001` tracing: Active acceptance 草稿把 MaxPacket reset 凭直觉写成一秒，Legacy `MirConnection.ReceiveData` 实际在严格 `< Now` 时重置并设为 `Now.AddSeconds(5)`。时间窗口、比较边界和计数单位必须从真实入口逐项抄录后再写验收清单；本次在任何 NET 代码写入前改回五秒并保留 equality 边界待测。
+- Strengthening after NET review: 测试用 Go ordinal 猜 Legacy enum 长度，并凭印象写 IPv6 首段；真实值是 153 项和 `[2001`。期望必须从目标表达式与 enum 逐项编号，不得跨基线借用相邻协议表。
 
 ### 2026-08-21 C22 — 不同 capability、门禁和业务阶段不得过度复用
 
