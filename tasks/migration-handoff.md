@@ -1,96 +1,103 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 03:38 (Asia/Singapore)
+Last updated: 2026-08-24 04:07 (Asia/Singapore)
 
-This replace-in-place snapshot records the corrected cross-repository transition
-from completed LOC to active `LOG-P1-CATEGORY-001`. No LOG code is modified.
+This replace-in-place snapshot closes the committed LOG leaf and routes the
+next bounded P1 leaf. The Goal remains active.
 
 ## Goal and control-plane state
 
-The persistent full Go migration Goal remains active, not Complete or externally
+The persistent full Go migration Goal is active, not Complete or externally
 Blocked. Main authority is `gpt-5.6-sol/ultra`; bounded workers use
-`luna_worker` (`gpt-5.6-luna/max`). P1 remains scope-frozen and In progress with
-nine unfinished finite leaves.
+`luna_worker` (`gpt-5.6-luna/max`). P1 is scope-frozen/In progress with twelve
+registered children: five Complete and seven unfinished.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch before the enclosing correction commit:
-  `master...origin/master [ahead 423]`.
-- Observed HEAD: `17e65658781e05ff83e4304277902d26635eb17f`
-  (`docs(migration): route P1 logging categories`).
-- Expected enclosing subject: `docs(migration): reconcile P1 logging route`.
-  Recovery may observe exactly this one documentation commit delta.
+- Branch: `master...origin/master [ahead 424]`.
+- HEAD before the enclosing control commit:
+  `4cf76bfe47f6a321440f509f8a7ec06629903b5a`
+  (`docs(migration): reconcile P1 logging route`).
+- Tracked modifications are exactly `tasks/lessons.md`,
+  `tasks/migration-active.md`, and this handoff after replacement.
 - Staged and untracked files: none.
-- Tracked modifications are exactly `tasks/lessons.md` and this handoff after
-  its replacement.
-- `AGENTS.md` and tracked `agents.md` remain one hard-linked inode; every C# file
-  remains unchanged.
+- `AGENTS.md` and tracked `agents.md` remain one hard-linked inode; all tracked,
+  staged, and untracked C# gates are empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch: `main`.
-- HEAD: `a3721cf8c08f3b10ea35987849278b36575347cf`
-  (`docs(migration): activate P1 logging categories`).
+- Branch: `main`; HEAD:
+  `0b7a68078e5bc4b182534ca5a5db7260b45267c7`
+  (`feat(logging): complete P1 category wiring`).
 - Worktree, staged files, and untracked files are clean.
-- Matrix marks LOC Complete, LOG category Active, P1 scope-frozen/In progress,
-  and nine named residual leaves.
+- All tracked, staged, and untracked C# gates are empty.
 
-## Active leaf and protected work
+## Completed LOG leaf
 
-- Active leaf: `LOG-P1-CATEGORY-001`; writes remain gated only until the expected
-  Legacy correction commit is clean.
-- Outcome: production wiring for Server/Chat/Debug queue+file and Player/Spawn
-  file-only logging with Legacy category, cap, layout, and sink-failure behavior.
-- Matrix anchors: `### 2026-08-24 P1 finite closure inventory`, the LOG category
-  row, and the row beginning `| P1 |`.
-- Legacy read authority: `Server/Logger.cs`, `Server/MessageQueue.cs`,
-  `Server.MirForms/SMain.cs`, `Server/MirObjects/Player/Reporting.cs`,
-  `Server/MirEnvir/Map.cs`, `Server.MirForms/log4net.config`, and bounded direct
-  startup/dequeue consumers.
-- Go owned files after the gate: `internal/logging/logging.go`,
-  `logging_test.go`, bounded logging setup/calls in `cmd/crystal-server/main.go`,
-  and new `runtime_logging.go`/`runtime_logging_test.go`.
-- Forbidden scope: broad call-site closure, localization, network services,
-  lifecycle redesign, unrelated config/persistence/protocol, and C#.
+- Legacy locks Server/Chat/Debug/Player/Spawn categories; Info/Debug levels;
+  local `dd-MM-yyyy` category names; append/roll; log4net ISO8601
+  comma-millisecond layouts; Server/Chat/Debug non-evicting 100-entry queues;
+  post-saturation file writes; and Player/Spawn file-only behavior.
+- Production shares one manager from startup through accepted sessions. Listener
+  startup uses Server queue/file; normal chat uses Chat queue/file; successful
+  market search uses Debug queue/file; StartGame writes exact Player Connected;
+  world-import spawn load writes Spawn file-only.
+- Sink failures cannot recurse through the installed standard logger. Queue
+  admission and unrelated categories continue, the failed category reopens on a
+  later write, and close is idempotent. No unrelated server lock crosses I/O.
+- Matrix LOG is Complete; the exact twelve-row registry now counts five Complete
+  and seven unfinished. Earlier prose had failed to decrement after LOC and is
+  corrected rather than mechanically subtracting from the stale count.
 
 ## Verification ledger
 
-- Go-only catalog generation and self-contained tests lock 768 unique defaults
-  from `Shared/Language.cs` SHA-256
-  `a196217d274d95db85559a0628152a42de48388f9e778e9daac4c952094c89e6`.
-- Exact English/Chinese assets each contain 766 Text and zero Enum entries at
-  SHA-256 `e1f7283042702b219fc46ee30cf299dcab0684f2015026a34899db942561ecfd`
-  and `b6a3b76c2f6c5c9032979da08b7880feef4c289c7a4634b6d772765197fecb53`;
-  all shared placeholders match. `HeroDesummonCountdown` and
-  `StoragePasswordCleared` are the only English-default fallbacks.
-- `go test ./internal/config -run '^$'`: exit 0.
-- Focused catalog/loader tests at `-count=20`: exit 0; focused race: exit 0.
-- `go test ./cmd/crystal-server -count=20 -run
-  '^TestProductionConfigPathLoadsAndCreatesLegacySetup$'`: exit 0.
-- `go test ./...`: unexcluded exit 0 after the LOC production changes.
-- Fresh `go test ./... -count=1`: exit 1 only at established unrelated
-  `TestSessionYinDevilNodeTranscript/42`, empty IDs versus `[84]`; the exact
-  isolated `-count=10` run also exits 1 with no LOC file in its stack.
-- `go test ./... -count=1 -skip '^TestSessionYinDevilNodeTranscript$'`: exit 0;
-  this is an excluded attribution pass, not a full pass.
-- `go vet ./...`, `go build ./...`, and `git diff --check`: exit 0. Full race was
-  not due; the leaf introduced no shared mutable catalog state.
+All commands below ran in the Go root and exited 0:
+
+- `gofmt -w internal/logging/logging.go internal/logging/logging_test.go
+  cmd/crystal-server/main.go cmd/crystal-server/runtime_logging.go
+  cmd/crystal-server/runtime_logging_test.go`.
+- `go test ./internal/logging ./cmd/crystal-server -run '^$'`.
+- `go test ./internal/logging -count=20`.
+- Runtime production-category/startup/session tests at `-count=20`.
+- Existing chat, market-search, and startup-error production entries at
+  `-count=10`.
+- `go test -race ./internal/logging -count=5` and runtime production logging
+  race tests at `-count=10`.
+- Fresh unexcluded `go test ./... -count=1`; no flake reproduced.
+- Fresh unexcluded `go test -race ./... -count=1`.
+- `go vet ./...`, `go build ./...`, and `git diff --check`.
 - Both repositories' tracked/staged/untracked C# gates are empty.
+
+## Active leaf and protected work
+
+- Active leaf: `NET-P1-GATES-001`; NET writes remain gated until the Legacy
+  control commit is clean.
+- Outcome: timed IP blocking, MaxUser/MaxIP admission/release, idle read timeout,
+  MaxPacket reset/rejection, and exact disconnect/log boundaries.
+- Matrix anchors: P1 finite inventory, `NET-P1-GATES-001`, and the P1 stage row.
+- Legacy read authority: bounded gate ranges in `Server/MirEnvir/Envir.cs`,
+  `Server/MirNetwork/MirConnection.cs`, and `Server/Settings.cs`, plus direct
+  timer/admission consumers only.
+- Go write authority after the gate: bounded `cmd/crystal-server/main.go` and
+  `main_test.go`, plus new `connection_gates.go`/`connection_gates_test.go`.
+- Forbidden: status port 3000, HTTP, lifecycle redesign, broad logging closure,
+  localization, unrelated persistence/protocol, and C#.
 
 ## Quiescence
 
-- Go-only catalog writer `01a03007-6e3f-7b82-bde9-62f4b51a405a` is closed.
-- Earlier loader and invalid Python auditors are closed; the Python report was
-  excluded from acceptance and independently replaced by Go-only evidence.
-- No subagent result is pending and no `go` or `crystal-server` process remains.
+- `luna_worker` `01a0302d-1068-7ad2-91e6-d4eb449599e0` is completed and closed.
+- No subagent result is pending; exact process audit found no `go` or
+  `crystal-server` process.
 
 ## Exact recovery sequence
 
-1. Verify the expected Legacy control commit and clean status; verify Go HEAD and
-   clean status separately, including all six C# gates.
-2. Read only the named LOG matrix anchors, run the targeted archive search, and
-   trace the bounded Legacy/Go logger authorities.
-3. Derive the finite category/queue/layout/failure checklist, delegate at most
-   one disjoint bounded wave, then implement only the registered LOG write set.
+1. Run `tasks/check-migration-control.sh`, verify both repositories and all six
+   C# gates separately, then commit only the three Legacy control paths with
+   subject `docs(migration): complete P1 logging categories`.
+2. Verify the expected one-commit Legacy delta and both clean worktrees; refresh
+   this handoff only if unexpected state remains.
+3. Once both worktrees are clean, read only the named NET anchors, search the
+   archive for IPBlocks/MaxUser/MaxIP/MaxPacket/timeout lessons, and trace the
+   bounded Legacy/Go gate authorities before any NET write.

@@ -29,6 +29,7 @@ duplicate.
 - Strengthening after bounded-control recovery: 控制面已经明确禁止跨仓后，首次恢复调用仍把绝对 Go matrix 路径附在 Legacy 文档读取后，约 8 万 token 输出再次全部作废。随后已物理拆成 Legacy 启动/状态与 Go 状态/matrix 两组调用，并以三项指纹核对十二文件未变。以后发送恢复命令前必须先做“命令文本内是否出现另一仓根”的机械检查，不能只检查 `workdir`。
 - Strengthening after `DISC-P1-CLOSURE`: P1 版本勘察又在 Legacy `workdir` 的同一命令中加入 Go 的 `internal/config`/`cmd/crystal-server` 相对路径；compact 恢复首调用随后再次把绝对 Go matrix 附在 Legacy 启动读取末尾。两次整调用均已作废并按两仓独立零退出重跑。即使核对同一 setting 或启动 authority，也必须在发送前机械检查“命令文本只含当前根”，且 Legacy 启动调用必须物理结束后才能构造 Go 调用。
 - Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
+- Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -51,6 +52,7 @@ duplicate.
 - Strengthening after `CFG-P1-CONTRACT-001` tracing: 查找 Legacy startup consumers 时再次把可能零匹配的 `rg` 裸放在 `set -e` 调用中，整次零输出结果已作废；随后先声明零匹配有效、显式接收退出码 0/1，并扩大到已验证的 `.cs` 路径后定位真实 `Server.MirForms/Program.cs` 入口。凡搜索“可能不存在的限定写法”必须在命令成形时就使用 0/1 分支，不能等退出 1 后补救。
 - Strengthening after `LOC-P1-CATALOG-001` discovery: Active Index 将 `server_text_catalog*.go` 列为允许新建文件，主线程却在枚举只返回现有 localization 两文件后仍把这两个未来路径交给 `wc`，调用退出 1 且整次输出作废。清单中的 write authority 不等于文件已存在；每个候选必须以本次 `rg --files` 结果分类为 existing/new，只有 existing 才能进入读取参数。
 - Strengthening after `LOC-P1-CATALOG-001` integration: 主审已有固定 argv 规则后仍把 `--glob` 放在 `rg --` 之后，调用 exit 2 且全部输出作废；随后清理本批测试生成文件时又把 `rm -f` 拼进补丁/测试复合命令，整次在执行前被策略拒绝。已分别以选项前置的 `rg` 和只删除精确自有文件的 `apply_patch` 零退出重跑；今后发送前同时机械检查 `rg` 的 `--` 边界和复合命令是否含被禁止的清理动作。
+- Strengthening after `LOG-P1-CATEGORY-001` tracing: 同一批三次把 `--glob` 放到 `rg --` 之后，导致有效前段与 exit 2 混杂；每次整调用均作废并用 `rg [options] -e pattern -- paths` 重跑。发送任何 `rg` 前必须先按固定四段模板目检，禁止从自然语言顺序临时拼 argv。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -60,6 +62,7 @@ duplicate.
 - Verification: 逐段复读 diff，并运行格式化、最小编译和定向测试；任一 patch 失败时不采用同调用的其他结果。本批矩阵第二个 hunk 因正文换行与预期不符而失败；先复读并独立核验同调用已落地的第一个 hunk，再以精确物理行单独重跑第二个 hunk，最终 `git diff --check` 通过。
 - Strengthening after Goal continuity patch: 一个补丁同时修改互为 hard link 的 `AGENTS.md` 与 `agents.md`；首个 hunk 已经同步改变两个路径，第二个 hunk 因旧正文消失而失败，形成“调用失败但修改已落地”。以后 patch 前先用 `ls -li`/`git ls-files` 核对别名与 inode；hard link 只修改一个 tracked canonical 路径，并在失败后立即独立回读全部别名和 Git 状态。本次已确认两路径仍共享 inode、内容均为 Sol Ultra/checkpoint-not-blocker，Git 只跟踪 canonical `agents.md` 变化。
 - Strengthening after P1 inventory insertion: 一次四-hunk matrix 补丁因旧段落物理换行与草稿不一致而整体失败；随后已独立确认没有部分写入，再把新段插入、P1 单行精确替换和两个小 prose hunk 分开发送并逐项 `git diff --check`。长表插入与陈旧 prose 修订不得共用一个补丁事务；先复读每个唯一锚点，失败后先查 status/目标标记再重试。
+- Strengthening after `LOG-P1-CATEGORY-001` wiring: 一个三-hunk 主文件补丁因其中 `stage = stageGame` 上下文未匹配而整体失败；随后 handoff 刷新又把只存在于 Active Index 的 ownership 正文当成 handoff 锚点。两次均确认零部分写入后按目标文件实际物理行拆成独立 hunk。跨越数千行或相邻控制文档的接线都必须逐文件复读并拆事务，不能因相似语义而复用锚点。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -75,6 +78,7 @@ duplicate.
 - Root cause: 依据相似模块、Legacy 名称或“应该对称”推断 Go API。
 - Prevention: 先读取声明、receiver、参数顺序、返回值、领域类型和包级符号，再接线。
 - Verification: 新调用接入后立即运行包级只编译门禁；本批测试夹具误写不存在的 `worldMagic.Spell` 字段后由编译器立即拦截，复读声明并改用实际 `Level` 字段后定向测试通过。
+- Strengthening after `LOG-P1-CATEGORY-001` compile: 主线程在 `runServerWithContext` 中取得 `runtimeLogs` 后，误以为数千行后的独立 `serveWithConfig` 仍共享该局部变量，首次只编译门禁报三处 undefined。复读函数边界后通过保留旧签名的显式 wrapper/context 传递修复；任何跨入口接线都要先列完整调用链与变量所有权，再落调用点。
 
 ### 2026-08-21 C06 — 行为判断前先通过 Go 语法、类型和 vet 门禁
 
@@ -275,3 +279,4 @@ duplicate.
 - Verification: 旧 1421 行 handoff 已逐字复制到 `tasks/migration-handoff-archive/2026-08-23-2055-pre-control-plane-optimization.md` 后改为短快照；`tasks/check-migration-control.sh` 对 handoff、active index、goal contract、agents 和 active lessons 执行行数/字节/必需标题门禁；Go 十二个未提交文件在优化中保持原样，双仓 `.cs` 三类审计为空。
 - Strengthening after utility/P1 closure: 将 active index 固定标题改成自然语言曾使控制脚本 exit 1；本次重建 handoff 又把必需的唯一 `- Active leaf: \`` 字段改写成普通叙述，再次被脚本拦截。控制标题和 section field 都是可执行 schema，补丁前必须先从 `tasks/check-migration-control.sh` 复制精确字符串；修复并让检查器 exit 0 后，才可采用回读、scope-freeze 或提交结论。
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
+- Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
