@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；交互式 `@ALLOWTRADE` Go 功能已提交）
+最后更新：2026-08-23（Asia/Singapore；交互式 `@ALLOWTRADE` 已收口）
 
 ## 迁移目标与硬边界
 
@@ -23,7 +23,7 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
-## 最近完成批次（交互式 `@ALLOWTRADE`，Go 功能已提交）
+## 最近完成批次（交互式 `@ALLOWTRADE`，已收口）
 
 - compact 摘要漏掉实际 Go 补丁且旧 handoff 错写 Go clean；恢复审计发现 3 tracked +
   3 untracked ALLOWTRADE 文件后立即停止实现/测试，按两仓分别重读启动材料、完整 matrix、
@@ -62,14 +62,16 @@
   `localization_test.go` 与 `docs/migration-matrix.md`；提交统计 434 insertions、19 deletions，
   提交后工作树 clean，无 staged/untracked，三类 `.cs` 为空。
 - Legacy 仓根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
-  `master...origin/master [ahead 413]`，HEAD
-  `c481fd9dcfae778fef0141296d27f7b1a4ad47ed`。owned 文档为 `tasks/lessons.md`、
-  `tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff；当前仅三份 tracked
-  修改，无 staged/untracked，三类 `.cs` 为空。
+  `master...origin/master [ahead 415]`，HEAD 为本 post-commit handoff refresh（parent
+  `84668b508fc6c2f5b19894b56e8aaa23391f572d`，
+  `84668b50 docs(migration): record interactive ALLOWTRADE command`）。功能文档提交只包含
+  `tasks/lessons.md`、`tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff；
+  提交后工作树 clean。本 refresh 仅更新本 handoff；提交后无 staged/untracked，三类 `.cs`
+  为空。
 - matrix 已更新 P1 localization、P3 character preference/interactive command 与 P6 Trade
-  admission；三个阶段继续 `In progress`，整体 Goal 继续 active。下一恢复命令：只暂存并
-  提交上述三份 Legacy 文档，随后回写实际 Legacy commit/clean 状态并再次分别核对两仓
-  status/HEAD/三类 `.cs`；不得把 P1/P3/P6 或整体 Goal 标为完成。
+  admission；三个阶段继续 `In progress`，整体 Goal 继续 active。下一恢复命令：新 Session
+  分别核对双仓 status/HEAD/三类 `.cs` 并完整读取 matrix，从明确 pending、dependency-ready
+  子切片重新选择；不要重复 `@ALLOWTRADE`，也不得把 P1/P3/P6 或整体 Goal 标为完成。
 
 ## 最近完成批次（交互式 `@HAIR`，已收口）
 
