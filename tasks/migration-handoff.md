@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 04:12 (Asia/Singapore)
+Last updated: 2026-08-24 04:17 (Asia/Singapore)
 
 This replace-in-place snapshot closes the committed LOG leaf and routes the
 next bounded P1 leaf. The Goal remains active.
@@ -15,13 +15,14 @@ registered children: five Complete and seven unfinished.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch before the enclosing route-reconciliation commit:
-  `master...origin/master [ahead 425]`.
+- Branch before the enclosing timing-correction commit:
+  `master...origin/master [ahead 426]`.
 - HEAD before the enclosing control commit:
-  `381fa931167e9a9c4f1d564b81c004445ec0b693`
-  (`docs(migration): complete P1 logging categories`).
-- Tracked modifications are exactly `tasks/lessons.md` and this handoff after
-  replacement; expected subject is `docs(migration): reconcile P1 network route`.
+  `b52cb1654e2e968939700e23257cbe04a347707d`
+  (`docs(migration): reconcile P1 network route`).
+- Tracked modifications are exactly `tasks/lessons.md`,
+  `tasks/migration-active.md`, and this handoff after replacement; expected
+  subject is `docs(migration): correct P1 packet window`.
 - Staged and untracked files: none.
 - `AGENTS.md` and tracked `agents.md` remain one hard-linked inode; all tracked,
   staged, and untracked C# gates are empty.
@@ -76,7 +77,7 @@ All commands below ran in the Go root and exited 0:
 - Active leaf: `NET-P1-GATES-001`; the matrix and Active Index now both say
   Active. NET writes remain gated until the expected Legacy correction is clean.
 - Outcome: timed IP blocking, MaxUser/MaxIP admission/release, idle read timeout,
-  MaxPacket reset/rejection, and exact disconnect/log boundaries.
+  MaxPacket five-second reset/rejection, and exact disconnect/log boundaries.
 - Matrix anchors: P1 finite inventory, `NET-P1-GATES-001`, and the P1 stage row.
 - Legacy read authority: bounded gate ranges in `Server/MirEnvir/Envir.cs`,
   `Server/MirNetwork/MirConnection.cs`, and `Server/Settings.cs`, plus direct
@@ -95,8 +96,8 @@ All commands below ran in the Go root and exited 0:
 ## Exact recovery sequence
 
 1. Run `tasks/check-migration-control.sh`, verify both repositories and all six
-   C# gates separately, then commit only `tasks/lessons.md` and this handoff with
-   the expected route-reconciliation subject.
+   C# gates separately, then commit only the three current Legacy control paths
+   with the expected timing-correction subject.
 2. Verify the expected one-commit Legacy delta and both clean worktrees; refresh
    this handoff only if unexpected state remains.
 3. Once both worktrees are clean, read only the named NET anchors, search the

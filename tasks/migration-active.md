@@ -100,7 +100,7 @@ this is a P1 denominator only, not a project percentage.
 - [ ] Preserve MaxUser/MaxIP rejection and release across ordinary close,
       bootstrap failure, timeout, and listener shutdown.
 - [ ] Consume `IPBlockDuration`; match idle read timeout plus MaxPacket counting,
-      one-second reset boundary, rejection, disconnect, and logging order.
+      five-second reset boundary, rejection, disconnect, and logging order.
 - [ ] Drive deterministic TCP/net.Pipe production entries with fake time where
       needed; run repeated and focused race plus the standard Leaf gate.
 

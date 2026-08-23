@@ -196,6 +196,7 @@ duplicate.
 - Prevention: 从真实入口追到构造类型、override、共享 helper 和所有消费者；当前源码与测试优先于文档。Review finding 也必须回到 Legacy 实现裁决，不能把“通常不应发包”“应显示实际变化量”或“应避免整数回绕”等常规工程直觉覆盖原版怪癖。
 - Verification: 用生产入口测试覆盖可达路径、历史怪癖和关键失败分支。本批只读 review 把 Plague 在零 MP 时仍发 `HealthChanged`、治疗接近满血时显示请求恢复量、`int32` unchecked 运算列为风险；主审回读 `Map.CompleteMagic`、`HumanObject.ProcessRegen/ChangeMP` 和项目 overflow 配置后确认三者均为 Legacy 行为，未按直觉“修正”，并保留对应边界测试。
 - Strengthening after P1 config compatibility: 既有 `TestVersionCheckingRequiresAFile` 首次失败，因为测试把 Go 的 fail-fast 规则当成权威；Legacy `LoadVersion` 实际跳过缺失路径并保留空 hash 列表，启用版本检查时由客户端 gate 全部拒绝。测试已改为锁定空列表/全拒绝，缺失、空白、多文件和 partial MD5 定向/重复/race 全通过。任何“更严格更安全”的配置错误都必须先由 Legacy loader 和消费者共同裁决。
+- Strengthening after `NET-P1-GATES-001` tracing: Active acceptance 草稿把 MaxPacket reset 凭直觉写成一秒，Legacy `MirConnection.ReceiveData` 实际在严格 `< Now` 时重置并设为 `Now.AddSeconds(5)`。时间窗口、比较边界和计数单位必须从真实入口逐项抄录后再写验收清单；本次在任何 NET 代码写入前改回五秒并保留 equality 边界待测。
 
 ### 2026-08-21 C22 — 不同 capability、门禁和业务阶段不得过度复用
 
