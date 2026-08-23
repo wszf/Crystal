@@ -20,6 +20,59 @@ The overall Goal remains unfinished until the Go migration matrix P0-P12 is
 fully Complete. Completing one batch, feature, protocol, or AI is not completion
 of the overall Goal.
 
+## Control plane and bounded context
+
+Use these files for different purposes; do not duplicate their contents:
+
+- `tasks/goal-task.md`: stable execution and completion contract.
+- `tasks/migration-active.md`: concise routing index, current leaf batch, scope-
+  freeze state, and the exact Go matrix anchors to inspect.
+- `tasks/migration-handoff.md`: current recoverable snapshot only.
+- Go `docs/migration-matrix.md`: authoritative detailed evidence and status.
+- `tasks/migration-handoff-archive/`: historical snapshots; never a startup-read
+  source.
+
+Keep `agents.md` at or below 200 lines/16 KiB and this stable contract at or
+below 300 lines/32 KiB. These limits are enforced with the other control-plane
+limits by `tasks/check-migration-control.sh`.
+
+At the start of a new main migration session, read `agents.md`, active
+`tasks/lessons.md`, this file, `tasks/migration-active.md`, and the current
+handoff once. Verify each repository separately. In the Go repository, read only
+the matrix rows or anchored sections named by `tasks/migration-active.md`.
+Read the full matrix only once for an explicit phase-closure audit, or when a
+proven index/matrix inconsistency requires reconstruction. A missing next item
+must activate a bounded `DISC-Px-CLOSURE` leaf and search only that phase's
+headings/rows; it is not permission for a full-matrix read. Never `cat` the full
+matrix, handoff archive, or broad source trees into the main thread.
+
+After an in-session context compaction, do not repeat the full startup sequence.
+Read the concise active index and current handoff, verify their stated worktree
+facts, then resume the same batch. Re-read another control file or matrix section
+only when the compacted context lacks a required rule or evidence.
+
+## Finite inventory and progress
+
+Every implementation batch must have a stable leaf ID in
+`tasks/migration-active.md` before code changes begin. A leaf records:
+
+- phase and matrix anchor;
+- observable outcome and authoritative Legacy entry points;
+- owned files and dependency boundary;
+- acceptance evidence and required test tier;
+- status: `Discovery`, `Ready`, `Active`, `Blocked-external`, or `Complete`.
+
+Vague matrix residuals such as “remaining”, “other”, or “full closure pending”
+are not measurable work. Each such residual requires a discovery/closure leaf
+that enumerates finite child leaves before the phase can be marked scope-frozen.
+Do not publish a completion percentage or ETA for an unfrozen phase. Stage
+statuses are routing summaries, not percentages.
+
+Only one main leaf batch may be `Active`. Independent sub-leaves may run in one
+bounded subagent wave when their write and authority scopes are disjoint. Update
+the active index when selection, ownership, status, or the next recovery point
+changes; do not append historical batch narratives to it.
+
 ## Authoritative evidence
 
 Resolve behavior conflicts in this order:
@@ -37,128 +90,157 @@ similar modules.
 
 ## Agent responsibilities
 
-The main agent uses `gpt-5.6-sol` with `high` reasoning and owns:
+The main agent uses `gpt-5.6-sol` with `ultra` reasoning and owns:
 
-- matrix and batch selection;
+- matrix and leaf selection;
 - Legacy behavior rulings and architecture decisions;
 - shared-state and cross-module integration;
 - subagent task boundaries and review;
-- final gates, documentation, handoff, commits, and Goal completion decisions.
+- integration gates, documentation, handoff, commits, and Goal completion.
 
 Prefer the custom `luna_worker` agent, configured as `gpt-5.6-luna` with `max`
-reasoning, for every bounded and independently verifiable task, including:
+reasoning, for bounded independently verifiable implementation, tests, Legacy/
+Go tracing, mechanical migration, focused verification, and review.
 
-- direct Go implementation within assigned files or modules;
-- tests, fixtures, protocol vectors, and transcript coverage;
-- Legacy/Go call-chain comparison and large read-only searches;
-- mechanical migration, repetitive edits, and data preparation;
-- compilation, targeted/repeated/race checks, log triage, and independent review.
+Use one subagent wave at a time. Start with one to three agents and at most two
+writing agents. Writing agents must have disjoint file and authority scopes;
+parallel writes to coupled packages require separate worktrees or serialization.
+Do not spawn agents merely to reread control documents, repeat status, or
+produce a second copy of work already assigned. Close each completed thread as
+soon as its concise evidence summary and patch are collected.
 
-Every delegation must define the goal, repository, read/write scope, forbidden
-scope, evidence source, acceptance criteria, required checks, and return format.
-Writing agents must have disjoint file and authority scopes. Do not duplicate a
-delegated task in the main thread. Review and integrate the returned patch; close
-the agent promptly after collecting its concise evidence summary.
+Every delegation must define the leaf ID, repository, read/write scope,
+forbidden scope, evidence source, acceptance criteria, required checks, and
+return format. `luna_worker` must not redefine the Goal, architecture,
+priorities, or acceptance criteria; expand scope; modify unassigned files;
+perform destructive Git actions; or commit unless commit ownership is explicit.
+If it is unavailable, do not silently substitute another model.
 
-`luna_worker` must not redefine the Goal, architecture, priorities, or acceptance
-criteria; expand scope; modify unassigned files; perform destructive Git actions;
-or commit unless commit ownership is explicitly delegated. If it is unavailable,
-do not silently substitute another model.
+## Work-cycle workflow
 
-## Batch workflow
+A work cycle completes one independently testable leaf or tightly coupled leaf
+cluster. A cycle is not required to equal one chat, turn, or context window.
 
-Use one independently testable, atomic feature cluster per main session whenever
-practical.
+Before a cycle:
 
-Before a batch:
+1. Verify the concise handoff and active index against each repository.
+2. Preserve existing tracked, staged, and untracked work; never reset, stash,
+   checkout, clean, delete, move, or overwrite unrelated changes.
+3. Read only the active matrix anchors and relevant Legacy/Go sources.
+4. Search the lessons archive with the leaf ID, entity/module, and concrete
+   workflow/failure keywords; never read it wholesale.
+5. Derive a finite Legacy behavior checklist and register missing child leaves
+   before implementation.
 
-1. Read `agents.md`, active `tasks/lessons.md`, this file, and
-   `tasks/migration-handoff.md`.
-2. Check branch, HEAD, working tree, staged/untracked files, and `.cs` status in
-   each repository separately.
-3. Read the authoritative Go `docs/migration-matrix.md` and select a dependency-
-   ready unfinished item.
-4. Search the lessons archive only with relevant AI IDs, entity/module names, and
-   workflow/failure keywords; never read the archive wholesale.
-5. Preserve and integrate existing work. Never reset, stash, checkout, clean, or
-   overwrite unrelated changes.
+During a cycle:
 
-During a batch:
-
-1. Derive a Legacy behavior checklist before implementation.
-2. Delegate bounded implementation, tests, comparison, and high-volume support
-   work to `luna_worker` with disjoint scopes.
-3. Keep architecture, shared-state decisions, integration, and final rulings in
+1. Delegate bounded independent work once, with disjoint ownership.
+2. Keep architecture, shared-state decisions, integration, and final rulings in
    the main agent.
-4. Drive tests through production entry points and verify domain state,
-   persistence, and complete observable protocol effects.
-5. Treat Go map-stored entities as values and preserve explicit writeback,
+3. Drive tests through production entry points and verify domain state,
+   persistence, recipients, wire order, relogin, and restart when applicable.
+4. Treat Go map-stored entities as values and preserve explicit writeback,
    authority, revision, lock, persistence, and notification ordering.
+5. Keep main-thread command output targeted. Locate with `rg --files`/`rg`, then
+   read only the necessary ranges; broad source dumps and raw test logs belong
+   in subagent threads or bounded log files, with concise summaries returned.
 
-Before ending or committing a batch:
+Before committing a leaf, run the leaf gate below, update the matrix and active
+index, refresh the current handoff, close completed agents, and commit only
+owned files. A completed leaf does not complete the overall Goal.
 
-1. Run `gofmt`, a minimum compile gate, targeted tests, relevant repeated/race
-   tests, `go test ./...`, `go vet ./...`, and `go build ./...`.
-2. Attribute any failure from its actual test name, exit code, and stack; do not
-   change unrelated modules to hide an existing failure.
-3. Run `git diff --check`.
-4. Update the Go migration matrix and `tasks/migration-handoff.md` with exact
-   evidence and the next recovery point.
-5. In both repositories, verify tracked, staged, and untracked `.cs` changes are
-   empty.
-6. Commit only files owned by the batch, using atomic commits per repository.
-7. Close completed subagents.
+## Tiered verification
 
-## Session rollover
+### Leaf gate — every functional leaf commit
 
-The Goal does not automatically change sessions. The handoff and matrix, not one
-large conversation, preserve migration state.
+- `gofmt` only the owned changed Go files.
+- Minimum compile for touched packages (`go test <packages> -run '^$'`).
+- Focused production-entry tests, relevant repeated tests, and relevant focused
+  race tests.
+- `git diff --check` and exact tracked/staged/untracked status review.
+- Tracked, staged, and untracked `.cs` gates in both repositories.
 
-Prefer a new main session after every completed atomic batch. Stop expanding
-scope and prepare a safe handoff when any of these occurs:
+### Integration gate — bounded cadence
 
-- about 5 million cumulative session tokens;
-- a rollout approaching 250 MB;
-- two context compactions;
-- noticeable tool, response, or migration slowdown;
-- insufficient remaining context to close the current batch safely.
+Run `go test ./...`, `go vet ./...`, and `go build ./...`:
 
-Treat about 8 million tokens or a 500 MB rollout as a hard ceiling. Before the
-ceiling, finish the smallest safe boundary, record exact repository state and
-next steps, commit only valid owned work, close subagents, and ask the user to
-open a new session. A rollover is never a reason to mark the Goal Complete.
+- before changing a phase status or shared architecture;
+- after at most four leaf commits or 24 hours since the last integration gate,
+  whichever comes first;
+- immediately when a leaf changes shared protocol, persistence, scheduler,
+  locking, or startup/shutdown infrastructure.
 
-### Context-compaction safety
+Run full `go test -race ./...` before phase closure, after at most eight leaf
+commits or 48 hours, and immediately for changes with broad concurrency impact.
+Focused race remains mandatory for every concurrency-relevant leaf.
 
-Compaction is a hard handoff boundary, not a point at which the model may defer
-bookkeeping. This rule also applies to documentation-only work, including
-Markdown edits. **Before every context compaction**, and as soon as the system
-signals imminent compaction, a context-limit rollover, or a new-session
-boundary, stop implementation and write or refresh `tasks/migration-handoff.md`.
-If the current batch cannot be closed safely, stop code changes and tests first
-and record the smallest complete handoff. It must include both repository roots,
-branches and HEADs, complete tracked/staged/untracked status, exact files owned
-by the batch, tests and exit codes, failure attribution, uncommitted changes,
-the current matrix row, and the next recovery command.
+Record actual command, exit code, failing test, and stack attribution. Do not
+rerun known unrelated failures for every tiny leaf merely to reproduce the same
+log, but never omit a due integration/full-race gate or describe an excluded run
+as a full pass.
 
-Read the handoff back and verify it against both worktrees before compaction.
-The handoff is the durable migration record. An automatically generated compacted
-summary is untrusted context and must not replace or override the handoff. After
-compaction, continue the same active Goal from the verified handoff; do not
-reopen or recreate the Goal, and do not call Goal creation/reset merely to
-recover from compaction or a new session. If no verified handoff exists, stop
-implementation and reconstruct one from both repositories before proceeding.
+### Overall closure gate
+
+The final Goal still requires fresh, unexcluded full tests, full race, vet,
+build, protocol/import/export/restart/deployment evidence, and all remaining
+definition-of-done checks.
+
+## Current handoff rules
+
+`tasks/migration-handoff.md` is a replace-in-place current snapshot, not an
+append-only journal. Keep it at or below 250 lines and 24 KiB. It must contain:
+
+- both repository roots, branches, observed HEADs, and complete tracked/staged/
+  untracked status;
+- active leaf ID, exact owned files, matrix anchors, and unresolved decisions;
+- tests with command, exit code, and failure attribution;
+- active subagents/processes or explicit quiescence evidence;
+- the smallest exact recovery sequence.
+
+Do not append successive compact boundaries or repeat completed milestone
+history. Git history is the normal archive. Before replacing a snapshot that
+contains unique uncommitted evidence not already preserved by Git, copy it once
+to `tasks/migration-handoff-archive/`; startup and compact recovery must never
+read that archive wholesale.
+
+Run `tasks/check-migration-control.sh` after changing the control plane. A
+handoff commit may record the exact HEAD observed immediately before its own
+commit and identify that one expected documentation commit delta; recovery must
+always compare it with the actual `git rev-parse HEAD` and status.
+
+## Session rollover and compaction
+
+The Goal does not automatically change sessions. An active persistent Goal has
+no repository-defined token, rollout-size, turn, or compaction-count ceiling.
+Those metrics are observability only and must not trigger a final answer, new-
+session request, pause, or `update_goal(status="blocked")`.
+
+Only an actual compaction/context-limit/new-session signal triggers the safety
+gate. Stop new writes/tests, quiesce writing agents, and verify both worktrees.
+Refresh the current handoff only if state changed; otherwise verify the existing
+snapshot instead of appending another section. After compaction, read the active
+index and current handoff, then resume useful work in the same Goal. Use a fresh
+main session only when the user explicitly requests one or the platform requires
+it.
+
+Only a genuine external/platform impasse that prevents all meaningful progress
+for the required consecutive turns may block the Goal. Difficulty, duration,
+unknown remaining scope, context size, compaction count, or preference for a new
+chat are not blockers.
 
 ## Definition of done
 
 Mark the overall Goal Complete only when all of the following are true:
 
-1. P0-P12 in Go `docs/migration-matrix.md` are Complete with no unverified
-   Pending, In progress, TODO, or residual migration gaps.
-2. Protocol ordinals, payloads, ordering, recipients, domain state, randomness,
+1. P0-P12 in Go `docs/migration-matrix.md` are scope-frozen and Complete with no
+   unverified Pending, In progress, Discovery, TODO, or residual migration gaps.
+2. Every registered leaf is Complete with authoritative behavior evidence.
+3. Protocol ordinals, payloads, ordering, recipients, domain state, randomness,
    timing, lifecycle, and error behavior are equivalent.
-3. Authenticated sessions, persistence, logout/relogin, restart, import/export,
+4. Authenticated sessions, persistence, logout/relogin, restart, import/export,
    backup/restore, deployment, and cross-platform operation are verified.
-4. `gofmt`, full tests, full race, `go vet ./...`, and `go build ./...` pass.
-5. Both repositories have no tracked, staged, or untracked `.cs` changes.
-6. Matrix, handoff, test evidence, and Git history prove the migration is closed.
+5. `gofmt`, fresh unexcluded full tests, full race, `go vet ./...`, and
+   `go build ./...` pass.
+6. Both repositories have no tracked, staged, or untracked `.cs` changes.
+7. Matrix, active inventory, current handoff, test evidence, and Git history
+   prove the migration is closed.
