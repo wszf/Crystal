@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 07:46 (Asia/Singapore)
+Last updated: 2026-08-24 07:49 (Asia/Singapore)
 
 This replace-in-place snapshot closes committed `NET-P1-HTTP-001`, routes
 `OPS-P1-LIFECYCLE-001` Active, and keeps the persistent full migration Goal
@@ -21,14 +21,12 @@ active.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master...origin/master [ahead 432]`; HEAD:
-  `ed6363f9b382dd05cd0c81c7ed52cffd30a9fb82`
-  (`docs(migration): bound P1 HTTP implementation`).
-- Tracked modifications are exactly
-  `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`,
-  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
-  `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff. Index and
-  untracked set are empty.
+- Branch before this snapshot commit: `master...origin/master [ahead 433]`;
+  HEAD before this snapshot commit:
+  `1abf30d2913cdf86381757fc379acfebd5317e5e`
+  (`docs(migration): close P1 HTTP leaf`).
+- Expected owned delta is this handoff only. Index and untracked set were empty
+  before this snapshot.
 - `tasks/check-migration-control.sh` and `git diff --check` pass.
 - `AGENTS.md` and tracked `agents.md` remain the established hard-linked pair.
 - Tracked, staged, and untracked C# gates are empty.
@@ -114,8 +112,8 @@ active or feature archive lesson and the corrected tests pass repeatedly/race.
 
 ## Exact recovery sequence
 
-1. Rerun the Legacy control/status/C# gates and commit only the five owned
-   Legacy documents.
-2. Read only the lifecycle matrix anchors and bounded Legacy authority, search
-   the archive for OPS/process/start-stop/reboot lessons, then begin the active
-   lifecycle leaf without reopening HTTP or frozen phase inventory.
+1. Search the archive for OPS/process/start-stop/reboot lessons and read only
+   matching sections.
+2. Trace the bounded Legacy lifecycle authority and current Go production
+   entry, then implement the active leaf without reopening HTTP or the frozen
+   P1 inventory.
