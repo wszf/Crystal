@@ -370,3 +370,10 @@
 - Prevention: 每条调用只使用当前仓库路径；Go 源文件 patch 目标必须带完整 `cmd/crystal-server/...` 绝对路径；任何非零读取或 patch 校验失败都不采用同调用其他输出。
 - Verification: 失败调用均未产生未预期文件；随后拆分为纯 Legacy/Go 调用并以精确路径完成 TrapRock 协议、受击和测试接线。
 
+
+### 2026-08-24 — Replace-in-place heredocs must not contain patch diff markers
+
+- Symptom: the reconstructed migration handoff heredoc accidentally prefixed new section lines with `+` copied from patch notation.
+- Root cause: patch-formatted draft text was pasted into a raw file replacement without a literal-content review.
+- Prevention: before sending a heredoc replacement, mechanically reject leading patch markers and prefer one `apply_patch` update when practical; always read the complete replaced file back.
+- Verification: the write succeeded, the exact accidental prefixes were removed immediately, full handoff readback contained no markers, and the migration control checker plus `git diff --check` passed.

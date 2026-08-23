@@ -30,7 +30,7 @@ duplicate.
 - Strengthening after `DISC-P1-CLOSURE`: P1 版本勘察又在 Legacy `workdir` 的同一命令中加入 Go 的 `internal/config`/`cmd/crystal-server` 相对路径；compact 恢复首调用随后再次把绝对 Go matrix 附在 Legacy 启动读取末尾。两次整调用均已作废并按两仓独立零退出重跑。即使核对同一 setting 或启动 authority，也必须在发送前机械检查“命令文本只含当前根”，且 Legacy 启动调用必须物理结束后才能构造 Go 调用。
 - Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
 - Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
-- Strengthening after `NET-P1-GATES-001` recovery: 本轮首个恢复调用又在 Legacy 根用 `git -C` 读取 Go 状态，整次输出已作废并按仓重跑。恢复模板今后必须把“两仓核验”落实为两个物理工具调用，而不是同一 shell 中的两个标题段；发送前机械拒绝 `git -C`。
+- Strengthening after NET/lifecycle recovery: 两次恢复首调用仍在 Legacy 根用 `git -C` 读取 Go 状态，整调用均作废并按仓重跑。恢复模板必须是两个物理工具调用；发送前机械拒绝 `git -C`。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -57,6 +57,7 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
+- Strengthening after HTTP review: repeated reads guessed nonexistent `session.go`, `datetime.go`, and Legacy project paths; every call was discarded and rerun from enumerated files. Review appendices use the same path gate.
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -68,6 +69,7 @@ duplicate.
 - Strengthening after P1 inventory insertion: 一次四-hunk matrix 补丁因旧段落物理换行与草稿不一致而整体失败；随后已独立确认没有部分写入，再把新段插入、P1 单行精确替换和两个小 prose hunk 分开发送并逐项 `git diff --check`。长表插入与陈旧 prose 修订不得共用一个补丁事务；先复读每个唯一锚点，失败后先查 status/目标标记再重试。
 - Strengthening after `LOG-P1-CATEGORY-001` wiring: 一个三-hunk 主文件补丁因其中 `stage = stageGame` 上下文未匹配而整体失败；随后 handoff 刷新又把只存在于 Active Index 的 ownership 正文当成 handoff 锚点。两次均确认零部分写入后按目标文件实际物理行拆成独立 hunk。跨越数千行或相邻控制文档的接线都必须逐文件复读并拆事务，不能因相似语义而复用锚点。
 - Strengthening after NET closure: 单行日志补丁夹带不连续的陈旧上下文而失败；确认零写入后复读并用最小 hunk 成功。不得把记忆中的远端行拼进单行补丁。
+- Strengthening after HTTP handoff reconstruction: `apply_patch` rejects delete-plus-add operations targeting the same path. The failed call made no write; use one update operation or a verified replace-in-place write, then read the file back.
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -92,6 +94,7 @@ duplicate.
 - Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；显式转换不同领域类型，再进入行为测试。
 - Verification: 最小编译、定向测试和 `go vet` 分层通过。
 - Strengthening after NET frame-reader integration: 替换返回类型时漏改三个消费者，测试重构又留了未使用 import，均由只编译门禁捕获。接口变更先列声明与全部调用点，同一补丁改完后立即 gofmt/compile。
+- Strengthening after HTTP recovery: recovered and incremental candidates repeatedly missed imports or helper definitions. Treat each hunk group as unverified; gofmt and touched-package compile must precede behavior tests.
 
 ### 2026-08-21 C07 — 全量、race 和环境失败必须按实际栈归因
 

@@ -663,3 +663,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: 将 totem/child 生命周期合并为一个 owner/parent gate，没有沿 `CharmedSnake.Process()` 的独立 `AliveTime` 分支和 `Die()` 的 `ObjectType.Monster/Player` switch 逐项迁移。
 - Prevention: 每个召唤层级分别核对 owner/parent 距离、独立存活截止、召回和死亡副作用；死亡爆炸按 Legacy race 白名单建模，不从通用 Player/Hero target projection 推断范围。
 - Verification: Go `TestCharmedSnakeExpiresIndependentlyAndExplodesOnlyAtLegacyTargetRaces` 锁定子蛇严格 `now > AliveTime` 清理、父 child-list 回写和 Player 命中；ArcherSummon 普通 `-count=1` 与 race `-count=3` 定向测试通过。
+
+### 2026-08-24 — NET-P1-HTTP shutdown tests must separate callback completion from socket closure
+
+- Symptom: the first blocked-GET shutdown test required the response body even though transport shutdown legitimately returned EOF; the POST test accepted any read error, so a still-open socket timing out could pass. A later non-GET fixture hand-built a wildcard prefix without its port and became a false 404 after port authority was enforced.
+- Root cause: handler-lifecycle completion and client wire completion were treated as one signal, deadline errors were not distinguished from close/EOF errors, and the fixture bypassed the production prefix parser.
+- Prevention: use an explicit callback-finished barrier for handler ownership; test the connection separately, accepting close/EOF/reset but rejecting deadline timeout after service Close; construct URI-authority fixtures through `parseLegacyHTTPPrefix` rather than partial structs.
+- Verification: the active-handler, repeated POST shutdown, and all-non-GET tests pass after the assertions were split and the wildcard fixture used the real parser.
