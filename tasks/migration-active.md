@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 02:43 (Asia/Singapore)
+Last verified: 2026-08-24 02:56 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,25 +39,32 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `CFG-P1-CONTRACT-001`
-- Status: `Active`; the Legacy documentation gate is committed at
-  `73233ac3121c9e870fd3f75a4012b0e3561c2932`, and both repositories were
-  separately verified clean before this recovery-point normalization.
-- Outcome: match the P1-owned Legacy Setup.ini/default/error/version-file
-  contract without pulling feature-specific P2-P12 settings into this leaf.
+- Leaf ID: `LOC-P1-CATALOG-001`
+- Status: `Active` for routing; CFG is committed at Go
+  `fbc69d25f3577ac7d2f16be17bbdbeba10722285`, and LOC writes remain gated only
+  until this control transition is committed and both repositories are clean.
+- Outcome: provide the exact Legacy 768-key server default catalog and English/
+  Chinese overlay behavior without importing client-only UI localization.
 - Go matrix anchors to read: `### 2026-08-24 P1 finite closure inventory`, the
-  `CFG-P1-CONTRACT-001` row, and the row beginning `| P1 |` only.
-- Legacy read authority: `Shared/Functions/IniReader.cs`, the General/Network
-  declarations and `Load`/`Save`/`LoadVersion` consumers in `Server/Settings.cs`,
-  plus direct startup consumers needed to rule observability.
-- Go write authority: `internal/config/config.go`,
-  `internal/config/config_test.go`, new
-  `internal/config/p1_contract_test.go`, the bounded config-path selection in
-  `cmd/crystal-server/main.go`, and new
-  `cmd/crystal-server/p1_config_startup_test.go`.
-- Forbidden scope: localization catalog work, listener/admission behavior,
-  logging, HTTP/status service implementation, lifecycle restructuring,
-  feature-specific settings, broad matrix edits, and C# changes.
+  `LOC-P1-CATALOG-001` row, and the row beginning `| P1 |` only.
+- Legacy read authority: `Shared/Language.cs`,
+  `Server.MirForms/Localization/English.json`,
+  `Server.MirForms/Localization/Chinese.json`, and bounded startup/lookup
+  consumers required to rule unknown/malformed/fallback behavior.
+- Go write authority: `internal/config/localization.go`,
+  `internal/config/localization_test.go`,
+  `internal/config/server_text_catalog.go`, and
+  `internal/config/server_text_catalog_test.go`.
+- Forbidden scope: feature call-site migration, client UI catalogs, network,
+  logging, lifecycle, unrelated config parsing, broad matrix edits, and C#
+  changes.
+
+`CFG-P1-CONTRACT-001` is Complete in the verified Go candidate. Exact-case and
+first-match INI behavior, UInt16 fallback/write-back, default production path,
+CRYSTAL extension precedence, service mappings, version MD5 edge behavior, and
+startup-visible failures are locked by focused/repeated/race tests. Its required
+unexcluded integration run reproduced the established OmaMage flake; the
+precisely excluded rerun and vet/build passed as recorded in the handoff.
 
 `DISC-P1-CLOSURE` is Complete in committed control. A bounded
 main-agent audit and independent read-only `luna_worker` review both found no
@@ -69,29 +76,25 @@ this is a P1 denominator only, not a project percentage.
 
 ### Protected Go ownership
 
-- The active P1 row is committed at Go
-  `b5e5999c743f3ae7183f3a51eb5fd50ec4fb3536`;
-  the Go worktree is clean with no protected uncommitted path.
-- Current protected Legacy control paths are recorded in the handoff. The active
-  Go production write set may begin after this normalization commit is clean.
+- CFG is committed at Go `fbc69d25f3577ac7d2f16be17bbdbeba10722285`;
+  the Go worktree is clean and no CFG path remains protected.
+- Current protected Legacy control paths are recorded in the handoff; the LOC
+  write set remains gated until this routing commit is clean.
 - Later P1 leaves may share files only serially. The one active leaf owns the
   exact paths above; no subagent may expand them.
 
 ### Remaining acceptance work
 
-- [ ] Enumerate the P1-owned General/Network/service fields and explicitly route
-      every other `Server/Settings.cs` field to its functional phase.
-- [ ] Match case-sensitive section/key lookup, first-match behavior, empty and
-      malformed values, missing sections/files, default write-back, and
-      unwritable-path behavior at the production config entry point.
-- [ ] Match Legacy numeric width/zero/range fallback semantics; rule each current
-      stricter Go validation with an observable compatibility test.
-- [ ] Match comma-separated version paths, whitespace, missing/multiple files,
-      partial hash collection, and version-check behavior.
-- [ ] Preserve documented `CRYSTAL_*` extensions without allowing them to change
-      the Legacy Setup.ini contract.
-- [ ] Run config package compile/focused/repeated tests and the focused production
-      startup gate; add focused race only if shared mutable startup state changes.
+- [ ] Generate the exact 768-key server default catalog in Go-native form and
+      prove its key count against Legacy declarations.
+- [ ] Lock the English/Chinese server asset key sets, exact values, and composite
+      format placeholder signatures without modifying either Legacy JSON file.
+- [ ] Match unknown key, missing file, malformed JSON/value, empty catalog, and
+      unwritable generated-file behavior at the production localization entry.
+- [ ] Preserve the active missing-Chinese-key English fallback and distinguish it
+      from unknown server keys and client-only UI Text/Enum assets.
+- [ ] Prove startup loading and environment path overrides with focused/repeated
+      catalog tests; add focused race only if shared mutable state is introduced.
 
 ### P1 frozen child registry
 
@@ -101,8 +104,8 @@ selected now.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
-| `CFG-P1-CONTRACT-001` | Active | — | `internal/config/{config.go,config_test.go,p1_contract_test.go}`; bounded `cmd/crystal-server/main.go`; new `cmd/crystal-server/p1_config_startup_test.go` | focused/repeated config + startup |
-| `LOC-P1-CATALOG-001` | Ready | CFG | `internal/config/{localization.go,localization_test.go,server_text_catalog.go,server_text_catalog_test.go}` | catalog/static + startup |
+| `CFG-P1-CONTRACT-001` | Complete | — | `internal/config/{config.go,config_test.go,p1_contract_test.go}`; bounded `cmd/crystal-server/main.go`; new `cmd/crystal-server/p1_config_startup_test.go` | focused/repeated config + startup |
+| `LOC-P1-CATALOG-001` | Active | CFG (Complete) | `internal/config/{localization.go,localization_test.go,server_text_catalog.go,server_text_catalog_test.go}` | catalog/static + startup |
 | `LOC-P1-CALLSITE-CLOSURE-001` | Ready | LOC catalog + P2-P11 feature closure | new `docs/p1-localization-callsite-ledger.md`; new `internal/config/localization_coverage_test.go`; matrix evidence only | static ledger + owning transcripts + phase integration |
 | `LOG-P1-CATEGORY-001` | Ready | CFG | `internal/logging/{logging.go,logging_test.go}`; `cmd/crystal-server/main.go`; new `runtime_logging.go`/`runtime_logging_test.go` | focused/repeated/race |
 | `LOG-P1-CALLSITE-CLOSURE-001` | Ready | LOG category + P2-P11 feature closure | new `docs/p1-logging-callsite-ledger.md`; new `cmd/crystal-server/logging_coverage_test.go`; matrix evidence only | static ledger + representative integration |

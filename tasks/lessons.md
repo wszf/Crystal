@@ -86,6 +86,7 @@ duplicate.
 - Root cause: 只看最终 `FAIL`，没有保留退出码、测试名、栈和定向复跑结果。
 - Prevention: 分开运行定向、普通全量和 race；保存退出码和失败摘要；环境错误先检查空间与可重建缓存。
 - Verification: 只以实际失败栈是否进入本批代码或测试为归因依据，已知排除项写入交接而不修改无关模块。
+- Strengthening after `CFG-P1-CONTRACT-001`: 必跑的 unexcluded 全仓测试复现既有 OmaMage `[2 1]`/`[1]` 后，首次只排除该项的重跑又偶发 YinDevilNode/42 空通知；后者独立 `-count=10` 通过，排除两项的全仓重跑、vet/build 和本 Leaf 定向/重复/race 全通过。全仓命令不得与 vet/build 串在同一 `set -e` 证据中后仍声称后两项执行；新失败必须逐个隔离，排除集合和“非 full pass”标签必须写入 matrix/handoff。
 
 ### 2026-08-21 C08 — 测试夹具必须复用真实 bootstrap、helper 和认证约束
 
@@ -187,6 +188,7 @@ duplicate.
 - Root cause: 读取声明但没有追踪 Spawn、调用者、helper 和消费者。
 - Prevention: 从真实入口追到构造类型、override、共享 helper 和所有消费者；当前源码与测试优先于文档。Review finding 也必须回到 Legacy 实现裁决，不能把“通常不应发包”“应显示实际变化量”或“应避免整数回绕”等常规工程直觉覆盖原版怪癖。
 - Verification: 用生产入口测试覆盖可达路径、历史怪癖和关键失败分支。本批只读 review 把 Plague 在零 MP 时仍发 `HealthChanged`、治疗接近满血时显示请求恢复量、`int32` unchecked 运算列为风险；主审回读 `Map.CompleteMagic`、`HumanObject.ProcessRegen/ChangeMP` 和项目 overflow 配置后确认三者均为 Legacy 行为，未按直觉“修正”，并保留对应边界测试。
+- Strengthening after P1 config compatibility: 既有 `TestVersionCheckingRequiresAFile` 首次失败，因为测试把 Go 的 fail-fast 规则当成权威；Legacy `LoadVersion` 实际跳过缺失路径并保留空 hash 列表，启用版本检查时由客户端 gate 全部拒绝。测试已改为锁定空列表/全拒绝，缺失、空白、多文件和 partial MD5 定向/重复/race 全通过。任何“更严格更安全”的配置错误都必须先由 Legacy loader 和消费者共同裁决。
 
 ### 2026-08-21 C22 — 不同 capability、门禁和业务阶段不得过度复用
 
