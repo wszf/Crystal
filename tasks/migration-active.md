@@ -54,7 +54,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - Go write authority: `internal/config/localization.go`,
   `internal/config/localization_test.go`,
   `internal/config/server_text_catalog.go`, and
-  `internal/config/server_text_catalog_test.go`.
+  `internal/config/server_text_catalog_test.go`, plus only the bounded
+  localization-load invocation in `internal/config/config.go` needed to
+  distinguish Legacy Setup startup from the documented empty-path Go extension.
 - Forbidden scope: feature call-site migration, client UI catalogs, network,
   logging, lifecycle, unrelated config parsing, broad matrix edits, and C#
   changes.
@@ -105,7 +107,7 @@ selected now.
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `CFG-P1-CONTRACT-001` | Complete | — | `internal/config/{config.go,config_test.go,p1_contract_test.go}`; bounded `cmd/crystal-server/main.go`; new `cmd/crystal-server/p1_config_startup_test.go` | focused/repeated config + startup |
-| `LOC-P1-CATALOG-001` | Active | CFG (Complete) | `internal/config/{localization.go,localization_test.go,server_text_catalog.go,server_text_catalog_test.go}` | catalog/static + startup |
+| `LOC-P1-CATALOG-001` | Active | CFG (Complete) | `internal/config/{localization.go,localization_test.go,server_text_catalog.go,server_text_catalog_test.go}` plus bounded `config.go` loader invocation | catalog/static + startup |
 | `LOC-P1-CALLSITE-CLOSURE-001` | Ready | LOC catalog + P2-P11 feature closure | new `docs/p1-localization-callsite-ledger.md`; new `internal/config/localization_coverage_test.go`; matrix evidence only | static ledger + owning transcripts + phase integration |
 | `LOG-P1-CATEGORY-001` | Ready | CFG | `internal/logging/{logging.go,logging_test.go}`; `cmd/crystal-server/main.go`; new `runtime_logging.go`/`runtime_logging_test.go` | focused/repeated/race |
 | `LOG-P1-CALLSITE-CLOSURE-001` | Ready | LOG category + P2-P11 feature closure | new `docs/p1-logging-callsite-ledger.md`; new `cmd/crystal-server/logging_coverage_test.go`; matrix evidence only | static ledger + representative integration |
