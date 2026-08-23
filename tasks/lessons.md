@@ -245,6 +245,7 @@ duplicate.
 - Root cause: 测试复制实现，没有观察真实入口、最终 map 状态和可观察协议。
 - Prevention: 通过生产入口驱动，并从当前源码、夹具坐标、公式和权威实体推导期望。
 - Verification: 同时验证领域终态、持久状态和网络 transcript。
+- Strengthening after `NET-P1-STATUS-001`: 独立 service 与注入 listener 的测试虽覆盖 payload/计时/关闭，仍未证明真实 runtime 入口按 `cfg.IPAddress:3000` 打开第二 listener。生产接线必须保留可注入的最小系统调用 seam，并通过同一 runtime 函数断言 game→status 的实际调用顺序、精确地址和关闭；helper-only 测试不能冒充 production-entry evidence。
 
 ### 2026-08-21 C28 — Active lessons 只保留可执行、跨批次规则
 

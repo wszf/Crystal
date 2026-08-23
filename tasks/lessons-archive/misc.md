@@ -708,3 +708,10 @@
 - Root cause: 只迁移 listener 与单帧 reader 的明显限制，把 `ConnectionLogs`、StopNetwork、异步 ReceiveData 批次边界和 Disconnecting 延迟误当成后续 lifecycle/logging 范围；测试按帧而不是按一次 8 KiB receive 建模。
 - Prevention: 网络 gate leaf 必须枚举所有 IPBlocks 写点和 direct consumers；把 accept re-arm、receive callback、packet queue、disconnect grace、shutdown reason 与日志顺序作为一个有限状态机；共享日志 sink 使用同步 writer。
 - Verification: 主审逐项裁决并实现 account/character 阈值怪癖、fatal wake、reason 0、原子 receive parser、绝对 idle deadline、500 ms grace、Legacy enum history/IP authority和同步日志测试；focused `-count=20`、focused race `-count=5`、fresh unexcluded full tests/full race/vet/build 均通过。
+
+### 2026-08-24 — NET-P1-STATUS-001 timer and entry findings
+
+- Symptom: 首版 deterministic test 把 `NextSendTime == 0` 特判为 elapsed time 等于零也立即发送，并只从注入 listener 的内部 helper 证明 status 接线。
+- Root cause: 把“正常运行中的第一个 process tick”简化成无条件 first-send，没有保留 Legacy `Time > NextSendTime` 的初始严格边界；同时把可测试 service 当成 production runtime 本身。
+- Prevention: status timer 必须分别测试 elapsed zero、首个正毫秒、十秒 equality 和下一毫秒；生产入口必须在同一 runtime 函数中注入最小 listener opener，断言 game listener 之后确实请求 `Settings.IPAddress:3000`。
+- Verification: service 已移除 zero-time 特判并锁定 strict positive first tick；runtime-entry test 记录真实 opener 调用序列、固定地址与双 listener 关闭，独立 TCP 测试覆盖五连接 backpressure/release。

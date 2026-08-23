@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 04:07 (Asia/Singapore)
+Last verified: 2026-08-24 05:58 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,21 +39,20 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `NET-P1-STATUS-001`
-- Status: `Active`; connection gates are Complete at Go
-  `46c1b81df12ac88bc662eaa43ffa2b69a7dd6f0b`.
-- Outcome: restore the always-enabled fixed TCP port 3000 status monitor, its
-  five-connection accept backpressure, exact ten-second ASCII response cadence,
-  timeout/disconnect behavior, and bounded shutdown.
+- Leaf ID: `NET-P1-HTTP-001`
+- Status: `Active`; status monitoring is Complete at Go
+  `269590b97f8f4f37d2387541a69981783fcc548b`.
+- Outcome: restore optional trusted-IP HTTP startup/stop and exact root,
+  account, name-list, broadcast, unknown-path, error, and POST behavior.
 - Go matrix anchors to read: `### 2026-08-24 P1 finite closure inventory`, the
-  `NET-P1-STATUS-001` row, and the row beginning `| P1 |` only.
-- Legacy read authority: bounded status-listener setup/stop ranges in
-  `Server/MirEnvir/Envir.cs` and `Server/MirNetwork/MirStatusConnection.cs`,
-  plus only their direct timer/count consumers.
-- Go write authority: bounded status setup/calls in `cmd/crystal-server/main.go`,
-  plus new `status_service.go` and `status_service_test.go`.
-- Forbidden scope: game-listener gate redesign, HTTP, broad process lifecycle,
-  logging/localization closure, unrelated persistence/protocol, and C#.
+  `NET-P1-HTTP-001` row, and the row beginning `| P1 |` only.
+- Legacy read authority: bounded `Server/Utils/HttpService.cs` and
+  `Server/Utils/HttpServer.cs`, plus only direct `Envir` startup/stop and endpoint
+  account/chat/name-list consumers.
+- Go write authority: bounded HTTP setup/calls in `cmd/crystal-server/main.go`,
+  plus new `http_service.go` and `http_service_test.go`.
+- Forbidden scope: status/game gate redesign, broad process lifecycle, UI,
+  unrelated persistence/protocol, logging/localization closure, and C#.
 
 `CFG-P1-CONTRACT-001` is Complete in the verified Go candidate. Exact-case and
 first-match INI behavior, UInt16 fallback/write-back, default production path,
@@ -80,7 +79,7 @@ main-agent audit and independent read-only `luna_worker` review both found no
 missing, duplicate, cross-phase, or non-observable P1 child. Static evidence
 locks 768 default server keys, 981 direct lookups/765 used keys/three unused
 aliases, 142 MessageQueue business invocations, and four direct Player/Spawn/
-Server logger sites. P1 has six unfinished leaves and six completed findings;
+Server logger sites. P1 has five unfinished leaves and seven completed findings;
 this is a P1 denominator only, not a project percentage.
 
 ### Protected Go ownership
@@ -88,20 +87,22 @@ this is a P1 denominator only, not a project percentage.
 - LOG code and matrix evidence are committed at Go `0b7a680`; no Go LOG path
   remains protected.
 - NET gate code and evidence are committed at Go `46c1b81`; no gate file remains
-  protected. Current status-service ownership is recorded in the handoff.
+  protected.
+- NET status code and evidence are committed at Go `269590b`; no status path
+  remains protected. Current HTTP-service ownership is recorded in the handoff.
 - Later P1 leaves may share files only serially. The one active leaf owns the
   exact paths above; no subagent may expand them.
 
 ### Remaining acceptance work
 
-- [ ] Lock exact status payload bytes, initial ten-second timer, strict timer
-      boundary, repeated cadence, and the absence of client input semantics.
-- [ ] Preserve fixed port 3000 startup alongside the configured game listener,
-      five-connection accept backpressure, release, and startup failure surface.
-- [ ] Match timeout/disconnect and StopNetwork shutdown behavior without pulling
-      HTTP or broad process lifecycle into this leaf.
-- [ ] Drive deterministic TCP tests with fake time; run repeated, focused race,
-      and the standard Leaf gate.
+- [ ] Lock exact enable flag, listener URI/prefix, trusted-IP comparison, startup
+      failure, request dispatch, and StopNetwork closure semantics.
+- [ ] Match `/`, `/newaccount`, `/addnamelist`, `/broadcast`, unknown path,
+      malformed/query/error, and POST-visible response/side-effect behavior.
+- [ ] Reuse existing account, chat, and NPC/name-list authorities without
+      redesigning their owning P2-P4 features.
+- [ ] Drive real HTTP production-entry tests, repeated/focused race, and the
+      standard Leaf gate.
 
 ### P1 frozen child registry
 
@@ -117,8 +118,8 @@ selected now.
 | `LOG-P1-CATEGORY-001` | Complete | CFG | `internal/logging/{logging.go,logging_test.go}`; `cmd/crystal-server/main.go`; new `runtime_logging.go`/`runtime_logging_test.go` | focused/repeated/race |
 | `LOG-P1-CALLSITE-CLOSURE-001` | Ready | LOG category + P2-P11 feature closure | new `docs/p1-logging-callsite-ledger.md`; new `cmd/crystal-server/logging_coverage_test.go`; matrix evidence only | static ledger + representative integration |
 | `NET-P1-GATES-001` | Complete | CFG | `cmd/crystal-server/main.go`, `main_test.go`; new `connection_gates.go`/`connection_gates_test.go` | deterministic TCP/repeated/race |
-| `NET-P1-STATUS-001` | Active | CFG | `cmd/crystal-server/main.go`; new `status_service.go`/`status_service_test.go` | TCP cadence/shutdown/race |
-| `NET-P1-HTTP-001` | Ready | CFG + P2/P3/P4 authorities | `cmd/crystal-server/main.go`; new `http_service.go`/`http_service_test.go` | HTTP integration/shutdown/race |
+| `NET-P1-STATUS-001` | Complete | CFG | `cmd/crystal-server/main.go`; new `status_service.go`/`status_service_test.go` | TCP cadence/shutdown/race |
+| `NET-P1-HTTP-001` | Active | CFG + P2/P3/P4 authorities | `cmd/crystal-server/main.go`; new `http_service.go`/`http_service_test.go` | HTTP integration/shutdown/race |
 | `OPS-P1-LIFECYCLE-001` | Ready | NET status + HTTP | `cmd/crystal-server/main.go`, `main_test.go`; new `process_lifecycle_test.go` | failure injection + integration/full race |
 | `OPS-P1-DEPLOY-001` | Ready | all other P1 leaves | `README.md`; new `cmd/crystal-server/deployment_test.go`; matrix evidence | fresh package + full unexcluded gates |
 | `NOTICE-P1-EDGE-001` | Complete | — | none | existing notice/session evidence |
