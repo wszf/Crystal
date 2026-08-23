@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 04:17 (Asia/Singapore)
+Last updated: 2026-08-24 04:25 (Asia/Singapore)
 
 This replace-in-place snapshot closes the committed LOG leaf and routes the
 next bounded P1 leaf. The Goal remains active.
@@ -15,14 +15,13 @@ registered children: five Complete and seven unfinished.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch before the enclosing timing-correction commit:
-  `master...origin/master [ahead 426]`.
+- Branch before the enclosing NET-trace checkpoint commit:
+  `master...origin/master [ahead 427]`.
 - HEAD before the enclosing control commit:
-  `b52cb1654e2e968939700e23257cbe04a347707d`
-  (`docs(migration): reconcile P1 network route`).
-- Tracked modifications are exactly `tasks/lessons.md`,
-  `tasks/migration-active.md`, and this handoff after replacement; expected
-  subject is `docs(migration): correct P1 packet window`.
+  `392829af8d29b6a4d3bf330c1aed4b1f253736f3`
+  (`docs(migration): correct P1 packet window`).
+- Tracked modifications are exactly this handoff after replacement; expected
+  subject is `docs(migration): checkpoint P1 network gates`.
 - Staged and untracked files: none.
 - `AGENTS.md` and tracked `agents.md` remain one hard-linked inode; all tracked,
   staged, and untracked C# gates are empty.
@@ -86,20 +85,31 @@ All commands below ran in the Go root and exited 0:
   `main_test.go`, plus new `connection_gates.go`/`connection_gates_test.go`.
 - Forbidden: status port 3000, HTTP, lifecycle redesign, broad logging closure,
   localization, unrelated persistence/protocol, and C#.
+- Legacy first checks an unexpired/equality IP block silently, then MaxIP; a
+  successful connection and a MaxIP rejection both overwrite a five-second
+  block. MaxUser throttles re-accept rather than rejecting. MaxPacket counts
+  receive callbacks in a first-receive-anchored five-second window, resets only
+  after strict expiry, and abuse/invalid framing installs a 24-hour block.
+- Go currently has active-count rejection only, frame-counts from session start,
+  resets at equality, omits abuse blocks, and lets zero TimeOut wait forever.
+  Implement mutexed lazy-expiry blocks and admission reasons in the registered
+  new gate file, add MaxUser re-accept backpressure, then wire bounded session
+  abuse/timeout paths without expanding into status/HTTP.
 
 ## Quiescence
 
 - `luna_worker` `01a0302d-1068-7ad2-91e6-d4eb449599e0` is completed and closed.
+- Read-only NET auditor `01a03042-17a7-70f0-a970-8ef4904c15a8` is completed and
+  closed; it changed no file.
 - No subagent result is pending; exact process audit found no `go` or
   `crystal-server` process.
 
 ## Exact recovery sequence
 
-1. Run `tasks/check-migration-control.sh`, verify both repositories and all six
-   C# gates separately, then commit only the three current Legacy control paths
-   with the expected timing-correction subject.
-2. Verify the expected one-commit Legacy delta and both clean worktrees; refresh
-   this handoff only if unexpected state remains.
-3. Once both worktrees are clean, read only the named NET anchors, search the
-   archive for IPBlocks/MaxUser/MaxIP/MaxPacket/timeout lessons, and trace the
-   bounded Legacy/Go gate authorities before any NET write.
+1. Verify this expected one-document checkpoint delta, run the control checker
+   and all six C# gates, and commit this handoff with the expected subject.
+2. With both trees clean, create only `connection_gates.go` and its test first;
+   lock exact block equality/overwrite, MaxIP zero, active release, 24-hour abuse,
+   and MaxUser wait semantics before changing `main.go`.
+3. Integrate bounded accept/session paths, then run compile, deterministic TCP/
+   net.Pipe repeated tests, focused race, and the standard Leaf gate.
