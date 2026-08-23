@@ -27,6 +27,7 @@ duplicate.
 - Strengthening after 18:24 utility-command rollover: 本次接续仍在 Legacy 启动读取中直接 `cat` 绝对 Go matrix，整次 10 万余 token 输出再次作废；随后不仅按仓拆开，还把超过输出上限的 matrix 区段进一步缩小重读到无截断。恢复模板必须物理拆成两个独立工具调用，且大文件必须按可完整返回的小段读取；“命令零退出”不能替代“输出完整可见”。
 - Strengthening after fourth utility-command compact: 本次恢复首调用又在 Legacy 文档读取末尾追加了对侧 Go 根的绝对 `find`，整次输出按 C01 作废；随后先以纯 Legacy 调用完整重读启动文档，再以纯 Go 调用分块重读 3223 行 matrix。恢复时禁止在第一仓命令中承担任何对侧“定位”工作；若 matrix 区段发生输出截断，该区段也必须整体作废并缩小范围重读。
 - Strengthening after bounded-control recovery: 控制面已经明确禁止跨仓后，首次恢复调用仍把绝对 Go matrix 路径附在 Legacy 文档读取后，约 8 万 token 输出再次全部作废。随后已物理拆成 Legacy 启动/状态与 Go 状态/matrix 两组调用，并以三项指纹核对十二文件未变。以后发送恢复命令前必须先做“命令文本内是否出现另一仓根”的机械检查，不能只检查 `workdir`。
+- Strengthening after `DISC-P1-CLOSURE`: P1 版本勘察又在 Legacy `workdir` 的同一命令中加入 Go 的 `internal/config`/`cmd/crystal-server` 相对路径；compact 恢复首调用随后再次把绝对 Go matrix 附在 Legacy 启动读取末尾。两次整调用均已作废并按两仓独立零退出重跑。即使核对同一 setting 或启动 authority，也必须在发送前机械检查“命令文本只含当前根”，且 Legacy 启动调用必须物理结束后才能构造 Go 调用。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -45,6 +46,7 @@ duplicate.
 - Strengthening after Goal model audit: 已有上述禁令后，Codex 配置验证仍再次使用 `mktemp` 后 `rm -f`，在启动前被策略拒绝；随后又凭记忆在错误数据库查询 `thread_goals`、并猜错时间戳列名，导致多次非零和部分输出作废。根因是没有在执行前把旧 lesson 转换成当前命令的机械检查。以后只读诊断默认用 shell command substitution 捕获 stdout/stderr，不创建需清理的临时文件；数据库先 `find` 定位当前 `$CODEX_HOME`，再用 `sqlite_master`/`pragma_table_info` 独立零退出确认库、表和列，每个尚未确认的查询必须单独调用。此次已用无临时文件的 `app-server --strict-config ... </dev/null` 验证 `gpt-5.6-sol/ultra` 退出 0，并从 Codex Box 的实际 `goals_1.sqlite`/`state_5.sqlite` 零退出回读 Goal 与线程模型状态。
 - Strengthening after Goal pause audit: 已有上述 schema 防猜规则后，首次 `pragma_table_info` 投影仍直接使用未引用的 SQLite 关键字列 `notnull`，两个查询退出 1，整次输出作废。以后 schema 勘察第一步固定为独立的 `SELECT * FROM pragma_table_info(...)`；完整回读真实列名后才允许自定义投影，关键字列必须引用。随后已分别零退出回读 `thread_goals` 与 continuation-deferral schema，再查询指定 Goal。
 - Strengthening after utility-command main review: 同一轮连续把 `--glob` 放到 `rg --` 之后、使用未验证 shell glob，并把不存在的目录加入搜索；相关调用均作废后按现有路径重跑。每次 `rg` 必须按固定 argv 模板构造：所有选项与 `-e` 在前，单个 `--` 居中，已验证路径在后；不得用尾部 `|| true` 掩盖语法/路径错误，只有事先声明“零匹配即有效答案”时才允许它。
+- Strengthening after P1 matrix reconciliation: 用记忆中的整句搜索实际跨行的 matrix prose 得到空行号，随后把负数范围交给 BSD `sed` 并 exit 1；恢复审计又把预期可为零的 archive `rg` 裸放在 `set -e` 下，并在 Go 定位中使用未引用 shell glob。相关调用均已作废并以稳定单行片段、显式接收 `rg` 退出 0/1、已确认精确路径重跑。不得对空搜索结果做算术，不得把“零匹配”或“glob 恰好命中”当成 argv 已验证。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -53,6 +55,7 @@ duplicate.
 - Prevention: patch 前复读精确物理行；按唯一函数锚点拆小 hunk；检查完整路径、上下文行和闭合标记。
 - Verification: 逐段复读 diff，并运行格式化、最小编译和定向测试；任一 patch 失败时不采用同调用的其他结果。本批矩阵第二个 hunk 因正文换行与预期不符而失败；先复读并独立核验同调用已落地的第一个 hunk，再以精确物理行单独重跑第二个 hunk，最终 `git diff --check` 通过。
 - Strengthening after Goal continuity patch: 一个补丁同时修改互为 hard link 的 `AGENTS.md` 与 `agents.md`；首个 hunk 已经同步改变两个路径，第二个 hunk 因旧正文消失而失败，形成“调用失败但修改已落地”。以后 patch 前先用 `ls -li`/`git ls-files` 核对别名与 inode；hard link 只修改一个 tracked canonical 路径，并在失败后立即独立回读全部别名和 Git 状态。本次已确认两路径仍共享 inode、内容均为 Sol Ultra/checkpoint-not-blocker，Git 只跟踪 canonical `agents.md` 变化。
+- Strengthening after P1 inventory insertion: 一次四-hunk matrix 补丁因旧段落物理换行与草稿不一致而整体失败；随后已独立确认没有部分写入，再把新段插入、P1 单行精确替换和两个小 prose hunk 分开发送并逐项 `git diff --check`。长表插入与陈旧 prose 修订不得共用一个补丁事务；先复读每个唯一锚点，失败后先查 status/目标标记再重试。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -263,4 +266,4 @@ duplicate.
 - Root cause: 把详细 matrix、append-only handoff、事故历史和每叶全仓门禁同时当成启动上下文；每次 compact 都完整重读 3223 行 matrix 与全部旧 checkpoint，形成“文档越大→更快 compact→再次全读”的自放大循环。十三个宽阶段又不是有限分母，无法给出可信百分比或 ETA。
 - Prevention: `migration-handoff.md` 只保留当前快照并限制为 250 行/24 KiB；独有未提交历史一次性归档，启动永不读 archive；使用 `migration-active.md` 注册唯一 active leaf、精确 matrix anchors 和 scope-freeze discovery leaves；compact 后只读 active+handoff 并核验状态；每叶运行 focused leaf gate，全仓普通/race 按有上限的 integration cadence 运行，阶段/Goal 收口仍要求新鲜无排除全量门禁；主线程禁止 broad dump。
 - Verification: 旧 1421 行 handoff 已逐字复制到 `tasks/migration-handoff-archive/2026-08-23-2055-pre-control-plane-optimization.md` 后改为短快照；`tasks/check-migration-control.sh` 对 handoff、active index、goal contract、agents 和 active lessons 执行行数/字节/必需标题门禁；Go 十二个未提交文件在优化中保持原样，双仓 `.cs` 三类审计为空。
-- Strengthening after utility leaf closure: 将 active index 的固定 `## Active batch` 改成语义更自然的 `## Current routing`，并同步改名 handoff 标题，导致控制脚本按设计 exit 1。控制文档的标题和唯一字段是可执行 schema，不是可自由改写的 prose；批次切换必须保留脚本要求的精确标题/字段，并用唯一 Active discovery leaf 表达“实现已闭合、下一步只清点”。修复后必须先让控制脚本 exit 0，再采用任何后续回读或提交结论。
+- Strengthening after utility/P1 closure: 将 active index 固定标题改成自然语言曾使控制脚本 exit 1；本次重建 handoff 又把必需的唯一 `- Active leaf: \`` 字段改写成普通叙述，再次被脚本拦截。控制标题和 section field 都是可执行 schema，补丁前必须先从 `tasks/check-migration-control.sh` 复制精确字符串；修复并让检查器 exit 0 后，才可采用回读、scope-freeze 或提交结论。

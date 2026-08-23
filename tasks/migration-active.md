@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 00:20 (Asia/Singapore)
+Last verified: 2026-08-24 01:24 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -16,15 +16,15 @@ Keep this file at or below 300 lines and 32 KiB.
   not need to be calculated in one up-front pass.
 - `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
   are publishable only for a scope-frozen phase.
-- Current project-wide ETA and percentage remain `Unavailable` while eleven
-  phases still have open closure inventories.
+- Current project-wide ETA and percentage remain `Unavailable`: P1 now has a
+  finite denominator, but ten other phases still have open closure inventories.
 
 ## Phase routing summary
 
 | Phase | Matrix status | Scope state | Closure leaf |
 |---|---|---|---|
 | P0 | Complete | Frozen | — |
-| P1 | In progress | Open | `DISC-P1-CLOSURE` |
+| P1 | In progress | Frozen | `DISC-P1-CLOSURE` (Complete) |
 | P2 | In progress | Open | `DISC-P2-CLOSURE` |
 | P3 | In progress | Open | `DISC-P3-CLOSURE` |
 | P4 | In progress | Open | `DISC-P4-CLOSURE` |
@@ -39,48 +39,78 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `DISC-P1-CLOSURE`
-- Status: `Active` (selected for recovery routing; no discovery command has run
-  since the actual compaction signal)
-- Outcome: enumerate the finite residual P1 configuration, localization,
-  logging/lifecycle, and deployment behaviors into stable child leaf IDs.
-- Go matrix anchors to read: row beginning `| P1 |`; its exact residual phrases
-  `remaining language keys`, `category-specific business call-site coverage`,
-  and `deployment validation`; only directly linked P1 headings found from those
-  anchors.
-- Authority boundary: Legacy and Go sources needed to prove each candidate P1
-  behavior are read-only during inventory. Discovery may write only
-  `tasks/migration-active.md`, `tasks/migration-handoff.md`, and the bounded P1
-  inventory/evidence portion of Go `docs/migration-matrix.md`.
-- Forbidden during this discovery leaf: functional implementation, broad matrix
-  or source-tree dumps, other-phase expansion, percentage/ETA publication, and
-  declaring P1 scope-frozen before every residual has a finite child leaf.
+- Leaf ID: `CFG-P1-CONTRACT-001`
+- Status: `Active` for routing; production writes remain gated until the Legacy
+  control documents are committed and both repositories are clean.
+- Outcome: match the P1-owned Legacy Setup.ini/default/error/version-file
+  contract without pulling feature-specific P2-P12 settings into this leaf.
+- Go matrix anchors to read: `### 2026-08-24 P1 finite closure inventory`, the
+  `CFG-P1-CONTRACT-001` row, and the row beginning `| P1 |` only.
+- Legacy read authority: `Shared/Functions/IniReader.cs`, the General/Network
+  declarations and `Load`/`Save`/`LoadVersion` consumers in `Server/Settings.cs`,
+  plus direct startup consumers needed to rule observability.
+- Go write authority after the documentation gate: `internal/config/config.go`,
+  `internal/config/config_test.go`, and new
+  `internal/config/p1_contract_test.go`. Any required production-startup test may
+  write only new `cmd/crystal-server/p1_config_startup_test.go`.
+- Forbidden scope: localization catalog work, listener/admission behavior,
+  logging, HTTP/status service implementation, lifecycle restructuring,
+  feature-specific settings, broad matrix edits, and C# changes.
 
-The immediately prior leaf `OPS-P1-P3-P4-UTILITY-001` is Complete at Go commit
-`5bce7c28c162296d27b61db60897d1b23a80c91e` (`feat(p3): restore public utility
-commands`). It updated the 2026-08-24 utility paragraph and P1/P3/P4/P8 rows;
-P1/P3/P4 remain In progress and P8 remains Complete.
+`DISC-P1-CLOSURE` is Complete in the uncommitted control candidate. A bounded
+main-agent audit and independent read-only `luna_worker` review both found no
+missing, duplicate, cross-phase, or non-observable P1 child. Static evidence
+locks 768 default server keys, 981 direct lookups/765 used keys/three unused
+aliases, 142 MessageQueue business invocations, and four direct Player/Spawn/
+Server logger sites. P1 has ten unfinished leaves and two completed audit items;
+this is a P1 denominator only, not a project percentage.
 
 ### Protected Go ownership
 
-- The Go worktree is clean; there is no uncommitted functional file to protect.
-- During this discovery leaf the only permitted Go write is the bounded P1
-  inventory/evidence portion of `docs/migration-matrix.md`.
-- Functional Go ownership must be assigned to finite child leaves before any
-  implementation begins.
+- The P1 inventory is committed at Go `460b8ed8f1ca10c5a9da5028948165d062e35db7`;
+  the Go worktree is clean with no protected uncommitted path.
+- Current protected Legacy paths are recorded in the handoff. Do not start the
+  active production write set until the Legacy documentation commit and clean
+  recovery-point verification finish.
+- Later P1 leaves may share files only serially. The one active leaf owns the
+  exact paths above; no subagent may expand them.
 
 ### Remaining acceptance work
 
-- [ ] Enumerate each P1 residual as an observable behavior, not a vague module.
-- [ ] Give every child a stable ID, matrix anchor, Legacy entry point, dependency
-      boundary, owned files, acceptance evidence, and required test tier.
-- [ ] Separate independent children from shared lifecycle/startup architecture.
-- [ ] Reconcile duplicate or already-complete evidence instead of creating work
-      from stale prose.
-- [ ] Mark P1 scope-frozen only when a bounded search proves no unnamed residual
-      remains; otherwise retain a finite follow-up discovery child.
-- [ ] Select exactly one dependency-ready child as the next `Active` batch and
-      refresh the handoff before any production write.
+- [ ] Enumerate the P1-owned General/Network/service fields and explicitly route
+      every other `Server/Settings.cs` field to its functional phase.
+- [ ] Match case-sensitive section/key lookup, first-match behavior, empty and
+      malformed values, missing sections/files, default write-back, and
+      unwritable-path behavior at the production config entry point.
+- [ ] Match Legacy numeric width/zero/range fallback semantics; rule each current
+      stricter Go validation with an observable compatibility test.
+- [ ] Match comma-separated version paths, whitespace, missing/multiple files,
+      partial hash collection, and version-check behavior.
+- [ ] Preserve documented `CRYSTAL_*` extensions without allowing them to change
+      the Legacy Setup.ini contract.
+- [ ] Run config package compile/focused/repeated tests and the focused production
+      startup gate; add focused race only if shared mutable startup state changes.
+
+### P1 frozen child registry
+
+Every functional leaf also runs the standard leaf gate. `Ready` means its finite
+contract is registered; the dependency column determines whether it may be
+selected now.
+
+| Leaf ID | Status | Dependency | Go write authority | Additional gate |
+|---|---|---|---|---|
+| `CFG-P1-CONTRACT-001` | Active | — | `internal/config/{config.go,config_test.go,p1_contract_test.go}`; new `cmd/crystal-server/p1_config_startup_test.go` | focused/repeated config + startup |
+| `LOC-P1-CATALOG-001` | Ready | CFG | `internal/config/{localization.go,localization_test.go,server_text_catalog.go,server_text_catalog_test.go}` | catalog/static + startup |
+| `LOC-P1-CALLSITE-CLOSURE-001` | Ready | LOC catalog + P2-P11 feature closure | new `docs/p1-localization-callsite-ledger.md`; new `internal/config/localization_coverage_test.go`; matrix evidence only | static ledger + owning transcripts + phase integration |
+| `LOG-P1-CATEGORY-001` | Ready | CFG | `internal/logging/{logging.go,logging_test.go}`; `cmd/crystal-server/main.go`; new `runtime_logging.go`/`runtime_logging_test.go` | focused/repeated/race |
+| `LOG-P1-CALLSITE-CLOSURE-001` | Ready | LOG category + P2-P11 feature closure | new `docs/p1-logging-callsite-ledger.md`; new `cmd/crystal-server/logging_coverage_test.go`; matrix evidence only | static ledger + representative integration |
+| `NET-P1-GATES-001` | Ready | CFG | `cmd/crystal-server/main.go`, `main_test.go`; new `connection_gates.go`/`connection_gates_test.go` | deterministic TCP/repeated/race |
+| `NET-P1-STATUS-001` | Ready | CFG | `cmd/crystal-server/main.go`; new `status_service.go`/`status_service_test.go` | TCP cadence/shutdown/race |
+| `NET-P1-HTTP-001` | Ready | CFG + P2/P3/P4 authorities | `cmd/crystal-server/main.go`; new `http_service.go`/`http_service_test.go` | HTTP integration/shutdown/race |
+| `OPS-P1-LIFECYCLE-001` | Ready | NET status + HTTP | `cmd/crystal-server/main.go`, `main_test.go`; new `process_lifecycle_test.go` | failure injection + integration/full race |
+| `OPS-P1-DEPLOY-001` | Ready | all other P1 leaves | `README.md`; new `cmd/crystal-server/deployment_test.go`; matrix evidence | fresh package + full unexcluded gates |
+| `NOTICE-P1-EDGE-001` | Complete | — | none | existing notice/session evidence |
+| `DOC-P1-EVIDENCE-001` | Complete | — | matrix P1/P12 prose | bounded documentation review |
 
 ## Scope-freeze discovery queue
 
@@ -89,7 +119,7 @@ broad unnamed scope.
 
 | Leaf ID | Phase | Status | Required output |
 |---|---|---|---|
-| `DISC-P1-CLOSURE` | P1 | Active | finite config/localization/log/lifecycle/deployment children |
+| `DISC-P1-CLOSURE` | P1 | Complete | 10 unfinished finite children + 2 completed audit items |
 | `DISC-P2-CLOSURE` | P2 | Discovery | finite account/NPC-access/restart children |
 | `DISC-P3-CLOSURE` | P3 | Discovery | finite startup/admin/ranking children |
 | `DISC-P4-CLOSURE` | P4 | Discovery | finite map/bootstrap/visibility children |
@@ -104,9 +134,9 @@ broad unnamed scope.
 ## Selection protocol
 
 1. Verify this index and the current handoff against each repository separately.
-2. Resume only the one `Active` phase-local closure leaf; do not inventory all
-   remaining phases up front.
-3. Close discovery by registering finite children, then activate one
-   dependency-ready child before production changes begin.
+2. Resume only the one `Active` leaf; do not inventory all remaining phases up
+   front.
+3. When an active leaf completes, select one dependency-ready child from the
+   current frozen phase before opening another phase discovery audit.
 4. Keep only current routing state here. Completed details belong in the matrix
    and Git history, not as appended narratives.
