@@ -20,6 +20,7 @@ duplicate.
 - Strengthening after localized-welcome recovery: compact 后首个启动读取再次把 Go matrix 绝对路径放入 Legacy 调用；该调用全部输出已作废，随后两仓 status、文档和 matrix 均以独立 workdir 重跑，并以重建 handoff 为恢复 authority。
 - Strengthening after TestServer/GameMaster selection: compact 硬门恢复时又在单次启动审计中通过 `git -C` 混读两仓；该调用全部输出已作废。后续只在对应 `workdir` 内使用相对路径，并分别重跑 Legacy 文档/status/C# 门禁与 Go matrix/status/C# 门禁后才刷新 handoff。
 - Strengthening after Superman recovery: 连续两次在 Go `workdir` 的上下文读取中追加 Legacy 相对路径，导致前段成功输出与尾部路径失败混杂；两次调用全部作废。此后构造命令前先把每个路径按仓库分类，命令文本只允许出现当前 `git rev-parse --show-toplevel` 下的相对路径；跨仓证据必须拆成相邻但独立的工具调用，并分别要求零退出后才可采用。
+- Strengthening after Observer recovery: 新 Session 首次门禁读取又在 Legacy `workdir` 中追加 Go matrix 路径，整次 9 万余 token 输出已作废；随后 `agents.md`、三份 Legacy 文档、双仓 status/`.cs` 门禁与 Go matrix 全部按单仓调用重跑。恢复时还发现 handoff 声称 Go clean、实际已有 5 tracked + 2 untracked Observer 文件，因此在重建 handoff 前停止实现和测试。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -31,6 +32,8 @@ duplicate.
 - Strengthening after TestServer bootstrap: Go 勘察再次把不存在的 `world_player*.go` 作为未引用 glob 交给 zsh，并有数次让预期“零匹配”的 `rg` 在 `set -e` 下终止调用；相关调用输出均作废。后续先用 `rg --files` 定位文件，并仅在“零匹配本身是有效答案”时显式使用 `rg ... || true`，实现、测试和文档只采用零退出的重跑结果。
 - Strengthening after Superman recovery: 勘察 session-local MP 扣减入口时又让预期可为零匹配的 `rg` 在 `set -e` 下退出 1；该调用证据已作废并以显式 `|| true` 零退出重跑。后续每个搜索在执行前先声明“零匹配是答案还是错误”，前者禁止与裸 `set -e` 组合。
 - Strengthening after Superman review: 主审又把已知不存在的 Legacy 根级 `Localization/` 和猜测的 `Monsters/Plague.cs` 传给读取命令；两次调用全部作废，随后分别用现有 `Server`/`Shared` 路径和 `rg --files | rg -i plague` 定位 `PlagueCrab.cs` 后重跑。曾经验证过路径不存在也不能成为下一次跳过最小文件枚举的理由。
+- Strengthening after `luna_worker` config validation: 首次把 `app-server --listen off` 猜成只解析配置模式，实际因无 transport 退出 1；随后又假定 malformed custom agent 会令进程非零，但 Codex 0.148.0 只打印 `Ignoring malformed agent role definition` 并退出 0。根因是把进程退出码误当成 custom-agent loader 的完整裁决。以后使用 `app-server --strict-config --listen stdio:// < /dev/null`，同时检查退出码和 stderr 中的 malformed/ignored-agent 诊断；`doctor config.load=ok` 只能作为主配置交叉证据。目标 `luna-worker.toml` 已以退出 0、无 malformed-agent 诊断和 required-field 回读验证；故意缺少 `developer_instructions` 的隔离负控确认了 stderr 门禁不可省略。
+- Strengthening after Observer archive search: 首次检索猜测 `tasks/lessons-archive/manifest.json` 存在并退出 2，整次结果作废；随后先用 `rg --files tasks/lessons-archive` 定位实际 `manifest/2026.jsonl`，再对两个已存在文件零退出重跑。archive manifest 也必须先枚举，不能依据常见命名猜路径。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 

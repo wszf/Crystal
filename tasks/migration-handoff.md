@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；`@SUPERMAN` 两仓提交已收口）
+最后更新：2026-08-23（Asia/Singapore；交互式 `@OBSERVER` 已收口）
 
 ## 迁移目标与硬边界
 
@@ -22,6 +22,86 @@
   后回读并与两仓实际状态核对。
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
+
+## 最近完成批次（交互式 `@OBSERVER`，已收口）
+
+本批从 compact 后发现的 5 tracked + 2 untracked 未验证补丁恢复；主 Agent 重新沿
+Legacy `PlayerObject.Chat -> MapObject.Observer setter -> HumanObject.UpdateGMBuff`
+调用链裁决，修正行为后补齐领域、协议、可见性、持久化与 authenticated session 证据。
+ranking closure 和其他管理员命令未混入本原子切片。
+
+- Go 仓库根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，提交 `a79e25c` (`feat(p3): restore interactive Observer mode`)；提交包含
+  17 个文件、720 insertions、90 deletions，提交后工作树 clean，无 staged/untracked，
+  tracked/staged/untracked `.cs` 均为空。
+- Legacy ruling：命令只允许 `IsGM`，TestServer 普通玩家仍被拒绝；命令大小写不敏感。
+  `Observer` 属性 setter 在 Hint 之前同步执行：启用先向附近广播 `ObjectRemove`，禁用先按
+  viewer 生成 `ObjectPlayer`；随后 owner 收 localized `ObserverMode`/`NormalMode` Hint，
+  `UpdateGMBuff` 再从 live `GMGameMaster`/`GMNeverDie`/`Observer` 三项重建 options，按
+  owner AddBuff -> 可见 nearby AddBuff -> persistence 更新。Observer 令对象不可见且
+  `Blocking=false`，但不会带来通用 player/monster attack-target immunity。
+- Go 实现：新增 localized ObserverMode、Game-stage admin chat route 与 transient
+  `worldPlayer.ObserverMode`；collision 排除 Observer，并在登录 bootstrap、observer passive、
+  map transition、NPC/relationship/forced teleport、revive、SlashingBurst、Guild/Conquest
+  appearance refresh 中抑制 Observer 的后续 `ObjectPlayer` materialization。GameMaster、
+  Superman、Observer 三个命令统一从 live runtime flags 重建 option byte，登录显式重置
+  Observer/Superman runtime；durable Observer option 仍先 restore，再由 final projection 清零。
+- 主审纠正了未验证补丁的两项错误：原补丁把 Hint 放在 setter visibility 之前，并错误把
+  Observer 加入通用玩家/怪物 target gate；两项均按当前 Legacy 源码修正。runtime options
+  统一后，既有 GameMaster/Superman fixture 因只 seed durable bits 出现期望 7、实际 1/5；
+  fixture 改为同时 seed live flags 后通过，教训已写入 protocol-session-wire archive。
+- 测试覆盖：world/config tests 锁定 permission、localized fallback/overlay、
+  `ObjectRemove/ObjectPlayer -> Hint -> AddBuff -> persist`、non-blocking 但仍 targetable、
+  runtime option composition 与后续投影抑制；authenticated `net.Pipe` 锁定管理员
+  enable/disable、TestServer-only 拒绝、join-time invisibility、logout persistence 与 relogin
+  restore/final reset。
+- 已通过（退出码 0）：两包最小编译；config Observer 普通 `-count=10`；world Observer
+  普通 `-count=10`；interactive Observer session 普通 `-count=10` 与 race `-count=3`；
+  GameMaster/Superman/Observer 组合普通 `-count=5`；相关 Guild/Conquest/HornedMage/
+  Reincarnation/SlashingBurst/TurtleKing 定向集合；服务端整包；`go test ./... -count=1
+  -timeout=900s`；`go test -race ./... -count=1 -timeout=900s`；`go vet ./...`；
+  `go build ./...`；`go run ./cmd/crystal-protocol-probe -mode vectors`；owned gofmt、
+  `git diff --check` 与两仓三类 `.cs` 门禁。本批没有排除项或未解决失败。
+- Subagent：Tesla (`01a02d25-25ce-7232-a31f-72b3c8be6260`) 在 compact gate 后停止，未改
+  文件；Hubble (`01a02d2c-495a-73d1-b8bf-fba64a1e6c4d`) 独占新增 authenticated session
+  test 文件并通过 focused 普通/race；Singer 只读 review 线程长时间无结果后关闭，未写文件。
+- 矩阵范围：P1/P3/P4/P5 已记录本切片，四阶段继续 `In progress`；整体 Goal 继续 active。
+- Legacy 当前仍待提交 `tasks/lessons.md`、
+  `tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff；提交并回读后需把
+  Legacy HEAD 写回本段。下一恢复应从 Go matrix 的 ranking closure 或其他明确 pending、
+  dependency-ready 子切片选择，不得重复 `@OBSERVER`。
+
+## 2026-08-23 compact 后恢复检查点
+
+- 本线程 Goal 累计用量在重新读取两仓启动材料并核验外部状态后达到
+  `8,014,337` tokens，已越过 `tasks/goal-task.md` 规定的约 800 万 hard ceiling；因此
+  立即停止选批、Legacy tracing、实现和测试，并触发 new-session rollover。本轮没有
+  选择 `@OBSERVER`、ranking closure 或其他新切片，也没有产生 Go 实现改动。
+- 当前会话的 `spawn_agent` schema 仍未暴露 `luna_worker` 或 `gpt-5.6-luna`，故未用
+  其他模型静默替代；新 Session 必须重新发现工具能力，可用时优先按
+  `gpt-5.6-luna/max` 委派边界明确的工作。
+
+- 收到 context compaction 信号后已停止选批、委派、实现与测试；本检查点没有选择或
+  启动新的迁移矩阵行，也没有恢复此前已收口的 `@SUPERMAN` 批次。
+- Legacy 仓库根为 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master`，HEAD `68f5e05585d841ab69b1d194bfb26e0b42fd4e41`
+  (`68f5e055 docs(migration): refresh Superman handoff`)。刷新前工作树 clean；刷新后
+  tracked 修改为本 `tasks/migration-handoff.md`，以及记录 Codex custom-agent 验证误区的
+  `tasks/lessons.md`；无 staged/untracked 文件，三类 `.cs` 门禁均为空。
+- Go 仓库根为 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
+  `main`，HEAD `901e6213df8240ba498eb1e00529cf72857a9de2`
+  (`901e621 feat(p3): restore interactive Superman mode`)；工作树 clean，无
+  staged/untracked 文件；三类 `.cs` 门禁均为空。
+- 当前 owned migration docs 为本 handoff 与上述 active lesson；没有 Go/C# 实现文件、
+  矩阵文件或测试文件处于本批所有权范围。当前没有未提交的迁移实现；两份文档刷新
+  尚未提交。
+- 本恢复检查点未运行迁移测试，故没有新的测试退出码或失败归因；最近完成批次的测试
+  证据仍以 `@SUPERMAN` 收口段为准。
+- 本轮先完成用户明确要求的 `$CODEX_HOME/agents/luna-worker.toml` 本地 Codex 配置复制
+  与验证；该路径位于两仓之外，不属于迁移批次，也不改变整体迁移目标或矩阵状态。
+- 下一恢复命令：分别重新核对两仓 `git status --short --branch`、HEAD 与三类 `.cs`
+  门禁，读取 Go `docs/migration-matrix.md` 后再选择一个 dependency-ready 的 pending
+  子切片；不得在未选定矩阵行前开始实现或重复已收口的 `@SUPERMAN`。
 
 ## 最近完成批次（交互式 `@SUPERMAN`，已收口）
 
