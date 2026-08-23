@@ -40,8 +40,9 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `CFG-P1-CONTRACT-001`
-- Status: `Active` for routing; production writes remain gated until the Legacy
-  control documents are committed and both repositories are clean.
+- Status: `Active`; the Legacy documentation gate is committed at
+  `73233ac3121c9e870fd3f75a4012b0e3561c2932`, and both repositories were
+  separately verified clean before this recovery-point normalization.
 - Outcome: match the P1-owned Legacy Setup.ini/default/error/version-file
   contract without pulling feature-specific P2-P12 settings into this leaf.
 - Go matrix anchors to read: `### 2026-08-24 P1 finite closure inventory`, the
@@ -49,7 +50,7 @@ Keep this file at or below 300 lines and 32 KiB.
 - Legacy read authority: `Shared/Functions/IniReader.cs`, the General/Network
   declarations and `Load`/`Save`/`LoadVersion` consumers in `Server/Settings.cs`,
   plus direct startup consumers needed to rule observability.
-- Go write authority after the documentation gate: `internal/config/config.go`,
+- Go write authority: `internal/config/config.go`,
   `internal/config/config_test.go`, and new
   `internal/config/p1_contract_test.go`. Any required production-startup test may
   write only new `cmd/crystal-server/p1_config_startup_test.go`.
@@ -57,7 +58,7 @@ Keep this file at or below 300 lines and 32 KiB.
   logging, HTTP/status service implementation, lifecycle restructuring,
   feature-specific settings, broad matrix edits, and C# changes.
 
-`DISC-P1-CLOSURE` is Complete in the uncommitted control candidate. A bounded
+`DISC-P1-CLOSURE` is Complete in committed control. A bounded
 main-agent audit and independent read-only `luna_worker` review both found no
 missing, duplicate, cross-phase, or non-observable P1 child. Static evidence
 locks 768 default server keys, 981 direct lookups/765 used keys/three unused
@@ -69,9 +70,8 @@ this is a P1 denominator only, not a project percentage.
 
 - The P1 inventory is committed at Go `460b8ed8f1ca10c5a9da5028948165d062e35db7`;
   the Go worktree is clean with no protected uncommitted path.
-- Current protected Legacy paths are recorded in the handoff. Do not start the
-  active production write set until the Legacy documentation commit and clean
-  recovery-point verification finish.
+- Current protected Legacy control paths are recorded in the handoff. The active
+  Go production write set may begin after this normalization commit is clean.
 - Later P1 leaves may share files only serially. The one active leaf owns the
   exact paths above; no subagent may expand them.
 
