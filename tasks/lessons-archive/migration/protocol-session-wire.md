@@ -296,6 +296,7 @@
 - Root cause: 把 `GuildBuffList` 当成稳定 game-loop 屏障，没有按 Legacy `restore Buffs -> final UpdateGMBuff` 展开管理员条件包；probe 只校验单包类型，没有建模 fresh admin、stored admin、TestServer admin 与 revoked authority 四种精确状态机。
 - Prevention: 对每种 authority/config/persisted-state 组合列出 owner/nearby 的完整包序：fresh admin 一个 final AddBuff，stored admin restore+final，TestServer admin early+restore+final，revoked non-admin restore+remove；新增条件 bootstrap 后机械更新所有会 seed AdminAccount 的旧 consumer，并用 KeepAlive 作为尾部屏障。probe 必须要求一个合法 option 值、已知 bit、最多两个 tail 包，且 RemoveBuff 只能紧跟一个 restore AddBuff。
 - Verification: 旧 observer transcript 已显式消费并断言 private final GameMaster AddBuff；probe 新增 missing/unknown options、third AddBuff、standalone removal 与 add-after-removal 拒绝测试。GameMaster/required-group/observer focused 普通 `-count=10`、四包 focused race `-count=3`、服务端整包、全仓普通重跑、完整 race、vet、build、probe vectors、gofmt 与 diff check 均退出 0；首次全仓普通仅命中既有 `TestSessionHallucinationTranscript` 30 秒 pipe flake，隔离 `-count=10` 与后续服务端/全仓重跑均退出 0，未修改该无关模块。
+- Strengthening after interactive `@HAIR`: 新 authenticated 管理员夹具再次在 `GuildBuffList` 后直接发送命令，导致合法 final `AddBuff(GameMaster)` 抢占静默命令的 KeepAlive 屏障；显式消费并断言该 tail 后定向普通/race 通过。所有复用 mail bootstrap helper 且 seed `AdminAccount` 的测试，仍必须把 helper 返回点视为条件包中间态而非 game-loop barrier。
 
 ### 2026-08-23 — 交互式 GameMaster mode 必须分离权限、瞬态状态与 Buff authority
 
@@ -317,3 +318,11 @@
 - Root cause: 只读取 `Chat("@OBSERVER")` 的命令正文而没有展开 `MapObject.Observer` setter，误掉了 setter 在 Hint 前同步执行的可见性副作用；同时把“不可见且不阻挡”推成“不可攻击”。旧测试在 Go 尚无 Observer runtime 字段时还把持久 `Buff.Values` 当作 live flag 替身，掩盖了 Legacy `UpdateGMBuff` 每次只从 `GMGameMaster`、`GMNeverDie`、`Observer` 三项运行时字段重建 options 的边界。
 - Prevention: 管理模式命令必须分别列出 permission、属性 setter 副作用、Hint、runtime flags、Buff projection 与持久化顺序；Observer 只影响 `GetInfo`/`BroadcastInfo` 和 `Blocking`，不得加入通用 `IsAttackTarget`。所有 option-preservation fixture 必须同时 seed 对应 live flag 与 durable projection，禁止从旧 `Buff.Values` 猜当前 runtime mode。
 - Verification: world tests 锁定 `ObjectRemove/ObjectPlayer -> Hint -> owner AddBuff -> visible nearby AddBuff -> persist`、非阻挡但仍可作为 player/monster target、三项 runtime option composition 和后续 ObjectPlayer 抑制；authenticated `net.Pipe` 锁定管理员 enable/disable、TestServer-only 拒绝、join-time invisibility、logout persistence 与 relogin restore/final reset。修正 fixture 后 focused 普通/race、服务端整包、全仓普通/race、vet、build 和 probe vectors 均退出 0。
+
+### 2026-08-23 — .NET `byte.TryParse` 命令参数不能用 Go `ParseUint` 近似
+
+- Symptom: `@HAIR` 的普通数值、负数、越界和非法字符串测试均通过后，新增 `+8` 向量稳定得到 Hair=0，而 Legacy `byte.TryParse("+8", out value)` 接受默认 `NumberStyles.Integer` 的前导正号并得到 8。
+- Root cause: 依据目标类型无符号就直接选择 `strconv.ParseUint`，没有对照 .NET 默认 TryParse 的 lexical grammar；两者对前导 `+` 的接受范围不同。
+- Prevention: 迁移 .NET 数值 TryParse 时先列出符号、空白、范围、overflow、culture 和失败默认值；对 byte 命令 token 使用有符号解析后显式约束 `0..255`，失败保留 out 参数默认 0，而不是按 Go 目标类型猜 parser。
+- Verification: `hair_command.go` 改用 `ParseInt(..., 16)` 加 `0..255` 门禁；domain tests 锁定 `+8`、255、负数、256 和非法值，管理员、TestServer 与未授权 authenticated session 锁定权限、静默包序及 live/auth 状态；focused 普通 `-count=10` 与 race `-count=3` 退出 0。
+- Strengthening after read-only review: TestServer transcript 初稿以初始 Hair=0 发送非法值并仍断言 0，未授权 no-op 也能通过，无法证明配置权限分支真实执行；改用有效非零值 7，并让独立未授权 session 保持原值。管理员 JSON relogin 还必须消费 stored restore 与 final projection 两个 AddBuff，再以 KeepAlive 锁定没有残余 bootstrap tail。

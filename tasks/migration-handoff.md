@@ -1,6 +1,6 @@
 # Crystal Go 迁移 Session 交接
 
-最后更新：2026-08-23（Asia/Singapore；交互式 `@OBSERVER` 已收口）
+最后更新：2026-08-23（Asia/Singapore；交互式 `@HAIR` 已收口）
 
 ## 迁移目标与硬边界
 
@@ -23,6 +23,47 @@
 - Compact 后沿用同一个 active Goal，从已核对的 handoff 恢复；不得仅因
   compact 重开或重建 Goal。若没有已核对的 handoff，先从两仓重建，再继续实现。
 
+## 最近完成批次（交互式 `@HAIR`，已收口）
+
+- 本批只迁移 P3 交互命令 `@HAIR`。Legacy ruling：权限为
+  `IsGM || Settings.TestServer`，只改本人；无参数使用 `Random.Next(0, 9)`；有参数仅按
+  `byte.TryParse(parts[1])` 解析首项，接受前导 `+`，invalid/negative/>255 失败时 out 值为
+  0，额外参数忽略；命令完全静默，不广播 appearance，Hair 随 `CharacterInfo` 持久化。
+- Go 实现已接入 Game-stage case-insensitive chat route、world-lock 内 live Hair 更新、auth
+  identity authority 与 JSON save。domain tests 覆盖管理员/TestServer/未授权、`+8`、255、
+  负数、overflow、非法值、额外参数和 `[0,9)` 随机 bound；authenticated `net.Pipe`
+  覆盖管理员、TestServer、未授权、静默 KeepAlive barrier、stored restore/final GameMaster
+  AddBuff tail、logout、真实 JSON reload 与 relogin Hair 投影。
+- 主审在 focused test 中发现初稿用 `strconv.ParseUint` 会把 Legacy 接受的 `+8` 错置为
+  0，已改为 `ParseInt(..., 16)` 后显式约束 `0..255`；该失败、此前管理员 final AddBuff
+  未消费的 fixture 失败及 prevention 已写入
+  `tasks/lessons-archive/migration/protocol-session-wire.md`。
+- `luna_worker` Rawls (`01a02d4f-f2d3-7493-9c50-d21640b84a48`) 只读审查四个 Go 文件，
+  无生产 correctness finding；其两个低严重度测试 finding（TestServer 初始/期望均为零不能
+  证明权限分支、relogin 未 drain 第二个 AddBuff/final barrier）均已修正并复跑，线程已关闭。
+- 已通过（退出码 0）：`go test ./cmd/crystal-server -run '^$' -count=1`；focused 普通
+  `-run 'HairCommand|InteractiveHair' -count=10` 与 race `-count=3`；排除下述已知 OmaMage
+  单测后的服务端整包及 `go test ./... -count=1`；无排除 `go test -race ./... -count=1`；
+  `go vet ./...`；`go build ./...`；`go run ./cmd/crystal-protocol-probe -mode vectors`；
+  owned gofmt、`git diff --check` 与双仓三类 `.cs` 门禁。
+- 无排除服务端整包与 `go test ./... -count=1` 均退出 1，唯一失败为 handoff 已记录的既有
+  `TestSessionOmaMageRangeSlowFrozenTranscript` 随机 bound `[2 1]` vs `[1]`；隔离
+  `-count=10` 同样退出 1，栈未进入本批文件；未修改无关 OmaMage 代码掩盖失败。排除该
+  单测的服务端整包和全仓普通均退出 0，完整 race 无排除退出 0。
+- Go 仓根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支 `main`，
+  提交 `cdd497656925f1b524841a8aab1acdda5362c14b`
+  (`cdd4976 feat(p3): restore interactive HAIR command`)；提交包含五个本批文件、205
+  insertions、1 deletion，提交后工作树 clean，无 staged/untracked，三类 `.cs` 为空。
+  矩阵仅更新 P3，阶段仍 `In progress`。
+- Legacy 仓根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master...origin/master [ahead 412]`，提交前 HEAD
+  `49e8504f9002c53e567869f156668c421e6c9ad5`；tracked 修改为本 handoff 与
+  `tasks/lessons-archive/migration/protocol-session-wire.md`，无 staged/untracked，三类
+  `.cs` 为空；本次 Legacy 文档提交只包含这两份文件。
+- 下一恢复命令：完成并核对 Legacy 两文件文档提交后，刷新本段为 post-commit 状态；新
+  Session 分别核对双仓 status/HEAD/三类 `.cs` 并读取 Go matrix，再从明确 pending、
+  dependency-ready 子切片选择。不要重复 `@HAIR`，也不要把 P3 或整体 Goal 标为完成。
+
 ## 最近完成批次（交互式 `@OBSERVER`，已收口）
 
 本批从 compact 后发现的 5 tracked + 2 untracked 未验证补丁恢复；主 Agent 重新沿
@@ -30,6 +71,12 @@ Legacy `PlayerObject.Chat -> MapObject.Observer setter -> HumanObject.UpdateGMBu
 调用链裁决，修正行为后补齐领域、协议、可见性、持久化与 authenticated session 证据。
 ranking closure 和其他管理员命令未混入本原子切片。
 
+- Legacy 仓库根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`，分支
+  `master...origin/master [ahead 412]`，HEAD
+  `49e8504f9002c53e567869f156668c421e6c9ad5`
+  (`49e8504f docs(migration): record interactive Observer mode`)；功能文档提交包含
+  active lessons、protocol-session-wire archive 与本 handoff。提交后工作树 clean；本段
+  post-commit 刷新后只有本 handoff 为 tracked 修改，无 staged/untracked，三类 `.cs` 为空。
 - Go 仓库根 `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`，分支
   `main`，提交 `a79e25c` (`feat(p3): restore interactive Observer mode`)；提交包含
   17 个文件、720 insertions、90 deletions，提交后工作树 clean，无 staged/untracked，
@@ -66,10 +113,10 @@ ranking closure 和其他管理员命令未混入本原子切片。
   文件；Hubble (`01a02d2c-495a-73d1-b8bf-fba64a1e6c4d`) 独占新增 authenticated session
   test 文件并通过 focused 普通/race；Singer 只读 review 线程长时间无结果后关闭，未写文件。
 - 矩阵范围：P1/P3/P4/P5 已记录本切片，四阶段继续 `In progress`；整体 Goal 继续 active。
-- Legacy 当前仍待提交 `tasks/lessons.md`、
-  `tasks/lessons-archive/migration/protocol-session-wire.md` 与本 handoff；提交并回读后需把
-  Legacy HEAD 写回本段。下一恢复应从 Go matrix 的 ranking closure 或其他明确 pending、
-  dependency-ready 子切片选择，不得重复 `@OBSERVER`。
+- 当前没有未提交的 Go 实现、测试或 matrix 工作；Legacy 仅本 post-commit handoff 刷新
+  未提交。下一恢复命令：分别核对双仓 status/HEAD/三类 `.cs` 门禁并读取 Go matrix，
+  再从 ranking closure 或其他明确 pending、dependency-ready 子切片选择；不得重复
+  `@OBSERVER`，也不得把本批或整体 Goal 误标为全部完成。
 
 ## 2026-08-23 compact 后恢复检查点
 
