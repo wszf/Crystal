@@ -40,9 +40,9 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `NET-P1-GATES-001`
-- Status: `Active` for routing; LOG is committed at Go
-  `0b7a68078e5bc4b182534ca5a5db7260b45267c7`, while NET writes remain gated
-  until this Legacy control commit is clean.
+- Status: `Active`; LOG is committed at Go
+  `0b7a68078e5bc4b182534ca5a5db7260b45267c7`, and the bounded NET candidate
+  currently owns four uncommitted Go files recorded in the handoff.
 - Outcome: preserve timed IP blocking, MaxUser/MaxIP admission and release, idle
   read timeout, packet-rate reset/rejection, and their disconnect/log boundaries.
 - Go matrix anchors to read: `### 2026-08-24 P1 finite closure inventory`, the
@@ -89,7 +89,7 @@ this is a P1 denominator only, not a project percentage.
 - LOG code and matrix evidence are committed at Go `0b7a680`; no Go LOG path
   remains protected.
 - Current protected Legacy control paths are recorded in the handoff; the NET
-  write set remains gated until this control commit is clean.
+  Go write set is active and must remain within the exact four owned files.
 - Later P1 leaves may share files only serially. The one active leaf owns the
   exact paths above; no subagent may expand them.
 

@@ -30,6 +30,7 @@ duplicate.
 - Strengthening after `DISC-P1-CLOSURE`: P1 版本勘察又在 Legacy `workdir` 的同一命令中加入 Go 的 `internal/config`/`cmd/crystal-server` 相对路径；compact 恢复首调用随后再次把绝对 Go matrix 附在 Legacy 启动读取末尾。两次整调用均已作废并按两仓独立零退出重跑。即使核对同一 setting 或启动 authority，也必须在发送前机械检查“命令文本只含当前根”，且 Legacy 启动调用必须物理结束后才能构造 Go 调用。
 - Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
 - Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
+- Strengthening after `NET-P1-GATES-001` recovery: 本轮首个恢复调用又在 Legacy 根用 `git -C` 读取 Go 状态，整次输出已作废并按仓重跑。恢复模板今后必须把“两仓核验”落实为两个物理工具调用，而不是同一 shell 中的两个标题段；发送前机械拒绝 `git -C`。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -53,6 +54,7 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` discovery: Active Index 将 `server_text_catalog*.go` 列为允许新建文件，主线程却在枚举只返回现有 localization 两文件后仍把这两个未来路径交给 `wc`，调用退出 1 且整次输出作废。清单中的 write authority 不等于文件已存在；每个候选必须以本次 `rg --files` 结果分类为 existing/new，只有 existing 才能进入读取参数。
 - Strengthening after `LOC-P1-CATALOG-001` integration: 主审已有固定 argv 规则后仍把 `--glob` 放在 `rg --` 之后，调用 exit 2 且全部输出作废；随后清理本批测试生成文件时又把 `rm -f` 拼进补丁/测试复合命令，整次在执行前被策略拒绝。已分别以选项前置的 `rg` 和只删除精确自有文件的 `apply_patch` 零退出重跑；今后发送前同时机械检查 `rg` 的 `--` 边界和复合命令是否含被禁止的清理动作。
 - Strengthening after `LOG-P1-CATEGORY-001` tracing: 同一批三次把 `--glob` 放到 `rg --` 之后，导致有效前段与 exit 2 混杂；每次整调用均作废并用 `rg [options] -e pattern -- paths` 重跑。发送任何 `rg` 前必须先按固定四段模板目检，禁止从自然语言顺序临时拼 argv。
+- Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -282,3 +284,4 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
+- Strengthening after NET handoff reconstruction: 快照虽含 Active leaf 语义，却把必需 schema 标题改成 `Candidate behavior and open review`，控制检查器 exit 1。重写 handoff 前必须先从检查脚本复制必需标题和字段，并在同一最小补丁中保留 `## Active leaf and protected work` 与唯一 `- Active leaf: \``。

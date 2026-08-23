@@ -1,30 +1,34 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 04:25 (Asia/Singapore)
+Last updated: 2026-08-24 04:39 (Asia/Singapore)
 
-This replace-in-place snapshot closes the committed LOG leaf and routes the
-next bounded P1 leaf. The Goal remains active.
+This replace-in-place snapshot reconstructs the current `NET-P1-GATES-001`
+candidate after startup verification found the prior clean-worktree claim stale.
+The persistent full migration Goal remains active.
 
 ## Goal and control-plane state
 
-The persistent full Go migration Goal is active, not Complete or externally
-Blocked. Main authority is `gpt-5.6-sol/ultra`; bounded workers use
-`luna_worker` (`gpt-5.6-luna/max`). P1 is scope-frozen/In progress with twelve
-registered children: five Complete and seven unfinished.
+- Main authority is `gpt-5.6-sol/ultra`; bounded workers use `luna_worker`
+  (`gpt-5.6-luna/max`).
+- P1 is scope-frozen/In progress with one Active leaf. Matrix and Active Index
+  both route `NET-P1-GATES-001`; no phase or Goal closure is claimed.
+- Owned Go paths are exactly `cmd/crystal-server/main.go`, `main_test.go`,
+  `connection_gates.go`, and `connection_gates_test.go`.
+- Forbidden scope remains status port 3000, HTTP, lifecycle redesign, broad
+  logging/localization closure, unrelated protocol/persistence, and all C#.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch before the enclosing NET-trace checkpoint commit:
-  `master...origin/master [ahead 427]`.
-- HEAD before the enclosing control commit:
-  `392829af8d29b6a4d3bf330c1aed4b1f253736f3`
-  (`docs(migration): correct P1 packet window`).
-- Tracked modifications are exactly this handoff after replacement; expected
-  subject is `docs(migration): checkpoint P1 network gates`.
-- Staged and untracked files: none.
-- `AGENTS.md` and tracked `agents.md` remain one hard-linked inode; all tracked,
-  staged, and untracked C# gates are empty.
+- Branch: `master...origin/master [ahead 428]`.
+- HEAD before this reconstruction commit:
+  `6cba22f25d1aa90cd4da9dbc21289ccdff4901cf`
+  (`docs(migration): checkpoint P1 network gate implementation`).
+- Before this control edit the worktree, index, and untracked set were clean.
+  Expected owned control delta is this handoff, the bounded Active Index wording,
+  and two strengthened canonical recovery lessons.
+- `AGENTS.md` and tracked `agents.md` remain one hard-linked inode.
+- Tracked, staged, and untracked C# gates were empty at recovery.
 
 ## Go repository state
 
@@ -32,84 +36,55 @@ registered children: five Complete and seven unfinished.
 - Branch: `main`; HEAD:
   `1878cad4b9e1e91214d7756c767180dc45db49ac`
   (`docs(migration): activate P1 network gates`).
-- Worktree, staged files, and untracked files are clean.
-- All tracked, staged, and untracked C# gates are empty.
-
-## Completed LOG leaf
-
-- Legacy locks Server/Chat/Debug/Player/Spawn categories; Info/Debug levels;
-  local `dd-MM-yyyy` category names; append/roll; log4net ISO8601
-  comma-millisecond layouts; Server/Chat/Debug non-evicting 100-entry queues;
-  post-saturation file writes; and Player/Spawn file-only behavior.
-- Production shares one manager from startup through accepted sessions. Listener
-  startup uses Server queue/file; normal chat uses Chat queue/file; successful
-  market search uses Debug queue/file; StartGame writes exact Player Connected;
-  world-import spawn load writes Spawn file-only.
-- Sink failures cannot recurse through the installed standard logger. Queue
-  admission and unrelated categories continue, the failed category reopens on a
-  later write, and close is idempotent. No unrelated server lock crosses I/O.
-- Matrix LOG is Complete; the exact twelve-row registry now counts five Complete
-  and seven unfinished. Earlier prose had failed to decrement after LOC and is
-  corrected rather than mechanically subtracting from the stale count.
-
-## Verification ledger
-
-All commands below ran in the Go root and exited 0:
-
-- `gofmt -w internal/logging/logging.go internal/logging/logging_test.go
-  cmd/crystal-server/main.go cmd/crystal-server/runtime_logging.go
-  cmd/crystal-server/runtime_logging_test.go`.
-- `go test ./internal/logging ./cmd/crystal-server -run '^$'`.
-- `go test ./internal/logging -count=20`.
-- Runtime production-category/startup/session tests at `-count=20`.
-- Existing chat, market-search, and startup-error production entries at
-  `-count=10`.
-- `go test -race ./internal/logging -count=5` and runtime production logging
-  race tests at `-count=10`.
-- Fresh unexcluded `go test ./... -count=1`; no flake reproduced.
-- Fresh unexcluded `go test -race ./... -count=1`.
-- `go vet ./...`, `go build ./...`, and `git diff --check`.
-- Both repositories' tracked/staged/untracked C# gates are empty.
+- Tracked modifications: `cmd/crystal-server/main.go`, `main_test.go`.
+- Untracked: `cmd/crystal-server/connection_gates.go`,
+  `connection_gates_test.go`. Staged files: none.
+- SHA-256 fingerprints at freeze: main `76e2edd66cba9ea8385de81306d712779c1dd0ff40117181222ab289211a1fa1`;
+  main test `2ab59ce4983003691046b478fbf324d661e3d6bc5dfe1d5916e193115fd2f22e`;
+  gates `dbec58c73f3923f833fc0d75a19c300d699f348567265b67094e819b8fa92619`;
+  gates test `b0288f10a7a9f444b1a8cc38f26540b331555c34422440554553078e7056b0d6`.
+- Tracked, staged, and untracked C# gates were empty at recovery.
 
 ## Active leaf and protected work
 
-- Active leaf: `NET-P1-GATES-001`; the matrix and Active Index now both say
-  Active. NET writes remain gated until the expected Legacy correction is clean.
-- Outcome: timed IP blocking, MaxUser/MaxIP admission/release, idle read timeout,
-  MaxPacket five-second reset/rejection, and exact disconnect/log boundaries.
-- Matrix anchors: P1 finite inventory, `NET-P1-GATES-001`, and the P1 stage row.
-- Legacy read authority: bounded gate ranges in `Server/MirEnvir/Envir.cs`,
-  `Server/MirNetwork/MirConnection.cs`, and `Server/Settings.cs`, plus direct
-  timer/admission consumers only.
-- Go write authority after the gate: bounded `cmd/crystal-server/main.go` and
-  `main_test.go`, plus new `connection_gates.go`/`connection_gates_test.go`.
-- Forbidden: status port 3000, HTTP, lifecycle redesign, broad logging closure,
-  localization, unrelated persistence/protocol, and C#.
-- Legacy first checks an unexpired/equality IP block silently, then MaxIP; a
-  successful connection and a MaxIP rejection both overwrite a five-second
-  block. MaxUser throttles re-accept rather than rejecting. MaxPacket counts
-  receive callbacks in a first-receive-anchored five-second window, resets only
-  after strict expiry, and abuse/invalid framing installs a 24-hour block.
-- Go currently has active-count rejection only, frame-counts from session start,
-  resets at equality, omits abuse blocks, and lets zero TimeOut wait forever.
-  Implement mutexed lazy-expiry blocks and admission reasons in the registered
-  new gate file, add MaxUser re-accept backpressure, then wire bounded session
-  abuse/timeout paths without expanding into status/HTTP.
+- Active leaf: `NET-P1-GATES-001`.
 
-## Quiescence
+- Candidate adds mutexed short/24-hour IP blocks, MaxIP admissions, MaxUser
+  accept backpressure and release, receive-callback counting with an 8 KiB
+  buffered reader, strict five-second reset, zero timeout disconnect, and
+  invalid-frame/rate abuse blocks.
+- Main review still must rule exact Legacy IP string authority, absolute idle
+  timeout behavior across maintenance wakes, localized/log ordering, bootstrap
+  failure/release, and all equality/shutdown boundaries before acceptance.
+- Do not assume these uncommitted files are correct merely because focused tests
+  currently pass.
 
-- `luna_worker` `01a0302d-1068-7ad2-91e6-d4eb449599e0` is completed and closed.
-- Read-only NET auditor `01a03042-17a7-70f0-a970-8ef4904c15a8` is completed and
-  closed; it changed no file.
-- No subagent result is pending; exact process audit found no `go` or
-  `crystal-server` process.
+## Verification ledger
+
+Commands run in the Go root during recovery and exited 0:
+
+- `git diff --check`.
+- `go test ./cmd/crystal-server -run '^$'`.
+- Focused NET regex covering gate/window/frame-reader/admission/abuse/zero-timeout
+  tests at `-count=1 -timeout=2m`.
+
+The first mixed-root status call and a later guessed nonexistent protocol path
+were discarded in full and are not evidence. No repeated, focused-race,
+integration, vet, build, or final C# gate has yet been run for this candidate.
+
+## Active agents and processes
+
+- Read-only `luna_worker` `01a03055-b94f-7ce0-b9b9-6e2a39c4ade9` reviews the
+  exact Legacy/Go NET contract and may not write any file.
+- Exact `comm` process audit found no `go` or `crystal-server` process at freeze.
 
 ## Exact recovery sequence
 
-1. Verify this expected one-document checkpoint delta, run the control checker
-   and all six C# gates, and commit this handoff with the expected subject.
-2. With both trees clean, create only `connection_gates.go` and its test first;
-   lock exact block equality/overwrite, MaxIP zero, active release, 24-hour abuse,
-   and MaxUser wait semantics before changing `main.go`.
-3. Integrate bounded accept/session paths, then run compile, deterministic TCP/
-   net.Pipe repeated tests, focused race, and the standard Leaf gate.
+1. Verify this control delta, run `tasks/check-migration-control.sh`, all Legacy
+   C# gates, and commit only the three owned control files.
+2. Recheck the four Go fingerprints/status and collect/close the read-only Luna
+   review without interrupting it.
+3. Resolve findings in the four-file authority, then run compile, deterministic
+   focused/repeated/race tests and the due standard Leaf/integration gates.
+4. Mark matrix/index Complete only after evidence, refresh this snapshot, run
+   both repositories' six C# gates, and commit owned files separately by repo.
