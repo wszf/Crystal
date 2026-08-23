@@ -48,6 +48,7 @@ duplicate.
 - Strengthening after Goal pause audit: 已有上述 schema 防猜规则后，首次 `pragma_table_info` 投影仍直接使用未引用的 SQLite 关键字列 `notnull`，两个查询退出 1，整次输出作废。以后 schema 勘察第一步固定为独立的 `SELECT * FROM pragma_table_info(...)`；完整回读真实列名后才允许自定义投影，关键字列必须引用。随后已分别零退出回读 `thread_goals` 与 continuation-deferral schema，再查询指定 Goal。
 - Strengthening after utility-command main review: 同一轮连续把 `--glob` 放到 `rg --` 之后、使用未验证 shell glob，并把不存在的目录加入搜索；相关调用均作废后按现有路径重跑。每次 `rg` 必须按固定 argv 模板构造：所有选项与 `-e` 在前，单个 `--` 居中，已验证路径在后；不得用尾部 `|| true` 掩盖语法/路径错误，只有事先声明“零匹配即有效答案”时才允许它。
 - Strengthening after P1 matrix reconciliation: 用记忆中的整句搜索实际跨行的 matrix prose 得到空行号，随后把负数范围交给 BSD `sed` 并 exit 1；恢复审计又把预期可为零的 archive `rg` 裸放在 `set -e` 下，并在 Go 定位中使用未引用 shell glob。相关调用均已作废并以稳定单行片段、显式接收 `rg` 退出 0/1、已确认精确路径重跑。不得对空搜索结果做算术，不得把“零匹配”或“glob 恰好命中”当成 argv 已验证。
+- Strengthening after `CFG-P1-CONTRACT-001` tracing: 查找 Legacy startup consumers 时再次把可能零匹配的 `rg` 裸放在 `set -e` 调用中，整次零输出结果已作废；随后先声明零匹配有效、显式接收退出码 0/1，并扩大到已验证的 `.cs` 路径后定位真实 `Server.MirForms/Program.cs` 入口。凡搜索“可能不存在的限定写法”必须在命令成形时就使用 0/1 分支，不能等退出 1 后补救。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 

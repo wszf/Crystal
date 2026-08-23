@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 01:24 (Asia/Singapore)
+Last verified: 2026-08-24 02:43 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -51,9 +51,10 @@ Keep this file at or below 300 lines and 32 KiB.
   declarations and `Load`/`Save`/`LoadVersion` consumers in `Server/Settings.cs`,
   plus direct startup consumers needed to rule observability.
 - Go write authority: `internal/config/config.go`,
-  `internal/config/config_test.go`, and new
-  `internal/config/p1_contract_test.go`. Any required production-startup test may
-  write only new `cmd/crystal-server/p1_config_startup_test.go`.
+  `internal/config/config_test.go`, new
+  `internal/config/p1_contract_test.go`, the bounded config-path selection in
+  `cmd/crystal-server/main.go`, and new
+  `cmd/crystal-server/p1_config_startup_test.go`.
 - Forbidden scope: localization catalog work, listener/admission behavior,
   logging, HTTP/status service implementation, lifecycle restructuring,
   feature-specific settings, broad matrix edits, and C# changes.
@@ -68,7 +69,8 @@ this is a P1 denominator only, not a project percentage.
 
 ### Protected Go ownership
 
-- The P1 inventory is committed at Go `460b8ed8f1ca10c5a9da5028948165d062e35db7`;
+- The active P1 row is committed at Go
+  `b5e5999c743f3ae7183f3a51eb5fd50ec4fb3536`;
   the Go worktree is clean with no protected uncommitted path.
 - Current protected Legacy control paths are recorded in the handoff. The active
   Go production write set may begin after this normalization commit is clean.
@@ -99,7 +101,7 @@ selected now.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
-| `CFG-P1-CONTRACT-001` | Active | — | `internal/config/{config.go,config_test.go,p1_contract_test.go}`; new `cmd/crystal-server/p1_config_startup_test.go` | focused/repeated config + startup |
+| `CFG-P1-CONTRACT-001` | Active | — | `internal/config/{config.go,config_test.go,p1_contract_test.go}`; bounded `cmd/crystal-server/main.go`; new `cmd/crystal-server/p1_config_startup_test.go` | focused/repeated config + startup |
 | `LOC-P1-CATALOG-001` | Ready | CFG | `internal/config/{localization.go,localization_test.go,server_text_catalog.go,server_text_catalog_test.go}` | catalog/static + startup |
 | `LOC-P1-CALLSITE-CLOSURE-001` | Ready | LOC catalog + P2-P11 feature closure | new `docs/p1-localization-callsite-ledger.md`; new `internal/config/localization_coverage_test.go`; matrix evidence only | static ledger + owning transcripts + phase integration |
 | `LOG-P1-CATEGORY-001` | Ready | CFG | `internal/logging/{logging.go,logging_test.go}`; `cmd/crystal-server/main.go`; new `runtime_logging.go`/`runtime_logging_test.go` | focused/repeated/race |
