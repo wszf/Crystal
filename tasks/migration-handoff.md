@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 16:42 (Asia/Singapore)
+Last updated: 2026-08-24 16:44 (Asia/Singapore)
 
 This replace-in-place snapshot closes and commits `CHAR-P3-CREATE-001`, routes
 `ADMIN-P3-ACCOUNT-OPS-001` as the one Active leaf, and records the exact clean
@@ -22,15 +22,12 @@ no phase or Goal completion is claimed.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master...origin/master [ahead 442]`; observed HEAD
-  `8d6db545765e78ee283cbac10e8cbd26e7d265e7`
-  (`docs(migration): close P3 discovery leaf`).
-- Tracked modifications are exactly
-  `tasks/lessons-archive/migration/protocol-session-wire.md`,
-  `tasks/lessons-archive/workflow/repository-boundaries-02.md`,
-  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
-  `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff. Index and
-  untracked set are empty.
+- Branch: `master...origin/master [ahead 443]`; observed clean HEAD
+  `d704fbc94fbbaca411b18d8fc7808fcce15a880b`
+  (`docs(migration): close character creation leaf`) immediately before this
+  handoff-only checkpoint. Replacing this file is the sole expected tracked
+  modification; its own documentation commit is the one expected HEAD delta.
+  Index and untracked set are empty.
 - Archives preserve creation tracing/review/test attribution and recovery/tool
   failures. Active C01/C03 were strengthened without exceeding control limits.
 - Tracked, staged, and untracked C# gates are empty.
@@ -109,8 +106,8 @@ no phase or Goal completion is claimed.
 
 ## Exact recovery sequence
 
-1. Reverify both repositories separately, run control/diff/C# gates, and commit
-   only the six owned Legacy control/archive files.
+1. Reverify both repositories separately and accept exactly one Legacy
+   handoff-only commit after the observed HEAD; run control/diff/C# gates.
 2. Search the lessons archive with `ADMIN-P3-ACCOUNT-OPS-001`, AccountInfoForm,
    PlayerInfoForm, account ban, password reset, wipe, JSON, and 117 keywords.
 3. Trace bounded Legacy/Go operator ledgers, delegate one read-only reviewer or
