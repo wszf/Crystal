@@ -425,3 +425,74 @@
 - Strengthening during admin-authority handoff reconstruction: 新快照把检查器要求的 `## Verification ledger` 自拟为 `## Recovered candidate evidence`，`tasks/check-migration-control.sh` exit 1；按脚本第 97-108 行完整 heading 清单精确改名后零退出。该事件与此前 `Candidate behavior and open review` 失败共同证明语义等价标题不属于控制 schema，重写前必须从检查器逐字复制全部 heading/field。
 - Strengthening during final admin-authority fixes: 一个跨 auth/main/ranking 的多文件 `apply_patch` 在 `main.go` 陈旧上下文失败，但前面的 service/import/ranking hunks 已实际落地；同一 shell 又因缺少 `set -e` 继续 gofmt/compile。主线程立即回读新增符号和 status，确认 partial write 后按文件拆 patch。随后新 observer transcript 先后因角色名、AccountID 超过 Legacy 长度门禁失败，改用真实约束内夹具后通过。多文件 patch 失败绝不代表原子零写入，且测试数据必须先过真实账户/角色约束。
 - Strengthening during P3 stage-row closure: 为避免手贴超长 matrix 行使用 Perl 精确替换，但 replacement 中未转义 `@LOGIN`，Perl 将其解释为空数组并写成双空格；后置计数门禁使命令 exit 1，却不能撤回已发生的写入。随后精确回读目标行，以 `\@LOGIN` 恢复并加回 Markdown backticks。即使 shell 最终非零，原位编辑也可能已落地；Perl replacement 的 `@/$/\\` 必须转义并在写后回读。
+
+### 2026-08-24 — Rank lifecycle tracing 必须逐字复制 rg argv 模板
+
+- Symptom: archive 检索先把 command substitution、`||`、赋值和分号塞进同一 zsh 子 shell而 parse error；随后三次把 `--glob` 放到 `rg --` 后。将事故细节追加 active lessons 又使控制检查以 52323 > 51200 bytes 失败。
+- Root cause: 仍从自然语言或旧失败命令重拼 argv，并把 leaf-specific 事故证据放入已经接近上限的 active canonical。
+- Prevention: 含 glob 的检索逐字复制 `rg -n --glob '*.go' -e 'pattern' -- path`，先完成选项段再输入 `--`；复杂退出码用顶层多行分支。事故证据归档，active 只保留既有 C02/C28 canonical。
+- Verification: 四次失败调用全部作废；按固定模板或顶层 `rc` 分支重跑均 exit 0。新增细节移入本 archive 后，active 恢复限额内并由控制检查复验。
+
+### 2026-08-24 — Rank lifecycle recovery 必须先清点延迟 subagent
+
+- Symptom: 环境列出 `01a0345f-b16b-7580-a80d-b3892c329aee`，handoff 却称无 active worker；主线程重复做 Legacy tracing并另开 reviewer。随后未列在环境中的旧 Go auditor `01a0345f-eb1b-7901-a913-a21abb43179f` 延迟返回，再暴露一项重复委派。
+- Root cause: 采用陈旧 handoff 的 quiescence 声明，没有先查询环境 ID，也没有给已完成但延迟投递的通知一个去重边界。
+- Prevention: 恢复先 `wait`/非中断询问环境列出的每个 ID，第一轮 wave 前短暂接收延迟通知，再按仓库/Leaf/范围去重；不得让 handoff 覆盖当前工具事实。
+- Verification: 所有相关线程均确认只读、零写入、无进程并已关闭；后续精确 ownership 由主线程统一冻结。
+
+### 2026-08-24 — Handoff 文件清单必须取最终 status 而非补丁记忆
+
+- Symptom: rank-lifecycle handoff 初稿把曾编辑但最终净零差异的 `tasks/lessons.md` 列为 tracked unstaged，实际 `git status --short` 只有 archive、active、handoff 三文件。
+- Root cause: 依据本轮操作记忆编写状态，没有用写入后最终 Git 输出逐项覆盖草稿。
+- Prevention: handoff 写后必须以最终 `git status --short` 为唯一文件清单，并立即修正任何净零或新增差异。
+- Verification: 已删除虚假条目；控制检查、`git diff --check` 和最终 status 再次零错误核对。
+
+### 2026-08-24 — Rank session helper 定位不得夹带已碰巧命中的 shell glob
+
+- Symptom: 定位 `mailSessionTestClient` 时把精确文件与未预先枚举的 `cmd/crystal-server/*mail*test.go` 放进同一命令；稍后搜索 Disconnect 用例又追加 `cmd/crystal-server/*_test.go`。glob 两次都碰巧命中且命令 exit 0，但仍不满足路径最小验证。
+- Root cause: 把 shell 成功展开误当成路径已由本轮 authority 枚举。
+- Prevention: 已知声明文件只传精确路径；文件族必须先独立 `rg --files`，不得为“保险”追加 shell glob。
+- Verification: 两次输出均作废；随后分别只用 `mail_session_test.go` 与已验证的 `process_lifecycle_test.go` 零退出重跑并读取精确范围。
+
+### 2026-08-25 — Rank lifecycle 测试必须先核对 typed outcome 字段
+
+- Symptom: 新删除后重入 transcript 把 `DeleteCharacterOutcome` 猜成通用 `Result == 10`，真实 API 使用 `Status == auth.DeleteCharacterSuccess`。
+- Root cause: 沿创建结果习惯推断另一个领域返回类型，没有先读取现有 ban/delete 测试。
+- Prevention: 新测试写断言前先从同包既有 production test 复制 typed outcome 的字段和常量；不同 mutation 不推断对称返回面。
+- Verification: 已回读 `internal/auth/p3_ban_delete_test.go`，改用真实 `Status`/typed constant，并重新 gofmt/diff check；行为测试仍待候选编译后执行。
+
+### 2026-08-25 — Rank seed 改变既有 fixture 前必须先扩展 test ownership
+
+- Symptom: 13-day seed使 ban/delete 的 imported-live fixture 因 `LastAccess=0` 正确不入榜；主线程先补 recent timestamp，随后才发现 `internal/auth/p3_ban_delete_test.go` 未列入精确 write set。
+- Root cause: 把“只修既有测试夹具”误当成不需要 ownership 的例外。
+- Prevention: production 语义引起的任何旧测试调整也属于写权限；失败归因后先更新 active exact path，再修改夹具。
+- Verification: active 已补登记该 bounded regression test；改动仅增加确定性 recent `LastAccess`/`ReplaceAccountsAt`，不改变已完成 ban/delete 生产语义，并将重跑其 focused gate。
+
+### 2026-08-25 — Rank review 仍不得在已定位声明后追加猜测路径
+
+- Symptom: 已由 `rg` 定位 `orderedAccountKeysLocked` 在 `operator_accounts.go` 后，读取调用仍追加不存在的 `account_order.go`；随后 IsGM 搜索又附带不存在的 `admin_authority.go`。两次调用均含有效前段与路径错误尾段。
+- Root cause: 把概念文件名当成“可能的补充上下文”，违反定位结果只能生成下一调用精确参数的规则。
+- Prevention: 定位调用结束后，下一次读取参数逐项复制其真实输出；不得追加语义上可能存在的候选，即使以 `2>/dev/null || true` 隐藏错误。
+- Verification: 两次混合输出全部作废；分别只读 `operator_accounts.go` 与 `game_master.go` 的精确范围后零退出取得证据。
+
+### 2026-08-25 — Materialized rank 测试夹具必须显式经过 load 或 StartGame
+
+- Symptom: 首轮 cmd focused 中四个 ranking tests 只见已登录角色或直接静默；既有 admin transcript 在 GM removal 后 overall 为空而读包超时，ban/import 与 account-operator loaded-admin fixtures 又因 live record `LastAccess=0` 得到空榜，live-grant operator test 的离线 control 也从未物化。
+- Root cause: 旧测试依赖动态扫描全部 auth characters；新权威状态按 Legacy 只在 recent load、non-GM StartGame 或 level-change-on-existing-row 时物化。直接 Create+Update 不能替代生命周期。
+- Prevention: ranking fixture 必须明确选择 recent `ReplaceAccountsAt` seed 或 `MaterializeCharacterRankingAt`；需要测试离线竞争者时也必须先物化。零 LastAccess 表示 DateTime.Min，不得当成 recent 默认。
+- Verification: 相关 fixtures 已补物化/recent timestamp；auth/cmd/admin/ban focused、两个 account-operator regressions 与最终 cmd 整包均 exit 0。
+
+### 2026-08-25 — Archive 新 section 必须锚定完整前一 lesson
+
+- Symptom: 向 protocol archive 追加 rank section 时只锚定 Character-delete 的 Symptom，导致其 Root cause/Prevention/Verification 落到新 rank heading 下。
+- Root cause: 在未读取完整前一 section 边界时按首个匹配行插入。
+- Prevention: archive 插入前读取目标 heading 到下一 heading；新 section 只能追加在完整四字段 block 后。
+- Verification: 已把 Character-delete 三字段移回原 heading，并回读确认两个 lesson 各自结构完整。
+
+### 2026-08-25 — Matrix 多行 prose 替换必须回读完整语法句
+
+- Symptom: rank closure 的 inventory patch exit 0，却只替换旧 continuation 的末段并额外写入第二个 `progress**`，留下“eight Complete”旧行和重复新行。
+- Root cause: hunk 草稿把 Markdown 跨行强调词误当成两个独立句首，没有先把 `**scope-frozen ... progress**` 整个物理范围作为一个 replacement。
+- Prevention: 修改跨行强调/表前 prose 时，先读取 heading 到下一空行；replacement 覆盖完整句子，成功后立即回读同一范围并检查旧计数、新计数和 Markdown delimiter 各唯一一次。
+- Verification: 已以完整三行 hunk 删除旧计数和重复词；目标段现唯一写成 eleven children、nine Complete、two Ready，`git diff --check` exit 0。
+- Strengthening during the same closure: stage-row Perl replacement succeeded, but the post-write assertion put an expected zero-match `rg` inside `set -e` command substitution, so the shell exited 1 before printing counts. The call was discarded; an independent explicit 0/1 audit proved old count 0, new count 1 and `git diff --check` 0. Post-write negative assertions must use the same explicit rc branch as discovery searches.

@@ -57,7 +57,7 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
-- Strengthening through admin-authority and ban/delete review: 猜测路径、错放参数、宽泛模式或裸跑“零匹配有效”的 `rg` 时，整调用作废；本次 `--glob` 越过 `--` 后已按固定 argv 重跑。发送前机械核对路径、argv、退出码与输出上限。
+- Strengthening through rank-lifecycle review: 再次因 `--glob` 越过 `--` 或裸跑可零匹配搜索导致 exit 2/1；整调用作废并以固定 argv/显式 0/1 分支重跑。发送前机械核对路径、argv、退出码与输出上限。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。

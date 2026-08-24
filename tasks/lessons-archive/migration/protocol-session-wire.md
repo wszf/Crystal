@@ -387,3 +387,25 @@
 - Root cause: 把 Go 现有即时导出当成删除事务的一部分，并为持久化场景凭语义命名夹具而未先过真实创建门禁。
 - Prevention: mutation leaf 逐层列出锁内状态、rank 副作用、网络顺序与持久化 authority；Legacy 未在 handler 内保存时不得新增同步落盘承诺。所有生产 session 夹具先用真实创建 API验证名称长度/字符集，再进入目标分支。
 - Verification: 已移除删除 handler 的即时 `SaveJSON`，生产测试在 success 后确认内存 tombstone 已存在且 export 文件仍不存在；夹具改为合法 `DeferredHero` 后定向测试退出 0。JSON 显式 save/reload、普通 unique-index 117 round-trip 与 corrupt-index 的 P12 re-export 边界仍分开验收。
+
+### 2026-08-25 — Rank materialization 必须保留 suffix、名字查找和在线计数泄漏
+
+- Symptom: 初版 auth worker 的 upward move 用 append/copy/remove，两个元素测试通过但三元素时会把未移动 suffix 置空；`FindRank` 又按 state identity 而非 Legacy 当前名字查找。初始 scope 还遗漏 password-GM 后 `OnlineRankingCount` 因 StopGame IsGM gate不递减的永久泄漏。
+- Root cause: 用常规身份安全与切片移动直觉近似 Legacy 的名字扫描、原地旋转和独立 materialized counters；最小夹具没有尾随第三项。
+- Prevention: upward move用区间右移保留 suffix；FindRank 从 stored rank 开始按当前 CharacterInfo.Name 精确比较；在线 Count 在非-GM StartGame显式递增，StopGame仅非GM递减，查询 Count 不从实时 world rows重算。
+- Verification: 三行移动测试锁定未移动 suffix/timestamp；load/start/level/delete/GM stale/duplicate/online-leak tests 与 cmd production transcripts focused 全部 exit 0。
+
+### 2026-08-25 — Ranking 查询必须保留 session identity 与按名字在线判定
+
+- Symptom: recovered server candidate 用 operator 可变的 public AccountID 查询 `MyRank`/执行 GM removal；旧 live account 被移除且 ID 重用后会命中新账户。OnlineOnly 又按 Character Index 判在线，使两个 corrupt duplicate indexes 中离线高排名行冒充在线低排名角色。Observer 的空 account sentinel 还可能碰到真实 blank account/index 0 并泄漏 `MyRank`。
+- Root cause: 把 UI/public identity 当成 auth session authority，把唯一 ID 直觉覆盖 Legacy `GetPlayer(listing.Name)`，并让“无 Player”复用可持久化的空字段值。
+- Prevention: production ranking 始终传登录时 opaque session key；observer 显式不查询 rank；OnlineOnly 对 materialized row name 使用与 world player lookup 相同的 case-insensitive name语义。不得从 corrupt index 推导在线身份。
+- Verification: `TestP3RankSessionKeyKeepsDetachedAccountIdentityAfterIDReuse`、`TestRankingOnlineFilterUsesNameWithDuplicatePlayerIDs` 与 `TestRankingObserverNeverProjectsBlankAccountRank` 分别锁定三条边界，新增定向测试均 exit 0。
+
+### 2026-08-25 — Rank[2] 最终赋值与 reload 必须以物化状态为边界
+
+- Symptom: read-only reviewer `01a034c7-b2f4-76c3-8e35-847f2798bdd8` 发现 TryAdd 的 follower pass 可让共享 stale duplicate 覆盖新行 rank，而 Go 缺少 Legacy 循环后的最终 `info.Rank[type]=NewRankIndex`；RemoveRank 又无条件恢复 stale rank，覆盖 duplicate follower 应产生的 zero-based rank。全局兼容 `RankingPosition` 还会给 age-excluded/未物化角色动态造 rank，复用 Service 的 LoadJSON 则保留旧 accounts/order。
+- Root cause: 把普通无重复行的中间状态当成最终状态，并让 pre-materialization compatibility fallback 越过已建立的 authoritative lists；JSON loader 也默认只在全新 Service 上调用。
+- Prevention: TryAdd 在 follower 更新后再次写新一基 rank；RemoveRank 不恢复字段，让共享 follower 的 SetNewRank 决定终态；materialized state 缺少 key 时直接返回 0；LoadJSON 在重建前清空 account/session/order/character authority。按 index 的 removal snapshot 仅为旧测试兼容投影，不能参与 wire 查询或 account-slot authority。
+- Verification: 新 duplicate-follower、age-excluded position 与 reused-service reload tests 锁定修复；auth focused `-count=10`、cmd focused `-count=10`、两包 focused race `-count=3`、auth 整包与 cmd 整包均 exit 0。reviewer 的 duplicate-index snapshot 项经主审裁决为非客户端 authority；现有 account-slot rank tests 与 wire 查询均不读取该 lossy compatibility map。
+- Strengthening after server reviewer `01a034c7-dd9b-73b3-bb85-c2d60d2cf957`: reviewer 单看 helper-level `TestRankTypeSixReportsProductionFatal` 后报告缺少 reason-3/reason-0 wire shutdown；同文件 companion `TestRankTypeSixProductionListenerSendsFatalThenNormalDisconnect` 已通过真实 TCP `serveListener` 精确断言两包顺序、listener error 与 count cleanup。主审按完整 evidence set 裁决无生产缺口；最终 review prompt 必须显式列出 companion evidence，不能要求每个辅助测试重复整条生产链。
