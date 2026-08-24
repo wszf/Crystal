@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 10:31 (Asia/Singapore)
+Last verified: 2026-08-24 11:42 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -16,8 +16,8 @@ Keep this file at or below 300 lines and 32 KiB.
   not need to be calculated in one up-front pass.
 - `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
   are publishable only for a scope-frozen phase.
-- Current project-wide ETA and percentage remain `Unavailable`: P1 now has a
-  finite denominator, but ten other phases still have open closure inventories.
+- Current project-wide ETA and percentage remain `Unavailable`: P1 and P2 now
+  have finite denominators, but nine other phases still have open inventories.
 
 ## Phase routing summary
 
@@ -25,7 +25,7 @@ Keep this file at or below 300 lines and 32 KiB.
 |---|---|---|---|
 | P0 | Complete | Frozen | — |
 | P1 | In progress | Frozen | `DISC-P1-CLOSURE` (Complete) |
-| P2 | In progress | Open | `DISC-P2-CLOSURE` |
+| P2 | In progress | Frozen | `DISC-P2-CLOSURE` (Complete) |
 | P3 | In progress | Open | `DISC-P3-CLOSURE` |
 | P4 | In progress | Open | `DISC-P4-CLOSURE` |
 | P5 | In progress | Open | `DISC-P5-CLOSURE` |
@@ -39,22 +39,25 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `DISC-P2-CLOSURE`
-- Status: `Active`; lifecycle is Complete and committed at Go
-  `cb595b4e40aeffa9f94e22d2deddaeb9abc7b75f`.
-- Outcome: convert every vague P2 account/login/password/storage-password,
-  static NPC-access, and restart residual into a finite child registry with
-  explicit completed evidence, dependencies, ownership, and gates.
-- Go matrix anchors to read: the row beginning `| P2 |` only; discovery may
-  locate P2-specific headings/rows by exact account/login/password/NPC/restart
-  terms, but must not read the full matrix.
-- Legacy read authority: bounded real account/login/password/storage-password,
-  account/character metadata, static NPC-access, and restart entry points found
-  from exact P2 terms; source tracing remains read-only and phase-local.
-- Go write authority: `docs/migration-matrix.md` P2 finite inventory/status only;
-  Legacy `tasks/migration-active.md` and current handoff are main-agent control.
-- Forbidden scope: implementation code, P3-P12 inventory, broad matrix/source
-  dumps, deployment packaging, P1 call-site closure, and every C# file.
+- Leaf ID: `AUTH-P2-ACCOUNT-SESSION-001`
+- Status: `Active`; `DISC-P2-CLOSURE` is Complete and P2 scope is frozen at Go
+  `5646b49382af5c04f11086d34aff6b05bd6c703d`.
+- Outcome: make TCP NewAccount/Login/ChangePassword source-equivalent for
+  validation, account index/creation/login metadata, ban/retry localization,
+  wrong-stage connection lifetime, and duplicate-account reason-1 takeover.
+- Go matrix anchors to read: the P2 row plus the single child row beginning
+  with exact leaf ID `AUTH-P2-ACCOUNT-SESSION-001`; do not read the full matrix.
+- Legacy read authority: bounded `Envir.NewAccount/Login/ChangePassword`, their
+  `MirConnection` Login-stage handlers, `AccountInfo`, and exact server-text
+  reason producers. Every C# file remains read-only.
+- Go write authority: `internal/auth/service.go` and focused tests; bounded
+  `cmd/crystal-server/main.go`; new `p2_account_session_test.go`; at most one new
+  account-session authority helper in that package; P2 matrix evidence.
+- Required gate: touched-package compile; focused authenticated success/ban/
+  retry/takeover/wrong-stage transcripts repeated and under race; JSON and 117
+  checkpoint/reload; diff/status/process and all six C# gates.
+- Forbidden scope: character lifecycle metadata, storage/NPC behavior, generic
+  P3/P7/P12 work, deployment, P1 call-site closure, and every C# write.
 
 `CFG-P1-CONTRACT-001` is Complete in the verified Go candidate. Exact-case and
 first-match INI behavior, UInt16 fallback/write-back, default production path,
@@ -113,18 +116,19 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
   protected.
 - OPS lifecycle code/evidence is committed at Go `cb595b4`; no lifecycle path
   remains protected.
-- The active discovery leaf owns only bounded P2 matrix inventory prose; no
-  implementation path is writable until a finite child is selected.
+- The active P2 account child owns only the exact files named above. P2
+  character metadata, storage gates, and source precedence remain protected.
 
 ### Remaining acceptance work
 
-- [ ] Reconcile every clause of the P2 stage row to current Legacy entry points,
-      Go production evidence, or one finite missing child.
-- [ ] Separate account service/protocol, metadata timestamps, storage password,
-      static NPC access, and restart/import dependencies without duplication.
-- [ ] Name exact child ownership/dependencies/gates and obtain independent
-      read-only review before marking P2 scope frozen.
-- [ ] Select one dependency-ready P2 child; do not implement during discovery.
+- [ ] Use Legacy's unanchored Unicode email matcher at TCP NewAccount and assign
+      unchecked account index plus creation IP/time without reopening P1 HTTP.
+- [ ] Stamp successful-login account LastIP/LastDate and preserve expired/active
+      ban, localized sixth-failure, retry, and case-insensitive identity rules.
+- [ ] Ignore wrong-stage auth packets and keep LoginBanned sessions alive;
+      evict the prior same-account session with disconnect reason 1.
+- [ ] Lock all outcomes through authenticated repeated/race transcripts and
+      JSON/117 checkpoint/reload evidence, then run the required leaf gate.
 
 ### P1 frozen child registry
 
@@ -147,6 +151,23 @@ selected now.
 | `NOTICE-P1-EDGE-001` | Complete | — | none | existing notice/session evidence |
 | `DOC-P1-EVIDENCE-001` | Complete | — | matrix P1/P12 prose | bounded documentation review |
 
+### P2 frozen child registry
+
+Independent read-only reviewer `01a031c0-18ea-71e3-ba9f-b6cf96be57d4`
+accepted this exact eight-child denominator after two rounds. Four are Complete;
+one is Active and three are Ready. This is a P2 denominator only.
+
+| Leaf ID | Status | Dependency | Go write authority | Additional gate |
+|---|---|---|---|---|
+| `AUTH-P2-CRYPTO-WIRE-001` | Complete | — | none | existing auth/protocol vectors |
+| `AUTH-P2-ACCOUNT-SESSION-001` | Active | crypto/wire | `internal/auth/service.go` + tests; bounded `cmd/crystal-server/main.go`; new `p2_account_session_test.go`; optional one account-session helper | authenticated repeated/race + JSON/117 |
+| `AUTH-P2-CHAR-METADATA-001` | Ready | account session + P3 mutation authority | bounded auth/main + new metadata lifecycle tests | login/logout projections + persistence/race |
+| `STORAGE-P2-PASSWORD-001` | Complete | — | none | existing service/protocol/valid-page sessions |
+| `STORAGE-P2-NPC-GATE-001` | Ready | `NPC-P7-ACCESS-GATE-001` | bounded storage handlers + new `p2_storage_npc_gate_test.go` | all-handler wrong-stage + NPC boundary/race |
+| `PERSIST-P2-ACCOUNT-BRIDGE-001` | Complete | — | none | existing JSON/117/global merge evidence |
+| `PERSIST-P2-CHECKPOINT-RESTART-001` | Complete | bridge | none | existing production checkpoint/restart smoke |
+| `PERSIST-P2-SOURCE-PRECEDENCE-001` | Ready | bridge | new `p2_account_precedence_test.go`; bounded startup if needed | conflicting-source startup/checkpoint/reload |
+
 ## Scope-freeze discovery queue
 
 These are registered phase-local inventory audits, not permission to implement
@@ -155,7 +176,7 @@ broad unnamed scope.
 | Leaf ID | Phase | Status | Required output |
 |---|---|---|---|
 | `DISC-P1-CLOSURE` | P1 | Complete | 10 unfinished finite children + 2 completed audit items |
-| `DISC-P2-CLOSURE` | P2 | Active | finite account/NPC-access/restart children |
+| `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 4 Complete + 4 unfinished |
 | `DISC-P3-CLOSURE` | P3 | Discovery | finite startup/admin/ranking children |
 | `DISC-P4-CLOSURE` | P4 | Discovery | finite map/bootstrap/visibility children |
 | `DISC-P5-CLOSURE` | P5 | Discovery | finite spell/combat/AI/respawn/packet children |
@@ -180,6 +201,21 @@ broad unnamed scope.
   `DISC-P12-CLOSURE`, dependent on P5/P6 catalogs): preserve
   `EnforceDBChecks`, first-missing monster/item source order, configured-name
   suffixes, and the disabled-check bypass after imported catalogs are complete.
+- `CHAR-P3-BAN-DELETE-001` (`Ready` input to `DISC-P3-CLOSURE`): preserve
+  StartGameBanned/expiry clearing, soft delete timestamp/tombstone, hidden
+  SelectInfo, and the manually supplied deleted-index quirk. P2 owns only the
+  LoginSuccess/LogOutSuccess projection over P3's retained records.
+- `ADMIN-P3-ACCOUNT-OPS-001` (`Ready` input to `DISC-P3-CLOSURE`): preserve
+  reachable operator account ban, password/storage reset, and removal effects.
+- `NPC-P7-ACCESS-GATE-001` (`Ready` input to `DISC-P7-CLOSURE`): preserve
+  normal NPC map/range/visibility and script-page/button authorization plus the
+  distinct default-NPC object gate before special pages become active.
+- `NPC-P7-SCRIPT-CLOSURE-001` (`Ready` input to `DISC-P7-CLOSURE`): enumerate
+  all remaining reachable normal/default-NPC action/condition/page/input
+  families without hiding them in P2 storage behavior.
+- `PERSIST-P12-RESTART-EQUIV-001` (`Ready` input to `DISC-P12-CLOSURE`,
+  dependent on P3-P11 authorities): preserve periodic save, atomic replacement,
+  backup, global re-export, and complete multi-store restart/recovery.
 
 ## Selection protocol
 

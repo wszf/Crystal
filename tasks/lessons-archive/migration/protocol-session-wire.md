@@ -333,3 +333,10 @@
 - Root cause: 把“不常触发的全局 ticker”“很短的真实冷却”和“最终字段等于默认值”当成稳定测试环境；同时没有区分首个 assertion timeout 与 defer/临时目录清理后的次生日志。裸 socket/done 等待还会把缺包回归拖到全局测试超时。
 - Prevention: 精确 `net.Pipe` transcript 在 bootstrap 后停止并等待 world ticker；双方都启动 reader，所有预期包和 session shutdown 都使用有界 channel。非冷却测试将 `TradeDelay` 显式设为零，而冷却语义由独立测试负责。持久化/relogin 必须以非默认正值收口，并在同一会话分别证明 enabled request、disabled rejection 和最终 re-enabled restore；失败归因以首个测试行和退出码为准，忽略 teardown 后的次生路径日志。
 - Verification: transcript 现以 private System chat + KeepAlive barrier 锁定大小写/额外参数，验证 enabled invitation、refusal、disabled trade gate、live/auth/JSON 三层状态，并以最终 AllowTrade=true logout/reload/relogin 排除默认值伪通过；source/target/relogin reader、ticker stop 与 5s shutdown barrier 消除裸等待。最小两包编译、focused 首次修正重跑、普通 `-count=10`、race `-count=3` 及全部 Trade 普通 `-count=5`/race `-count=3` 均退出 0。
+
+### 2026-08-24 — P2 scope-freeze 不能把局部 helper 门禁或未测生命周期写成 Complete
+
+- Symptom: P2 有限清单把 storage-password hash/protocol 与 wrong-stage connection lifetime 合并为 Complete，并只按 `CanAccessStorageNpc` 的 key/object/map/range 列门禁；独立 review 发现真实 `PlayerObject.CallNPC` 还要求普通 NPC 的 range、visibility 与 script page authorization。清单还把 global sections 写成双向 export，并未明确 P3 tombstone mutation 与 P2 Login/Logout SelectInfo filtering 的 ownership 分界。
+- Root cause: 从末端 helper 和 schema 字段反推完整生产入口，把“实现存在”误当成“生产 transcript 已证明”，且没有逐项拆开 parse/merge、writer、restart 与跨阶段 mutation/projection authority。
+- Prevention: phase closure 的每个 Complete 行必须映射到实际测试；未测 wrong-stage/connection lifetime 必须留在 Ready。门禁从客户端 packet 追到 page producer、visibility、对象/range 和最终 consumer；跨阶段字段明确一个 mutation owner 和一个 projection consumer。Import parse/merge、account-only writer、global re-export 与多 store recovery 分开登记，禁止用 round-trip 一词掩盖空 section writer。
+- Verification: final review `01a031c0-18ea-71e3-ba9f-b6cf96be57d4` 精确指出 storage visibility/page、StartGameBanned、delete projection、wrong-stage lifetime 和 global writer 五项；P2 candidate 已把普通 NPC authorization 路由到 `NPC-P7-ACCESS-GATE-001`，将 all-handler wrong-stage transcript 留在 Ready，明确 P3 ban/delete mutation 与 P2 Login/Logout projection，并把 global re-export/recovery留给 P12。Review 只读、未运行测试、两仓无 C# 变化。
