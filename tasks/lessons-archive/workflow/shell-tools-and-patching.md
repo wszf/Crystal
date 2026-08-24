@@ -398,3 +398,20 @@
 - Root cause: 猜测 Go tool 会接受隐藏 `.go` 文件，并且复合命令没有先启用 `set -e`，只看工具调用最终退出码。
 - Prevention: 一次性 Go helper 使用非隐藏、精确自有的 `.go` 文件；复合命令第一行固定 `set -e`，程序内断言替换计数恰为一；只用 `apply_patch` 新增/删除并在新调用回读目标与 status。
 - Verification: 失败调用不用于状态裁决；随后以 `tmp_p3_matrix_edit.go`、`set -e` 和两个单匹配断言重跑，目标 P3 行精确更新，临时文件已由 patch 删除且 Go status 只剩 matrix。
+
+### 2026-08-24 — CHAR-P3-CREATE tracing 仍须逐步构造检索 argv
+
+- Symptom: 主线程先把猜测的 `Shared/Packets` 加到已验证 Client 搜索，随后又把 `--glob` 放到 `rg --` 之后，并让预期可为空的精确测试名搜索裸退出 1；三次调用都不能作为证据。
+- Root cause: 在一个命令里同时做定位、过滤和读取，发送前没有执行已存在的路径、`rg` 四段 argv、零匹配三项机械检查。
+- Prevention: 新 leaf tracing 固定拆成三次：`rg --files` 定位；`rg [options] -e pattern -- verified-paths` 取行号；下一调用才读精确范围。任何“可能没有直接调用者”的检索在成形时就显式接收 0/1。
+- Verification: 三次失败输出全部丢弃；随后分别从 `Shared/{ClientPackets,ServerPackets}.cs`、选项前置的测试 glob、显式 0/1 分支零退出重跑，并只采用重跑结果。
+
+### 2026-08-24 — replace-in-place handoff 不可在一个 patch 中 delete-plus-add
+
+- Symptom: 重建 `tasks/migration-handoff.md` 时，同一 `apply_patch` 同时 Delete/Add 同一路径，被工具拒绝。
+- Root cause: 把文件整体替换错误表达为两个互斥 path operation，而不是一个 update/replace transaction。
+- Prevention: 同一路径在一次 patch 中只允许一种操作；重写快照用单次 replace-in-place，失败后先独立确认无写入。
+- Verification: 被拒调用未修改文件；随后单次 here-doc replace 写入、控制检查、`git diff --check` 与完整回读均退出 0。
+- Strengthening during candidate repair: 一个复合调用的首个 `service_test.go` patch 因格式化上下文不匹配失败，后续 `hero_test.go` patch 仍成功；主线程没有采用混合结果，先独立回读确认 Hero 两处实际写入，再按精确物理行单独修改 service 测试。补丁事务前必须启用 `set -e` 或拆调用，不能让失败后继续执行形成隐式部分写入。
+- Strengthening during 117 tracing: 读取 bridge 后追加猜测 `ReplaceAccounts` 位于 `service.go`，尾部 `rg` exit 1，整次输出作废；随后先在 `internal/auth` 定位真实 `accounts_import.go`，再以两个单独零退出调用重读 bridge 与 counter authority。已知符号也必须先定位，不能把猜测声明路径附在读取末尾。
+- Strengthening after IP-order test edit: 仅凭重复正文替换 `response = p2WriteAndRead(... invalid)` 命中了第一个 validation request，而不是最后一个 blocked request，focused test 因 malformed payload 提前断线/EOF。修复时以相邻 `service.AllowNewCharacter` 和 `blockedUntil` 两个唯一语义锚点分别恢复首包、修改末包；复跑 P3 focused 退出 0。重复测试语句必须带阶段语义上下文，不能只按首个文本匹配。

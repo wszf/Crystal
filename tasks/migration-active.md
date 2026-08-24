@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 14:56 (Asia/Singapore)
+Last verified: 2026-08-24 16:37 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -40,36 +40,50 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `CHAR-P3-CREATE-001`
-- Status: `Active`; `DISC-P3-CLOSURE` is Complete in the Go matrix candidate.
-- Outcome: preserve Select-stage-only NewCharacter with exact setting,
-  IP-throttle, validation/result source order, administrator disabled-name
-  bypass, class gates, non-deleted limit, tombstone name reservation, unchecked
-  character ID allocation, creation metadata, account/global insertion, and
-  complete returned SelectInfo.
+- Leaf ID: `ADMIN-P3-ACCOUNT-OPS-001`
+- Status: `Active`; `CHAR-P3-CREATE-001` is Complete in the verified Go
+  candidate.
+- Outcome: preserve reachable operator blank-account creation and metadata
+  edits, administrator and require-password-change toggles, day/week/permanent
+  plus live-player account-ban differences, administrative password and storage-
+  password resets with live notification, direct account removal, stopped-
+  server wipe quirks, and direct JSON/117 save/reload without invented cleanup
+  or disconnect behavior.
 - Go matrix anchors to read: only the P3 finite-inventory row
-  `CHAR-P3-CREATE-001`, the exact P3 stage row, and evidence headings/tests named
-  by that row. Do not read the full matrix.
-- Legacy read authority: `MirConnection.NewCharacter`, `Envir.NewCharacter`,
-  `MirConnectionLog.CharactersMade`, `CharacterInfo` construction/SelectInfo,
-  and the SelectScene consumer; every C# file remains read-only and audit
-  tooling remains Go-only.
-- Go write authority: bounded `internal/auth/service.go`,
-  `cmd/crystal-server/main.go`, their existing tests, one new focused P3
-  creation production-entry test file, and matrix evidence. Legacy writes are
-  the active index, handoff, and feature-specific lessons only.
-- Required gate: all NewCharacter result codes and exact ordering, current/
-  future IP admission, complete returned SelectInfo, JSON/117 reload, touched
-  compile, focused/repeated/race, diff/status/process, and all six C# gates.
-- Forbidden scope: implementing tombstone/delete/ban/start/logout, operator or
-  ranking children; reopening P2; inventorying P4-P12; broad matrix/source
-  dumps; and every C# write.
+  `ADMIN-P3-ACCOUNT-OPS-001`, exact P3 stage row, and evidence headings/tests
+  named by that row. Do not read the full matrix.
+- Legacy read authority: bounded `Server.MirForms.AccountInfoForm` account
+  handlers, live account actions in `PlayerInfoForm`, their auth/storage/
+  persistence consumers, and exact operator messages; every C# file remains
+  read-only and audit tooling remains Go-only.
+- Go write authority: new bounded `internal/operator/{account.go,account_test.go}`
+  if tracing confirms that boundary; bounded `internal/auth` adapters/tests and
+  `cmd/crystal-server` live-session/persistence wiring/tests; matrix evidence.
+  Legacy writes remain active index, handoff, and feature-specific lessons.
+- Required gate: every offline/live result and source order, no invented
+  disconnect/cleanup, JSON and ordinary 117 direct save/reload, production-entry
+  live notification, touched compile, focused/repeated/race, due integration
+  cadence, diff/status/process, and all six C# gates.
+- Forbidden scope: character delete/ban/start/logout, GMPassword/`@LOGIN`,
+  ranking, player combat/map/item/flag actions, broad P12 recovery/backup,
+  native C# UI migration, broad matrix/source dumps, and every C# write.
 
 `PERSIST-P2-SOURCE-PRECEDENCE-001` is Complete at Go
 `4729fed32ded396d36b05c4bdafad6e17e4fc1dd`. Exact production startup with
 conflicting JSON/117 account and global sentinels proves JSON authority,
 non-merge, graceful final checkpoint replacement, and direct 117 reload under
 repeated/race tests. Retained-gap counters and global re-export remain P12.
+
+`CHAR-P3-CREATE-001` is Complete at Go
+`a7f16f8bfb5a0ec4e885d5101dce6635bfafd6e5`. Exact Select-
+stage dispatch, every result/source-order edge, first-request/one-stale-entry IP
+quirks and future admission, strict name range/current-culture DisabledChars,
+administrator/class/count/tombstone gates, unchecked IDs, constructor-zero
+returned SelectInfo, creation metadata/insertion, JSON counter gaps, and
+ordinary retained-record 117 checkpoint/reload are locked by focused,
+repeated, race, and fresh unexcluded integration evidence. Level-1 StartGame
+initialization remains with its named Start child; higher 117 header gaps remain
+P12.
 
 `CFG-P1-CONTRACT-001` is Complete in the verified Go candidate. Exact-case and
 first-match INI behavior, UInt16 fallback/write-back, default production path,
@@ -132,18 +146,18 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
   account-session path remains protected.
 - Source-precedence test/evidence is committed at Go `4729fed`; no P2 source-
   precedence path remains protected.
-- P3 finite-inventory evidence is the only current Go documentation change.
-  `CHAR-P3-CREATE-001` owns only its bounded auth/main implementation and tests;
-  no other P3 child path is protected.
+- Character-creation code/tests/matrix are committed at Go `a7f16f8`; no
+  creation path remains protected.
+- `ADMIN-P3-ACCOUNT-OPS-001` is selected but owns no Go change yet; its exact
+  new operator files and bounded auth/main adapters are the only next write
+  authority after the creation commit.
 
 ### Remaining acceptance work
 
-- [ ] Trace exact Legacy NewCharacter validation/IP-throttle/creation order and
-      current Go authority without entering delete/start/operator scope.
-- [ ] Implement the finite creation mutation/result contract through production
-      session entry, including complete SelectInfo and JSON/117 reload.
-- [ ] Run focused/repeated/race and leaf gates, review the candidate, update
-      matrix/control, commit, and select the next dependency-ready P3 child.
+- [ ] Trace every bounded Legacy account-operator handler and current Go auth/
+      live-session/persistence authority; freeze exact result/message order.
+- [ ] Implement the Go-only operator surface and run the registered focused,
+      persistence, production-entry, repeated, race, and integration gates.
 
 ### P1 frozen child registry
 
@@ -187,8 +201,8 @@ only.
 ### P3 frozen child registry
 
 Independent reviewer `01a0327e-55a1-7f63-9fb7-0b8bdcc061af` accepted this
-exact eleven-child denominator after one revision. Four are Complete,
-`CHAR-P3-CREATE-001` is Active, and six are Ready.
+exact eleven-child denominator after one revision. Five are Complete,
+`ADMIN-P3-ACCOUNT-OPS-001` is Active, and five are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -196,11 +210,11 @@ exact eleven-child denominator after one revision. Four are Complete,
 | `CHAR-P3-START-BOOTSTRAP-001` | Complete | — | none | existing post-admission bootstrap transcripts |
 | `ADMIN-P3-RUNTIME-MODES-001` | Complete | seeded/imported authority | none | existing authenticated mode/relogin transcripts |
 | `CMD-P3-PUBLIC-UTILITY-001` | Complete | P4/P6/P8 business owners | none | existing command repeated/race transcripts |
-| `CHAR-P3-CREATE-001` | Active | P2 account session (Complete) | bounded `internal/auth/service.go`, `cmd/crystal-server/main.go`, existing tests, one new focused creation session test | all results/order + IP + JSON/117 + repeated/race |
+| `CHAR-P3-CREATE-001` | Complete | P2 account session (Complete) | bounded `internal/auth/service.go`, `cmd/crystal-server/main.go`, existing tests, one new focused creation session test | results/order + IP + JSON counter + ordinary 117 + repeated/race |
 | `CHAR-P3-BAN-DELETE-001` | Ready | P2 projection/import + P11 ranking core | bounded auth/main/import + focused mutation/restart tests | tombstone/ban/index + repeated/race |
 | `CHAR-P3-START-LOGOUT-001` | Ready | ban/delete + P2 character metadata | bounded auth/main lifecycle tests | transitions/persistence/race |
 | `ADMIN-P3-AUTHORITY-001` | Ready | P1 config/localization/logging + P11 ranking | bounded config/auth/logging/game-session | grant/revoke/@LOGIN/relogin/race |
-| `ADMIN-P3-ACCOUNT-OPS-001` | Ready | P2 account/storage | new bounded Go operator control + auth tests | live/offline JSON/117/race |
+| `ADMIN-P3-ACCOUNT-OPS-001` | Active | P2 account/storage (Complete) | new bounded Go operator control + auth/main tests | live/offline JSON/117/race |
 | `RANK-P3-CHAR-LIFECYCLE-001` | Ready | P11 core + ban/delete + admin authority | bounded auth/ranking/main | deleted/age/admin/lifecycle transcripts |
 | `CLIENT-P3-SELECT-PROBE-001` | Ready | all P3 character leaves + P2 metadata | bounded `internal/probe` + session tests | full transition transcript |
 
@@ -237,6 +251,11 @@ broad unnamed scope.
   `DISC-P12-CLOSURE`, dependent on P5/P6 catalogs): preserve
   `EnforceDBChecks`, first-missing monster/item source order, configured-name
   suffixes, and the disabled-check bypass after imported catalogs are complete.
+- `PERSIST-P12-CHARACTER-ID-001` (`Ready` input to `DISC-P12-CLOSURE`):
+  preserve a version-117 `NextCharacterID` header above every retained
+  character through import, checkpoint/re-export, restart, and the next create.
+  P3 owns allocation after an authoritative counter is installed; retained-gap
+  importer/writer authority remains P12.
 - `NPC-P7-ACCESS-GATE-001` (`Ready` input to `DISC-P7-CLOSURE`): preserve
   normal NPC map/range/visibility and script-page/button authorization plus the
   distinct default-NPC object gate before special pages become active.

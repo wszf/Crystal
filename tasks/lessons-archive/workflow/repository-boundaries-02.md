@@ -585,3 +585,17 @@
 - Root cause: 恢复模板没有在发送前机械拒绝跨仓参数。
 - Prevention: 每次调用只允许当前 `workdir` 所属仓库；命令文本出现 `git -C` 或对侧根时拒绝发送。
 - Verification: 整次输出已作废；双仓 HEAD/status/三类 C# 门禁随后以独立 `workdir` 零退出重跑。
+
+### 2026-08-24 — CHAR-P3-CREATE writer 候选必须按 forbidden behavior 复审
+
+- Symptom: bounded writer 虽只修改获授权文件，却把明确禁止的 DeleteCharacter 物理删除改成 tombstone，并让旧 CreateCharacter wrapper 保留 Go 自创的 Hero-name 冲突；missing DisabledChars loader 也没有按 Legacy 创建空文件，生产时间断言仍非确定性。
+- Root cause: 只把文件集合当成 ownership 边界，没有在 worker 自报通过后立刻按 forbidden behavior、Legacy authority 和测试判据逐 hunk 复审。
+- Prevention: writer 返回后、运行主线程行为门禁前，固定审查三张清单：允许文件、允许行为、显式 forbidden；wrapper/helper 也必须服从 Legacy 生产语义，不能以“历史 Go 兼容”为由保留错误；fixture 的时间/文件副作用必须确定性验证。
+- Verification: 主线程在首次 diff review 即恢复 DeleteCharacter 原实现，统一两个 CreateCharacter 入口为仅检查角色名，补 missing-file 创建与 gate 时钟注入；随后 touched compile 和 focused 首跑退出 0，删除/tombstone leaf 未被实现。
+
+### 2026-08-24 — CHAR-P3-CREATE recovery 首调用仍不得跨仓
+
+- Symptom: 新 Session 首个诊断在 Legacy `workdir` 使用 `git -C` 核验 Go 根，违反单仓路径闭包。
+- Root cause: 把“两仓启动核验”误写成一个复合命令，没有在发送前机械拒绝 `git -C`。
+- Prevention: 启动恢复命令先只写当前仓清单并结束调用；收到零退出结果后才能构造下一仓命令，命令文本内禁止出现对侧根或 `git -C`。
+- Verification: 整次混仓输出已作废；Legacy 与 Go 的 HEAD/status/三类 C# 门禁随后分别在各自 `workdir` 零退出重跑，准确 handoff 写入并通过控制检查。
