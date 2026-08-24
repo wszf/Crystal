@@ -437,3 +437,11 @@
 - Root cause: 旧测试依赖 Go 的“任意无效位置落到传入地图”近似，并把 Legacy `PlayerLogged(false)` 早于 ObjectRemove 的通知漏出 transcript；新增精确生命周期后这些隐藏前提成为真实回归。
 - Prevention: 多人 logout 必须消费 `GuildMemberChange -> ObjectRemove`；自定义 map fixture 必须显式 seed living HP 与该 map 的 authoritative runtime/bind，不得依赖测试 helper 默认 map 或旧 fallback。
 - Verification: 三个 guild transcript 和 utility 四角色 fixture 已按真实 authority 修正，四个失败测试定向 `-count=10` exit 0；原 fresh full 命令 exit 1，必须在修复后重新跑 fresh unexcluded full gate，不能覆盖失败记录。
+
+### 2026-08-25 — Protocol probe 必须以 production transcript 反证自建假服务器
+
+- Symptom: 首个真实 server probe 因无 StartPoint 让 Level 0 排名断言失败，cleanup 又对共享 done channel 重复 close；修正夹具后继续发现 probe 假服务器回显裸 `probe`，真实/Legacy normal ObjectChat 是 `Name: probe`。
+- Root cause: 只让 probe 与自己构造的 server transcript 相互证明，并用 `close` 表达多 goroutine 完成；既漏掉 PlayerObject 首登前置，也把假响应当成 wire authority。
+- Prevention: Go-only probe 必须配套真实 production session；首登夹具 seed loaded StartPoint，多完成者用 buffered send/WaitGroup；每个 fake response 回到 Legacy producer和真实 Go entry 裁决。
+- Verification: production fixture 现加载 StartPoint、每个 server goroutine独立发送 done；probe/fake server 同步期待 `ProbeSelect: probe`。fake transcript `-count=10` 与真实 production probe 均 exit 0；两次原失败明确保留，后续完整 leaf gate 仍需重跑。
+- Strengthening after Select-state review: reviewer 发现新状态机只被直接单测调用、fake LoginSuccess 为空且 production 结束未证明 Disconnect；根因是把“从构造出的 Packet 调 handler”误当完整网络 transcript。失败分支现通过同一 `expectStateID` 在单连接双向 request/response 顺序中覆盖 result 0..4、Banned、LogOutFailed/Success、完整非零 SelectInfo、列表效果和最终 Disconnect；production 连接也记录并解析 client→server 帧，断言两次会话均以 ClientDisconnect 结束。修正后 touched compile、focused probe 与 production-entry 均 exit 0；repeated/race/full gate 仍必须按新 candidate 重跑。

@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 03:43 (Asia/Singapore)
+Last verified: 2026-08-25 06:54 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -27,7 +27,7 @@ Keep this file at or below 300 lines and 32 KiB.
 | P0 | Complete | Frozen | — |
 | P1 | In progress | Frozen | `DISC-P1-CLOSURE` (Complete) |
 | P2 | In progress | Frozen | `DISC-P2-CLOSURE` (Complete) |
-| P3 | In progress | Frozen | `DISC-P3-CLOSURE` (Complete) |
+| P3 | Complete | Frozen | `DISC-P3-CLOSURE` (Complete) |
 | P4 | In progress | Open | `DISC-P4-CLOSURE` |
 | P5 | In progress | Open | `DISC-P5-CLOSURE` |
 | P6 | In progress | Open | `DISC-P6-CLOSURE` |
@@ -40,28 +40,25 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `CLIENT-P3-SELECT-PROBE-001`
-- Status: `Active`; `CHAR-P3-START-LOGOUT-001` is Complete at committed Go
-  `2cb8a85baa04b50b6a604676c09cf11c2aba0261`.
-- Outcome: provide a Go-only test-client/probe transcript for LoginSuccess into
-  Select, complete metadata consumption, New/Delete local-list effects,
-  StartGame success/failure transition, LogOut success/failure return, and full
-  connection-lifetime ordering.
-- Go matrix anchors to read: only the P3 finite-inventory row
-  `CLIENT-P3-SELECT-PROBE-001`, exact P3 stage row, and evidence headings/tests
-  named by that row. Do not read the full matrix.
-- Legacy source authority is traced and closed: exact LoginScene animation,
-  SelectScene sort/prepend/remove/result transitions, GameScene logout consumers
-  and packet serializers; every C# file remains read-only.
-- Exact Go write authority: `internal/probe/{network.go,network_test.go}`; new
-  `internal/probe/{select_state.go,select_state_test.go}` and new
-  `cmd/crystal-server/p3_select_probe_session_test.go` only.
-- Required gate: deterministic complete transition transcript, vector/probe
-  output, repeated/focused race, cadence-aware integration, diff/status/process,
-  and all six C# gates.
-- Forbidden scope: native UI boot/settings/patcher, P1 version handshake, P2
-  account-auth UI, no-op Credits, dead StartGameDelay/RelogDelay, broad dumps,
-  all completed P3 domain mutation and every C# write.
+- Leaf ID: `DISC-P4-CLOSURE`
+- Status: `Active`; P3 is scope-frozen and Complete with all eleven children
+  Complete after `CLIENT-P3-SELECT-PROBE-001` passed its phase-closure gates.
+- Outcome: convert P4's finite map/bootstrap/movement/visibility residual into
+  an exact child registry with dependencies, ownership and acceptance gates;
+  do not implement a functional child in this discovery leaf.
+- Go matrix anchors to read: exact `| P4 |` stage row, the named P4 map-loading,
+  map-info, enter-map, movement and visibility evidence headings/tests, and the
+  registered `BOOT-P4-STARTPOINT-001` finding only. Do not read the full matrix.
+- Legacy read authority: bounded P4 map loader/bootstrap, map-entry/location,
+  Turn/Walk/Run, visibility/object producers and matching packet serializers;
+  every C# file remains read-only.
+- Exact Go write authority during discovery: `docs/migration-matrix.md` finite
+  P4 inventory only; Legacy active index/handoff remain main-agent control.
+- Required gate: finite source/Go evidence ledger, dependency/phase-boundary
+  rulings, independent read-only denominator review, matrix/index consistency,
+  diff/status/process and all six C# gates.
+- Forbidden scope: P5 combat/spells/AI, P6 items, P7 NPC script semantics, P8
+  pets/mounts, implementation code, broad matrix/source dumps and every C# write.
 
 `CHAR-P3-BAN-DELETE-001` is Complete at Go
 `c0f70e833b15599d8acb9ad3ebf423cb731fc6a9`. Exact wrong-stage lifetime,
@@ -164,13 +161,15 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
   metadata path remains protected and protocol/117 needed no serializer write.
 - Start/Logout code/tests/matrix are committed at Go `2cb8a85`; no transition
   path remains protected.
+- Select-probe code/tests/matrix are committed at Go `76d7f48`; no Select-probe
+  path remains protected.
 
 ### Remaining acceptance work
 
-- [ ] Trace exact Legacy select-scene consumers and current Go probe/session
-      coverage; refine finite missing transitions and exact write authority.
-- [ ] Implement the bounded Go-only transcript and run probe/vector,
-      production-entry, repeated, race and cadence-aware integration gates.
+- [ ] Enumerate finite P4 children from only the registered P4 anchors and exact
+      Legacy/Go evidence, including the StartPoint startup child.
+- [ ] Obtain independent denominator review, scope-freeze P4, and route one
+      dependency-ready functional child without implementing it in discovery.
 
 ### P1 frozen child registry
 
@@ -215,7 +214,7 @@ denominator only.
 
 Independent reviewer `01a0327e-55a1-7f63-9fb7-0b8bdcc061af` accepted this
 exact eleven-child denominator after one revision. Ten are Complete and
-`CLIENT-P3-SELECT-PROBE-001` is Active.
+All eleven children are Complete; P3 is scope-frozen and Complete.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -229,7 +228,7 @@ exact eleven-child denominator after one revision. Ten are Complete and
 | `ADMIN-P3-AUTHORITY-001` | Complete | P1 config/localization/logging + P11 ranking | committed config/auth/logging/game-session | grant/revoke/@LOGIN/relogin/race |
 | `ADMIN-P3-ACCOUNT-OPS-001` | Complete | P2 account/storage (Complete) | committed Go operator control + auth/main tests | live/offline JSON/117/race |
 | `RANK-P3-CHAR-LIFECYCLE-001` | Complete | P11 core + ban/delete + admin authority | committed auth/ranking/main | deleted/age/admin/lifecycle transcripts |
-| `CLIENT-P3-SELECT-PROBE-001` | Active | all P3 character leaves + P2 metadata (Complete) | bounded `internal/probe` + session tests | full transition transcript |
+| `CLIENT-P3-SELECT-PROBE-001` | Complete | all P3 character leaves + P2 metadata (Complete) | committed/accepted bounded `internal/probe` + session tests | full transition transcript + phase closure gates |
 
 ## Scope-freeze discovery queue
 
@@ -240,8 +239,8 @@ broad unnamed scope.
 |---|---|---|---|
 | `DISC-P1-CLOSURE` | P1 | Complete | 10 unfinished finite children + 2 completed audit items |
 | `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 5 Complete + 3 unfinished |
-| `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: 4 Complete + 7 unfinished |
-| `DISC-P4-CLOSURE` | P4 | Discovery | finite map/bootstrap/visibility children |
+| `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: all Complete |
+| `DISC-P4-CLOSURE` | P4 | Active | finite map/bootstrap/visibility children |
 | `DISC-P5-CLOSURE` | P5 | Discovery | finite spell/combat/AI/respawn/packet children |
 | `DISC-P6-CLOSURE` | P6 | Discovery | finite item/equipment/craft children |
 | `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |

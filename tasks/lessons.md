@@ -292,4 +292,4 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
-- Strengthening through admin-authority recovery: handoff 重建已三次把必需 heading 改成语义近似标题并被检查器拦截；重写前必须从脚本逐字复制全部 heading/field schema，禁止自拟名称。
+- Strengthening through admin-authority and Select-probe recovery: handoff 重建已四次把必需 heading 改成语义近似标题并被检查器拦截；重写前必须从脚本逐字复制全部 heading/field schema，禁止自拟名称；本次恢复精确标题并重跑检查为 0。
