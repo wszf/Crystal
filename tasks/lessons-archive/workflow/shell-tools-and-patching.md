@@ -505,3 +505,10 @@
 - Verification: 所有失败/未验证调用均已按显式 rc、`rg --glob` 或精确路径零退出重跑；ownership prose 压缩到 299 行，`tasks/check-migration-control.sh` 与 `git diff --check` 均恢复 exit 0 后才开放 Go 写入。
 - Strengthening during review fixes: 将 account-session disconnect callback 改成返回完成状态时，首次补丁漏写 closure 的 `bool` 返回类型，并遗漏两个既有 operator-test closure，只编译门禁如实 exit 1。该结果仅作 finding，不作行为证据；主线程先把真实调用点 `operator_accounts_test.go` 扩入 exact ownership，再修正三个 closure，随后 touched-package compile、focused repeated 与 race 全部 exit 0。
 - Strengthening during metadata closure: callback API 再增加 rollback 返回值时又遗漏两个 operator-test assignment，compile 再次如实 exit 1；P2 active prose 的局部 replacement 还留下相邻 “Six are Complete / seven are Complete”，控制脚本因结构合法未捕获，最终逐段回读才发现。Matrix 三项 `perl -e` 首次又因脚本间缺分号在编译期 exit 255、确认零写入后才重跑。API arity 变化必须先列全部真实调用点；计数 prose 修改后既跑 checker 又回读完整句；多段 Perl 每段显式以分号闭合并做唯一计数。
+
+### 2026-08-25 — Metadata compact recovery 必须拒绝混仓状态模板
+
+- Symptom: compact 后首个恢复调用在 Legacy `workdir` 使用 `git -C` 核验 Go，且输出被截断；新增事故行又使 active lessons 达到 51421 bytes，控制检查 exit 1。
+- Root cause: 复用了混仓状态模板，并把 leaf-specific 恢复事故继续追加到已接近 50 KiB 上限的 active canonical。
+- Prevention: 恢复命令发送前机械拒绝 `git -C`/对侧根，双仓状态物理拆调用；事故证据进入 workflow archive，active 只保留既有 C01/C28 规则。
+- Verification: 混仓与非零控制调用全部作废；两仓状态/C# 门禁已分别零退出重跑，本节归档后 active 恢复限额内并重新执行控制检查。

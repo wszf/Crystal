@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 02:07 (Asia/Singapore)
+Last verified: 2026-08-25 03:43 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -41,8 +41,9 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `CHAR-P3-START-LOGOUT-001`
-- Status: `Active`; `AUTH-P2-CHAR-METADATA-001` is Complete in the verified Go
-  candidate awaiting its owned commit.
+- Status: `Active`; `AUTH-P2-CHAR-METADATA-001` is Complete at committed Go
+  `f0a1ff862f92a65358cecb283404e0452c042bc6` and Legacy control
+  `26974a7f68b9e2dfad1cec566c16eaa0b7d3d1a0`.
 - Outcome: preserve exact StartGame stage/settings/account/index/ban admission,
   deleted-record quirk, map/bind fallback and result/resolution; preserve Game/
   Observer-only LogOut, combat-lock failure, PlayerObject stop/date/ranking
