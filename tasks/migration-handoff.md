@@ -1,10 +1,10 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 08:00 (Asia/Singapore)
+Last updated: 2026-08-25 08:03 (Asia/Singapore)
 
-This replace-in-place snapshot records the accepted and Go-committed closure of
-`DISC-P4-CLOSURE`, the synchronized P4 finite registry, and routing to
-`MAP-P4-LOAD-001` pending the Legacy documentation commit below.
+This replace-in-place snapshot records the committed closure of
+`DISC-P4-CLOSURE`, the synchronized P4 finite registry, and routing to the sole
+Active functional leaf `MAP-P4-LOAD-001`.
 
 ## Goal and control-plane state
 
@@ -15,21 +15,22 @@ This replace-in-place snapshot records the accepted and Go-committed closure of
   crystal-server process remains active.
 - P4 now has an accepted exact ten-child denominator: two Complete and eight
   unfinished. `DISC-P4-CLOSURE` is Complete, P4 is scope-frozen In progress,
-  and `MAP-P4-LOAD-001` is the sole Active leaf in both candidate control files.
+  and `MAP-P4-LOAD-001` is the sole Active leaf in both authoritative controls.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; HEAD:
-  `bed83c6ec7055bbb644a18c5dbce59acab0fc116`
-  (`docs(migration): close select probe and p3`).
-- Tracked unstaged: `tasks/lessons.md`, `tasks/migration-active.md`, and this
-  handoff. Staged and untracked sets are empty.
+- Branch: `master`; observed HEAD:
+  `25d9fa26555280cce5ce096f4981cca5e03f1cc8`
+  (`docs(migration): freeze p4 inventory`). The eventual handoff-only commit is
+  the one expected documentation delta from this observed HEAD.
+- Before this snapshot refresh the worktree, index and untracked set were empty;
+  this handoff is now the sole tracked unstaged file.
 - `tasks/lessons.md` contains two bounded strengthening substitutions for the
   recurring P4 cross-repository/`rg` command mistakes. The active index records
   P4 Frozen, the ten-child registry and exact `MAP-P4-LOAD-001` authority.
-- Control limits/headings, diff checks, lock and all three Legacy C# gates must
-  remain clean before the Legacy documentation commit.
+- Control limits/headings, diff checks, lock and all three Legacy C# gates were
+  clean at the registry commit and must remain clean for the handoff-only commit.
 
 ## Go repository state
 
@@ -82,9 +83,8 @@ This replace-in-place snapshot records the accepted and Go-committed closure of
 
 ## Exact recovery sequence
 
-1. In Legacy, rerun control/diff/status/lock and all three C# gates; commit only
-   `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff.
-2. Verify both repositories clean, matrix/index/handoff agree, and no agent or
-   process remains active.
-3. Begin `MAP-P4-LOAD-001` under its exact four-file authority; derive focused
+1. Verify both repositories clean, matrix/index/handoff agree, and no agent or
+   process remains active; the actual Legacy HEAD may be one handoff-only commit
+   after the observed value above.
+2. Begin `MAP-P4-LOAD-001` under its exact four-file authority; derive focused
    missing/read/corrupt/source-order/diagnostic tests before production edits.
