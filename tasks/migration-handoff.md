@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-24 10:33 (Asia/Singapore)
+Last updated: 2026-08-24 10:35 (Asia/Singapore)
 
 This replace-in-place snapshot closes committed `OPS-P1-LIFECYCLE-001`, routes
 `DISC-P2-CLOSURE` Active, and keeps the persistent full migration Goal active.
@@ -22,15 +22,15 @@ No phase or Goal closure is claimed.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master...origin/master [ahead 434]`; observed HEAD:
-  `7402fa7759a23c255fecdc2a068b3f8d276c7462`.
-- Tracked modifications are exactly
-  `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`,
-  `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff. The index
-  and untracked set are empty.
-- The lesson deltas preserve lifecycle fixture/review failures and strengthen
-  recurring path/argv/output prevention. The Active Index closes OPS and
-  selects the P2 discovery leaf.
+- Branch before this snapshot commit: `master...origin/master [ahead 435]`;
+  HEAD before this snapshot commit:
+  `6f5b3806c6c64d5c0cc7ff124ded453dd73aa513`
+  (`docs(migration): close lifecycle and route P2 discovery`).
+- The worktree, index, and untracked set were empty before this handoff-only
+  refresh; its one expected documentation commit delta is the current snapshot.
+- The committed lesson evidence preserves lifecycle fixture/review failures and
+  recurring path/argv/output prevention. The committed Active Index closes OPS
+  and selects the P2 discovery leaf.
 - `AGENTS.md` and tracked `agents.md` remain one hard-linked inode.
 - `tasks/check-migration-control.sh` and `git diff --check` pass.
 - Tracked, staged, and untracked C# gates are empty. No C# file is owned.
@@ -110,8 +110,9 @@ the leaf safe to close. It changed no files and was closed.
 
 ## Exact recovery sequence
 
-1. Verify each repository separately; Go must remain clean at `cb595b4e40ae` and
-   Legacy must contain only the four owned control/lesson modifications above.
+1. Verify each repository separately; Go must remain clean at `cb595b4e40ae`.
+   Legacy must be clean at exactly one handoff-only documentation commit after
+   recorded pre-snapshot HEAD `6f5b3806c6c6`.
 2. Read only the P2 stage row, then search the archive for P2 plus exact account,
    login, password, storage, NPC-access, and restart terms.
 3. Trace phase-local Legacy and Go entry points, reconcile each P2-row clause,
