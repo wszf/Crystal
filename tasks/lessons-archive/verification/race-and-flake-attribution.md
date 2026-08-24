@@ -78,6 +78,8 @@
 - Verification after AI=88 recurrence: `go test -race ./cmd/crystal-server -run ManectricKing -count=1 -timeout=5m` 通过；普通 `go test ./... -count=1 -timeout=5m`、`go vet ./...` 与 `go build ./...` 通过；全包 race 保持既知失败，不宣称通过，继续按共享 session fixture 隔离项排期。
 - Strengthening after AI=51 recurrence: 本次全包 race 再次复现 `TestGuildBuffSessionNewbieLoginReplacesStalePersistedBuff` 的 `player_spell_buffs.go:742` 写入与 `intelligent_creature_items.go:549` 读取竞争，并新增既有 `TestSessionKirinIceThrustTranscript` 对 `monsterAIRollLocked`/测试随机回调的未同步读写；失败栈均未进入 HedgeKekTal 实现或其 session transcript。
 - Verification after AI=51 recurrence: `go test -race ./cmd/crystal-server -run 'HedgeKekTal' -count=1 -timeout=300s` 通过；全包 race 继续按既有共享 session fixture 失败处理，不宣称通过。
+- Strengthening after `CHAR-P3-BAN-DELETE-001`: 首次 fresh full race 再次命中同一 Kirin `monsterAIRollLocked`/测试回调竞争，栈未进入本 leaf 的 auth/protocol/import/main 分支；单测 race `-count=3` 随后通过。
+- Verification after ban/delete recurrence: 首次失败 run 未记为 full pass；第二次 fresh unexcluded `go test -race ./... -count=1 -timeout=30m` 全部通过，focused ban/delete race `-count=3`、普通全仓、vet 和 build 也均通过。
 
 ### 2026-08-19 — AI=89 收尾仍需记录全包 race 的新增既有 fixture 栈
 

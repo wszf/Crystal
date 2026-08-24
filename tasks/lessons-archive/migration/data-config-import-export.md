@@ -157,3 +157,10 @@
 - Root cause: 删除 HTTP fixture 时未同步 import；新建账户没有角色，命中了 Legacy 对首账户之后无留存角色账户的加载过滤；多连接生产 transcript 没有隔离进程级 IP block。
 - Prevention: wrapper 收紧后立即跑 touched compile；需要通过 117 loader 验收的新账户必须创建一个可留存角色或避免按原始写入数断言；非 gate 测试显式将 `IPBlockDuration` 设为零并保留真实 `MaxIP` 语义。为单独证明 graceful checkpoint，先等待 SaveJSON hook 完成，再把冲突 binary 写回，最后取消生产 context。
 - Verification: 移除残留 import、给 TCP 新账户创建 `TCPHero`、将测试 IP block 设为零后，精确定向测试曾通过；独立 review 随后指出该夹具会不必要地触及 P3 character-metadata 边界，最终改为在同一 login-stage 连接用已完成的 ChangePassword 路径触发 SaveJSON，并直接重载两个原有 JSON 账户。关服前恢复的冲突 binary 仍只能由最终 checkpoint 替换，direct 117 reload 保留 JSON-backed 账户、密码变化与登录 metadata，并清除冲突 binary global sentinel。
+
+### 2026-08-24 — 117 角色夹具头部必须从真实 writer 字段序列推导
+
+- Symptom: `CHAR-P3-BAN-DELETE-001` 首个 retained-tombstone 定向测试因手写 version-117 头部偏移错误而在目标角色字段前解析失败。
+- Root cause: 夹具按注释猜测相邻 header 字段，没有逐项对照现有 Go writer/parser 的实际宽度与顺序。
+- Prevention: 二进制夹具先复用现有 fixture writer，并从生产 parser/writer 逐字段列出 header、count 和 record 边界；新增语义断言前先跑单个 parse smoke。
+- Verification: 修正头部字段序列后，recent tombstone、严格归档边界和第五 retained record 测试的普通、`-count=10`、race `-count=3`、完整 package 与 vet 均退出 0。

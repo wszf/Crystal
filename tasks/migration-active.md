@@ -40,37 +40,43 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `CHAR-P3-BAN-DELETE-001`
-- Status: `Active`; `ADMIN-P3-AUTHORITY-001` is Complete at Go
-  `02a63cefdcc551dcc08eb5a4cec71249339091d1`.
-- Outcome: preserve Select-stage DeleteCharacter failure/success, soft
-  `Deleted`/`DeleteDate` tombstones retained in account/global storage, hidden
-  SelectInfo, rank removal, repeated deletion and deleted-index StartGame
-  quirks, persisted character ban/strict expiry clearing/StartGameBanned, and
-  first-match client-supplied index behavior for duplicate/corrupt retained IDs.
+- Leaf ID: `RANK-P3-CHAR-LIFECYCLE-001`
+- Status: `Active`; `CHAR-P3-BAN-DELETE-001` is Complete at Go
+  `c0f70e833b15599d8acb9ad3ebf423cb731fc6a9`.
+- Outcome: preserve ranking seed eligibility, non-admin/non-deleted/13-day
+  filtering, StartGame and level-up updates, deletion and GM-login removal
+  quirks, class-list stale-entry/zero-based re-rank defects, RankType 6 and
+  offset no-response boundaries, and reachable old-timestamp detail resend.
 - Go matrix anchors to read: only the P3 finite-inventory row
-  `CHAR-P3-BAN-DELETE-001`, exact P3 stage row, and evidence headings/tests
+  `RANK-P3-CHAR-LIFECYCLE-001`, exact P3 stage row, and evidence headings/tests
   named by that row. Do not read the full matrix.
-- Legacy read authority: bounded `AccountInfo.GetSelectInfo`, CharacterInfo
-  delete/ban fields and serialization, `MirConnection` DeleteCharacter/
-  StartGame handlers, and exact Envir delete/rank/import consumers. Every C#
-  file stays read-only and audit tooling stays Go-only.
+- Legacy read authority, closed until tracing: exact rank seed/load/update/
+  remove/query consumers in `AccountInfo`, `Envir`, `PlayerObject`, and
+  `MirConnection`, plus exact ranking packet serializers. Every C# file stays
+  read-only and audit tooling stays Go-only.
 - Tentative Go write authority, closed until tracing: bounded
-  `internal/auth/{service.go,ranking.go}` and existing focused tests; exact
-  imported-character adapters in `internal/legacyaccountbridge` or
-  `internal/legacyworld` only if the trace proves they own ban/delete fields;
-  bounded `cmd/crystal-server/main.go` plus one new focused ban/delete session
+  `internal/auth/{ranking.go,service.go}` and focused tests; bounded
+  `cmd/crystal-server/{ranking.go,main.go}` plus one focused lifecycle session
   test; and `docs/migration-matrix.md`. Refine exact existing/new paths before
   any Go code write.
-- Required gate: exact stage/result/source order, soft tombstone/global-name/
-  ranking effects, duplicate/repeated/index edges, strict ban-expiry boundary,
-  JSON and ordinary 117 round trips, production relogin/restart, touched
-  compile, focused/repeated/race, cadence-aware integration, diff/status/process,
+- Required gate: load/admin/deleted/age seed matrix; StartGame/level-up/delete/
+  GM-login transitions; exact overall/class stale rows and `MyRank`; zero-based
+  re-rank defects, RankType 6/offset silence, timestamp/detail resend, production
+  transcripts, repeated/race, cadence-aware integration, diff/status/process,
   and all six C# gates.
-- Forbidden scope: completed account/admin authority, character creation,
-  StartGame location/bootstrap and full logout lifecycle, P2 metadata closure,
-  ranking-core redesign, broad P12 malformed-header/counter recovery, native C#
-  UI, broad matrix/source dumps, and every C# write.
+- Forbidden scope: completed ban/delete/auth/admin mutation, StartGame map/
+  bootstrap/logout lifecycle, P2 metadata, P11 ranking-core redesign, native
+  client UI/no-producer navigation, broad matrix/source dumps, and every C#
+  write.
+
+`CHAR-P3-BAN-DELETE-001` is Complete at Go
+`c0f70e833b15599d8acb9ad3ebf423cb731fc6a9`. Exact wrong-stage lifetime,
+delete result/source order, retained/repeated/duplicate/signed tombstones,
+selection projection, strict persisted ban admission, ordinal-15 packet, JSON/
+ordinary-117 restart, importer retention/archive behavior, current ranking
+snapshot removal, focused/repeated/race, fresh full/full-race/vet/build, and
+independent `no findings` review are locked. Materialized class lifecycle stays
+with the active ranking child; corrupt-index 117 re-export stays P12.
 
 `PERSIST-P2-SOURCE-PRECEDENCE-001` is Complete at Go
 `4729fed32ded396d36b05c4bdafad6e17e4fc1dd`. Exact production startup with
@@ -156,15 +162,17 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
   ops path remains protected.
 - Admin-authority code/tests/matrix are committed at Go `02a63ce`; no admin-
   authority path remains protected.
-- `CHAR-P3-BAN-DELETE-001` has only tentative bounded ownership above; exact
-  writes remain closed until its source trace ends.
+- Ban/delete code/tests/matrix are committed at Go `c0f70e8`; no ban/delete
+  path remains protected.
+- `RANK-P3-CHAR-LIFECYCLE-001` has only tentative bounded ownership above;
+  exact writes remain closed until its source trace ends.
 
 ### Remaining acceptance work
 
-- [ ] Trace Legacy delete/ban/index/rank/import consumers and refine exact Go
-      files without reopening P2 metadata or broad P12 recovery.
-- [ ] Implement the bounded mutation surface and run production-entry,
-      persistence, repeated, race, and cadence-aware integration gates.
+- [ ] Trace Legacy rank seed/update/remove/query consumers and refine exact Go
+      files without reopening P11 core or completed ban/admin mutation.
+- [ ] Implement the bounded lifecycle surface and run production-entry,
+      repeated, race, and cadence-aware integration gates.
 
 ### P1 frozen child registry
 
@@ -208,8 +216,8 @@ only.
 ### P3 frozen child registry
 
 Independent reviewer `01a0327e-55a1-7f63-9fb7-0b8bdcc061af` accepted this
-exact eleven-child denominator after one revision. Seven are Complete,
-`CHAR-P3-BAN-DELETE-001` is Active, and three are Ready.
+exact eleven-child denominator after one revision. Eight are Complete,
+`RANK-P3-CHAR-LIFECYCLE-001` is Active, and two are dependency-blocked Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -218,11 +226,11 @@ exact eleven-child denominator after one revision. Seven are Complete,
 | `ADMIN-P3-RUNTIME-MODES-001` | Complete | seeded/imported authority | none | existing authenticated mode/relogin transcripts |
 | `CMD-P3-PUBLIC-UTILITY-001` | Complete | P4/P6/P8 business owners | none | existing command repeated/race transcripts |
 | `CHAR-P3-CREATE-001` | Complete | P2 account session (Complete) | bounded `internal/auth/service.go`, `cmd/crystal-server/main.go`, existing tests, one new focused creation session test | results/order + IP + JSON counter + ordinary 117 + repeated/race |
-| `CHAR-P3-BAN-DELETE-001` | Active | P2 projection/import + P11 ranking core | bounded auth/main/import + focused mutation/restart tests | tombstone/ban/index + repeated/race |
+| `CHAR-P3-BAN-DELETE-001` | Complete | P2 projection/import + P11 ranking core | committed auth/main/import/protocol + focused mutation/restart tests | tombstone/ban/index + repeated/race |
 | `CHAR-P3-START-LOGOUT-001` | Ready | ban/delete + P2 character metadata | bounded auth/main lifecycle tests | transitions/persistence/race |
 | `ADMIN-P3-AUTHORITY-001` | Complete | P1 config/localization/logging + P11 ranking | committed config/auth/logging/game-session | grant/revoke/@LOGIN/relogin/race |
 | `ADMIN-P3-ACCOUNT-OPS-001` | Complete | P2 account/storage (Complete) | committed Go operator control + auth/main tests | live/offline JSON/117/race |
-| `RANK-P3-CHAR-LIFECYCLE-001` | Ready | P11 core + ban/delete + admin authority | bounded auth/ranking/main | deleted/age/admin/lifecycle transcripts |
+| `RANK-P3-CHAR-LIFECYCLE-001` | Active | P11 core + ban/delete + admin authority | bounded auth/ranking/main | deleted/age/admin/lifecycle transcripts |
 | `CLIENT-P3-SELECT-PROBE-001` | Ready | all P3 character leaves + P2 metadata | bounded `internal/probe` + session tests | full transition transcript |
 
 ## Scope-freeze discovery queue
@@ -263,6 +271,11 @@ broad unnamed scope.
   character through import, checkpoint/re-export, restart, and the next create.
   P3 owns allocation after an authoritative counter is installed; retained-gap
   importer/writer authority remains P12.
+- `PERSIST-P12-CORRUPT-CHAR-INDEX-001` (`Ready` input to
+  `DISC-P12-CLOSURE`): preserve duplicate and nonpositive retained
+  `CharacterInfo.Index` values through version-117 checkpoint/re-export and
+  restart. P3 owns current-process first-match client lookup/mutation outcomes;
+  P12 owns writer normalization/rejection and recovery continuity.
 - `NPC-P7-ACCESS-GATE-001` (`Ready` input to `DISC-P7-CLOSURE`): preserve
   normal NPC map/range/visibility and script-page/button authorization plus the
   distinct default-NPC object gate before special pages become active.
