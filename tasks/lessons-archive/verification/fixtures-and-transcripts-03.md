@@ -670,3 +670,45 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: handler-lifecycle completion and client wire completion were treated as one signal, deadline errors were not distinguished from close/EOF errors, and the fixture bypassed the production prefix parser.
 - Prevention: use an explicit callback-finished barrier for handler ownership; test the connection separately, accepting close/EOF/reset but rejecting deadline timeout after service Close; construct URI-authority fixtures through `parseLegacyHTTPPrefix` rather than partial structs.
 - Verification: the active-handler, repeated POST shutdown, and all-non-GET tests pass after the assertions were split and the wildcard fixture used the real parser.
+
+### 2026-08-24 — OPS-P1-LIFECYCLE shutdown fixtures must consume service preambles before EOF
+
+- Symptom: the first integrated Stop test reported that the status connection remained open because its post-Stop read returned the unread initial status payload; a package-wide run separately hit the established class of asynchronous transcript noise when `TestSessionHallucinationTranscript` timed out after a closed pipe.
+- Root cause: the lifecycle fixture treated the first successful read as proof of a live post-shutdown transport instead of consuming the service preamble before the shutdown boundary; the broad-run failure stack did not enter lifecycle production or test code.
+- Prevention: establish a per-service readiness/preamble barrier before Stop, then require EOF/reset after Stop; attribute broad failures by exact test and stack, and isolate them before changing the active leaf.
+- Verification: the corrected integrated HTTP→game→status closure test passes repeatedly and under race; the exact Hallucination test passed independently at `-count=5`.
+
+### 2026-08-24 — Production source quirks and injectable seam cleanup must be tested separately
+
+- Symptom: after production status-bind behavior was corrected to retain Legacy's already-bound game listener, the older injected-listener test failed because it intentionally expected its caller-owned fixture to close.
+- Root cause: one helper had been used both as a production-fidelity authority and as a leak-free unit-test seam, although those ownership contracts differ.
+- Prevention: keep production factory tests authoritative for occupied-port/leaked-state behavior; preserve explicit cleanup only for the pre-opened test seam and label that extension in production code.
+- Verification: the legacy helper test passes again, while new production-entry and lifecycle tests independently lock game-first binding, status failure, stale Running, duplicate-Start no-op, and the leaked game listener.
+
+### 2026-08-24 — Fatal reason 3/0 delivery needs separate callback and wire barriers
+
+- Symptom: synchronously writing reason 3 before closing the listener blocked the fatal callback and made the max-user wake test receive a nil terminal error; releasing the callback before reason 0 completed then intermittently let session cleanup close the sender first.
+- Root cause: Legacy enqueue order was projected onto direct Go socket writes without separating “reason 3 was scheduled before listener close”, “the fatal producer may return”, and “both frames reached each accepted client”.
+- Prevention: snapshot accepted clients in stable order, start the reason-3 writer before listener close, signal the accept owner to request reason 0, release the producer only after that handoff, and keep the session callback alive until the ordered wire writer completes.
+- Verification: max-user fatal wake and utility-format fatal transcripts both pass at `-count=20`; focused lifecycle/gate tests pass under race with reason 3 then 0.
+
+### 2026-08-24 — Cross-platform process signals must use the platform's os.Signal value
+
+- Symptom: a raw `syscall.Signal(1)` SIGHUP representation compiled on Unix/Windows but failed on Plan 9 because that target exposes `syscall.Note` instead of `syscall.Signal`.
+- Root cause: numeric signal identity was coupled to one syscall concrete type even though the standard package already exposes target-specific `SIGHUP` values implementing `os.Signal`.
+- Prevention: store `syscall.SIGHUP` behind the `os.Signal` interface and compare interface values; cross-build the entire module for every claimed target without creating binaries in the worktree.
+- Verification: full-module builds pass for Plan 9, Windows, and Linux after the type change.
+
+### 2026-08-24 — Fatal wake and writer startup must follow the accept-owner handoff
+
+- Symptom: the first normal `-count=20` run and a later full-race run each returned a nil listener error once from the new reason-3/listener ordering regression, although the wire-order events completed.
+- Root cause: `gates.stopAccepting()` could wake the MaxUser accept owner before the fatal descriptor was published; its nonblocking capture then saw an empty channel and attributed the shutdown as ordinary. Merely publishing before writer startup did not close this earlier wake race.
+- Prevention: publish the fatal descriptor first, then wake the accept owner, then start any writer that can close the listener. Both wake and close must follow the attribution handoff.
+- Verification: after enforcing publish→wake→writer order, the ordering regression passes under race at `-count=50`, and the combined ordering/max-user/utility-format fatal set passes under race at `-count=10`.
+
+### 2026-08-24 — Concurrent Stop must not overtake fatal wire completion
+
+- Symptom: final review found that context cancellation could close the listener before reason 3, a two-second callback timeout could release the reporting session before the two five-second wire phases, late accepted clients could miss normal reason 0, and HTTP/session joins exceeded Legacy's bounded service windows.
+- Root cause: fatal attribution, listener closure, producer lifetime, accepted-client snapshots, and service joins were bounded independently rather than as one ordered shutdown transaction.
+- Prevention: register and unconditionally publish the once-only fatal descriptor before wake; coordinate context/listener close through a reason-3 completion channel; keep the producer alive for the full bounded reason-3/0 window; take a fresh accepted-client snapshot for reason 0; cap HTTP waiting once at one second and session joining at five seconds. Preserve the separate unbounded top-level Stop join because Legacy explicitly spins until `_thread` clears.
+- Verification: the strengthened regression cancels context while reason 3 is blocked beyond the former two-second timeout and locks reason3-done→listener-close→reason0; it passes under race at `-count=5`. Final independent read-only review found no remaining P1/P2 issue, and fresh focused, full unexcluded normal/race, vet/build, and Plan 9/Windows/Linux builds pass.

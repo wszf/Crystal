@@ -30,7 +30,7 @@ duplicate.
 - Strengthening after `DISC-P1-CLOSURE`: P1 版本勘察又在 Legacy `workdir` 的同一命令中加入 Go 的 `internal/config`/`cmd/crystal-server` 相对路径；compact 恢复首调用随后再次把绝对 Go matrix 附在 Legacy 启动读取末尾。两次整调用均已作废并按两仓独立零退出重跑。即使核对同一 setting 或启动 authority，也必须在发送前机械检查“命令文本只含当前根”，且 Legacy 启动调用必须物理结束后才能构造 Go 调用。
 - Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
 - Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
-- Strengthening after NET/lifecycle recovery: 两次恢复首调用仍在 Legacy 根用 `git -C` 读取 Go 状态，整调用均作废并按仓重跑。恢复模板必须是两个物理工具调用；发送前机械拒绝 `git -C`。
+- Strengthening after lifecycle compaction: 恢复首调用再次在 Legacy 根用 `git -C` 混读 Go，随后又合并大文档导致输出截断；两次调用均作废并按仓、按小段重跑。发送前机械拒绝 `git -C`/对侧根，并限制为单仓且完整可见的输出。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -57,7 +57,7 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
-- Strengthening after HTTP review: repeated reads guessed nonexistent `session.go`, `datetime.go`, and Legacy project paths; every call was discarded and rerun from enumerated files. Review appendices use the same path gate.
+- Strengthening after HTTP/lifecycle review: 猜测路径、错放 `--glob`，又用宽泛 `Fatal` 模式命中全部 `Fatalf` 并产生截断；调用均作废。发送前须机械核对路径、argv、模式选择和输出上限。
 
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
@@ -206,7 +206,7 @@ duplicate.
 - Verification: 用生产入口测试覆盖可达路径、历史怪癖和关键失败分支。本批只读 review 把 Plague 在零 MP 时仍发 `HealthChanged`、治疗接近满血时显示请求恢复量、`int32` unchecked 运算列为风险；主审回读 `Map.CompleteMagic`、`HumanObject.ProcessRegen/ChangeMP` 和项目 overflow 配置后确认三者均为 Legacy 行为，未按直觉“修正”，并保留对应边界测试。
 - Strengthening after P1 config compatibility: 既有 `TestVersionCheckingRequiresAFile` 首次失败，因为测试把 Go 的 fail-fast 规则当成权威；Legacy `LoadVersion` 实际跳过缺失路径并保留空 hash 列表，启用版本检查时由客户端 gate 全部拒绝。测试已改为锁定空列表/全拒绝，缺失、空白、多文件和 partial MD5 定向/重复/race 全通过。任何“更严格更安全”的配置错误都必须先由 Legacy loader 和消费者共同裁决。
 - Strengthening after `NET-P1-GATES-001` tracing: Active acceptance 草稿把 MaxPacket reset 凭直觉写成一秒，Legacy `MirConnection.ReceiveData` 实际在严格 `< Now` 时重置并设为 `Now.AddSeconds(5)`。时间窗口、比较边界和计数单位必须从真实入口逐项抄录后再写验收清单；本次在任何 NET 代码写入前改回五秒并保留 equality 边界待测。
-- Strengthening after NET review: 测试用 Go ordinal 猜 Legacy enum 长度，并凭印象写 IPv6 首段；真实值是 153 项和 `[2001`。期望必须从目标表达式与 enum 逐项编号，不得跨基线借用相邻协议表。
+- Strengthening after NET/lifecycle review: ordinal/IPv6 与“清理 occupied-status 泄漏”建议均回到源码裁决；保留真实的 153、`[2001` 及 stale Running/已绑定 game listener。安全直觉不得覆盖可观察怪癖。
 
 ### 2026-08-21 C22 — 不同 capability、门禁和业务阶段不得过度复用
 
