@@ -409,3 +409,10 @@
 - Prevention: TryAdd 在 follower 更新后再次写新一基 rank；RemoveRank 不恢复字段，让共享 follower 的 SetNewRank 决定终态；materialized state 缺少 key 时直接返回 0；LoadJSON 在重建前清空 account/session/order/character authority。按 index 的 removal snapshot 仅为旧测试兼容投影，不能参与 wire 查询或 account-slot authority。
 - Verification: 新 duplicate-follower、age-excluded position 与 reused-service reload tests 锁定修复；auth focused `-count=10`、cmd focused `-count=10`、两包 focused race `-count=3`、auth 整包与 cmd 整包均 exit 0。reviewer 的 duplicate-index snapshot 项经主审裁决为非客户端 authority；现有 account-slot rank tests 与 wire 查询均不读取该 lossy compatibility map。
 - Strengthening after server reviewer `01a034c7-dd9b-73b3-bb85-c2d60d2cf957`: reviewer 单看 helper-level `TestRankTypeSixReportsProductionFatal` 后报告缺少 reason-3/reason-0 wire shutdown；同文件 companion `TestRankTypeSixProductionListenerSendsFatalThenNormalDisconnect` 已通过真实 TCP `serveListener` 精确断言两包顺序、listener error 与 count cleanup。主审按完整 evidence set 裁决无生产缺口；最终 review prompt 必须显式列出 companion evidence，不能要求每个辅助测试重复整条生产链。
+
+### 2026-08-25 — Duplicate login 的 SelectInfo 必须以完成的旧 StopGame 为屏障
+
+- Symptom: Go 先在 `LoginWithMetadata` 生成 character projection，再触发旧连接 reason-1 cleanup，因此新 LoginSuccess 可漏掉旧 Player 的 LastIP/LastLogoutDate。首个同步修复又可能无限等待、在 timeout 后丢失旧 claim，或让 rollback 复活已经 final-release 的 stale claim；FIFO queue wait 也不受既有 write deadline 约束。
+- Root cause: 把“已发送 Disconnect/已关闭连接”当成“StopGame metadata 已提交”，并让 account claim replacement、cleanup completion、rollback 和 FIFO reservation 各自独立，没有一个可回滚的顺序边界。
+- Prevention: character StopGame 在 auth 单锁内原子写 LastIP+LastAccess；同 session key 的 takeover 由 transition lock 串行，旧 session 在 metadata cleanup 后、claim release 前关闭 completion channel；timeout rollback 只恢复尚未 released 的 prior claim。LoginSuccess 在完成屏障后重新投影；FIFO timeout 显式取消 ticket 并在 serving 前进时跳过，禁止遗留 Cond waiter。
+- Verification: production explicit/disconnect/duplicate-login/game-to-observer/observer-only/pre-Game transcripts、source-order Deleted-only four-cap、JSON/117、rollback/released-race 和 timed-ticket tests 普通/repeated/race 均 exit 0；fresh unexcluded full/full-race/vet/build 通过，最终 reviewer `01a0351b-a7a3-7ac3-8cb0-06cb2da74cb0` 返回 `no findings`。

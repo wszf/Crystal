@@ -40,32 +40,31 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `AUTH-P2-CHAR-METADATA-001`
-- Status: `Active`; `RANK-P3-CHAR-LIFECYCLE-001` is Complete at Go
-  `fded2735c2dd5a7dcad583730a048e1938534b29`.
-- Outcome: preserve character creation IP/time/index projection, Player
-  construction `LastLoginDate`, StopGame LastIP/LastLogoutDate, and
-  `SelectInfo.LastAccess`; every LoginSuccess/LogOutSuccess selection must omit
-  deleted records and cap at four across explicit logout, disconnect,
-  game-to-observer takeover, observer-only logout, failed pre-map entry, JSON,
-  and version-117 reload.
-- Go matrix anchors to read: only the P2 finite-inventory row
-  `AUTH-P2-CHAR-METADATA-001`, exact P2 stage row, and evidence headings/tests
+- Leaf ID: `CHAR-P3-START-LOGOUT-001`
+- Status: `Active`; `AUTH-P2-CHAR-METADATA-001` is Complete in the verified Go
+  candidate awaiting its owned commit.
+- Outcome: preserve exact StartGame stage/settings/account/index/ban admission,
+  deleted-record quirk, map/bind fallback and result/resolution; preserve Game/
+  Observer-only LogOut, combat-lock failure, PlayerObject stop/date/ranking
+  side effects, refreshed capped non-deleted SelectInfo, and same-connection
+  re-entry cleanup.
+- Go matrix anchors to read: only the P3 finite-inventory row
+  `CHAR-P3-START-LOGOUT-001`, exact P3 stage row, and evidence headings/tests
   named by that row. Do not read the full matrix.
-- Legacy read authority is closed until bounded tracing: exact `CharacterInfo`,
-  `AccountInfo.GetSelectInfo`, `PlayerObject.Load/StopGame`, and
-  `MirConnection` login/logout consumers plus exact metadata serializers. Every
-  C# file stays read-only and audit tooling stays Go-only.
+- Legacy read authority is closed until bounded tracing: exact `MirConnection`
+  StartGame/LogOut dispatch, `PlayerObject` construction/StartGame/
+  StartGameFailed/StopGame, settings/map-bind consumers and packet serializers.
+  Every C# file stays read-only and audit tooling stays Go-only.
 - Tentative Go write authority is closed until tracing: bounded
   `internal/auth/service.go`, `cmd/crystal-server/main.go`, focused existing
-  tests and new metadata lifecycle tests; refine exact paths before any write.
-- Required gate: deterministic authenticated projection/lifecycle matrix,
-  timestamps/IP/source order, explicit/disconnect/observer/failure paths, JSON/
-  117 round trips, production transcripts, repeated/focused race, cadence-aware
-  integration, diff/status/process, and all six C# gates.
-- Forbidden scope: completed create/delete/admin/rank mutation, StartGame
-  admission/map/bootstrap payloads, P4 map entry, P7 NPC/storage, P12 broad
-  recovery, native client UI, broad matrix/source dumps, and every C# write.
+  tests and new transition tests; refine exact paths before any write.
+- Required gate: deterministic authenticated admission/result/location/logout/
+  re-entry matrix, persistence and ranking side effects, production transcripts,
+  repeated/focused race, cadence-aware integration, diff/status/process, and all
+  six C# gates.
+- Forbidden scope: completed create/delete/metadata/admin/rank mutation,
+  post-admission bootstrap payload families, broad P4 map/visibility, P5 combat,
+  P7 NPC/storage, P12 recovery, native client UI, broad dumps and every C# write.
 
 `CHAR-P3-BAN-DELETE-001` is Complete at Go
 `c0f70e833b15599d8acb9ad3ebf423cb731fc6a9`. Exact wrong-stage lifetime,
@@ -164,15 +163,17 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
   path remains protected.
 - Ranking lifecycle code/tests/matrix are committed at Go `fded273`; no rank
   path remains protected.
-- `AUTH-P2-CHAR-METADATA-001` has only tentative bounded ownership above;
-  exact writes remain closed until its source trace ends.
+- Character-metadata code/tests/matrix are committed at Go `f0a1ff8`; no
+  metadata path remains protected and protocol/117 needed no serializer write.
+- `CHAR-P3-START-LOGOUT-001` has only tentative bounded ownership above; exact
+  writes remain closed until its source trace ends.
 
 ### Remaining acceptance work
 
-- [ ] Trace the exact metadata projection/load/stop/logout consumers and refine
-      exact Go files without reopening completed P3 mutation authority.
-- [ ] Implement the bounded lifecycle surface and run production-entry,
-      repeated, race, persistence, and cadence-aware integration gates.
+- [ ] Trace exact StartGame/LogOut admission, failure, map-bind and cleanup
+      consumers; refine exact Go files without reopening completed metadata.
+- [ ] Implement the bounded transition slice and run production-entry,
+      repeated, race, persistence and cadence-aware integration gates.
 
 ### P1 frozen child registry
 
@@ -198,15 +199,15 @@ selected now.
 ### P2 frozen child registry
 
 Independent read-only reviewer `01a031c0-18ea-71e3-ba9f-b6cf96be57d4`
-accepted this exact eight-child denominator after two rounds. Six are Complete
-and `AUTH-P2-CHAR-METADATA-001` is Active; one remains dependency-blocked Ready.
-This is a P2 denominator only.
+accepted this exact eight-child denominator after two rounds. Seven are Complete
+and one remains dependency-blocked Ready. This is a P2
+denominator only.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `AUTH-P2-CRYPTO-WIRE-001` | Complete | — | none | existing auth/protocol vectors |
 | `AUTH-P2-ACCOUNT-SESSION-001` | Complete | crypto/wire | `internal/auth/service.go` + tests; bounded `cmd/crystal-server/main.go`; new `p2_account_session_test.go`; optional one account-session helper | authenticated repeated/race + JSON/117 |
-| `AUTH-P2-CHAR-METADATA-001` | Active | account session + P3 mutation authority (Complete) | tentative bounded auth/main + new metadata lifecycle tests | login/logout projections + persistence/race |
+| `AUTH-P2-CHAR-METADATA-001` | Complete | account session + P3 mutation authority (Complete) | verified auth/main metadata lifecycle candidate | login/logout projections + persistence/race |
 | `STORAGE-P2-PASSWORD-001` | Complete | — | none | existing service/protocol/valid-page sessions |
 | `STORAGE-P2-NPC-GATE-001` | Ready | `NPC-P7-ACCESS-GATE-001` | bounded storage handlers + new `p2_storage_npc_gate_test.go` | all-handler wrong-stage + NPC boundary/race |
 | `PERSIST-P2-ACCOUNT-BRIDGE-001` | Complete | — | none | existing JSON/117/global merge evidence |
@@ -216,8 +217,8 @@ This is a P2 denominator only.
 ### P3 frozen child registry
 
 Independent reviewer `01a0327e-55a1-7f63-9fb7-0b8bdcc061af` accepted this
-exact eleven-child denominator after one revision. Nine are Complete and two
-are dependency-blocked Ready.
+exact eleven-child denominator after one revision. Nine are Complete,
+`CHAR-P3-START-LOGOUT-001` is Active and one remains dependency-blocked Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -227,7 +228,7 @@ are dependency-blocked Ready.
 | `CMD-P3-PUBLIC-UTILITY-001` | Complete | P4/P6/P8 business owners | none | existing command repeated/race transcripts |
 | `CHAR-P3-CREATE-001` | Complete | P2 account session (Complete) | bounded `internal/auth/service.go`, `cmd/crystal-server/main.go`, existing tests, one new focused creation session test | results/order + IP + JSON counter + ordinary 117 + repeated/race |
 | `CHAR-P3-BAN-DELETE-001` | Complete | P2 projection/import + P11 ranking core | committed auth/main/import/protocol + focused mutation/restart tests | tombstone/ban/index + repeated/race |
-| `CHAR-P3-START-LOGOUT-001` | Ready | ban/delete + P2 character metadata | bounded auth/main lifecycle tests | transitions/persistence/race |
+| `CHAR-P3-START-LOGOUT-001` | Active | ban/delete + P2 character metadata (Complete) | tentative bounded auth/main lifecycle tests | transitions/persistence/race |
 | `ADMIN-P3-AUTHORITY-001` | Complete | P1 config/localization/logging + P11 ranking | committed config/auth/logging/game-session | grant/revoke/@LOGIN/relogin/race |
 | `ADMIN-P3-ACCOUNT-OPS-001` | Complete | P2 account/storage (Complete) | committed Go operator control + auth/main tests | live/offline JSON/117/race |
 | `RANK-P3-CHAR-LIFECYCLE-001` | Complete | P11 core + ban/delete + admin authority | committed auth/ranking/main | deleted/age/admin/lifecycle transcripts |

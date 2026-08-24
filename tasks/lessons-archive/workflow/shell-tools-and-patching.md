@@ -496,3 +496,12 @@
 - Prevention: 修改跨行强调/表前 prose 时，先读取 heading 到下一空行；replacement 覆盖完整句子，成功后立即回读同一范围并检查旧计数、新计数和 Markdown delimiter 各唯一一次。
 - Verification: 已以完整三行 hunk 删除旧计数和重复词；目标段现唯一写成 eleven children、nine Complete、two Ready，`git diff --check` exit 0。
 - Strengthening during the same closure: stage-row Perl replacement succeeded, but the post-write assertion put an expected zero-match `rg` inside `set -e` command substitution, so the shell exited 1 before printing counts. The call was discarded; an independent explicit 0/1 audit proved old count 0, new count 1 and `git diff --check` 0. Post-write negative assertions must use the same explicit rc branch as discovery searches.
+
+### 2026-08-25 — Metadata tracing 必须预声明零匹配并预算控制文档净行数
+
+- Symptom: metadata tracing 多次把预期可零匹配的 `rg` 裸放进 `set -e`，并把未由本轮枚举验证的测试文件 shell glob 交给读取命令；相关调用即使前段有效或 glob 碰巧命中也全部作废。首次 ownership 补丁又把 active index 从 297 行增到 301 行，控制检查 exit 1。
+- Root cause: 临时按自然语言拼搜索 argv，并把“shell 成功展开”误当成路径验证；控制补丁只检查语义完整，没有在写前计算新增减行净额。
+- Prevention: 每次搜索在发送前声明零匹配是否有效，有效时固定使用显式 0/1 分支；文件族只用 `rg --glob`，已知文件只传精确路径。接近上限的控制文件先计算 replacement 净行数并为后续路由保留余量。
+- Verification: 所有失败/未验证调用均已按显式 rc、`rg --glob` 或精确路径零退出重跑；ownership prose 压缩到 299 行，`tasks/check-migration-control.sh` 与 `git diff --check` 均恢复 exit 0 后才开放 Go 写入。
+- Strengthening during review fixes: 将 account-session disconnect callback 改成返回完成状态时，首次补丁漏写 closure 的 `bool` 返回类型，并遗漏两个既有 operator-test closure，只编译门禁如实 exit 1。该结果仅作 finding，不作行为证据；主线程先把真实调用点 `operator_accounts_test.go` 扩入 exact ownership，再修正三个 closure，随后 touched-package compile、focused repeated 与 race 全部 exit 0。
+- Strengthening during metadata closure: callback API 再增加 rollback 返回值时又遗漏两个 operator-test assignment，compile 再次如实 exit 1；P2 active prose 的局部 replacement 还留下相邻 “Six are Complete / seven are Complete”，控制脚本因结构合法未捕获，最终逐段回读才发现。Matrix 三项 `perl -e` 首次又因脚本间缺分号在编译期 exit 255、确认零写入后才重跑。API arity 变化必须先列全部真实调用点；计数 prose 修改后既跑 checker 又回读完整句；多段 Perl 每段显式以分号闭合并做唯一计数。

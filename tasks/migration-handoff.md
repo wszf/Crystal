@@ -1,103 +1,102 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 02:07 (Asia/Singapore)
+Last updated: 2026-08-25 03:40 (Asia/Singapore)
 
-This replace-in-place snapshot closes `RANK-P3-CHAR-LIFECYCLE-001` and routes
-the same persistent Goal to `AUTH-P2-CHAR-METADATA-001`. Preserve every listed
-Legacy control/lesson/archive change; never reset, stash, clean, delete, move,
-or overwrite it. The compact-reconstruction snapshot was preserved once as
-`tasks/migration-handoff-archive/2026-08-25-0207-pre-rank-closure.md`.
+This replace-in-place snapshot closes the verified
+`AUTH-P2-CHAR-METADATA-001` candidate and routes the same persistent Goal to
+`CHAR-P3-START-LOGOUT-001`. Preserve every listed change; never reset, stash,
+clean, delete, move, or overwrite it.
 
 ## Goal and control-plane state
 
 - Goal remains Active: migrate all reachable, client-observable Legacy behavior
   to the independent pure-Go repository. It is neither complete nor blocked.
 - Main authority is `gpt-5.6-sol/ultra`; bounded workers are `luna_worker`
-  (`gpt-5.6-luna/max`). Rank reviewers `01a034c7-b2f4-76c3-8e35-847f2798bdd8`,
-  `01a034c7-dd9b-73b3-bb85-c2d60d2cf957`, and final reviewer
-  `01a034e7-7b2d-7ff2-9e01-a4c290fdba79` are closed; no subagent or Go/server
-  process remains active.
-- P1/P2/P3 remain scope-frozen and In progress. P2 has six Complete,
-  `AUTH-P2-CHAR-METADATA-001` Active and one dependency-blocked Ready child;
-  P3 has nine Complete and two dependency-blocked Ready children. Matrix and
-  active index agree; no phase status changed.
+  (`gpt-5.6-luna/max`). Legacy auditor `01a034f9-f650-7d43-9ee4-85c62b5b0de9`,
+  Go auditor `01a034fa-1836-7513-bd1e-65375fb42b69`, test writer
+  `01a03507-919f-7f51-9a38-8018262efae4`, and final reviewer
+  `01a0351b-a7a3-7ac3-8cb0-06cb2da74cb0` are closed. No subagent, Go process,
+  or crystal-server process remains active.
+- P1/P2/P3 remain scope-frozen and In progress. P2 has seven Complete and one
+  dependency-blocked Ready child. P3 has nine Complete,
+  `CHAR-P3-START-LOGOUT-001` Active and one dependency-blocked Ready child.
+  Matrix and active index agree; no phase status changed.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; HEAD: `10b092173849978deddfc873804a3d657b53130e`
-  (`docs(migration): close character ban delete leaf`).
+- Branch: `master`; HEAD: `b37d8396f5972b8fd7d3c8fe2873804c58d03f2b`
+  (`docs(migration): close character ranking lifecycle`).
 - Tracked unstaged files are exactly:
   - `tasks/lessons-archive/migration/protocol-session-wire.md`
-  - `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`
   - `tasks/lessons-archive/workflow/shell-tools-and-patching.md`
-  - `tasks/lessons.md`
   - `tasks/migration-active.md`
   - `tasks/migration-handoff.md`
-- Untracked files are exactly:
-  - `tasks/migration-handoff-archive/2026-08-25-0115-pre-rank-compact-reconstruction.md`
-  - `tasks/migration-handoff-archive/2026-08-25-0207-pre-rank-closure.md`
-- Index is empty. One expected Legacy documentation commit remains after final
-  control/C# checks. No repository lock exists.
+- Index and untracked set are empty. Control checker and diff check exit 0; all
+  three C# gates are empty. One expected Legacy documentation commit remains
+  after the Go candidate commit supplies its exact hash. No repository lock
+  exists.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch: `main`; HEAD: `fded2735c2dd5a7dcad583730a048e1938534b29`
-  (`migrate character ranking lifecycle`).
-- Worktree and index are clean. `git diff --check` and all three C# checks are
+- Branch: `main`; HEAD: `f0a1ff862f92a65358cecb283404e0452c042bc6`
+  (`migrate character metadata lifecycle`).
+- Worktree and index are clean. Gofmt/diff check and all three C# gates are
   empty; no repository lock or matching process exists.
 
 ## Active leaf and protected work
 
-- Active leaf: `AUTH-P2-CHAR-METADATA-001`.
-- Read only its exact P2 finite-inventory row, P2 stage row and tests/headings
-  named there. Do not reread the full matrix.
-- Outcome: preserve creation IP/time/index projection, construction
-  `LastLoginDate`, StopGame LastIP/LastLogoutDate and `SelectInfo.LastAccess`;
-  every LoginSuccess/LogOutSuccess selection omits deleted records and caps at
-  four across explicit logout, disconnect, game-to-observer takeover,
-  observer-only logout, failed pre-map entry, JSON and version-117 reload.
-- Legacy authority is closed until exact `CharacterInfo`,
-  `AccountInfo.GetSelectInfo`, `PlayerObject.Load/StopGame`, `MirConnection`
-  login/logout and metadata serializers are bounded. Every C# file is read-only.
-- Tentative Go ownership is closed until tracing: bounded
-  `internal/auth/service.go`, `cmd/crystal-server/main.go`, existing focused
-  tests and new metadata lifecycle tests. Refine exact paths before writes.
-- Forbidden: completed P3 create/delete/admin/rank mutation, StartGame
-  admission/map/bootstrap, P4/P7/P12 behavior, broad dumps and every C# write.
+- Active leaf: `CHAR-P3-START-LOGOUT-001`.
+- The completed metadata commit `f0a1ff862f92a65358cecb283404e0452c042bc6`
+  atomically writes LastIP/LastAccess for real
+  StopGame, preserves creation/LastLoginDate and capped Deleted-only projection,
+  synchronizes duplicate-login cleanup, safely rolls back timed-out claims, and
+  retires timed FIFO tickets. JSON/117 and every registered lifecycle path are
+  covered; reviewer `01a0351b-a7a3-7ac3-8cb0-06cb2da74cb0` returned
+  `no findings`.
+- Read only the exact P3 Start/Logout row, P3 stage row and headings/tests named
+  there. Do not reread the full matrix or reopen metadata after its commit.
+- Next outcome: exact StartGame stage/settings/account/index/ban admission,
+  deleted-record quirk, map/bind fallback and result/resolution; Game/Observer
+  LogOut, combat-lock failure, stop/date/ranking effects, refreshed selection
+  and same-connection re-entry cleanup.
+- Legacy and Go write authority for the new leaf remain closed until bounded
+  tracing. Every C# file is read-only. Completed create/delete/metadata/admin/
+  ranking semantics, post-admission bootstrap, broad P4/P5/P7/P12, native UI
+  and broad dumps are forbidden.
 
 ## Verification ledger
 
-- Touched compile exited 0. Auth and server ranking/admin/operator focused suites
-  passed `-count=10`; matching focused race passed `-count=3`. Full touched auth
-  and server packages exited 0.
-- First fresh `go test ./... -count=1 -timeout=20m` failed only established
-  `TestSessionHallucinationTranscript` after 30 seconds with a closed-pipe stack
-  outside owned files. Exact isolation passed `-count=10`; the next fresh
-  unexcluded full test exited 0 (`cmd/crystal-server` 74.909s). The failed run
-  is not recorded as a pass.
-- Fresh `go test -race ./... -count=1 -timeout=30m` exited 0
-  (`cmd/crystal-server` 81.557s). `go vet ./...` and `go build ./...` exited 0.
-- Review fixed shared duplicate Rank final assignment/removal, materialized
-  fallback, reused-service JSON replacement, stable session identity,
-  name-based OnlineOnly and observer blank-account collision. The lossy old
-  index snapshot is not wire authority; the companion TCP test proves exact
-  type-6 reason-3/reason-0 order. Final reviewer `01a034e7-7b2d-7ff2-9e01-a4c290fdba79`
-  returned `no findings` and no files changed.
-- Final Go gofmt/diff/status/process and all three Go-side C# checks passed
-  before commit. Legacy control/diff/all three C# checks remain the only pending
-  closure step before its documentation commit.
+- Touched compile exited 0. Metadata/account-session/operator/FIFO focused suites
+  passed `-count=10`; matching focused race passed `-count=3`. Auth and server
+  touched packages passed; final server package time was 74.205s.
+- Fresh `go test ./... -count=1 -timeout=20m` exited 0
+  (`cmd/crystal-server` 75.328s). Fresh
+  `go test -race ./... -count=1 -timeout=30m` exited 0
+  (`cmd/crystal-server` 81.330s). `go vet ./...` and `go build ./...` exited 0.
+- Production evidence covers exact creation/IP/date authority, physical order,
+  banned inclusion, Deleted-only four-cap LoginSuccess/LogOutSuccess, explicit
+  logout, disconnect, duplicate takeover, game-to-observer, observer-only,
+  post-construction/pre-Game failure, concurrent snapshots, JSON and registered
+  version-117 reload. P3 still owns exact missing-map Result 3 and transition
+  outcomes.
+- Review findings fixed unbounded takeover/FIFO waits, timeout claim loss,
+  released-claim resurrection, completion ordering, callback races, race-test
+  error capacity and evidence wording. Intermediate compile/control/Perl
+  failures were corrected and archived; none is recorded as a passing gate.
+- Final gofmt/diff/status/process and three Go-side C# checks passed. Legacy
+  control/diff and three C# checks passed before this rewrite; rerun them before
+  its documentation commit.
 
 ## Exact recovery sequence
 
-1. In the Legacy root run the control checker, diff check, status and all three
-   C# gates; commit exactly the six tracked control/lesson files plus two owned
-   archived snapshots if they match this handoff.
-2. In a separate Go-root call verify clean HEAD `fded2735c2dd5a7dcad583730a048e1938534b29`,
-   empty diff/C# gates and no process. Do not reopen the completed rank leaf.
-3. Read only the named metadata P2 row/stage anchors and search matching archived
-   metadata/LastAccess/logout/projection lessons.
-4. Trace bounded Legacy and Go consumers, refine exact ownership before writes,
-   then implement the smallest coherent metadata slice and run its registered
-   compile/focused/repeated/race gates.
+1. Re-read this handoff and compare both repositories separately against the
+   exact HEAD/status lists above; run Legacy control/diff/C# gates and verify
+   clean Go HEAD `f0a1ff862f92a65358cecb283404e0452c042bc6` with process/C# gates.
+2. Commit exactly the four Legacy documents after control/diff/C# gates using
+   `docs(migration): close character metadata leaf`.
+3. Read only the named Start/Logout P3 row/stage anchors and search matching
+   archived StartGame/StartGameFailed/LogOut/map-bind/re-entry lessons. Trace
+   bounded Legacy and Go consumers, refine exact ownership before writes, then
+   implement the smallest coherent transition slice and run its leaf gate.
