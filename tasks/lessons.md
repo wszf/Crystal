@@ -57,12 +57,12 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
-- Strengthening after HTTP/lifecycle/account-ops review: 猜测路径（本次为不存在的 `internal/auth/crypto.go`）、错放参数或宽泛模式产生失败/截断时，整调用作废。发送前须机械核对枚举路径、argv、模式和输出上限。
+- Strengthening through admin-authority review: 猜测路径、错放参数、宽泛模式或裸跑“零匹配有效”的 `rg` 时，整调用作废；本次 ChatBanned 搜索已按显式 0/1 分支重跑。发送前机械核对路径、argv、退出码与输出上限。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
 - Root cause: 使用陈旧正文、模糊锚点或人工拼装错误 hunk 标记。
-- Prevention: patch 前复读精确物理行；按唯一函数锚点拆小 hunk；检查完整路径、上下文行和闭合标记。
+- Prevention: patch 前复读精确物理行；按唯一函数锚点拆小 hunk；复杂多文件拆事务，复合调用启用 `set -e`；检查路径、上下文和闭合标记。
 - Verification: 逐段复读 diff，并运行格式化、最小编译和定向测试；任一 patch 失败时不采用同调用的其他结果。本批矩阵第二个 hunk 因正文换行与预期不符而失败；先复读并独立核验同调用已落地的第一个 hunk，再以精确物理行单独重跑第二个 hunk，最终 `git diff --check` 通过。
 - Strengthening after Goal continuity patch: 一个补丁同时修改互为 hard link 的 `AGENTS.md` 与 `agents.md`；首个 hunk 已经同步改变两个路径，第二个 hunk 因旧正文消失而失败，形成“调用失败但修改已落地”。以后 patch 前先用 `ls -li`/`git ls-files` 核对别名与 inode；hard link 只修改一个 tracked canonical 路径，并在失败后立即独立回读全部别名和 Git 状态。本次已确认两路径仍共享 inode、内容均为 Sol Ultra/checkpoint-not-blocker，Git 只跟踪 canonical `agents.md` 变化。
 - Strengthening after P1 inventory insertion: 一次四-hunk matrix 补丁因旧段落物理换行与草稿不一致而整体失败；随后已独立确认没有部分写入，再把新段插入、P1 单行精确替换和两个小 prose hunk 分开发送并逐项 `git diff --check`。长表插入与陈旧 prose 修订不得共用一个补丁事务；先复读每个唯一锚点，失败后先查 status/目标标记再重试。
@@ -226,7 +226,7 @@ duplicate.
 - Symptom: 权威状态已变，但在线 session 使用陈旧成员关系、物品或地图快照。
 - Root cause: 直接覆盖整快照，或在错误 authority/锁域内判定。
 - Prevention: 明确字段 authority；分离锁；按 revision 定向合并并主动唤醒目标会话。
-- Verification: 跨会话测试确认权威存储、在线快照和双方通知一致。
+- Verification: 跨会话测试核对权威存储、在线状态与通知；测试只读切片也必须经锁内 deep snapshot，禁止复制外壳后读取共享 backing array。
 
 ### 2026-08-21 C25 — 导入导出和 round-trip 必须验证语义规范化
 
@@ -286,10 +286,10 @@ duplicate.
 
 - Symptom: 线程 `01a02d0d-6a74-75f2-a72a-a2f2736980a2` 在约 6 小时 40 分内记录 11 个 compact window、295 次 matrix 相关调用、131 次 handoff 相关调用和约 870 万字符工具输出；当前 handoff 增长到 1421 行/128 KB，compact 恢复主要消耗在全量重读、历史追加和重复门禁，而不是继续实现。
 - Root cause: 把详细 matrix、append-only handoff、事故历史和每叶全仓门禁同时当成启动上下文；每次 compact 都完整重读 3223 行 matrix 与全部旧 checkpoint，形成“文档越大→更快 compact→再次全读”的自放大循环。十三个宽阶段又不是有限分母，无法给出可信百分比或 ETA。
-- Prevention: `migration-handoff.md` 只保留当前快照并限制为 250 行/24 KiB；独有未提交历史一次性归档，启动永不读 archive；使用 `migration-active.md` 注册唯一 active leaf、精确 matrix anchors 和 scope-freeze discovery leaves；compact 后只读 active+handoff 并核验状态；每叶运行 focused leaf gate，全仓普通/race 按有上限的 integration cadence 运行，阶段/Goal 收口仍要求新鲜无排除全量门禁；主线程禁止 broad dump。
+- Prevention: handoff 只保留 250 行/24 KiB 当前快照，历史归档且启动不读；active index 注册唯一 leaf、精确 matrix anchors 和 closure leaves；compact 后只读 active+handoff 并核验；每叶跑 focused gate，全仓/race 按 cadence，阶段/Goal 收口跑 fresh full gates；矩阵锚点只用精确 `rg`/单行 `sed`，禁止相邻超长行或 broad dump。
 - Verification: 旧 1421 行 handoff 已逐字复制到 `tasks/migration-handoff-archive/2026-08-23-2055-pre-control-plane-optimization.md` 后改为短快照；`tasks/check-migration-control.sh` 对 handoff、active index、goal contract、agents 和 active lessons 执行行数/字节/必需标题门禁；Go 十二个未提交文件在优化中保持原样，双仓 `.cs` 三类审计为空。
 - Strengthening after utility/P1 closure: 将 active index 固定标题改成自然语言曾使控制脚本 exit 1；本次重建 handoff 又把必需的唯一 `- Active leaf: \`` 字段改写成普通叙述，再次被脚本拦截。控制标题和 section field 都是可执行 schema，补丁前必须先从 `tasks/check-migration-control.sh` 复制精确字符串；修复并让检查器 exit 0 后，才可采用回读、scope-freeze 或提交结论。
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
-- Strengthening after NET handoff reconstruction: 快照虽含 Active leaf 语义，却把必需 schema 标题改成 `Candidate behavior and open review`，控制检查器 exit 1。重写 handoff 前必须先从检查脚本复制必需标题和字段，并在同一最小补丁中保留 `## Active leaf and protected work` 与唯一 `- Active leaf: \``。
+- Strengthening through admin-authority recovery: handoff 重建已三次把必需 heading 改成语义近似标题并被检查器拦截；重写前必须从脚本逐字复制全部 heading/field schema，禁止自拟名称。

@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 20:03 (Asia/Singapore)
+Last verified: 2026-08-24 22:15 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -40,35 +40,37 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `ADMIN-P3-AUTHORITY-001`
-- Status: `Active`; `ADMIN-P3-ACCOUNT-OPS-001` is Complete at Go
-  `2e6df8aedb921935bc79d3e48518f47ee707b89e`.
-- Outcome: preserve `[General] GMPassword`, unrestricted case-insensitive
-  `@LOGIN` admission, one-shot next nonempty chat capture, exact case-sensitive
-  password match, localized Hint/System and server-log ordering, transient
-  runtime `IsGM` plus GameMaster Buff/ranking removal, logout/relogin reset, and
-  operator AdminAccount grant/revoke effects on current versus future sessions.
+- Leaf ID: `CHAR-P3-BAN-DELETE-001`
+- Status: `Active`; `ADMIN-P3-AUTHORITY-001` is Complete at Go
+  `02a63cefdcc551dcc08eb5a4cec71249339091d1`.
+- Outcome: preserve Select-stage DeleteCharacter failure/success, soft
+  `Deleted`/`DeleteDate` tombstones retained in account/global storage, hidden
+  SelectInfo, rank removal, repeated deletion and deleted-index StartGame
+  quirks, persisted character ban/strict expiry clearing/StartGameBanned, and
+  first-match client-supplied index behavior for duplicate/corrupt retained IDs.
 - Go matrix anchors to read: only the P3 finite-inventory row
-  `ADMIN-P3-AUTHORITY-001`, exact P3 stage row, and evidence headings/tests
+  `CHAR-P3-BAN-DELETE-001`, exact P3 stage row, and evidence headings/tests
   named by that row. Do not read the full matrix.
-- Legacy read authority: bounded `Settings.GMPassword` load/save, the real
-  `PlayerObject.Chat` `@LOGIN`/GMLogin path, rank/Buff/log side effects, and
-  AccountInfoForm AdminAccount handler; every C# file stays read-only and audit
-  tooling stays Go-only.
-- Go write authority: bounded `internal/config/{config.go,config_test.go,
-  p1_contract_test.go}`, `internal/auth/operator_accounts*.go`,
-  `cmd/crystal-server/{main.go,world.go,game_master.go,game_master_test.go,
-  game_master_session_test.go,ranking.go,runtime_logging.go}` plus one new
-  focused admin-authority helper/session test and matrix evidence. Refine exact
-  paths after tracing and before any code write; no other file is authorized.
-- Required gate: exact command/source/message order, grant/revoke current/future
-  session distinctions, transient logout/relogin reset, Buff/ranking/log effects,
-  production config/session entry, touched compile, focused/repeated/race, due
-  integration cadence, diff/status/process, and all six C# gates.
-- Forbidden scope: account CRUD/ban/password/storage operations now Complete,
-  character delete/ban/start/logout, ranking-core redesign, player combat/map/
-  item/flag actions, broad P12 recovery, native C# UI, broad matrix/source dumps,
-  and every C# write.
+- Legacy read authority: bounded `AccountInfo.GetSelectInfo`, CharacterInfo
+  delete/ban fields and serialization, `MirConnection` DeleteCharacter/
+  StartGame handlers, and exact Envir delete/rank/import consumers. Every C#
+  file stays read-only and audit tooling stays Go-only.
+- Tentative Go write authority, closed until tracing: bounded
+  `internal/auth/{service.go,ranking.go}` and existing focused tests; exact
+  imported-character adapters in `internal/legacyaccountbridge` or
+  `internal/legacyworld` only if the trace proves they own ban/delete fields;
+  bounded `cmd/crystal-server/main.go` plus one new focused ban/delete session
+  test; and `docs/migration-matrix.md`. Refine exact existing/new paths before
+  any Go code write.
+- Required gate: exact stage/result/source order, soft tombstone/global-name/
+  ranking effects, duplicate/repeated/index edges, strict ban-expiry boundary,
+  JSON and ordinary 117 round trips, production relogin/restart, touched
+  compile, focused/repeated/race, cadence-aware integration, diff/status/process,
+  and all six C# gates.
+- Forbidden scope: completed account/admin authority, character creation,
+  StartGame location/bootstrap and full logout lifecycle, P2 metadata closure,
+  ranking-core redesign, broad P12 malformed-header/counter recovery, native C#
+  UI, broad matrix/source dumps, and every C# write.
 
 `PERSIST-P2-SOURCE-PRECEDENCE-001` is Complete at Go
 `4729fed32ded396d36b05c4bdafad6e17e4fc1dd`. Exact production startup with
@@ -151,17 +153,18 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
 - Character-creation code/tests/matrix are committed at Go `a7f16f8`; no
   creation path remains protected.
 - Account-operator code/tests/matrix are committed at Go `2e6df8a`; no account-
-  ops path remains protected except bounded auth adapters explicitly re-owned
-  by the Active admin-authority leaf.
-- `ADMIN-P3-AUTHORITY-001` owns only the bounded config/auth/logging/game-session
-  paths listed above; exact writes remain closed until its source trace ends.
+  ops path remains protected.
+- Admin-authority code/tests/matrix are committed at Go `02a63ce`; no admin-
+  authority path remains protected.
+- `CHAR-P3-BAN-DELETE-001` has only tentative bounded ownership above; exact
+  writes remain closed until its source trace ends.
 
 ### Remaining acceptance work
 
-- [ ] Trace Legacy GMPassword/@LOGIN and operator AdminAccount current/future
-      session effects; freeze exact message/Buff/ranking/log order.
-- [ ] Register exact files, implement the bounded authority surface, and run
-      production-entry, repeated, race, and due integration gates.
+- [ ] Trace Legacy delete/ban/index/rank/import consumers and refine exact Go
+      files without reopening P2 metadata or broad P12 recovery.
+- [ ] Implement the bounded mutation surface and run production-entry,
+      persistence, repeated, race, and cadence-aware integration gates.
 
 ### P1 frozen child registry
 
@@ -205,8 +208,8 @@ only.
 ### P3 frozen child registry
 
 Independent reviewer `01a0327e-55a1-7f63-9fb7-0b8bdcc061af` accepted this
-exact eleven-child denominator after one revision. Six are Complete,
-`ADMIN-P3-AUTHORITY-001` is Active, and four are Ready.
+exact eleven-child denominator after one revision. Seven are Complete,
+`CHAR-P3-BAN-DELETE-001` is Active, and three are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -215,9 +218,9 @@ exact eleven-child denominator after one revision. Six are Complete,
 | `ADMIN-P3-RUNTIME-MODES-001` | Complete | seeded/imported authority | none | existing authenticated mode/relogin transcripts |
 | `CMD-P3-PUBLIC-UTILITY-001` | Complete | P4/P6/P8 business owners | none | existing command repeated/race transcripts |
 | `CHAR-P3-CREATE-001` | Complete | P2 account session (Complete) | bounded `internal/auth/service.go`, `cmd/crystal-server/main.go`, existing tests, one new focused creation session test | results/order + IP + JSON counter + ordinary 117 + repeated/race |
-| `CHAR-P3-BAN-DELETE-001` | Ready | P2 projection/import + P11 ranking core | bounded auth/main/import + focused mutation/restart tests | tombstone/ban/index + repeated/race |
+| `CHAR-P3-BAN-DELETE-001` | Active | P2 projection/import + P11 ranking core | bounded auth/main/import + focused mutation/restart tests | tombstone/ban/index + repeated/race |
 | `CHAR-P3-START-LOGOUT-001` | Ready | ban/delete + P2 character metadata | bounded auth/main lifecycle tests | transitions/persistence/race |
-| `ADMIN-P3-AUTHORITY-001` | Active | P1 config/localization/logging + P11 ranking | bounded config/auth/logging/game-session | grant/revoke/@LOGIN/relogin/race |
+| `ADMIN-P3-AUTHORITY-001` | Complete | P1 config/localization/logging + P11 ranking | committed config/auth/logging/game-session | grant/revoke/@LOGIN/relogin/race |
 | `ADMIN-P3-ACCOUNT-OPS-001` | Complete | P2 account/storage (Complete) | committed Go operator control + auth/main tests | live/offline JSON/117/race |
 | `RANK-P3-CHAR-LIFECYCLE-001` | Ready | P11 core + ban/delete + admin authority | bounded auth/ranking/main | deleted/age/admin/lifecycle transcripts |
 | `CLIENT-P3-SELECT-PROBE-001` | Ready | all P3 character leaves + P2 metadata | bounded `internal/probe` + session tests | full transition transcript |
