@@ -54,11 +54,13 @@ This replace-in-place snapshot records committed closure of
   LoginSuccess animation boundary into Select, complete select metadata,
   New/Delete local-list effects, StartGame success/failure transition, LogOut
   success/failure return and full connection-lifetime ordering.
-- Legacy read authority is not yet traced: bound it to exact select-scene packet
-  consumers and serializers before writes. Every `.cs` file remains read-only.
-- Tentative Go write authority is closed until tracing: bounded
-  `internal/probe` plus focused production session tests; refine exact paths in
-  the active index before modifying Go.
+- Legacy authority is traced and closed to LoginScene animation, SelectScene
+  LastAccess sort/New prepend/Delete first-index removal/StartGame transitions,
+  GameScene logout transitions and exact serializers. Every `.cs` file remains
+  read-only.
+- Exact Go write authority is `internal/probe/{network.go,network_test.go}`;
+  new `internal/probe/{select_state.go,select_state_test.go}`; and new
+  `cmd/crystal-server/p3_select_probe_session_test.go` only.
 - Forbidden scope: native client UI/settings/patcher, P1 version handshake, P2
   account-auth UI, no-op Credits, no-producer StartGameDelay/RelogDelay, broad
   dumps, completed P3 domain behavior and all C# writes.
@@ -93,8 +95,6 @@ This replace-in-place snapshot records committed closure of
    `2cb8a85baa04b50b6a604676c09cf11c2aba0261`, exact status/lock/process,
    `git diff --check` and all three C# gates.
 3. Read only the `CLIENT-P3-SELECT-PROBE-001` matrix row, exact P3 stage row and
-   named evidence. Search archive by leaf ID, SelectScene, LoginSuccess,
-   NewCharacter, DeleteCharacter, StartGame, LogOut and probe/transcript.
-4. Trace exact Legacy consumers and current Go probe/session coverage, refine
-   finite missing behavior and exact write authority in the active index, then
-   implement the smallest Go-only transcript and run its leaf gate.
+   named evidence; use the already traced Legacy consumer rulings above.
+4. Implement the bounded client state/transcript and production-session proof
+   only in the five authorized paths, then run its probe/vector and leaf gates.

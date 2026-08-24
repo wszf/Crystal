@@ -50,11 +50,12 @@ Keep this file at or below 300 lines and 32 KiB.
 - Go matrix anchors to read: only the P3 finite-inventory row
   `CLIENT-P3-SELECT-PROBE-001`, exact P3 stage row, and evidence headings/tests
   named by that row. Do not read the full matrix.
-- Legacy read authority is closed until bounded tracing: exact select-scene
-  consumers for LoginSuccess/New/Delete/StartGame/LogOut plus packet serializers;
-  every C# file remains read-only.
-- Tentative Go write authority is closed until tracing: bounded `internal/probe`
-  and focused production session tests; refine exact paths before any write.
+- Legacy source authority is traced and closed: exact LoginScene animation,
+  SelectScene sort/prepend/remove/result transitions, GameScene logout consumers
+  and packet serializers; every C# file remains read-only.
+- Exact Go write authority: `internal/probe/{network.go,network_test.go}`; new
+  `internal/probe/{select_state.go,select_state_test.go}` and new
+  `cmd/crystal-server/p3_select_probe_session_test.go` only.
 - Required gate: deterministic complete transition transcript, vector/probe
   output, repeated/focused race, cadence-aware integration, diff/status/process,
   and all six C# gates.
