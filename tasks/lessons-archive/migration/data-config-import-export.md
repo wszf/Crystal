@@ -151,3 +151,9 @@
 - Prevention: 对覆盖 `Attacked` 的怪物先标注它是否调用基类/是否显式加 AttackBonus，再决定调用方是否传递或补算；测试 fixture 必须设置非零 AttackBonus。
 - Verification: helper 已移除额外加成，测试以 AttackBonus=2 仍断言传入 damage=10；IcePillar 定向测试通过。
 
+### 2026-08-24 — Source-precedence transcript 必须隔离关服 checkpoint 与 Legacy 留存门禁
+
+- Symptom: 主审将候选从 HTTP wrapper 收紧到 `runServerWithContext` 后，首次编译残留未使用 `fmt`；首次 direct-binary reload 又只返回 2 个而非 3 个账户；第二会话随后被首连接安装的短期 IP block 静默拒绝并在版本握手处 EOF。
+- Root cause: 删除 HTTP fixture 时未同步 import；新建账户没有角色，命中了 Legacy 对首账户之后无留存角色账户的加载过滤；多连接生产 transcript 没有隔离进程级 IP block。
+- Prevention: wrapper 收紧后立即跑 touched compile；需要通过 117 loader 验收的新账户必须创建一个可留存角色或避免按原始写入数断言；非 gate 测试显式将 `IPBlockDuration` 设为零并保留真实 `MaxIP` 语义。为单独证明 graceful checkpoint，先等待 SaveJSON hook 完成，再把冲突 binary 写回，最后取消生产 context。
+- Verification: 移除残留 import、给 TCP 新账户创建 `TCPHero`、将测试 IP block 设为零后，精确定向测试曾通过；独立 review 随后指出该夹具会不必要地触及 P3 character-metadata 边界，最终改为在同一 login-stage 连接用已完成的 ChangePassword 路径触发 SaveJSON，并直接重载两个原有 JSON 账户。关服前恢复的冲突 binary 仍只能由最终 checkpoint 替换，direct 117 reload 保留 JSON-backed 账户、密码变化与登录 metadata，并清除冲突 binary global sentinel。

@@ -578,3 +578,10 @@
 - Root cause: 依据概念目录名构造参数，没有先用当前 Go 根目录的 `rg --files`/目录清单确认实际路径。
 - Prevention: 每次 Go 读取先核验根目录和精确候选路径；只传已存在的路径或让 `rg` 在已存在目录内处理模式，失败调用整体作废。
 - Verification: 本次没有 Go 文件写入；后续重跑只使用已确认的 `cmd`、`internal`、`docs` 路径。
+
+### 2026-08-24 — Source-precedence 恢复状态审计再次混仓
+
+- Symptom: 首个 Legacy 状态调用使用 `git -C` 混读 Go 仓库。
+- Root cause: 恢复模板没有在发送前机械拒绝跨仓参数。
+- Prevention: 每次调用只允许当前 `workdir` 所属仓库；命令文本出现 `git -C` 或对侧根时拒绝发送。
+- Verification: 整次输出已作废；双仓 HEAD/status/三类 C# 门禁随后以独立 `workdir` 零退出重跑。

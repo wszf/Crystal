@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 12:35 (Asia/Singapore)
+Last verified: 2026-08-24 13:58 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,34 +39,34 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `PERSIST-P2-SOURCE-PRECEDENCE-001`
-- Status: `Active`; `AUTH-P2-ACCOUNT-SESSION-001` is Complete at Go
-  `96ffa15e5719d00bb14eca116ff9e6cb9e5afead`.
-- Outcome: prove that configured JSON account/global state wins over a
-  conflicting Legacy binary source, and that the registered Legacy checkpoint
-  subsequently receives only the authoritative JSON-backed state.
-- Go matrix anchors to read: the P2 row plus the single child row beginning
-  with exact leaf ID `PERSIST-P2-SOURCE-PRECEDENCE-001`; do not read the full
-  matrix.
-- Legacy read authority: the already frozen version-117 account format only;
-  this leaf adjudicates Go startup source precedence and every C# file remains
-  read-only.
-- Go write authority: new `cmd/crystal-server/p2_account_precedence_test.go`;
-  bounded startup code only if the production transcript fails; P2 matrix
-  evidence.
-- Required gate: conflicting nonzero JSON/binary sentinels through
-  `runServerWithContext` startup, login, checkpoint, and direct-binary reload;
-  repeated test, compile, diff/status/process, and all six C# gates.
-- Forbidden scope: account-session reopening, P12 imported-header counter/global
-  recovery, character metadata, storage/NPC behavior, and every C# write.
+- Leaf ID: `DISC-P3-CLOSURE`
+- Status: `Active`; `PERSIST-P2-SOURCE-PRECEDENCE-001` is Complete at Go
+  `4729fed32ded396d36b05c4bdafad6e17e4fc1dd`.
+- Outcome: perform a bounded P3-only inventory audit and convert the current
+  ranking, administrator-capability, and client-startup residuals plus the two
+  registered P3 cross-phase findings into a finite child denominator,
+  dependencies, exclusions, and evidence owners before any P3 implementation.
+- Go matrix anchors to read: the single P3 stage row; the cross-phase bullets
+  `CHAR-P3-BAN-DELETE-001` and `ADMIN-P3-ACCOUNT-OPS-001`; then only the P3
+  evidence headings or rows named by those anchors. Do not read the full matrix.
+- Legacy read authority: reachable NewCharacter/DeleteCharacter/StartGame/
+  LogOut, SelectInfo, operator-account, ranking, and client-startup entry points;
+  every C# file remains read-only and audit tooling remains Go-only.
+- Go write authority: P3 finite-inventory matrix evidence only; Legacy active
+  index/handoff control updates. No production or test implementation is owned
+  by this discovery leaf.
+- Required gate: bounded Legacy/Go handler and test ledgers, explicit Completed/
+  Ready/dependency/exclusion rulings, one independent read-only `luna_worker`
+  denominator review, matrix/index reconciliation, control/diff/status/process,
+  and all six C# gates.
+- Forbidden scope: implementing a child before scope freeze, reopening P2,
+  inventorying P4-P12, broad matrix/source dumps, and every C# write.
 
-`AUTH-P2-ACCOUNT-SESSION-001` is Complete at Go
-`96ffa15e5719d00bb14eca116ff9e6cb9e5afead`. All TCP
-NewAccount 0..8 and ChangePassword 0..6 results, Unicode unanchored email,
-unchecked index plus creation/login metadata, active/expired localized ban,
-wrong-stage and banned-session survival, listener-owned reason-1 takeover,
-claim identity, JSON/117 reload, repeated/race tests, fresh full tests/full race,
-vet, and build pass. The retained-gap version-117 header counter remains P12.
+`PERSIST-P2-SOURCE-PRECEDENCE-001` is Complete at Go
+`4729fed32ded396d36b05c4bdafad6e17e4fc1dd`. Exact production startup with
+conflicting JSON/117 account and global sentinels proves JSON authority,
+non-merge, graceful final checkpoint replacement, and direct 117 reload under
+repeated/race tests. Retained-gap counters and global re-export remain P12.
 
 `CFG-P1-CONTRACT-001` is Complete in the verified Go candidate. Exact-case and
 first-match INI behavior, UInt16 fallback/write-back, default production path,
@@ -126,17 +126,20 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
 - OPS lifecycle code/evidence is committed at Go `cb595b4`; no lifecycle path
   remains protected.
 - Account-session code and matrix evidence are committed at Go `96ffa15`; no
-  account-session path remains protected. The active source-precedence leaf
-  owns only its new test and bounded startup code if the transcript fails.
+  account-session path remains protected.
+- Source-precedence test/evidence is committed at Go `4729fed`; no P2 source-
+  precedence path remains protected. The Active P3 discovery leaf owns only
+  finite-inventory documentation.
 
 ### Remaining acceptance work
 
-- [ ] Seed conflicting JSON and version-117 account/global sentinels, including
-      the same account ID with different passwords and metadata.
-- [ ] Prove production startup/login uses only JSON authority and does not merge
-      the conflicting binary account/global state.
-- [ ] Gracefully checkpoint, reload the resulting binary directly, and prove it
-      contains the JSON-backed authority; repeat and run the focused leaf gate.
+- [ ] Enumerate the reachable Legacy P3 entry-point families and map every
+      existing Go production/test claim without reopening completed P2 work.
+- [ ] Replace ranking, administrator-capability, and client-startup residuals
+      plus the two registered P3 findings with finite child leaves and explicit
+      dependencies/exclusions.
+- [ ] Obtain independent denominator review, reconcile matrix/index counts, and
+      freeze P3 scope without implementing any child in this discovery leaf.
 
 ### P1 frozen child registry
 
@@ -162,8 +165,8 @@ selected now.
 ### P2 frozen child registry
 
 Independent read-only reviewer `01a031c0-18ea-71e3-ba9f-b6cf96be57d4`
-accepted this exact eight-child denominator after two rounds. Five are Complete,
-one is Active, and two are Ready. This is a P2 denominator
+accepted this exact eight-child denominator after two rounds. Six are Complete
+and two are dependency-blocked Ready. This is a P2 denominator
 only.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -175,7 +178,7 @@ only.
 | `STORAGE-P2-NPC-GATE-001` | Ready | `NPC-P7-ACCESS-GATE-001` | bounded storage handlers + new `p2_storage_npc_gate_test.go` | all-handler wrong-stage + NPC boundary/race |
 | `PERSIST-P2-ACCOUNT-BRIDGE-001` | Complete | — | none | existing JSON/117/global merge evidence |
 | `PERSIST-P2-CHECKPOINT-RESTART-001` | Complete | bridge | none | existing production checkpoint/restart smoke |
-| `PERSIST-P2-SOURCE-PRECEDENCE-001` | Active | bridge | new `p2_account_precedence_test.go`; bounded startup if needed | conflicting-source startup/checkpoint/reload |
+| `PERSIST-P2-SOURCE-PRECEDENCE-001` | Complete | bridge | new `p2_account_precedence_test.go`; bounded startup if needed | conflicting-source startup/checkpoint/reload |
 
 ## Scope-freeze discovery queue
 
@@ -186,7 +189,7 @@ broad unnamed scope.
 |---|---|---|---|
 | `DISC-P1-CLOSURE` | P1 | Complete | 10 unfinished finite children + 2 completed audit items |
 | `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 5 Complete + 3 unfinished |
-| `DISC-P3-CLOSURE` | P3 | Discovery | finite startup/admin/ranking children |
+| `DISC-P3-CLOSURE` | P3 | Active | finite startup/admin/ranking children |
 | `DISC-P4-CLOSURE` | P4 | Discovery | finite map/bootstrap/visibility children |
 | `DISC-P5-CLOSURE` | P5 | Discovery | finite spell/combat/AI/respawn/packet children |
 | `DISC-P6-CLOSURE` | P6 | Discovery | finite item/equipment/craft children |

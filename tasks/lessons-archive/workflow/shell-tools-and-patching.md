@@ -377,3 +377,10 @@
 - Root cause: patch-formatted draft text was pasted into a raw file replacement without a literal-content review.
 - Prevention: before sending a heredoc replacement, mechanically reject leading patch markers and prefer one `apply_patch` update when practical; always read the complete replaced file back.
 - Verification: the write succeeded, the exact accidental prefixes were removed immediately, full handoff readback contained no markers, and the migration control checker plus `git diff --check` passed.
+
+### 2026-08-24 — Source-precedence archive 零匹配必须显式接收
+
+- Symptom: 首次 archive 精确检索在合法零匹配时仍由 `set -e` 退出 1。
+- Root cause: 未在发送前声明 `rg` 退出 1 是有效答案。
+- Prevention: 可能合法零匹配的检索必须显式接收退出 0/1，只把大于 1 视为错误。
+- Verification: 失败调用全部作废；随后以显式 0/1 分支确认无精确匹配，并以 version-117/checkpoint 关键词取得有限命中。
