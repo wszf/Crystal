@@ -416,3 +416,24 @@
 - Root cause: 把“已发送 Disconnect/已关闭连接”当成“StopGame metadata 已提交”，并让 account claim replacement、cleanup completion、rollback 和 FIFO reservation 各自独立，没有一个可回滚的顺序边界。
 - Prevention: character StopGame 在 auth 单锁内原子写 LastIP+LastAccess；同 session key 的 takeover 由 transition lock 串行，旧 session 在 metadata cleanup 后、claim release 前关闭 completion channel；timeout rollback 只恢复尚未 released 的 prior claim。LoginSuccess 在完成屏障后重新投影；FIFO timeout 显式取消 ticket 并在 serving 前进时跳过，禁止遗留 Cond waiter。
 - Verification: production explicit/disconnect/duplicate-login/game-to-observer/observer-only/pre-Game transcripts、source-order Deleted-only four-cap、JSON/117、rollback/released-race 和 timed-ticket tests 普通/repeated/race 均 exit 0；fresh unexcluded full/full-race/vet/build 通过，最终 reviewer `01a0351b-a7a3-7ac3-8cb0-06cb2da74cb0` 返回 `no findings`。
+
+### 2026-08-25 — StartGame 地图名比较不得擅自清理持久字符串
+
+- Symptom: `NoReconnectMap` 候选在调用 current-culture 比较前使用 `TrimSpace`，会让 Legacy 精确不匹配的带空格值错误跳转并消费随机位置。
+- Root cause: 把配置友好化直觉带入了 `GetMapByNameAndInstance` 的原始持久字段比较；Legacy 只做 `CurrentCultureIgnoreCase`，不裁剪字符串。
+- Prevention: 地图名 source-order、instance 与 culture 规则必须逐项复制真实 lookup；任何 trim、规范化或 fallback 都要有 Legacy 消费者证据。
+- Verification: 生产移除 trim；带空格 `NoReconnectMap`、已加载无空格同名目标且有效当前点的定向测试 `-count=10` exit 0，证明保留当前地图且不消费随机数。
+
+### 2026-08-25 — StopGame 的旁观者通知失败不得中断权威清理
+
+- Symptom: 显式 logout 新增的 guild/lover notification 在接收者写失败时直接 `return`，会留下 stage Game/world player/ranking，但 guild 已离线且 LastLogout 已写，形成部分 StopGame。
+- Root cause: 把 Legacy 队列式尽力通知改成同步网络事务，并让接收者 I/O 成为权威 cleanup 的前置成功条件。
+- Prevention: logout 领域状态、持久化、world/ranking removal 和 Select transition 必须继续完成；对其他玩家的 guild/relationship 投递只记录错误，不得回滚或中止离场。
+- Verification: 两个新增投递点已改为 log-and-continue；现有显式 guild/lover/re-entry/ranking production transcripts `-count=10` exit 0，新增关闭 lover sink 的 production transcript 也以 `-count=10` 证明 caller 仍收到 LogOutSuccess、离开 world 且 ranking count 归零。
+
+### 2026-08-25 — Start/Logout closure 会暴露旧 fixture 的隐式地图与通知假设
+
+- Symptom: 首次 fresh full test 有三个双人 guild transcript 在成员显式 logout 后残留 `GuildMemberChange(offline)`，下一断言误读；utility transcript 的角色仍是默认 map 0，但测试只向共享 world 注册 map 42，精确 StartGame 因 current/bind/StartPoint 均不可解返回 Result 3。
+- Root cause: 旧测试依赖 Go 的“任意无效位置落到传入地图”近似，并把 Legacy `PlayerLogged(false)` 早于 ObjectRemove 的通知漏出 transcript；新增精确生命周期后这些隐藏前提成为真实回归。
+- Prevention: 多人 logout 必须消费 `GuildMemberChange -> ObjectRemove`；自定义 map fixture 必须显式 seed living HP 与该 map 的 authoritative runtime/bind，不得依赖测试 helper 默认 map 或旧 fallback。
+- Verification: 三个 guild transcript 和 utility 四角色 fixture 已按真实 authority 修正，四个失败测试定向 `-count=10` exit 0；原 fresh full 命令 exit 1，必须在修复后重新跑 fresh unexcluded full gate，不能覆盖失败记录。

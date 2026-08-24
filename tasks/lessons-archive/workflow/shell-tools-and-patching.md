@@ -512,3 +512,6 @@
 - Root cause: 复用了混仓状态模板，并把 leaf-specific 恢复事故继续追加到已接近 50 KiB 上限的 active canonical。
 - Prevention: 恢复命令发送前机械拒绝 `git -C`/对侧根，双仓状态物理拆调用；事故证据进入 workflow archive，active 只保留既有 C01/C28 规则。
 - Verification: 混仓与非零控制调用全部作废；两仓状态/C# 门禁已分别零退出重跑，本节归档后 active 恢复限额内并重新执行控制检查。
+- Strengthening during Start/Logout archive search: 首次 `rg -l ... | sort` 在零匹配时被下游 `sort` 掩成 exit 0；该空输出未用于裁决，随后显式捕获 `rg` 返回码并仅接受 0/1 重跑，再用较宽但仍 leaf-specific 的 StartGame/LogOut 关键词定位六个文件。可为空检索禁止用排序/截断管道代替退出码分支。
+- Strengthening during Start/Logout compaction handoff: durable handoff 初稿把控制脚本要求的固定标题 `## Active leaf and protected work` 改写成同义标题，导致 `tasks/check-migration-control.sh` exit 1；该复合调用全部输出作废。以后 replace-in-place handoff 必须从现有结构复制固定标题，只替换正文；回读后以控制脚本零退出重跑验证。本次已恢复精确标题并重新执行完整单仓门禁。
+- Strengthening during Start/Logout runtime-persistence coverage: 在既有 re-entry transcript 中直接调用 `world.update(objectID, ...)`，却没有先从该测试自己的 StartGame `UserInfo` 提取 `objectID`，只编译门禁报 undefined。新增任何生产 seam 前必须在同一测试作用域列出 ID authority，不能借用相邻测试的同名局部变量；本次从首轮 bootstrap 回包解析 object ID 后，定向测试 `-count=10` exit 0，并锁定显式 logout 从 world snapshot 持久化最终位置。
