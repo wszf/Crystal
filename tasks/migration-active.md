@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 06:54 (Asia/Singapore)
+Last verified: 2026-08-25 07:53 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -16,8 +16,8 @@ Keep this file at or below 300 lines and 32 KiB.
   not need to be calculated in one up-front pass.
 - `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
   are publishable only for a scope-frozen phase.
-- Current project-wide ETA and percentage remain `Unavailable`: P1, P2 and P3
-  now have finite denominators, but eight other phases still have open
+- Current project-wide ETA and percentage remain `Unavailable`: P1-P4 now have
+  finite denominators, but seven other phases still have open
   inventories.
 
 ## Phase routing summary
@@ -28,7 +28,7 @@ Keep this file at or below 300 lines and 32 KiB.
 | P1 | In progress | Frozen | `DISC-P1-CLOSURE` (Complete) |
 | P2 | In progress | Frozen | `DISC-P2-CLOSURE` (Complete) |
 | P3 | Complete | Frozen | `DISC-P3-CLOSURE` (Complete) |
-| P4 | In progress | Open | `DISC-P4-CLOSURE` |
+| P4 | In progress | Frozen | `DISC-P4-CLOSURE` (Complete) |
 | P5 | In progress | Open | `DISC-P5-CLOSURE` |
 | P6 | In progress | Open | `DISC-P6-CLOSURE` |
 | P7 | In progress | Open | `DISC-P7-CLOSURE` |
@@ -40,25 +40,28 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `DISC-P4-CLOSURE`
-- Status: `Active`; P3 is scope-frozen and Complete with all eleven children
-  Complete after `CLIENT-P3-SELECT-PROBE-001` passed its phase-closure gates.
-- Outcome: convert P4's finite map/bootstrap/movement/visibility residual into
-  an exact child registry with dependencies, ownership and acceptance gates;
-  do not implement a functional child in this discovery leaf.
-- Go matrix anchors to read: exact `| P4 |` stage row, the named P4 map-loading,
-  map-info, enter-map, movement and visibility evidence headings/tests, and the
-  registered `BOOT-P4-STARTPOINT-001` finding only. Do not read the full matrix.
-- Legacy read authority: bounded P4 map loader/bootstrap, map-entry/location,
-  Turn/Walk/Run, visibility/object producers and matching packet serializers;
+- Leaf ID: `MAP-P4-LOAD-001`
+- Status: `Active`; P4 is scope-frozen In progress with ten finite children,
+  two Complete and eight unfinished, after independent reviewer
+  `01a03617-76c2-7652-ab64-7e27143ce72b` accepted the corrected denominator.
+- Outcome: preserve Legacy per-map v0-v7/v100 loading/registration without a
+  synthetic or specially required exported-world primary; continue after each
+  missing/read/corrupt map, retain source order, exclude failed-map StartPoints,
+  and emit the exact exception/localized title/filename/count observability.
+- Go matrix anchors to read: exact P4 inventory `MAP-P4-LOAD-001` row, exact
+  `| P4 |` stage row and named map-loading evidence only. Do not read the full
+  matrix.
+- Legacy read authority: `Map.Load`, `MapInfo.CreateMap`, bounded
+  `Envir.StartEnvir` map loop/message order and matching localization keys;
   every C# file remains read-only.
-- Exact Go write authority during discovery: `docs/migration-matrix.md` finite
-  P4 inventory only; Legacy active index/handoff remain main-agent control.
-- Required gate: finite source/Go evidence ledger, dependency/phase-boundary
-  rulings, independent read-only denominator review, matrix/index consistency,
-  diff/status/process and all six C# gates.
-- Forbidden scope: P5 combat/spells/AI, P6 items, P7 NPC script semantics, P8
-  pets/mounts, implementation code, broad matrix/source dumps and every C# write.
+- Exact Go write authority: `cmd/crystal-server/{maps.go,maps_test.go,main.go,
+  process_lifecycle_test.go}` and P4 matrix evidence only.
+- Required gate: touched-package compile, focused production startup and loader
+  tests, repeated tests, focused race, diff/status/process checks and all six
+  C# gates; run integration gates if shared startup architecture changes.
+- Forbidden scope: `BOOT-P4-STARTPOINT-001` final no-startpoint validation,
+  P5 monster spawns/combat/AI, P6 item semantics, P7 NPC scripts, P8 companions,
+  P12 persistence mechanics, broad matrix/source dumps and every C# write.
 
 `CHAR-P3-BAN-DELETE-001` is Complete at Go
 `c0f70e833b15599d8acb9ad3ebf423cb731fc6a9`. Exact wrong-stage lifetime,
@@ -133,43 +136,34 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
 
 ### Protected Go ownership
 
-- LOG code and matrix evidence are committed at Go `0b7a680`; no Go LOG path
-  remains protected.
-- NET gate code and evidence are committed at Go `46c1b81`; no gate file remains
-  protected.
-- NET status code and evidence are committed at Go `269590b`; no status path
-  remains protected.
-- NET HTTP code/evidence is committed at Go `dbbe12e`; no HTTP path remains
-  protected.
-- OPS lifecycle code/evidence is committed at Go `cb595b4`; no lifecycle path
-  remains protected.
-- Account-session code and matrix evidence are committed at Go `96ffa15`; no
-  account-session path remains protected.
-- Source-precedence test/evidence is committed at Go `4729fed`; no P2 source-
-  precedence path remains protected.
-- Character-creation code/tests/matrix are committed at Go `a7f16f8`; no
-  creation path remains protected.
-- Account-operator code/tests/matrix are committed at Go `2e6df8a`; no account-
-  ops path remains protected.
-- Admin-authority code/tests/matrix are committed at Go `02a63ce`; no admin-
-  authority path remains protected.
-- Ban/delete code/tests/matrix are committed at Go `c0f70e8`; no ban/delete
-  path remains protected.
-- Ranking lifecycle code/tests/matrix are committed at Go `fded273`; no rank
-  path remains protected.
-- Character-metadata code/tests/matrix are committed at Go `f0a1ff8`; no
-  metadata path remains protected and protocol/117 needed no serializer write.
-- Start/Logout code/tests/matrix are committed at Go `2cb8a85`; no transition
-  path remains protected.
-- Select-probe code/tests/matrix are committed at Go `76d7f48`; no Select-probe
-  path remains protected.
+- `MAP-P4-LOAD-001` exclusively owns the four Go paths named in Active batch
+  until its leaf gate, matrix update and commit are complete.
 
 ### Remaining acceptance work
 
-- [ ] Enumerate finite P4 children from only the registered P4 anchors and exact
-      Legacy/Go evidence, including the StartPoint startup child.
-- [ ] Obtain independent denominator review, scope-freeze P4, and route one
-      dependency-ready functional child without implementing it in discovery.
+- [ ] Replace exported-world synthetic/required primary behavior with ordered
+      independent per-map load results and Legacy-compatible diagnostics.
+- [ ] Prove missing/read/corrupt continuation, loaded-map/StartPoint exclusion,
+      metadata-count message and production pre-bind behavior under repeat/race.
+
+### P4 frozen child registry
+
+Independent reviewer `01a03617-76c2-7652-ab64-7e27143ce72b` rejected two
+candidate revisions, then accepted this ten-child denominator with no remaining
+finding. Two children are Complete and eight are unfinished.
+
+| Leaf ID | Status | Dependency | Go write authority | Additional gate |
+|---|---|---|---|---|
+| `MAP-P4-LOAD-001` | Active | — | `cmd/crystal-server/{maps.go,maps_test.go,main.go,process_lifecycle_test.go}` | failure continuation/order + repeated/race |
+| `BOOT-P4-STARTPOINT-001` | Ready | map load + LOC | bounded `main.go` + startup test | localized pre-bind rejection |
+| `ENTRY-P4-LOCATION-001` | Complete | P3 start/logout | none | existing transition transcripts |
+| `MOVE-P4-ACTION-001` | Complete | — | none | existing movement/repeated/race |
+| `MOVE-P4-COLLISION-RULES-001` | Ready | P9 conquest state | bounded world/main + RequiredGroup test | authenticated gate/order matrix |
+| `VIS-P4-OBJECT-001` | Ready | P5 hide/show producers | legacyworld/worlddata + bounded server visibility | recipient/filter/re-entry matrix |
+| `MAP-P4-DETAIL-001` | Ready | map load + StartPoint | protocol/probe + bounded map-info session | payload/order/suppression/search |
+| `MAP-P4-LIGHT-001` | Ready | — | `time_of_day.go`, `main.go` + tests | UTC production clock/non-UTC host |
+| `MAP-P4-NOREINCARNATION-AUTH-001` | Ready | P5 spell | focused authenticated session | unchanged amulet/no cast |
+| `CHAT-P4-MAP-CONTEXT-001` | Ready | P6 shout arming | map-rule import + bounded chat/session | NoNames/shout recipients/order |
 
 ### P1 frozen child registry
 
@@ -240,7 +234,7 @@ broad unnamed scope.
 | `DISC-P1-CLOSURE` | P1 | Complete | 10 unfinished finite children + 2 completed audit items |
 | `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 5 Complete + 3 unfinished |
 | `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: all Complete |
-| `DISC-P4-CLOSURE` | P4 | Active | finite map/bootstrap/visibility children |
+| `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
 | `DISC-P5-CLOSURE` | P5 | Discovery | finite spell/combat/AI/respawn/packet children |
 | `DISC-P6-CLOSURE` | P6 | Discovery | finite item/equipment/craft children |
 | `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
@@ -256,9 +250,6 @@ broad unnamed scope.
   retained-record gaps, checkpoint write, restart, and the next account create.
   Live/JSON HTTP counters are complete; this finite importer/checkpoint gap is
   P12-owned and does not reopen P1 HTTP transport behavior.
-- `BOOT-P4-STARTPOINT-001` (`Ready` input to `DISC-P4-CLOSURE`): preserve the
-  mandatory nonempty Legacy `StartPoints` startup gate from authoritative
-  `SafeZoneInfo.StartPoint` map/bootstrap data and its localized failure.
 - `PERSIST-P12-CANSTART-DBCHECKS-001` (`Ready` input to
   `DISC-P12-CLOSURE`, dependent on P5/P6 catalogs): preserve
   `EnforceDBChecks`, first-missing monster/item source order, configured-name

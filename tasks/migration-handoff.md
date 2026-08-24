@@ -1,100 +1,90 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 06:56 (Asia/Singapore)
+Last updated: 2026-08-25 08:00 (Asia/Singapore)
 
-This replace-in-place snapshot records the committed closure of
-`CLIENT-P3-SELECT-PROBE-001`, P3 phase-closure gates, and routing to the sole
-Active discovery leaf `DISC-P4-CLOSURE`.
+This replace-in-place snapshot records the accepted and Go-committed closure of
+`DISC-P4-CLOSURE`, the synchronized P4 finite registry, and routing to
+`MAP-P4-LOAD-001` pending the Legacy documentation commit below.
 
 ## Goal and control-plane state
 
 - Goal remains Active and unchanged. It is neither complete nor blocked.
 - Main authority remains `gpt-5.6-sol/ultra`; bounded workers remain
-  `luna_worker` (`gpt-5.6-luna/max`). Read-only reviewer
-  `01a035ec-07b1-71f1-90dd-5fb5760f0467` found three initial transcript gaps,
-  then returned `no findings` after fixes and was closed. No agent or Go/
+  `luna_worker` (`gpt-5.6-luna/max`). Fresh read-only reviewer
+  `01a03617-76c2-7652-ab64-7e27143ce72b` is closed and no agent or Go/
   crystal-server process remains active.
-- P3 is scope-frozen and Complete with all eleven finite children Complete.
-  P1/P2 remain frozen In progress. `DISC-P4-CLOSURE` is the unique Active leaf;
-  no P4 functional implementation is authorized until its finite inventory is
-  reviewed and scope-frozen.
+- P4 now has an accepted exact ten-child denominator: two Complete and eight
+  unfinished. `DISC-P4-CLOSURE` is Complete, P4 is scope-frozen In progress,
+  and `MAP-P4-LOAD-001` is the sole Active leaf in both candidate control files.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
 - Branch: `master`; HEAD:
-  `5440e6e39eb4d20d9b81a9d4bd66ffa0c4d84812`
-  (`docs(migration): trace select probe leaf`).
-- Tracked unstaged: `tasks/lessons-archive/migration/protocol-session-wire.md`,
-  `tasks/lessons.md`, `tasks/migration-active.md`, and this
-  `tasks/migration-handoff.md`. Staged and untracked sets are empty.
-- The archive records candidate fixture failures and review fixes; the active
-  lesson records the corrected recurring fixed-heading control mistake; the
-  active index closes P3 and routes only `DISC-P4-CLOSURE`.
-- Index lock is absent. `tasks/check-migration-control.sh`, `git diff --check`
-  and cached diff check exited 0. All tracked/staged/untracked Legacy C# gates
-  are empty.
+  `bed83c6ec7055bbb644a18c5dbce59acab0fc116`
+  (`docs(migration): close select probe and p3`).
+- Tracked unstaged: `tasks/lessons.md`, `tasks/migration-active.md`, and this
+  handoff. Staged and untracked sets are empty.
+- `tasks/lessons.md` contains two bounded strengthening substitutions for the
+  recurring P4 cross-repository/`rg` command mistakes. The active index records
+  P4 Frozen, the ten-child registry and exact `MAP-P4-LOAD-001` authority.
+- Control limits/headings, diff checks, lock and all three Legacy C# gates must
+  remain clean before the Legacy documentation commit.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch: `main`; HEAD: `76d7f48a1d4ae2f4327bace60be2dd9fecfb4d6d`
-  (`migrate select client probe transcript`).
-- Worktree, index and untracked set are empty. The commit contains the five
-  bounded code/test paths plus `docs/migration-matrix.md`; the matrix marks the
-  Select child and P3 Complete and marks `DISC-P4-CLOSURE` Active.
-- Index lock is absent; diff/cached-diff checks, tracked/staged/untracked Go C#
-  gates and process audit are empty.
+- Branch: `main`; HEAD: `84db86606fff4ef88bf57c28688d00233b72e43a`
+  (`docs(migration): freeze p4 inventory`).
+- Worktree, index and untracked set are empty. The commit adds the accepted
+  ten-child P4 registry, marks P4 scope-frozen In progress, closes discovery
+  and routes MAP load Active.
+- The registry records earlier auditors
+  `01a035fe-9de9-7ab3-855a-a2c48e43d140` and
+  `01a035fe-c4c9-77d0-b0ff-abb7abfccefa`, denominator reviewer
+  `01a0360b-428d-7bb0-a036-830680fa9d8e`, and the fresh reviewer above.
+- Lock/process, diff/cached-diff and all three Go C# gates were empty/clean at
+  the matrix commit.
 
 ## Active leaf and protected work
 
-- Active leaf: `DISC-P4-CLOSURE`.
-- Read only the exact P4 stage row, named map-loading/map-info/enter-map/
-  movement/visibility evidence headings/tests, and registered
-  `BOOT-P4-STARTPOINT-001` finding. Do not read the full matrix.
-- Outcome: enumerate a finite P4 child registry with exact dependencies, Go
-  ownership and gates; obtain independent denominator review; scope-freeze P4;
-  then route one dependency-ready child without implementing it in discovery.
-- Legacy read authority is bounded to map loader/bootstrap, map entry/location,
-  Turn/Walk/Run, visibility/object producers and matching serializers. Every
-  `.cs` file remains read-only.
-- Exact Go write authority during discovery is P4 inventory prose in
-  `docs/migration-matrix.md` only; Legacy active index/handoff remain main-agent
-  control. P5 combat/AI, P6 items, P7 NPC scripts, P8 pets/mounts, broad dumps,
-  implementation code and every C# write are forbidden.
-- Select-probe work is committed at Go `76d7f48`; no Go path remains protected.
-  Its state parser is driven by `RunNetwork` and one bidirectional single-
-  connection failure/success transcript; production reads prove
-  ClientDisconnect is the final request in both probe lifetimes.
+- Active leaf: `MAP-P4-LOAD-001`.
+- Outcome: preserve Legacy per-map v0-v7/v100 metadata/cell/door/fishing/
+  walkability loading and ordered registration without a synthetic or specially
+  required exported-world primary; continue after missing/read/corrupt maps,
+  exclude their StartPoints, and preserve exception -> localized title ->
+  filename plus metadata-count observability.
+- Read only the exact P4 MAP-load inventory row/stage row and bounded Legacy
+  `Map.Load`, `MapInfo.CreateMap`, `Envir.StartEnvir` map loop/message order and
+  localization keys. Do not read the full matrix or broad source trees.
+- Exact Go write authority is `cmd/crystal-server/{maps.go,maps_test.go,main.go,
+  process_lifecycle_test.go}` plus bounded P4 matrix evidence. Legacy active
+  index/handoff remain main-agent control; every `.cs` file is read-only.
+- `BOOT-P4-STARTPOINT-001` final no-startpoint rejection, P5 combat/AI/spawns,
+  P6 item semantics, P7 NPC scripts, P8 companions and P12 persistence mechanics
+  remain forbidden.
 
 ## Verification ledger
 
-- Original candidate failures are retained: missing loaded StartPoint prevented
-  level-zero ranking; two goroutines closed one done channel; after fixture
-  repair the fake expected bare `probe` while real/Legacy ObjectChat emitted
-  `ProbeSelect: probe`. These were candidate-caused and are corrected.
-- Reviewer then found the state model direct-test-only, empty fake login
-  metadata, and weak production disconnect proof. The common `expectStateID`
-  path, bidirectional result 0..4/Banned/LogOutFailed/Success transcript,
-  complete metadata/list assertions and recorded production frames close all
-  three. Reviewer re-review returned `no findings`.
-- `go test ./internal/probe ./cmd/crystal-server -run '^$' -count=1` exited 0.
-- Full `go test ./internal/probe -count=10` and production
-  `TestP3SelectProbeRunsAgainstProductionSession -count=10` exited 0; focused
-  races for those scopes at `-count=3` exited 0.
-- Fresh unexcluded `go test ./... -count=1 -timeout=20m`, `go vet ./...`,
-  `go build ./...`, and `go test -race ./... -count=1 -timeout=30m` each exited
-  0. No failure or package was excluded from a claimed full pass.
+- Archive search and bounded Legacy/Go source/test ledgers covered map loading,
+  StartPoint, map detail, entry, movement, visibility, chat, UTC light and
+  NoReincarnation without reading the full matrix.
+- Fresh reviewer first rejected omitted map shout/NoNames, unsupported UTC-light
+  Complete status, and weak SearchMap/GameName/repeat gates. It rejected the
+  first correction for three stale candidate statements, then returned ACCEPT
+  with no remaining finding after all corrections. Zero reviewer writes/tests/
+  commits and no `.cs` changes occurred.
+- Locked P3 fresh unexcluded full tests/full race/vet/build at Go `76d7f48`
+  remain valid because discovery changed documentation only. No functional test
+  result is newly claimed for P4 discovery.
+- Required discovery closure gate is control/matrix consistency, diff/status/
+  process checks and all six C# gates; those are rerun immediately before commit.
 
 ## Exact recovery sequence
 
-1. In Legacy only, verify the exact four-file status, HEAD/control/diff/lock and
-   all three C# gates against this snapshot.
-2. In Go only, verify clean HEAD
-   `76d7f48a1d4ae2f4327bace60be2dd9fecfb4d6d`, lock/process and all three C#
-   gates. Do not rerun locked full gates unless committed code changes.
-3. Commit only the four owned Legacy documentation files after control/diff/C#
-   gates; the handoff may name this observed pre-documentation HEAD.
-4. Resume `DISC-P4-CLOSURE`: search the archive by that ID and exact P4 entity
-   keywords, read only the registered matrix anchors, run one bounded read-only
-   reviewer wave, and enumerate the finite P4 children without code writes.
+1. In Legacy, rerun control/diff/status/lock and all three C# gates; commit only
+   `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff.
+2. Verify both repositories clean, matrix/index/handoff agree, and no agent or
+   process remains active.
+3. Begin `MAP-P4-LOAD-001` under its exact four-file authority; derive focused
+   missing/read/corrupt/source-order/diagnostic tests before production edits.
