@@ -348,3 +348,11 @@
 - Prevention: listener-owned 跨会话状态需要一条真实 listener/accept 测试；claim replacement 还必须等待旧 cleanup 后发起第三次同账户登录，断言第二会话收到 reason 1、第三会话成功并保持可用。release 必须按 claim identity 比较，禁止只按 account key 删除。
 - Verification: 新 production-listener transcript 锁定两次登录的 reason-1 takeover；三会话 `net.Pipe` transcript 在旧 cleanup 后再次替换第二 claim，定向普通 `-count=5` 退出 0。
 - Strengthening after read-only review `01a031f8-b7cb-7c70-b729-bdb23b11b362`: 初版 production transcript 未逐项覆盖 NewAccount 0..8 与 ChangePassword 0..6，ChangePassword 的严格 ban-expiry 边界也只有静态代码；现已增加完整 TCP result-code 表和确定性 `Expiry > now`/equality service test。Reviewer 指出的 version-117 retained-gap counter 仍明确属于已登记 `PERSIST-P12-ACCOUNT-ID-001`，不得在本 P2 leaf 中过度声明。
+
+### 2026-08-24 — P3 closure 必须从配置路由和 operator handler 两端枚举管理员 authority
+
+- Symptom: 首轮 P3 Legacy 只读清单覆盖已登记的 ban/password/storage reset/removal，却遗漏 `Settings.GMPassword -> PlayerObject.Chat(@LOGIN)` 的瞬态提权，以及 AccountInfoForm 的空账户创建、元数据编辑、AdminAccount/RequirePasswordChange 切换。
+- Root cause: 把 cross-phase finding 中列出的操作示例当成完整入口集，只沿已知 operator-account button 追踪，没有反向检查 P1 已路由到 P3 的配置键，也没有机械枚举 AccountInfoForm 的全部事件处理器。
+- Prevention: scope-freeze 遇到“remaining administrator capabilities”时固定做双向闭包：从 matrix/config 路由符号追全部消费者；同时枚举 operator UI/control 的 handler 声明并逐个裁决可观察效果、动态会话影响和 phase owner。已有 runtime-admin 测试只能证明预置 authority 的消费者，不能替代 grant/revoke/GMPassword 生产入口。
+- Verification: 主线程分别零退出定位 `GMPassword`、`GMLogin`、`@LOGIN`、AdminAccount assignments 与 AccountInfoForm handlers；候选 P3 registry 增加独立 `ADMIN-P3-AUTHORITY-001`，并扩展 `ADMIN-P3-ACCOUNT-OPS-001` 到 create/edit/toggle/ban/reset/delete/wipe，Go-only ledger 复核当前只有 fixture 注入、没有可达 operator/GM-login API。
+- Strengthening after denominator review `01a0327e-55a1-7f63-9fb7-0b8bdcc061af`: 首版 registry 让 wire boundary、StartGame bootstrap 和 Start/Logout 三项重复拥有 result/location/runtime-GM 语义，并把 P12 完整 recovery 写成 operator leaf 前置依赖，形成 P3↔P12 伪循环。现已把 Complete 项严格限为 codec/dispatch 与 admission 后 payload，把 admission/result/location/logout 全归一个 Ready child；operator leaf 直接验 JSON/117，P12 只作为后续 multi-store 消费者。Reviewer 复读后以 11=4 Complete+7 Ready 接受，无重叠或循环。

@@ -384,3 +384,17 @@
 - Root cause: 未在发送前声明 `rg` 退出 1 是有效答案。
 - Prevention: 可能合法零匹配的检索必须显式接收退出 0/1，只把大于 1 视为错误。
 - Verification: 失败调用全部作废；随后以显式 0/1 分支确认无精确匹配，并以 version-117/checkpoint 关键词取得有限命中。
+
+### 2026-08-24 — P3 operator UI 路径必须先枚举项目根
+
+- Symptom: P3 closure 勘察把不存在的 `Server/MirForms` 追加到已存在的 `CharacterInfo.cs` 读取命令，整次调用退出 2。
+- Root cause: 依据 namespace/项目名猜了子目录，而实际独立项目根是 `Server.MirForms/`。
+- Prevention: 跨项目目录定位先用仓库根 `rg --files`，下一调用的每个路径只能来自该零退出清单；任一尾部路径失败使前段输出同时作废。
+- Verification: 错误调用全部丢弃；随后先枚举并确认 `Server.MirForms/Account`，再分别零退出重读 `CharacterInfo.cs` 和 operator account handlers。
+
+### 2026-08-24 — 一次性 Go 编辑器不能使用点号前缀并掩盖中间失败
+
+- Symptom: matrix 单行替换 helper 命名为 `.tmp_p3_matrix_edit.go`，`go run` 即使显式传入仍报告根目录无 Go 文件；后续删除命令成功又把复合 shell 的最终退出码变成零。
+- Root cause: 猜测 Go tool 会接受隐藏 `.go` 文件，并且复合命令没有先启用 `set -e`，只看工具调用最终退出码。
+- Prevention: 一次性 Go helper 使用非隐藏、精确自有的 `.go` 文件；复合命令第一行固定 `set -e`，程序内断言替换计数恰为一；只用 `apply_patch` 新增/删除并在新调用回读目标与 status。
+- Verification: 失败调用不用于状态裁决；随后以 `tmp_p3_matrix_edit.go`、`set -e` 和两个单匹配断言重跑，目标 P3 行精确更新，临时文件已由 patch 删除且 Go status 只剩 matrix。
