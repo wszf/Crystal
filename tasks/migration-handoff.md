@@ -22,18 +22,14 @@ This replace-in-place snapshot records committed closure of
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; HEAD: `47af9775eb9428bb0da6ccec83ea44fa32c40d7a`
-  (`docs(migration): checkpoint start logout leaf`).
-- Tracked unstaged files are exactly:
-  - `tasks/lessons-archive/migration/protocol-session-wire.md`
-  - `tasks/lessons-archive/workflow/shell-tools-and-patching.md`
-  - `tasks/migration-active.md`
-  - `tasks/migration-handoff.md`
-- Index and untracked set are empty. Archive edits preserve Start/Logout review,
-  fixture, notification and control-check lessons. The active index routes the
-  next leaf and records the committed Start/Logout authority.
-- Before this handoff rewrite, `tasks/check-migration-control.sh` and
-  `git diff --check` exited 0; all Legacy C# gates were empty.
+- Branch: `master`; observed HEAD:
+  `dc3a8cc1766656cbf6713112a7d2183f58bbd8b2`
+  (`docs(migration): close start logout leaf`).
+- Worktree, index and untracked set were empty immediately before this
+  handoff-only refresh. Recovery therefore expects exactly one documentation
+  commit delta from the observed HEAD and must compare the actual HEAD/status.
+- `tasks/check-migration-control.sh` and `git diff --check` exited 0; all Legacy
+  C# gates were empty.
 
 ## Go repository state
 
