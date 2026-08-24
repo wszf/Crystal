@@ -340,3 +340,11 @@
 - Root cause: 从末端 helper 和 schema 字段反推完整生产入口，把“实现存在”误当成“生产 transcript 已证明”，且没有逐项拆开 parse/merge、writer、restart 与跨阶段 mutation/projection authority。
 - Prevention: phase closure 的每个 Complete 行必须映射到实际测试；未测 wrong-stage/connection lifetime 必须留在 Ready。门禁从客户端 packet 追到 page producer、visibility、对象/range 和最终 consumer；跨阶段字段明确一个 mutation owner 和一个 projection consumer。Import parse/merge、account-only writer、global re-export 与多 store recovery 分开登记，禁止用 round-trip 一词掩盖空 section writer。
 - Verification: final review `01a031c0-18ea-71e3-ba9f-b6cf96be57d4` 精确指出 storage visibility/page、StartGameBanned、delete projection、wrong-stage lifetime 和 global writer 五项；P2 candidate 已把普通 NPC authorization 路由到 `NPC-P7-ACCESS-GATE-001`，将 all-handler wrong-stage transcript 留在 Ready，明确 P3 ban/delete mutation 与 P2 Login/Logout projection，并把 global re-export/recovery留给 P12。Review 只读、未运行测试、两仓无 C# 变化。
+
+### 2026-08-24 — duplicate-account takeover 必须分别证明 production wiring 与 claim identity
+
+- Symptom: 初版 P2 双会话测试直接向两个 handler 注入共享 authority，并在旧会话 cleanup 后只用新连接 KeepAlive；它能证明物理连接存活，却不能证明 `serveListener` 为所有 accepted sessions 共享同一 authority，也不能发现旧 release 误删新 claim。
+- Root cause: 把依赖注入 helper 当成 production wiring evidence，并把 socket 存活等同于 account-authority 仍登记。
+- Prevention: listener-owned 跨会话状态需要一条真实 listener/accept 测试；claim replacement 还必须等待旧 cleanup 后发起第三次同账户登录，断言第二会话收到 reason 1、第三会话成功并保持可用。release 必须按 claim identity 比较，禁止只按 account key 删除。
+- Verification: 新 production-listener transcript 锁定两次登录的 reason-1 takeover；三会话 `net.Pipe` transcript 在旧 cleanup 后再次替换第二 claim，定向普通 `-count=5` 退出 0。
+- Strengthening after read-only review `01a031f8-b7cb-7c70-b729-bdb23b11b362`: 初版 production transcript 未逐项覆盖 NewAccount 0..8 与 ChangePassword 0..6，ChangePassword 的严格 ban-expiry 边界也只有静态代码；现已增加完整 TCP result-code 表和确定性 `Expiry > now`/equality service test。Reviewer 指出的 version-117 retained-gap counter 仍明确属于已登记 `PERSIST-P12-ACCOUNT-ID-001`，不得在本 P2 leaf 中过度声明。

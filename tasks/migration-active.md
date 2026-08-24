@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-24 11:42 (Asia/Singapore)
+Last verified: 2026-08-24 12:35 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,25 +39,34 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `AUTH-P2-ACCOUNT-SESSION-001`
-- Status: `Active`; `DISC-P2-CLOSURE` is Complete and P2 scope is frozen at Go
-  `5646b49382af5c04f11086d34aff6b05bd6c703d`.
-- Outcome: make TCP NewAccount/Login/ChangePassword source-equivalent for
-  validation, account index/creation/login metadata, ban/retry localization,
-  wrong-stage connection lifetime, and duplicate-account reason-1 takeover.
+- Leaf ID: `PERSIST-P2-SOURCE-PRECEDENCE-001`
+- Status: `Active`; `AUTH-P2-ACCOUNT-SESSION-001` is Complete at Go
+  `96ffa15e5719d00bb14eca116ff9e6cb9e5afead`.
+- Outcome: prove that configured JSON account/global state wins over a
+  conflicting Legacy binary source, and that the registered Legacy checkpoint
+  subsequently receives only the authoritative JSON-backed state.
 - Go matrix anchors to read: the P2 row plus the single child row beginning
-  with exact leaf ID `AUTH-P2-ACCOUNT-SESSION-001`; do not read the full matrix.
-- Legacy read authority: bounded `Envir.NewAccount/Login/ChangePassword`, their
-  `MirConnection` Login-stage handlers, `AccountInfo`, and exact server-text
-  reason producers. Every C# file remains read-only.
-- Go write authority: `internal/auth/service.go` and focused tests; bounded
-  `cmd/crystal-server/main.go`; new `p2_account_session_test.go`; at most one new
-  account-session authority helper in that package; P2 matrix evidence.
-- Required gate: touched-package compile; focused authenticated success/ban/
-  retry/takeover/wrong-stage transcripts repeated and under race; JSON and 117
-  checkpoint/reload; diff/status/process and all six C# gates.
-- Forbidden scope: character lifecycle metadata, storage/NPC behavior, generic
-  P3/P7/P12 work, deployment, P1 call-site closure, and every C# write.
+  with exact leaf ID `PERSIST-P2-SOURCE-PRECEDENCE-001`; do not read the full
+  matrix.
+- Legacy read authority: the already frozen version-117 account format only;
+  this leaf adjudicates Go startup source precedence and every C# file remains
+  read-only.
+- Go write authority: new `cmd/crystal-server/p2_account_precedence_test.go`;
+  bounded startup code only if the production transcript fails; P2 matrix
+  evidence.
+- Required gate: conflicting nonzero JSON/binary sentinels through
+  `runServerWithContext` startup, login, checkpoint, and direct-binary reload;
+  repeated test, compile, diff/status/process, and all six C# gates.
+- Forbidden scope: account-session reopening, P12 imported-header counter/global
+  recovery, character metadata, storage/NPC behavior, and every C# write.
+
+`AUTH-P2-ACCOUNT-SESSION-001` is Complete at Go
+`96ffa15e5719d00bb14eca116ff9e6cb9e5afead`. All TCP
+NewAccount 0..8 and ChangePassword 0..6 results, Unicode unanchored email,
+unchecked index plus creation/login metadata, active/expired localized ban,
+wrong-stage and banned-session survival, listener-owned reason-1 takeover,
+claim identity, JSON/117 reload, repeated/race tests, fresh full tests/full race,
+vet, and build pass. The retained-gap version-117 header counter remains P12.
 
 `CFG-P1-CONTRACT-001` is Complete in the verified Go candidate. Exact-case and
 first-match INI behavior, UInt16 fallback/write-back, default production path,
@@ -116,19 +125,18 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
   protected.
 - OPS lifecycle code/evidence is committed at Go `cb595b4`; no lifecycle path
   remains protected.
-- The active P2 account child owns only the exact files named above. P2
-  character metadata, storage gates, and source precedence remain protected.
+- Account-session code and matrix evidence are committed at Go `96ffa15`; no
+  account-session path remains protected. The active source-precedence leaf
+  owns only its new test and bounded startup code if the transcript fails.
 
 ### Remaining acceptance work
 
-- [ ] Use Legacy's unanchored Unicode email matcher at TCP NewAccount and assign
-      unchecked account index plus creation IP/time without reopening P1 HTTP.
-- [ ] Stamp successful-login account LastIP/LastDate and preserve expired/active
-      ban, localized sixth-failure, retry, and case-insensitive identity rules.
-- [ ] Ignore wrong-stage auth packets and keep LoginBanned sessions alive;
-      evict the prior same-account session with disconnect reason 1.
-- [ ] Lock all outcomes through authenticated repeated/race transcripts and
-      JSON/117 checkpoint/reload evidence, then run the required leaf gate.
+- [ ] Seed conflicting JSON and version-117 account/global sentinels, including
+      the same account ID with different passwords and metadata.
+- [ ] Prove production startup/login uses only JSON authority and does not merge
+      the conflicting binary account/global state.
+- [ ] Gracefully checkpoint, reload the resulting binary directly, and prove it
+      contains the JSON-backed authority; repeat and run the focused leaf gate.
 
 ### P1 frozen child registry
 
@@ -154,19 +162,20 @@ selected now.
 ### P2 frozen child registry
 
 Independent read-only reviewer `01a031c0-18ea-71e3-ba9f-b6cf96be57d4`
-accepted this exact eight-child denominator after two rounds. Four are Complete;
-one is Active and three are Ready. This is a P2 denominator only.
+accepted this exact eight-child denominator after two rounds. Five are Complete,
+one is Active, and two are Ready. This is a P2 denominator
+only.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `AUTH-P2-CRYPTO-WIRE-001` | Complete | — | none | existing auth/protocol vectors |
-| `AUTH-P2-ACCOUNT-SESSION-001` | Active | crypto/wire | `internal/auth/service.go` + tests; bounded `cmd/crystal-server/main.go`; new `p2_account_session_test.go`; optional one account-session helper | authenticated repeated/race + JSON/117 |
+| `AUTH-P2-ACCOUNT-SESSION-001` | Complete | crypto/wire | `internal/auth/service.go` + tests; bounded `cmd/crystal-server/main.go`; new `p2_account_session_test.go`; optional one account-session helper | authenticated repeated/race + JSON/117 |
 | `AUTH-P2-CHAR-METADATA-001` | Ready | account session + P3 mutation authority | bounded auth/main + new metadata lifecycle tests | login/logout projections + persistence/race |
 | `STORAGE-P2-PASSWORD-001` | Complete | — | none | existing service/protocol/valid-page sessions |
 | `STORAGE-P2-NPC-GATE-001` | Ready | `NPC-P7-ACCESS-GATE-001` | bounded storage handlers + new `p2_storage_npc_gate_test.go` | all-handler wrong-stage + NPC boundary/race |
 | `PERSIST-P2-ACCOUNT-BRIDGE-001` | Complete | — | none | existing JSON/117/global merge evidence |
 | `PERSIST-P2-CHECKPOINT-RESTART-001` | Complete | bridge | none | existing production checkpoint/restart smoke |
-| `PERSIST-P2-SOURCE-PRECEDENCE-001` | Ready | bridge | new `p2_account_precedence_test.go`; bounded startup if needed | conflicting-source startup/checkpoint/reload |
+| `PERSIST-P2-SOURCE-PRECEDENCE-001` | Active | bridge | new `p2_account_precedence_test.go`; bounded startup if needed | conflicting-source startup/checkpoint/reload |
 
 ## Scope-freeze discovery queue
 
@@ -176,7 +185,7 @@ broad unnamed scope.
 | Leaf ID | Phase | Status | Required output |
 |---|---|---|---|
 | `DISC-P1-CLOSURE` | P1 | Complete | 10 unfinished finite children + 2 completed audit items |
-| `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 4 Complete + 4 unfinished |
+| `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 5 Complete + 3 unfinished |
 | `DISC-P3-CLOSURE` | P3 | Discovery | finite startup/admin/ranking children |
 | `DISC-P4-CLOSURE` | P4 | Discovery | finite map/bootstrap/visibility children |
 | `DISC-P5-CLOSURE` | P5 | Discovery | finite spell/combat/AI/respawn/packet children |

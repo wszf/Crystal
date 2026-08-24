@@ -48,7 +48,7 @@ duplicate.
 - Strengthening after utility-command hard-gate process audit: 首个进程检查因使用临时文件后 `rm -f` 被执行策略在启动前拒绝；第二个正则又匹配了自身命令行中的诊断文本，两个结果均作废。随后改用 `ps -Ao pid=,comm=,args=` 并只按 `comm` 精确匹配 `go`/`crystal-server`，零退出确认无残留进程。进程审计不得依赖临时文件清理，也不得用会命中自身正则或输出文案的全文匹配。
 - Strengthening after Goal model audit: 已有上述禁令后，Codex 配置验证仍再次使用 `mktemp` 后 `rm -f`，在启动前被策略拒绝；随后又凭记忆在错误数据库查询 `thread_goals`、并猜错时间戳列名，导致多次非零和部分输出作废。根因是没有在执行前把旧 lesson 转换成当前命令的机械检查。以后只读诊断默认用 shell command substitution 捕获 stdout/stderr，不创建需清理的临时文件；数据库先 `find` 定位当前 `$CODEX_HOME`，再用 `sqlite_master`/`pragma_table_info` 独立零退出确认库、表和列，每个尚未确认的查询必须单独调用。此次已用无临时文件的 `app-server --strict-config ... </dev/null` 验证 `gpt-5.6-sol/ultra` 退出 0，并从 Codex Box 的实际 `goals_1.sqlite`/`state_5.sqlite` 零退出回读 Goal 与线程模型状态。
 - Strengthening after Goal pause audit: 已有上述 schema 防猜规则后，首次 `pragma_table_info` 投影仍直接使用未引用的 SQLite 关键字列 `notnull`，两个查询退出 1，整次输出作废。以后 schema 勘察第一步固定为独立的 `SELECT * FROM pragma_table_info(...)`；完整回读真实列名后才允许自定义投影，关键字列必须引用。随后已分别零退出回读 `thread_goals` 与 continuation-deferral schema，再查询指定 Goal。
-- Strengthening after utility-command main review: 同一轮连续把 `--glob` 放到 `rg --` 之后、使用未验证 shell glob，并把不存在的目录加入搜索；相关调用均作废后按现有路径重跑。每次 `rg` 必须按固定 argv 模板构造：所有选项与 `-e` 在前，单个 `--` 居中，已验证路径在后；不得用尾部 `|| true` 掩盖语法/路径错误，只有事先声明“零匹配即有效答案”时才允许它。
+- Strengthening after utility-command main review: 同一轮连续把 `--glob` 放到 `rg --` 之后、使用未验证 shell glob，并把不存在的目录加入搜索；相关调用均作废后按现有路径重跑。每次 `rg` 必须按固定 argv 模板构造：所有选项与 `-e` 在前，单个 `--` 居中，已验证路径在后；发送前拒绝含 `-- --glob` 或用 `|| true` 掩盖语法/路径错误的命令，只有事先声明“零匹配即有效答案”时才允许后者。
 - Strengthening after P1 matrix reconciliation: 用记忆中的整句搜索实际跨行的 matrix prose 得到空行号，随后把负数范围交给 BSD `sed` 并 exit 1；恢复审计又把预期可为零的 archive `rg` 裸放在 `set -e` 下，并在 Go 定位中使用未引用 shell glob。相关调用均已作废并以稳定单行片段、显式接收 `rg` 退出 0/1、已确认精确路径重跑。不得对空搜索结果做算术，不得把“零匹配”或“glob 恰好命中”当成 argv 已验证。
 - Strengthening after `CFG-P1-CONTRACT-001` tracing: 查找 Legacy startup consumers 时再次把可能零匹配的 `rg` 裸放在 `set -e` 调用中，整次零输出结果已作废；随后先声明零匹配有效、显式接收退出码 0/1，并扩大到已验证的 `.cs` 路径后定位真实 `Server.MirForms/Program.cs` 入口。凡搜索“可能不存在的限定写法”必须在命令成形时就使用 0/1 分支，不能等退出 1 后补救。
 - Strengthening after `LOC-P1-CATALOG-001` discovery: Active Index 将 `server_text_catalog*.go` 列为允许新建文件，主线程却在枚举只返回现有 localization 两文件后仍把这两个未来路径交给 `wc`，调用退出 1 且整次输出作废。清单中的 write authority 不等于文件已存在；每个候选必须以本次 `rg --files` 结果分类为 existing/new，只有 existing 才能进入读取参数。
@@ -58,7 +58,6 @@ duplicate.
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
 - Strengthening after HTTP/lifecycle review: 猜测路径、错放 `--glob`，又用宽泛 `Fatal` 模式命中全部 `Fatalf` 并产生截断；调用均作废。发送前须机械核对路径、argv、模式选择和输出上限。
-
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -264,7 +263,7 @@ duplicate.
 - Root cause: 把 compact 摘要当成迁移记录，或只在“快要 compact”之后才补 handoff，导致 compact 前没有可核验的完整状态边界。
 - Prevention: 每次 compact 前，或收到 compaction/上下文上限/rollover 信号时，立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`；即使当前批次只有 Markdown/文档变更也必须执行。记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
 - Verification: `agents.md`、`tasks/goal-task.md` 和 `tasks/migration-handoff.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续；本次 compact 摘要声称已刷新，但 handoff 仍写 Go clean、实际却有 8 tracked + 2 untracked，因此已停止实现/测试并从两仓重建后才恢复。
-- Strengthening after third utility-command rollover: compact 恢复环境只列出一名 direct subagent，但首版 handoff 回读期间 Go 状态从九文件继续增长为十二文件，证明另一个未暴露 worker 尚在写入；仅看环境 `<subagents>` 和 `go`/server 进程不足以证明 quiescence。Hard gate 今后先关闭所有已知 agent，再核对当前 thread-writer locks；对未知 lock ID 用 agent tool 停止并收取 memory-only 报告，直到只剩主线程 lock。随后至少两次对照工作树，第二次必须发生在 handoff 写入后；任一文件列表、mtime 或 status 变化都使草稿失效，须重新冻结并回读。本次据 lock 精确关闭 `01a02e52-2e36-7951-a009-65595fdd6d7e`，收取其三文件/测试记账，确认只剩主线程 lock、无 Go/server 进程且 Go 状态稳定为 6 tracked + 6 untracked 后重写 handoff。
+- Strengthening after third utility-command rollover: compact 恢复环境只列出一名 direct subagent，但首版 handoff 回读期间 Go 状态从九文件继续增长为十二文件，证明另一个未暴露 worker 尚在写入；仅看环境 `<subagents>` 和 `go`/server 进程不足以证明 quiescence。Hard gate 今后先关闭所有已知 agent，再核对当前 UUID thread-writer locks（不计 `.coordination.lock`）；对未知 lock ID 用 agent tool 停止并收取 memory-only 报告，直到只剩主线程 lock。随后至少两次对照工作树，第二次必须发生在 handoff 写入后；任一文件列表、mtime 或 status 变化都使草稿失效，须重新冻结并回读。本次据 lock 精确关闭 `01a02e52-2e36-7951-a009-65595fdd6d7e`，收取其三文件/测试记账，确认只剩主线程 lock、无 Go/server 进程且 Go 状态稳定为 6 tracked + 6 untracked 后重写 handoff。
 
 ### 2026-08-23 C30 — Subagent 模型不可用时必须在执行前显式说明
 
