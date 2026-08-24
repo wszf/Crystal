@@ -23,15 +23,16 @@ progress; no phase or Goal completion is claimed.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master...origin/master [ahead 438]`; observed HEAD
-  `65e035a06a5faab662e2987c182e1682fe407a8b`
-  (`docs(migration): close P2 discovery and select auth`).
-- Tracked modifications are exactly `tasks/lessons.md`,
-  `tasks/lessons-archive/migration/protocol-session-wire.md`,
-  `tasks/migration-active.md`, and this handoff. Index and untracked set are
-  empty.
-- The active lesson strengthens mechanical `rg` argv and UUID writer-lock
-  predicates. The archive records account-session review findings and fixes.
+- Branch before this handoff snapshot commit:
+  `master...origin/master [ahead 439]`; observed clean HEAD
+  `ae1b27581d496f1b809afc30db145d00699ffac8`
+  (`docs(migration): close account session leaf`).
+- Before this edit, worktree, index, and untracked set were empty. This handoff
+  is the only current modification and its own documentation commit is the one
+  expected delta from the observed HEAD.
+- The committed active lesson strengthens mechanical `rg` argv and UUID
+  writer-lock predicates. The committed archive records account-session review
+  findings and fixes.
 - `AGENTS.md` and tracked `agents.md` remain one hard-linked inode.
 - No C# file is owned; tracked, staged, and untracked C# gates are empty.
 
@@ -117,8 +118,9 @@ write or test attribution.
 
 1. Verify each repository separately against the exact HEAD/status/file lists
    above; do not discard or overwrite any owned uncommitted work.
-2. Run final Legacy control/diff/status/process/C# gates and commit the four
-   owned Legacy docs. Go must remain clean at `96ffa15e5719`.
+2. Verify Legacy is clean at exactly one handoff documentation commit after
+   `ae1b27581d496f1b809afc30db145d00699ffac8`; Go must remain clean at
+   `96ffa15e5719d00bb14eca116ff9e6cb9e5afead`.
 3. Read only the P2 stage row and `PERSIST-P2-SOURCE-PRECEDENCE-001` row, search
    the archive with source-precedence/startup/checkpoint keywords, and trace only
    the relevant Go startup/load/register order.
