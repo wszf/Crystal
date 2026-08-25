@@ -119,6 +119,16 @@
 - Prevention: 时间迁移先固定中间量 `hours = hour*2%24`，再列出每个边界小时的枚举和 wire 值；定义类型负例也显式转换为协议底层 `byte`，避免测试类型与业务枚举混淆。
 - Verification: 修正 hour 9 为 Night、负例显式 `byte(LightNight)` 后，协议、探针和服务端 TimeOfDay 定向测试通过。
 
+### 2026-08-25 — LightSetting 必须枚举 modulo 后的第二轮边界
+
+- Symptom: MAP-light 初稿只覆盖 UTC 3/4/8/9，测试 oracle 错把 15–20 点都归为 Night。
+- Root cause: 虽保留 `hour*2%24` 公式，却按前半天直觉编写期望，遗漏 12 小时后的 modulo 回绕。
+- Prevention: 对全部 24 个 UTC hour 逐值计算，并单独锁定 3/4/8/9/15/16/20/21 八个转换边界；非 UTC 表示也必须映射同一 instant。
+- Verification: 24-hour table、两轮 change-only 全局广播、non-UTC production clock、count-20 与 focused race 均覆盖修正后的 Dawn/Day/Evening/Night 序列。
+- Review finding: 只读 Go review 因两个 NPC context 传入 host-local `time.Now()`，把 `legacyNPCMapLight` 内的 UTC 转换判为高风险。
+- Ruling/root cause: 该判断只沿 Go 参数位置推断时间 authority；Legacy `MAPLIGHT` 实际比较同一个 UTC-anchored `Envir.Lights` 名称，而不是本地墙钟小时，因此 UTC 转换是必需等价行为。
+- Prevention/verification: 时间消费者必须追到 Legacy authority writer，不能由调用参数 location 推断；主 Agent 以 `Envir.Now`/`AdjustLights`/MAPLIGHT 调用链裁决后保留实现，并把该证据交回 reviewer 做 focused re-review。
+
 ### 2026-08-14 — 全局时钟副作用必须区分在线 runtime 与纯 world fixture
 
 - Symptom: 全仓测试中大量使用合成 epoch 时间调用 `world.tick` 的战斗、掉落和治疗 transcript 收到意外 `TimeOfDay` 通知并失败。

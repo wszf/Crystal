@@ -40,31 +40,35 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `MAP-P4-LIGHT-001`
-- Status: `Active`; P4 is scope-frozen In progress with ten finite children, five Complete and five unfinished. Complete `MAP-P4-DETAIL-001` unlocks this dependency-free clock child.
-- Outcome: preserve static map light fields plus the UTC-derived global
-  `TimeOfDay` bootstrap and transition broadcast only when the light changes.
-- Go matrix anchors to read: exact `MAP-P4-LIGHT-001` and `| P4 |` rows plus named TimeOfDay/light/bootstrap evidence only; never read the full matrix.
-- Legacy read authority: bounded `Envir` UTC start/`AdjustLights`, settings light
-  boundaries, `PlayerObject` StartGame `TimeOfDay`, exact serializer and client
-  consumer; every C# file remains read-only.
-- Exact Go write authority: `cmd/crystal-server/{time_of_day.go,
-  time_of_day_test.go,main.go}` and bounded P4 matrix evidence only.
-- Required gate: touched-package compile; exact UTC boundary/bootstrap/change-
-  only broadcast tests including a non-UTC production host; count-20 repetition,
-  focused race, diff/status/process checks and all six C# gates; scheduler changes
-  require integration.
-- Forbidden scope: static map-detail semantics, collision/visibility/chat,
-  combat fire/lightning effects, P5-P12 systems, broad matrix/source dumps and
-  every C# write.
+- Leaf ID: `DISC-P5-CLOSURE`
+- Status: `Active`; P5 remains open-scope In progress. P4 has ten frozen children,
+  six Complete and four dependency-blocked unfinished, so no P4 child is currently
+  dependency-ready and the bounded P5 inventory audit is selected next.
+- Outcome: convert every vague remaining P5 spell/combat/AI/death/drop/respawn/
+  packet residual into a finite non-overlapping child registry, classify existing
+  completion evidence, and record dependencies without implementing behavior.
+- Go matrix anchors to read: exact `| P5 |` and all `| P5 ` rows plus P5-named
+  completion headings/residual prose only; never read another phase or the full
+  matrix.
+- Legacy read authority: phase-bounded spell/monster catalog and dispatch entry
+  points, player/monster combat processing, damage/death/drop/respawn and packet
+  producers located by exact `rg`; every C# file remains read-only.
+- Exact Go write authority: bounded P5 inventory/evidence in
+  `docs/migration-matrix.md` only; no Go production or test file may change.
+- Required gate: finite static counts, completed-vs-unfinished evidence and
+  dependency/ownership reconciliation, independent read-only denominator review,
+  matrix diff/status/process checks, control checker and all six C# gates.
+- Forbidden scope: implementation, tests, P1-P4/P6-P12 inventory, full-matrix or
+  broad source dumps, phase completion before review, and every C# write.
 
-`MAP-P4-DETAIL-001` is Complete at Go
-`ea3a4503f5c6f506888898e012e62a3fa91ac767`. Exact current-map,
-setup/full detail payloads, persistent suppression, failed-known/unknown request
-boundaries, raw current-culture loaded-order search, NPC suffixes, sentinels and
-strict production-probe consumption pass vectors, authenticated count-20,
-focused race and fresh unexcluded full tests/vet/build. Independent review's one
-probe-suppression finding is fixed and focused re-review reports no remainder.
+`MAP-P4-LIGHT-001` is Complete at Go
+`fc6b98b6b312357d850f6710fbf697b8678fd4c2`. UTC startup plus
+monotonic elapsed authority, all 24 hours/two modulo cycles, eight exact
+boundaries, global change-only broadcasts, StartGame bootstrap, static map-light
+separation, non-UTC production initialization, repeated/focused-race and fresh
+full tests/vet/build pass. A reviewer finding about NPC MAPLIGHT local time was
+rejected from exact Legacy global-LightSetting authority; focused re-review
+reports `resolved, no remaining finding`.
 
 `MAP-P4-LOAD-001` is Complete at Go
 `7cceb308cef7232a1b02c64c301adc1f89275e9a`. Ordered v0-v7/v100
@@ -147,19 +151,20 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
 
 ### Protected Go ownership
 
-- `MAP-P4-LIGHT-001` exclusively owns the three Go paths named in Active batch
-  until its leaf gate, matrix update and commit are complete.
+- `DISC-P5-CLOSURE` exclusively owns bounded P5 matrix inventory evidence and
+  Legacy control routing; no Go code is writable during discovery.
 
 ### Remaining acceptance work
 
-- [ ] Lock UTC-derived initial TimeOfDay against a non-UTC host environment.
-- [ ] Lock exact boundary transitions and broadcast only when light changes.
+- [ ] Enumerate every remaining P5 residual into finite non-overlapping children.
+- [ ] Classify completed evidence, dependencies and mutually exclusive ownership.
+- [ ] Obtain independent denominator review with no missing/duplicate boundary.
 
 ### P4 frozen child registry
 
 Independent reviewer `01a03617-76c2-7652-ab64-7e27143ce72b` rejected two
 candidate revisions, then accepted this ten-child denominator with no remaining
-finding. Five children are Complete and five are unfinished.
+finding. Six children are Complete and four dependency-blocked children are unfinished.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -170,7 +175,7 @@ finding. Five children are Complete and five are unfinished.
 | `MOVE-P4-COLLISION-RULES-001` | Ready | P9 conquest state | bounded world/main + RequiredGroup test | authenticated gate/order matrix |
 | `VIS-P4-OBJECT-001` | Ready | P5 hide/show producers | legacyworld/worlddata + bounded server visibility | recipient/filter/re-entry matrix |
 | `MAP-P4-DETAIL-001` | Complete | map load + StartPoint | verified Go protocol/probe/map-info candidate | payload/order/suppression/search |
-| `MAP-P4-LIGHT-001` | Active | — | `time_of_day.go`, `main.go` + tests | UTC production clock/non-UTC host |
+| `MAP-P4-LIGHT-001` | Complete | — | committed Go `fc6b98b6b312357d850f6710fbf697b8678fd4c2` | UTC production clock/non-UTC host |
 | `MAP-P4-NOREINCARNATION-AUTH-001` | Ready | P5 spell | focused authenticated session | unchanged amulet/no cast |
 | `CHAT-P4-MAP-CONTEXT-001` | Ready | P6 shout arming | map-rule import + bounded chat/session | NoNames/shout recipients/order |
 
@@ -244,7 +249,7 @@ broad unnamed scope.
 | `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 5 Complete + 3 unfinished |
 | `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: all Complete |
 | `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
-| `DISC-P5-CLOSURE` | P5 | Discovery | finite spell/combat/AI/respawn/packet children |
+| `DISC-P5-CLOSURE` | P5 | Active | finite spell/combat/AI/respawn/packet children |
 | `DISC-P6-CLOSURE` | P6 | Discovery | finite item/equipment/craft children |
 | `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |

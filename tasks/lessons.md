@@ -57,7 +57,7 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
-- Strengthening through MAP detail: helper 定位再次使用未引用 glob 且输出截断；整调用作废后按精确文件/行重跑。发送前机械拒绝 shell glob、宽泛输出和未验证 argv。
+- Strengthening through MAP light: 猜测不存在的 protocol 文件、错误 zsh command substitution 及把可零匹配 `rg` 串在有效 `sed` 后均使整调用作废；已分别以独立枚举、最小分支和显式 0/1 重跑。路径、复合 shell 与空搜索必须先验证，失败调用前段输出不可采用。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -68,7 +68,7 @@ duplicate.
 - Strengthening after P1 inventory insertion: 一次四-hunk matrix 补丁因旧段落物理换行与草稿不一致而整体失败；随后已独立确认没有部分写入，再把新段插入、P1 单行精确替换和两个小 prose hunk 分开发送并逐项 `git diff --check`。长表插入与陈旧 prose 修订不得共用一个补丁事务；先复读每个唯一锚点，失败后先查 status/目标标记再重试。
 - Strengthening after `LOG-P1-CATEGORY-001` wiring: 一个三-hunk 主文件补丁因其中 `stage = stageGame` 上下文未匹配而整体失败；随后 handoff 刷新又把只存在于 Active Index 的 ownership 正文当成 handoff 锚点。两次均确认零部分写入后按目标文件实际物理行拆成独立 hunk。跨越数千行或相邻控制文档的接线都必须逐文件复读并拆事务，不能因相似语义而复用锚点。
 - Strengthening after NET closure: 单行日志补丁夹带不连续的陈旧上下文而失败；确认零写入后复读并用最小 hunk 成功。不得把记忆中的远端行拼进单行补丁。
-- Strengthening after HTTP handoff reconstruction: `apply_patch` rejects delete-plus-add operations targeting the same path. Use one operation per path; after rejection verify no write, replace in place, and read back.
+- Strengthening through MAP light: 跨文件长补丁因尾部括号不符被拒；独立确认零写入后拆成三个精确 hunk 并编译通过。多文件与长函数替换不得共用 patch transaction。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -101,7 +101,7 @@ duplicate.
 - Root cause: 只看最终 `FAIL`，没有保留退出码、测试名、栈和定向复跑结果。
 - Prevention: 分开运行定向、普通全量和 race；保存退出码和失败摘要；环境错误先检查空间与可重建缓存。
 - Verification: 只以实际失败栈是否进入本批代码或测试为归因依据，已知排除项写入交接而不修改无关模块。
-- Strengthening after `CFG-P1-CONTRACT-001`: 必跑的 unexcluded 全仓测试复现既有 OmaMage `[2 1]`/`[1]` 后，首次只排除该项的重跑又偶发 YinDevilNode/42 空通知；后者独立 `-count=10` 通过，排除两项的全仓重跑、vet/build 和本 Leaf 定向/重复/race 全通过。全仓命令不得与 vet/build 串在同一 `set -e` 证据中后仍声称后两项执行；新失败必须逐个隔离，排除集合和“非 full pass”标签必须写入 matrix/handoff。
+- Strengthening through MAP light: focused race 在执行测试前因 Go build cache 写入 `no space left on device` 失败；`df` 仅余 257 MiB，`go clean -cache -testcache` 后恢复 76 GiB，compile 与原 race 命令均通过。环境失败先按真实栈检查磁盘/可重建缓存，不得归因于行为回归或省略原命令复跑。
 
 ### 2026-08-21 C08 — 测试夹具必须复用真实 bootstrap、helper 和认证约束
 
