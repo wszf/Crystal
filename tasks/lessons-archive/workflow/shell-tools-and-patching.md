@@ -503,6 +503,7 @@
 - Root cause: 临时按自然语言拼搜索 argv，并把“shell 成功展开”误当成路径验证；控制补丁只检查语义完整，没有在写前计算新增减行净额。
 - Prevention: 每次搜索在发送前声明零匹配是否有效，有效时固定使用显式 0/1 分支；文件族只用 `rg --glob`，已知文件只传精确路径。接近上限的控制文件先计算 replacement 净行数并为后续路由保留余量。
 - Verification: 所有失败/未验证调用均已按显式 rc、`rg --glob` 或精确路径零退出重跑；ownership prose 压缩到 299 行，`tasks/check-migration-control.sh` 与 `git diff --check` 均恢复 exit 0 后才开放 Go 写入。
+- Strengthening during `MINE-P6-RUBBLE-001` freeze: active index 原有 272 行，首次冻结补丁未先计算净增量而扩到 307 行，首轮压缩仍有 303 行，两次控制检查均如实 exit 1。Go 写权限继续关闭；必须在每次压缩前用实际 `wc -l` 计算至少留一行余量，并只在 checker/diff 零退出后允许实现。
 - Strengthening during review fixes: 将 account-session disconnect callback 改成返回完成状态时，首次补丁漏写 closure 的 `bool` 返回类型，并遗漏两个既有 operator-test closure，只编译门禁如实 exit 1。该结果仅作 finding，不作行为证据；主线程先把真实调用点 `operator_accounts_test.go` 扩入 exact ownership，再修正三个 closure，随后 touched-package compile、focused repeated 与 race 全部 exit 0。
 - Strengthening during metadata closure: callback API 再增加 rollback 返回值时又遗漏两个 operator-test assignment，compile 再次如实 exit 1；P2 active prose 的局部 replacement 还留下相邻 “Six are Complete / seven are Complete”，控制脚本因结构合法未捕获，最终逐段回读才发现。Matrix 三项 `perl -e` 首次又因脚本间缺分号在编译期 exit 255、确认零写入后才重跑。API arity 变化必须先列全部真实调用点；计数 prose 修改后既跑 checker 又回读完整句；多段 Perl 每段显式以分号闭合并做唯一计数。
 

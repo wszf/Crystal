@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-26 02:51 (Asia/Singapore)
+Last verified: 2026-08-26 03:48 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -76,11 +76,39 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Remaining acceptance work
 
-- [ ] Trace and freeze exact mine config/schema/runtime files and the finite
-  Legacy RNG/timer/packet/persistence checklist before any Go write.
+- [x] Trace and freeze the finite Legacy call chain. Exact Go write set:
+  `internal/worlddata/{world.go,world_test.go}`;
+  `internal/legacyworld/{settings.go,database.go,export.go,reader_settings_test.go,map_schema_test.go,export_test.go}`;
+  mine-only `internal/protocol/{packet.go,packet_test.go}` `MapEffect` adapter;
+  `cmd/crystal-server/{world.go,main.go,mine.go,mine_test.go,mine_session_test.go}`.
+  `internal/config` needs no write because production imports `Mines.ini` through
+  Legacy-world export; no other file is owned without revising this index.
 - [ ] Implement only missing Mine/Rubble behavior and production-entry evidence.
 - [ ] Run the leaf gate, obtain bounded review, commit and route the next
   dependency-ready P6 child.
+
+### Frozen behavior checklist
+- Mines parser: absent-file built-ins; exact `Mine0..n`/`D0..n` sentinel defaults;
+  JSON round trip; stable no-space/case-insensitive item resolution; ordered
+  map `MineZones` then `MineIndex`.
+- Map runtime: map-wide one-based mine assignment followed by ordered
+  half-open zones, with mine zero clearing; only an in-bounds non-walkable
+  front cell can mine. Generic accepted attack packets/timers precede silent
+  weapon/CanMine/durability/map/spot failures.
+- RNG/state: consume accepted attack power before mining; decrement a positive
+  stone before strict hit; only new Rubble consumes spawn-delay RNG; strict
+  drop, first inclusive slot match, drop-item/upgrade and ore draws retain source
+  order; weapon damage is `5+Next(15)`. Empty spots regenerate only at strict
+  `now > LastRegen`, schedule first, with no same-request hit.
+- Rubble/wire: reuse same-cell Rubble by refreshing strict five-minute expiry;
+  otherwise allocate one runtime ObjectID at the miner cell and emit
+  `ObjectSpell(Rubble)`. At inclusive 400ms due, emit `MapEffect(Mine)` with
+  the miner's then-current direction, increment Rubble direction through six,
+  then emit refreshed `ObjectSpell`; strict expiry emits `ObjectRemove`.
+- Payout/persistence: full inventory returns before slot/item RNG; no ground
+  fallback; rejected creations consume identity/RNG; existing adapters retain
+  quest and `NewItemInfo`/`GainedItem` order. Items/weapon persist across
+  relogin/restart; spot/Rubble survive only in-process, definitions persist.
 
 ### P6 frozen child registry
 
