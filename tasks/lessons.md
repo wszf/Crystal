@@ -31,7 +31,7 @@ duplicate.
 - Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
 - Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
 - Strengthening through MAP-detail recovery: 新 Session 首调用仍用 `git -C` 混读双仓且输出截断；整调用作废后，文档/status/C# 门禁按单仓小段重跑。恢复命令发送前必须机械拒绝 `git -C`、对侧根和超限区段；只采用单仓、零退出、完整输出。
-- P6 closure recurrence: a Go search appended Legacy `HumanObject.cs`; discarded, separate reruns passed. Preflight every argument by repository, including zero-match searches.
+- P6 recovery recurrence: mixed-source searches and a `git -C` startup audit were discarded; separate single-repo reruns passed. Preflight every argument.
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -293,4 +293,4 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
-- Strengthening through MAP detail/new-session VIS reconstruction: heading/field schema 必须从检查脚本逐字复制；重建 handoff 又自拟标题而被门禁拦截。写前先复制 schema，控制文档与源码均按精确文件/物理段回读。
+- Strengthening through P6 shout recovery: handoff 的 heading/field schema 必须从检查脚本逐字复制；本轮又把 Active 字段放错章节而失败。写前先复制 schema 并精确回读。

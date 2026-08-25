@@ -1,80 +1,89 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 16:27 (Asia/Singapore)
+Last updated: 2026-08-25 17:02 (Asia/Singapore)
 
-This replace-in-place snapshot records the accepted P6 scope freeze and the
-route to the first dependency-ready P6 child.
+This replace-in-place snapshot freezes the uncommitted implementation of the
+unique active P6 shout-arming leaf after a new-session recovery mismatch.
 
 ## Goal and control-plane state
 
 - Goal remains Active and unchanged. It is neither complete nor blocked.
 - Main authority remains `gpt-5.6-sol/ultra`.
-- `DISC-P6-CLOSURE` is Complete. The matrix and Active Index contain one
-  accepted nineteen-child P6 denominator: seven Complete and twelve Ready.
-- Independent Legacy auditor `01a037e1-30fa-7840-860a-237521bf558e` and Go
-  auditor `01a037e1-67d2-7013-bf45-313d11b10b4e` wrote no files. Reviewer
-  `01a037ed-f35d-7d23-a532-803fdce5a5ff` required death-drop, expanded-storage,
-  cross-grid, UseItem-shape and expiry corrections, then returned
-  `accepted, no findings`; all three threads are closed.
-- `ITEM-P6-SHOUT-ARMING-001` is the unique Active leaf because it can unblock
-  the remaining P4 chat child without entering P4 routing authority.
-- No `go` or `crystal-server` process remained at the documentation gate.
+- Legacy Active Index and Go matrix row 3197 now both mark the leaf `Active`.
+  The mismatch discovered at recovery was repaired in the isolated Go matrix
+  commit `3f7b29d41787a683c42d767ef321afbb4bec45c8` without changing the five
+  implementation files.
+- The first recovery command incorrectly combined both repositories with
+  `git -C`; its entire output was discarded. Startup documents and repository
+  facts were then reread in separate, zero-exit, complete calls.
+- Read-only reviewer `01a03823-05a6-7270-8f06-0cd469a25bc2` was quiesced and
+  closed. It wrote nothing and ran no tests; its unfinished review identified
+  admission/chat ordering, world/auth atomicity and stale snapshots,
+  interception boundaries, and test validity as remaining review points.
+- No `go` or `crystal-server` process was present in either repository at the
+  freeze.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; HEAD before the expected control commit:
-  `133f5164c142ac7e03f2018f85e687fc8c850f0a`.
-- Tracked unstaged files are `tasks/lessons.md`,
-  `tasks/migration-active.md`, and this handoff. The staged and untracked sets
-  are empty.
-- `tasks/lessons.md` records the discarded cross-repository P6 search and its
-  successful separate reruns. All three Legacy C# gates are empty.
+- Branch: `master`; HEAD:
+  `0022c3a076e585d825cc711be13f6b45f83ae21a`
+  (`Route migration to P6 shout arming`).
+- Before this snapshot refresh the tracked, staged, and untracked sets were
+  empty. Expected current tracked unstaged files are `tasks/lessons.md` and
+  this handoff; staged and untracked sets remain empty.
+- `tasks/check-migration-control.sh` passed before this refresh. All three
+  Legacy C# gates were empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
 - Branch: `main`; HEAD:
-  `45e532f3703ece18f1f45392c0aa959c61b21b2e`
-  (`Freeze P6 migration inventory`).
-- Tracked unstaged, staged and untracked sets are empty.
-- Matrix P6 is scope-frozen In progress at 7/19 children Complete, records
-  `DISC-P6-CLOSURE` Complete and routes the twelve finite unfinished children.
-- All three Go-repository C# gates are empty.
+  `3f7b29d41787a683c42d767ef321afbb4bec45c8`
+  (`Activate P6 shout arming leaf`).
+- Tracked unstaged files are `cmd/crystal-server/main.go` and
+  `cmd/crystal-server/world.go`. Untracked files are
+  `cmd/crystal-server/item_shout.go`, `item_shout_test.go`, and
+  `item_shout_session_test.go`; staged files are empty.
+- The five file sizes/mtimes were stable across the post-review audit. The
+  tracked diff has 42 insertions and one deletion; `git diff --check` passed.
+- All three Go C# gates were empty. No implementation test, compile, race, vet,
+  or build has run for this uncommitted batch.
 
 ## Active leaf and protected work
 
 - Active leaf: `ITEM-P6-SHOUT-ARMING-001`.
-- Outcome: preserve Scroll shape 8/9 common admission, transient one-shot
-  map/server-shout arming, localized Hint, item consumption and successful
-  `UseItem` order. Re-arming consumes another scroll; logout drops both flags.
-- Matrix anchors are only the P6 summary row, this exact P6 child row and the
-  exact `CHAT-P4-MAP-CONTEXT-001` dependency row.
-- Go write authority is bounded to `cmd/crystal-server/main.go`, `world.go`, new
-  `item_shout.go`, `item_shout_test.go`, and `item_shout_session_test.go`.
-- P4 owns shout consumption, cooldown, linked-item projection, routing and
-  recipients. Every other P6 child, accepted registry and `.cs` file is read-only.
+- Outcome: preserve Scroll shape 8/9 common admission, independent transient
+  one-shot map/server-shout arming, localized Hint, item consumption and exact
+  successful `UseItem` order. Re-arming consumes another scroll; logout drops
+  both flags.
+- Matrix anchors are only the P6 summary row, exact
+  `ITEM-P6-SHOUT-ARMING-001` row, and exact
+  `CHAT-P4-MAP-CONTEXT-001` dependency row.
+- Owned Go files are exactly the five listed above. P4 shout consumption,
+  cooldown, linked-item projection, routing and recipients remain forbidden.
+- Current candidate adds runtime flags to `worldPlayer`, resets them on
+  enter/leave, intercepts shape 8/9 item use, persists consumed inventory, emits
+  Hint then `UseItem`, and adds pure/world/authenticated session tests.
+- Preserve all five uncommitted files. Do not reset, stash, clean, checkout,
+  overwrite, or commit them before review and the required gates.
 
 ## Verification ledger
 
-- Discovery performed no production/test-code change, so no Go compile/test,
-  race, vet or build was run for this documentation-only leaf.
-- Two independent inventories and the final two-round read-only denominator
-  review completed; reviewers wrote no files and ran no tests/builds.
-- Go `git diff --check`, exact status, process review and all three Go C# gates:
-  exit 0/empty before matrix commit.
-- Go matrix commit `45e532f` succeeded and the Go worktree is clean.
-- Legacy `git diff --check`, `tasks/check-migration-control.sh`, exact
-  three-file status, process review and all six cross-repository C# gates:
-  exit 0/empty after this handoff refresh.
-- Full tests/full race are not due for a documentation-only scope freeze; the
-  selected functional child retains focused compile/repetition/race gates.
+- Startup control documents were fully reread in separate Legacy calls.
+- Exact named matrix rows were reread in a separate Go call; they exposed the
+  `Active`/`Ready` inconsistency. The exact child row was changed to `Active`,
+  `git diff --check` passed, and matrix-only commit `3f7b29d` succeeded.
+- Legacy control checker before refresh: exit 0. Both repository status, HEAD,
+  process review and three C# gates: exit 0/empty in separate calls.
+- Go `git diff --check`: exit 0. No tests/builds have run for the candidate.
 
 ## Exact recovery sequence
 
-1. Run the Legacy control checker, diff/status/process review and both
-   repositories' six C# gates; commit exactly the three owned Legacy control
-   files and verify both repositories clean.
-2. Read only the named matrix/Legacy/Go anchors for
-   `ITEM-P6-SHOUT-ARMING-001`, then implement its bounded item-side state and
-   authenticated tests without entering P4 chat routing.
+1. Run the Legacy control checker and separately verify both repository
+   statuses/C# gates; read this handoff back and confirm the five Go file
+   size/mtime values are stable.
+2. Review the five-file candidate against the already named Legacy and Go
+   anchors, beginning with the four unresolved reviewer points; then run the
+   leaf compile, focused `-count=20`, focused race `-count=5`, status, process,
+   diff and six C# gates before any completion/routing commit.
