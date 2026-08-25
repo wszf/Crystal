@@ -58,7 +58,7 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
-- Strengthening through P6 shout review: 未引用 glob、猜测路径及 `set -e` 下零匹配 `rg` 先后使搜索作废；均经精确枚举或显式 0/1 分支重跑。发送前逐项验证 argv 与预期退出码。
+- Strengthening through P6 item reviews: 未引用 glob、猜测路径及 `set -e` 下零匹配 `rg` 反复使搜索作废；均经目录参数加 `rg --glob`、精确枚举或显式 0/1 重跑。发送前逐项验证 argv 与退出码。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -85,7 +85,7 @@ duplicate.
 - Root cause: 依据相似模块、Legacy 名称或“应该对称”推断 Go API。
 - Prevention: 先读取声明、receiver、参数顺序、返回值、领域类型和包级符号，再接线。
 - Verification: 新调用接入后立即运行包级只编译门禁；编译器已分别拦截猜测的 `worldMagic.Spell`、`MarketStatusSold`、`Guild.Index` 和错误 bool 返回，复读真实声明后定向测试通过。
-- Strengthening after `LOG-P1-CATEGORY-001` compile: 主线程在 `runServerWithContext` 中取得 `runtimeLogs` 后，误以为数千行后的独立 `serveWithConfig` 仍共享该局部变量，首次只编译门禁报三处 undefined。复读函数边界后通过保留旧签名的显式 wrapper/context 传递修复；任何跨入口接线都要先列完整调用链与变量所有权，再落调用点。
+- Strengthening through P6 grid mutation: 测试先猜成 `protocol.RentalInformation`，又把 `ParseChatPayload` 猜成三个返回值，两次均被编译门禁拦截；回读真实声明后改为 `ItemRentalInformation` 与 `ChatMessage,error` 并重跑通过。字段夹具和解析器必须先读完整类型、返回值及所有权。
 
 ### 2026-08-21 C06 — 行为判断前先通过 Go 语法、类型和 vet 门禁
 
