@@ -33,6 +33,14 @@
 - Prevention: 公会授权先在 auth 的同一锁域内校验 guild 和 member，再检查安全区/权限；一次性状态只有在所有前置校验成功后才能消耗。world 快照只用于定位连接和投递包，不决定权威成员资格。
 - Verification: 新增 stale world GuildIndex 回归测试，锁定金钱请求优先返回 NotPartOfGuild，失败的列表请求保留 `GuildCanRequestItems`；公会仓库定向测试通过。
 
+### 2026-08-25 — admission bypass 重构必须同一编译步迁完全部调用点
+
+- Symptom: 将 variadic admission flag 改成显式 `AfterAdmission` wrapper 时，先删除共享 helper 再迁其余两个消费者，包级 compile 报 `undefined: itemUseAdmissionAlreadyChecked`；首个可编译版本又只绕过 `CanUseItem`，仍把 death bool 传入 family helper，使 Hero/Shout 等 world commit 能在共享 runtime snapshot 之后重复 generic death 门禁。
+- Root cause: 接口迁移按文件而非按声明和完整 caller 集分步，发送最小编译前留下了有意但不可编译的中间态；随后又把“已执行 common admission”误缩窄成仅 gender/class/requirement，没有把已经由 main 线性化的 generic death decision 纳入 bypass 契约。
+- Prevention: 先以 `rg` 列出声明和全部消费者；同一补丁迁完声明、wrapper 与 caller，或保留旧 helper 到最后一个消费者切换完成后再删除。`AfterAdmission` API 不再接收已经裁决的 common/death 输入，原始 standalone wrapper 才执行完整门禁；family-specific effect checks 仍由 owning helper 保留。
+- Verification: Hero/Shout/Mount/intelligent-creature wrapper 与 main caller 全部迁到显式 `AfterAdmission` API 后，`go test ./cmd/crystal-server -run '^$'` 重跑 exit 0；focused `-count=20` 与 focused race `-count=5` 均通过，且 due full test/vet/build/full-race 全部 exit 0。
+- Strengthening after auth-first adoption: 将智能生物领养分支从 session/world-first 改成 latest-auth callback 后，旧外层 `index` 不再被使用，首个 package compile 报 `declared and not used: index`。根因是替换事务体时未同步缩窄短变量声明；修正为丢弃 slot 的 `_` 后 `go test ./cmd/crystal-server -run '^$'` exit 0。大块事务替换后必须立即按新消费者集合检查声明，而不能沿用旧分支变量。
+
 ### 2026-08-12 — Go 门禁前检查并清理可重建构建缓存
 
 - Symptom: 新关系网络测试编译时出现 `no space left on device`，系统数据卷仅剩约 204 MiB，而 Go build cache 占用约 5.4 GiB。
@@ -204,4 +212,3 @@
 - Root cause: 直接展示原始长输出无法稳定区分业务失败与会话清理日志，且没有在同一 shell 中保留 Go 命令的退出码和过滤摘要。
 - Prevention: 长门禁用任务专用变量保存完整输出和退出码，再单独过滤 `--- FAIL`/`FAIL`/panic；失败名不明时不得直接归因到本批生产代码。
 - Verification: 重跑用 `go_rc` 明确取得 0；AI=48 定向测试、race、vet/build 与全仓普通结果分别留存。
-

@@ -1,95 +1,92 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 18:53 (Asia/Singapore)
+Last updated: 2026-08-26 00:04 (Asia/Singapore)
 
-This replace-in-place snapshot closes the reviewed P6 grid-mutation candidate
-and routes the persistent Goal to shared item-use admission. The Goal remains
-Active; this is not a phase closure or project completion boundary.
+This replace-in-place snapshot closes the accepted item-use-admission leaf and
+routes the same active Goal to the next dependency-ready P6 child. No phase or
+project closure is claimed.
 
 ## Goal and control-plane state
 
 - Goal remains Active and unchanged. It is neither complete nor blocked.
 - Main authority remains `gpt-5.6-sol/ultra`; bounded workers remain
-  `gpt-5.6-luna/max` through `luna_worker`.
-- P6 is scope-frozen In progress: nine of nineteen children are Complete,
-  `ITEM-P6-USE-ADMISSION-001` is Active and nine are Ready.
-- `ITEM-P6-GRID-MUTATION-001` is Complete in Go commit
-  `fccbfcd91a36d867d48974c7d14b43e092c7a33d`.
-- All completed reviewer/worker threads are closed. No `go` or
-  `crystal-server` process remains.
+  `gpt-5.6-luna/max` through `luna_worker` without silent substitution.
+- P6 is scope-frozen In progress: ten of nineteen children are Complete,
+  `ADMIN-P6-ITEM-COMMAND-001` is the unique Active leaf and eight are Ready.
+- Go matrix anchors are the P6 summary row near 901, exact Active row near 3192
+  and immediately preceding item-admission completion evidence near 3243-3261.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; HEAD:
-  `5abeef47bdedf8a3162d61fcb26bc02e33f49e17`
-  (`Close P6 shout leaf and route grid mutations`).
-- Tracked unstaged files are exactly `tasks/lessons.md`,
-  `tasks/lessons-archive/migration/world-state-lifecycle.md`,
-  `tasks/migration-active.md` and `tasks/migration-handoff.md`.
-- Staged and untracked sets are empty. All three Legacy C# gates are empty.
-- The active lesson records two corrected API-signature guesses; the targeted
-  archive section records the Use -> Delete resurrection and latest-auth rule.
+- Branch: `master`; observed pre-documentation-commit HEAD:
+  `0e672087925fede6f756be14e81e45b3e56747ad`
+  (`Close P6 grid mutations and route item admission`).
+- Tracked unstaged files are exactly:
+  - `tasks/lessons-archive/migration/world-state-lifecycle.md`
+  - `tasks/lessons-archive/verification/build-vet-and-gates.md`
+  - `tasks/lessons-archive/verification/race-and-flake-attribution.md`
+  - `tasks/lessons.md`
+  - `tasks/migration-active.md`
+  - this handoff
+- Staged and untracked sets are empty. One expected owned Legacy documentation
+  commit will archive the completed leaf evidence and route the next leaf.
+- All three Legacy `.cs` gates are empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
 - Branch: `main`; HEAD:
-  `fccbfcd91a36d867d48974c7d14b43e092c7a33d`
-  (`Complete P6 inventory grid mutations`).
-- Tracked unstaged, staged and untracked sets are empty.
-- The matrix marks grid mutation Complete, use admission Active and P6 at 9/19
-  Complete. All three Go C# gates and `git diff --check` are empty/passing.
+  `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2`
+  (`Complete P6 item use admission`).
+- Tracked, staged and untracked sets are empty after the owned 24-file commit.
+- All three Go `.cs` gates are empty.
 
 ## Active leaf and protected work
 
-- Active leaf: `ITEM-P6-USE-ADMISSION-001`.
-- Outcome: migrate shared `CanUseItem` gender/class, every RequiredType stat/
-  level/rebirth gate and common item/grid/death admission, with exact localized
-  System text before `UseItem=false` and no consumption/effect on denial.
-- Read only the P6 summary, exact active row and completed grid evidence
-  paragraph. Legacy read/write and exact Go write boundaries are registered in
-  `tasks/migration-active.md`; every C# file remains read-only.
-- The accepted grid commit authority, normalized revision/CAS world apply,
-  runtime item reports and inventory-only Move/Split/Merge/Delete behavior are
-  protected. Do not redesign them in admission work.
-- Item-family effects, use catalog expansion, equipment movement/stat formulas,
-  another P6 child, P4 chat routing and unrelated refactors remain forbidden.
-
-## Completed grid-mutation evidence
-
-- Auth mutators receive detached latest item state, commit only deep-cloned
-  grids, capture rental transfer proposals, reserve globally unique split IDs
-  including rental authority IDs and publish global process-monotonic revisions.
-- World applies returned normalized snapshots only after auth unlock, clones all
-  grids and rejects delayed revisions without a nested world-to-auth lock.
-- Session auth/world/configured JSON commit precedes Legacy-ordered Player logs
-  and packets. Null-source Move is report -> localized System chat -> failure;
-  successful Move/Split/Merge/Delete preserve their exact report/wire order.
-- A focused regression proved basic potion consumption now commits against the
-  latest auth snapshot and cannot resurrect or erase a concurrent item before a
-  later Delete.
-- Reviewer `01a0385f-7607-7be3-9541-8759a864ab1c` rejected the initial auth
-  authority. Reviewer `01a0387f-52d9-7d62-8803-340b6f3f53b8` found the stale
-  potion write and accepted its correction with no remaining blocker.
+- Active leaf: `ADMIN-P6-ITEM-COMMAND-001`.
+- Outcome: preserve administrator/TestServer `@MAKE` item index/name lookup,
+  ushort count fallback, stack splitting, `GMMade`, early-return/full-bag quirks
+  and observable text/report behavior; preserve self/online-target `@CLEARBAG`
+  per-slot `DeleteItem` ordering and final stat refresh.
+- Legacy authority is bounded to `PlayerObject` command dispatch and the exact
+  `MAKE`/`CLEARBAG` cases near lines 2362-2434, `Envir.CreateDropItem` near
+  4403-4427 and only directly invoked lookup/gain/refresh/packet helpers.
+- Go write authority is bounded to `cmd/crystal-server/{utility_command.go,
+  utility_command_test.go,utility_command_session_test.go,main.go,
+  item_transactions.go,item_transactions_test.go}` plus one focused new test if
+  needed, and `internal/auth/{service.go,service_test.go}` only if latest-state
+  atomic create/clear persistence requires it.
+- Completed item admission commit `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2`
+  and all other files are protected from redesign or unrelated cleanup.
 
 ## Verification ledger
 
-- Touched-package compile for `./internal/auth` and `./cmd/crystal-server`:
-  exit 0.
-- Focused auth/world/helper/authenticated/failure tests at `-count=20`: exit 0.
-- The same concurrency-relevant set under race at `-count=5`: exit 0.
-- Fresh unexcluded `go test ./...`: exit 0.
-- Fresh `go vet ./...` and `go build ./...`: exit 0.
-- Fresh unexcluded `go test -race ./...`: exit 0.
-- Earlier failures were implementation-attributed and resolved: wrong
-  `RentalInformation` type, wrong `ParseChatPayload` arity and Use -> Delete
-  stale-auth resurrection. Final focused/package/full gates all pass.
+- Post-correction `gofmt` and
+  `go test ./cmd/crystal-server ./internal/auth -run '^$'` exited 0.
+- The combined admission/family/latest-auth/Hero/pet focused set passed at
+  `-count=20`; the same set passed under race at `-count=5`.
+- Fresh unexcluded `go test ./... -count=1`, `go vet ./...`, `go build ./...`
+  and `go test -race ./... -count=1` all exited 0 after final corrections.
+- Reviewer `01a0398c-2192-7710-baba-e3c5548d5d1a` rejected stale sealed-Hero
+  full-snapshot commit and post-auth ordinary-pet rollback. Production now uses
+  one revisioned `AttachSealedHeroLatest` transaction and retains a pet after
+  authoritative item consumption; focused/full gates passed and re-review
+  returned `no findings` / ACCEPT. Its allocator-gap observation was ruled
+  intentional by the existing Legacy-compatible `AllocateItemID` contract.
+- The earlier read-only reviewer `01a03979-3ff3-7980-967f-e51afec821b8` was
+  shut down after failing to return; it changed no files. All reviewer threads
+  are closed and no `go` or `crystal-server` process remains.
 
 ## Exact recovery sequence
 
-1. Run the Legacy control checker, commit exactly the four owned Legacy files
-   and verify both roots plus all six C# gates.
-2. Read only the active admission matrix anchors and bounded Legacy `CanUseItem`/
-   common UseItem admission code. Derive the finite precedence/text matrix before
-   the next Go write, then use one bounded Luna wave with disjoint authority.
+1. Commit the six owned Legacy control/evidence files, then verify both
+   repositories separately, all six `.cs` gates and active-index/matrix parity.
+2. Search matching archive sections only for `ADMIN-P6-ITEM-COMMAND-001`,
+   `MAKE`, `CLEARBAG`, `CreateDropItem`, command parser and item allocator.
+3. Trace exact Legacy parser/permission/count/stack/full-bag/target order and
+   inspect only current Go command/item authorities; register any bounded write
+   expansion before implementation.
+4. Implement the finite delta, run compile/focused `-count=20`/race `-count=5`
+   and any due integration gate, obtain bounded Luna review, update matrix,
+   index and this snapshot, then commit only accepted owned files.

@@ -32,6 +32,7 @@ duplicate.
 - Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
 - Strengthening through MAP-detail recovery: 新 Session 首调用仍用 `git -C` 混读双仓且输出截断；整调用作废后，文档/status/C# 门禁按单仓小段重跑。恢复命令发送前必须机械拒绝 `git -C`、对侧根和超限区段；只采用单仓、零退出、完整输出。
 - P6 recovery recurrence: mixed-source searches and a `git -C` startup audit were discarded; separate single-repo reruns passed. Preflight every argument.
+- Item-use recovery recurrence: 首个 status 又以 `git -C` 混读两仓；整次作废并按仓重跑。发送前字面拒绝 `git -C`，状态核验也无例外。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 

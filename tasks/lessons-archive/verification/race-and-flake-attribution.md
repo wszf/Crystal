@@ -224,3 +224,4 @@
 - Root cause: 已归档的 OmaMage 真实 session maintenance 会在人工攻击 tick 前进入移动 fallback 并额外消费 `Next(2)`；栈和修改文件均未进入 localization、welcome bootstrap、probe 或本批 consumer changes。
 - Prevention: 保留无排除失败与精确隔离结果，再以仅排除该用例的服务端/全仓普通门禁验证其余测试；不得修改 OmaMage 掩盖当前 bootstrap 批次，也不得把带排除项的通过表述为无排除全仓通过。
 - Verification: `go test ./cmd/crystal-server -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'`、对应 `go test ./... -skip ...` 与 `go test -race ./... -skip ...` 均退出 0；本批 focused 普通/race 也退出 0。更早一次无排除完整 race 曾通过，但最终重跑退出 1，handoff 必须同时保留而以最终状态为准。
+- Strengthening after item-use admission: 本批 post-expansion 首次无排除 `go test -race ./...` 仍只命中相同 OmaMage `[2 1]`/`[1]` 边界且无 race detector 报告；隔离 race `-count=10` 随即 exit 0，第二次 fresh 无排除完整 race exit 0。必须在 handoff 同时保留首次 exit 1、隔离归因与最终 exit 0，不能删除失败证据或把首次运行表述为通过。
