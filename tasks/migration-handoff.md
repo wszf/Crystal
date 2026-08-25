@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 08:48 (Asia/Singapore)
+Last updated: 2026-08-25 08:50 (Asia/Singapore)
 
 This replace-in-place snapshot records committed closure of `MAP-P4-LOAD-001`
 and synchronized routing to `BOOT-P4-STARTPOINT-001`.
@@ -19,12 +19,13 @@ and synchronized routing to `BOOT-P4-STARTPOINT-001`.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; HEAD: `b1b85fcc5bdc2a8ef290da1ad710ed49e3d1d3dc`
-  (`docs(migration): refresh p4 handoff`).
-- Tracked unstaged: `tasks/lessons.md`, `tasks/migration-active.md`, and this
-  handoff. Staged and untracked sets are empty.
-- Lessons contains bounded C01/C02 strengthening for the discarded mixed-repo
-  recovery call and discarded unquoted-glob lookup. Active Index closes MAP and
+- Branch: `master`; observed HEAD:
+  `d9d449aeb06618497050422459ebe9f01a66f54f`
+  (`docs(migration): route p4 startpoint validation`). The eventual handoff-only
+  commit is the one expected documentation delta from this observed HEAD.
+- Before this refresh the worktree, index and untracked set were empty; this
+  handoff is now the sole tracked unstaged file.
+- The committed control closes MAP, records bounded C01/C02 strengthening and
   registers exact BOOT ownership in `main.go` plus new
   `p4_startpoint_startup_test.go`.
 - Control checker, diff check and Legacy tracked/staged/untracked `.cs` gates
@@ -79,8 +80,6 @@ All listed commands use the final MAP candidate and exit 0:
 
 ## Exact recovery sequence
 
-1. Re-read this handoff and compare both status sets; Go must remain clean and
-   Legacy must contain only the three control files described above.
-2. Commit the three Legacy control files, then verify both repositories clean
-   and matrix/index/handoff Active fields agree.
-3. Begin `BOOT-P4-STARTPOINT-001` under its exact two-file Go authority.
+1. Verify both repositories clean and matrix/index/handoff Active fields agree;
+   the actual Legacy HEAD may be one handoff-only commit after the observed ID.
+2. Begin `BOOT-P4-STARTPOINT-001` under its exact two-file Go authority.
