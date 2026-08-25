@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 07:53 (Asia/Singapore)
+Last verified: 2026-08-25 10:07 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -40,35 +40,31 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `MAP-P4-DETAIL-001`
-- Status: `Active`; P4 is scope-frozen In progress with ten finite children, four Complete and six unfinished. Complete `BOOT-P4-STARTPOINT-001` unlocks this source-order map-detail child.
-- Outcome: preserve current-map `MapInformation`; exact full `NewMapInfo` and
-  one-per-connection `WorldMapSetup`; per-connection repeat suppression; and
-  `SearchMap` silence/sentinels, loaded-map source order, current-culture prefix
-  matching and NPC underscore-suffix `GameName`, with production probe evidence.
-- Go matrix anchors to read: exact `MAP-P4-DETAIL-001` and `| P4 |` rows plus named map-detail/SearchMap/probe evidence only; never read the full matrix.
-- Legacy read authority: bounded `PlayerObject` StartGame map packets,
-  `RequestMapInfo` and `SearchMap`; `MirConnection` dispatch gates; `MapInfo`/
-  `NPCInfo` ClientInfo/GameName; exact packet serializers and client consumers;
-  every C# file remains read-only.
-- Exact Go write authority: `cmd/crystal-server/{main.go,main_test.go,world.go,world_test.go}`, new `cmd/crystal-server/p4_map_detail_session_test.go`,
-  `internal/protocol/{packet.go,packet_test.go}`, `internal/probe/{network.go,
-  network_test.go}`, and bounded P4 matrix evidence only.
-- Required gate: touched-package compile, exact payload/vector tests,
-  authenticated multi-map request/search/suppression transcript, production
-  probe consumption, repeated tests, focused race, diff/status/process checks
-  and all six C# gates; protocol changes require integration.
-- Forbidden scope: map cell loading/StartPoint validation, P4 collision/light/
-  visibility/chat behavior, P5-P12 systems, broad matrix/source dumps and every
-  C# write.
+- Leaf ID: `MAP-P4-LIGHT-001`
+- Status: `Active`; P4 is scope-frozen In progress with ten finite children, five Complete and five unfinished. Complete `MAP-P4-DETAIL-001` unlocks this dependency-free clock child.
+- Outcome: preserve static map light fields plus the UTC-derived global
+  `TimeOfDay` bootstrap and transition broadcast only when the light changes.
+- Go matrix anchors to read: exact `MAP-P4-LIGHT-001` and `| P4 |` rows plus named TimeOfDay/light/bootstrap evidence only; never read the full matrix.
+- Legacy read authority: bounded `Envir` UTC start/`AdjustLights`, settings light
+  boundaries, `PlayerObject` StartGame `TimeOfDay`, exact serializer and client
+  consumer; every C# file remains read-only.
+- Exact Go write authority: `cmd/crystal-server/{time_of_day.go,
+  time_of_day_test.go,main.go}` and bounded P4 matrix evidence only.
+- Required gate: touched-package compile; exact UTC boundary/bootstrap/change-
+  only broadcast tests including a non-UTC production host; count-20 repetition,
+  focused race, diff/status/process checks and all six C# gates; scheduler changes
+  require integration.
+- Forbidden scope: static map-detail semantics, collision/visibility/chat,
+  combat fire/lightning effects, P5-P12 systems, broad matrix/source dumps and
+  every C# write.
 
-`BOOT-P4-STARTPOINT-001` is Complete at Go `6db6bbb002fe7e74d8b51473409252f5c407455e`.
-Empty, all-failed, loaded-without-StartPoint and failed-map-only exports return the
-exact localized typed validation failure in `EnvirStarted -> error ->
-EnvirStopped` order without listener bind; a loaded non-index-zero StartPoint
-permits game/status startup. Focused/repeated/race and fresh integration/vet/
-build evidence pass after exact isolation and clean rerun of the known
-Hallucination package flake; P12 retains `EnforceDBChecks`.
+`MAP-P4-DETAIL-001` is Complete at Go
+`ea3a4503f5c6f506888898e012e62a3fa91ac767`. Exact current-map,
+setup/full detail payloads, persistent suppression, failed-known/unknown request
+boundaries, raw current-culture loaded-order search, NPC suffixes, sentinels and
+strict production-probe consumption pass vectors, authenticated count-20,
+focused race and fresh unexcluded full tests/vet/build. Independent review's one
+probe-suppression finding is fixed and focused re-review reports no remainder.
 
 `MAP-P4-LOAD-001` is Complete at Go
 `7cceb308cef7232a1b02c64c301adc1f89275e9a`. Ordered v0-v7/v100
@@ -151,21 +147,19 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
 
 ### Protected Go ownership
 
-- `MAP-P4-DETAIL-001` exclusively owns the nine Go paths named in Active batch
+- `MAP-P4-LIGHT-001` exclusively owns the three Go paths named in Active batch
   until its leaf gate, matrix update and commit are complete.
 
 ### Remaining acceptance work
 
-- [ ] Lock complete current-map/NewMapInfo/WorldMapSetup payload state, request
-      suppression and authenticated multi-map bootstrap/production probe use.
-- [ ] Lock SearchMap blank/short/invalid silence, sentinels, loaded source order,
-      current-culture prefix matching and NPC underscore GameName behavior.
+- [ ] Lock UTC-derived initial TimeOfDay against a non-UTC host environment.
+- [ ] Lock exact boundary transitions and broadcast only when light changes.
 
 ### P4 frozen child registry
 
 Independent reviewer `01a03617-76c2-7652-ab64-7e27143ce72b` rejected two
 candidate revisions, then accepted this ten-child denominator with no remaining
-finding. Two children are Complete and eight are unfinished.
+finding. Five children are Complete and five are unfinished.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -175,8 +169,8 @@ finding. Two children are Complete and eight are unfinished.
 | `MOVE-P4-ACTION-001` | Complete | — | none | existing movement/repeated/race |
 | `MOVE-P4-COLLISION-RULES-001` | Ready | P9 conquest state | bounded world/main + RequiredGroup test | authenticated gate/order matrix |
 | `VIS-P4-OBJECT-001` | Ready | P5 hide/show producers | legacyworld/worlddata + bounded server visibility | recipient/filter/re-entry matrix |
-| `MAP-P4-DETAIL-001` | Active | map load + StartPoint | exact nine-file protocol/probe/map-info authority above | payload/order/suppression/search |
-| `MAP-P4-LIGHT-001` | Ready | — | `time_of_day.go`, `main.go` + tests | UTC production clock/non-UTC host |
+| `MAP-P4-DETAIL-001` | Complete | map load + StartPoint | verified Go protocol/probe/map-info candidate | payload/order/suppression/search |
+| `MAP-P4-LIGHT-001` | Active | — | `time_of_day.go`, `main.go` + tests | UTC production clock/non-UTC host |
 | `MAP-P4-NOREINCARNATION-AUTH-001` | Ready | P5 spell | focused authenticated session | unchanged amulet/no cast |
 | `CHAT-P4-MAP-CONTEXT-001` | Ready | P6 shout arming | map-rule import + bounded chat/session | NoNames/shout recipients/order |
 

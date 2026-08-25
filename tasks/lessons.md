@@ -30,7 +30,7 @@ duplicate.
 - Strengthening after `DISC-P1-CLOSURE`: P1 版本勘察又在 Legacy `workdir` 的同一命令中加入 Go 的 `internal/config`/`cmd/crystal-server` 相对路径；compact 恢复首调用随后再次把绝对 Go matrix 附在 Legacy 启动读取末尾。两次整调用均已作废并按两仓独立零退出重跑。即使核对同一 setting 或启动 authority，也必须在发送前机械检查“命令文本只含当前根”，且 Legacy 启动调用必须物理结束后才能构造 Go 调用。
 - Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
 - Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
-- Strengthening through P4: 跨仓调用仍复发（本次恢复又用 `git -C` 混读双仓）；整调用作废并按 `workdir` 分仓重跑。发送前拒绝 `git -C` 与任何对侧路径，只采用单仓、零退出、完整输出；改 active lesson 前先跑大小门禁。
+- Strengthening through MAP-detail recovery: 新 Session 首调用仍用 `git -C` 混读双仓且输出截断；整调用作废后，文档/status/C# 门禁按单仓小段重跑。恢复命令发送前必须机械拒绝 `git -C`、对侧根和超限区段；只采用单仓、零退出、完整输出。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -57,7 +57,7 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
-- Strengthening through P4: `--glob` 越界、可零匹配裸跑、猜路径及本次未引用 `*.go` 仍复发；整调用作废后先枚举路径，并以固定 argv/显式 0/1 分支重跑。发送前机械核对路径、glob、argv、退出码和输出上限。
+- Strengthening through MAP detail: helper 定位再次使用未引用 glob 且输出截断；整调用作废后按精确文件/行重跑。发送前机械拒绝 shell glob、宽泛输出和未验证 argv。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -93,7 +93,7 @@ duplicate.
 - Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；显式转换不同领域类型，再进入行为测试。
 - Verification: 最小编译、定向测试和 `go vet` 分层通过。
 - Strengthening after NET frame-reader integration: 替换返回类型时漏改三个消费者，测试重构又留了未使用 import，均由只编译门禁捕获。接口变更先列声明与全部调用点，同一补丁改完后立即 gofmt/compile。
-- Strengthening after HTTP recovery: recovered and incremental candidates repeatedly missed imports or helper definitions. Treat each hunk group as unverified; gofmt and touched-package compile must precede behavior tests.
+- Strengthening through MAP detail: 新测试漏加 `config` import，被 touched-package compile 拦截；每组 hunk 先 gofmt/compile，再跑行为测试。
 
 ### 2026-08-21 C07 — 全量、race 和环境失败必须按实际栈归因
 
@@ -195,7 +195,7 @@ duplicate.
 - Verification: 普通、重复和 race 模式均无阻塞，包数与接收者矩阵一致。Superman 认证
   transcript 首版在测试 goroutine 中同步调用 `deliverWorldNotifications`，而客户端 reader
   尚未启动，两个测试均等到 30 秒 pipe timeout 后失败；改为先启动 delivery goroutine、
-  主测试同步读取并在独立 channel 回收发送结果后，两个定向 session tests 退出 0。
+  主测试同步读取并回收发送结果；fatal 测试须把 `SetReadDeadline` 的 closed-pipe 当作成功关闭。
 
 ### 2026-08-21 C21 — 迁移必须沿真实 Legacy 调用链、动态类型和 override
 
@@ -292,4 +292,4 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
-- Strengthening through admin-authority and Select-probe recovery: handoff 重建已四次把必需 heading 改成语义近似标题并被检查器拦截；重写前必须从脚本逐字复制全部 heading/field schema，禁止自拟名称；本次恢复精确标题并重跑检查为 0。
+- Strengthening through MAP detail: heading/field schema 必须从检查脚本逐字复制；主审 broad diff 再次截断并整调用作废。控制文档与源码均须按精确文件/物理段回读，禁止自拟 schema 或提高输出上限代替分段。

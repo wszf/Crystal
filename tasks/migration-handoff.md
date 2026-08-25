@@ -1,85 +1,78 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 09:14 (Asia/Singapore)
+Last updated: 2026-08-25 10:12 (Asia/Singapore)
 
-This replace-in-place snapshot records committed closure of
-`BOOT-P4-STARTPOINT-001` and synchronized routing to `MAP-P4-DETAIL-001`.
+This replace-in-place snapshot records committed `MAP-P4-DETAIL-001` closure and
+synchronized routing to `MAP-P4-LIGHT-001`.
 
 ## Goal and control-plane state
 
 - Goal remains Active and unchanged. It is neither complete nor blocked.
-- Main authority remains `gpt-5.6-sol/ultra`. Bounded writer
-  `01a03667-3c77-7d90-acbd-f4ed31781f1b` (`luna_worker`,
-  `gpt-5.6-luna/max`) exclusively created the new StartPoint test file, returned
-  passing focused evidence and was closed. No agent or Go/server process remains.
-- P4 is scope-frozen In progress with ten children, four Complete and six
-  unfinished. Matrix and Active Index mark BOOT Complete and
-  `MAP-P4-DETAIL-001` as the sole Active leaf.
+- Main authority remains `gpt-5.6-sol/ultra`.
+- The completed MAP-detail writer and reviewer are closed; no active subagent or
+  Go/server process remains.
+- Matrix and Active Index close MAP detail, activate MAP light, and record P4 as
+  scope-frozen In progress with ten children, five Complete/five unfinished.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; observed HEAD:
-  `c5f16466085ac3d1b758609724b1467f99a4ee01`
-  (`docs(migration): route p4 map detail closure`). The eventual handoff-only
-  commit is the one expected documentation delta from this observed HEAD.
-- Before this refresh the worktree, index and untracked set were empty; this
-  handoff is now the sole tracked unstaged file.
-- The archive strengthening records one fresh package exit 1 from the established
-  30-second Hallucination closed-pipe flake, exact isolation count 10 exit 0 and
-  fresh package rerun exit 0. No unrelated production/test change was made.
-- Active Index closes BOOT and registers exact nine-file MAP-detail authority.
-  Control checker, diff check and all three Legacy C# gates are clean/empty.
+- Branch: `master`; observed HEAD before the expected control commit:
+  `35c026d5531c214e5e21c73e861c10af29e1b74a`.
+- Tracked unstaged: `tasks/lessons.md`,
+  `tasks/lessons-archive/verification/fixtures-and-transcripts-01.md`,
+  `tasks/migration-active.md`, and this refreshed handoff. Index and untracked
+  set are empty.
+- Lessons record the startup single-repository violation, truncated broad/glob
+  calls, missing-import compile catch, fatal closed-pipe test race and reviewer
+  suppression finding. Active Index routes exact three-file MAP-light authority.
+- Control checker and diff check pass; all three Legacy C# gates are empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch: `main`; HEAD: `6db6bbb002fe7e74d8b51473409252f5c407455e`
-  (`feat(migration): enforce loaded map startpoint startup gate`).
-- Worktree, index and untracked set are empty; diff and C# gates are clean.
-- Committed production derives the mandatory StartPoint gate only from successfully
-  loaded maps, runs it before existing world-map validation, returns the exact
-  localized typed error in `EnvirStarted -> error -> EnvirStopped` order and
-  never calls game/status openers on rejection. A loaded non-index-zero
-  StartPoint permits game then status bind.
-- Matrix closes BOOT, activates MAP detail and records four Complete/six
-  unfinished. Go diff check and all three Go C# gates are clean/empty.
+- Branch: `main`; HEAD:
+  `ea3a4503f5c6f506888898e012e62a3fa91ac767`.
+- Worktree and index are clean.
+- The committed leaf preserves full current/detail/setup payloads, loaded-source/current-
+  culture search, NPC suffix GameName, sentinels, persistent suppression,
+  failed-known silence and unknown-index fatal. Strict parsers and the production
+  probe consume the exact sequence and reject repeated map detail.
+- Go diff check and all three Go C# gates are empty.
 
 ## Active leaf and protected work
 
-- Active leaf: `MAP-P4-DETAIL-001`.
-- Outcome: exact current-map `MapInformation`, complete `NewMapInfo`, one-time
-  `WorldMapSetup`, repeat suppression, and loaded-source-order/current-culture
-  SearchMap silence/sentinels plus NPC underscore-GameName behavior, consumed by
-  the Go production probe.
-- Matrix anchors: exact MAP-detail/P4 rows and named map-detail/SearchMap/probe
-  evidence. Legacy authority is bounded PlayerObject StartGame/RequestMapInfo/
-  SearchMap, MirConnection dispatch, MapInfo/NPCInfo ClientInfo/GameName,
-  serializers and client consumers.
-- Exact Go authority is `cmd/crystal-server/{main.go,main_test.go,world.go,
-  world_test.go}`, new `p4_map_detail_session_test.go`,
-  `internal/protocol/{packet.go,packet_test.go}`, and
-  `internal/probe/{network.go,network_test.go}` plus matrix evidence. Cell load,
-  StartPoint, collision/light/visibility/chat and P5-P12 behavior are forbidden.
+- Active leaf: `MAP-P4-LIGHT-001`.
+- Outcome: exact static map lights plus UTC-derived global `TimeOfDay` bootstrap
+  and transition broadcast only when light changes.
+- Matrix anchors: exact MAP-light/P4 rows and named TimeOfDay/light/bootstrap
+  evidence only.
+- Exact Go authority after MAP-detail commit: `cmd/crystal-server/time_of_day.go`,
+  `cmd/crystal-server/time_of_day_test.go`, and bounded `main.go`; matrix evidence
+  only. Combat fire/lightning, detail/collision/visibility/chat and P5-P12 are
+  forbidden.
 
 ## Verification ledger
 
-Final BOOT candidate commands and results:
+Final MAP-detail evidence:
 
-- touched compile: exit 0;
-- focused seven production/fixture tests: `-count=1` and `-count=20`, exit 0;
-- focused race seven tests `-count=5`: exit 0;
-- first fresh `go test ./cmd/crystal-server -count=1`: exit 1 only at known
-  `TestSessionHallucinationTranscript` after 30 seconds, outside owned files;
-- exact Hallucination isolation `-count=10 -timeout=10m`: exit 0;
-- fresh unexcluded package rerun: exit 0 in 75.352s;
-- fresh unexcluded `go test ./... -count=1`: exit 0, server 80.143s;
-- `go vet ./...` and `go build ./...`: exit 0;
-- worker compile/focused/repeated/race evidence also exited 0. Full repository
-  race is not due; startup changes have current focused race and integration.
+- `gofmt` on all nine owned Go files: exit 0;
+- touched compile `go test ./cmd/crystal-server ./internal/protocol ./internal/probe -run '^$'`: exit 0;
+- seven focused server tests, four exact protocol vectors and five probe/bootstrap
+  tests at `-count=20`: exit 0;
+- the same focused sets under `go test -race ... -count=5`: exit 0;
+- first integration `go test ./... -count=1`: exit 1 only because the new fatal
+  test treated `SetReadDeadline` closed-pipe as failure; root cause fixed and its
+  isolation `-count=20` passed;
+- fresh unexcluded final `go test ./... -count=1`: exit 0, server 77.403s;
+- final `go vet ./...`, `go build ./...`, and `git diff --check`: exit 0;
+- independent focused re-review: `resolved, no remaining finding`.
+
+Full repository race is not due; focused race covers session/protocol/probe state,
+and the due protocol integration gate is fresh and unexcluded.
 
 ## Exact recovery sequence
 
-1. Verify both repositories clean and all three Active fields agree; the actual
-   Legacy HEAD may be one handoff-only commit after the observed ID.
-2. Begin `MAP-P4-DETAIL-001` under its exact nine-file authority.
+1. Verify the expected Legacy control commit, Go MAP-detail commit, clean Go
+   worktree and both repositories' six C# gates.
+2. Begin `MAP-P4-LIGHT-001` from its exact three-file authority and named anchors.

@@ -849,3 +849,10 @@
 - Root cause: 确定性 `monsterAIRoll` 夹具只列出了分支和部分旧调用的上界，且测试把延迟动作完成时刻与该 tick 后续 poison 调度边界混为一谈。
 - Prevention: 新增 AI 测试先记录完整随机调用序列（分支、伤害、抗性、chance、毒值），夹具必须为每个实际上界提供确定值；延迟命中 transcript 同时投影命中、同 tick 移动和状态首跳，再断言 `Elapsed` 与包序。
 - Verification: 加入 `Next(10)` 的固定返回并将 Red poison 的首跳期望改为 `Elapsed=1` 后，包级编译和全部 CatShaman 定向测试通过。
+
+### 2026-08-25 — MAP-detail probe 必须拒绝重复地图详情
+
+- Symptom: 独立 review 发现 production probe 在已请求并消费 `NewMapInfo` 后，仍把搜索阶段再次收到 `NewMapInfo` 当作可选兼容路径。
+- Root cause: probe 只验证能解析两种 packet 顺序，没有把 Legacy `SentMapInfo.Contains` 的 repeat suppression 当成必须失败的协议判据。
+- Prevention: probe 先消费一次 `WorldMapSetup -> NewMapInfo`，随后对同图搜索必须直接期望 `SearchMapResult`；任何重复 setup/map-info 都立即报错。
+- Verification: probe 改为严格 `expectID(ServerSearchMapResult)`，新增 suppression 正例与重复 `NewMapInfo` 负例，定向 count-20 通过。
