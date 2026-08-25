@@ -16,7 +16,7 @@ duplicate.
 - Symptom: Go/Legacy 路径混入同一调用，出现部分成功输出、尾部失败或错误目标。
 - Root cause: 把工作目录、仓库根和参数列表分开考虑，并复用了另一仓库的路径。
 - Prevention: 启动恢复也无例外：一次调用只属于一个仓库；先核验 `git rev-parse --show-toplevel`，参数只允许该根下已存在的路径；切换仓库必须新开调用；不得在当前 workdir 中用 `git -C`、绝对路径或脚本参数指向另一仓库；不得以只读、并行或减少往返为例外。
-- Verification: 命令零退出且所有路径属于同一根；任一读取失败、非零退出或混合根调用时，丢弃该调用的全部输出（包括前面成功的片段），不得用于实现、测试归因或文档。 本次 BaseStats 审查又在 Go workdir 的只读调用中误带 Legacy `Shared/Data/Stat.cs`，整次输出已丢弃并按两仓分别重跑。本轮跨仓库 status 审计因混入另一根路径作废，随后已拆成两次单仓调用重跑；本批一次 Legacy workdir 混入 Go 文件路径的只读调用同样整体作废，随后按仓库拆开重跑；本轮 Legacy 方向核对命令再次混入 Go 相对路径，整次输出作废，随后按仓库边界重跑。 本轮一次 Legacy 读取调用误附 Go 相对路径，整次输出再次作废并已拆分重跑；一次委派消息误将已选 AI=8 写成 AI=80，相关 AI=80 tracing 已明确丢弃并按 AI=8 重做；本轮两次继续勘察时又把 Legacy lesson/archive 路径或 Go 源码路径混入对侧 workdir，相关调用输出均作废，随后已按仓库分别重跑。 本 Session 首次恢复读取又在 Legacy workdir 的同一命令中加入 Go migration-matrix 绝对路径；整次约 8 万 token 输出已作废，并按两仓独立调用重新读取。 本批 Notice 勘察又在 Go workdir 的同一读取中附带 Legacy `Server/Settings.cs`，整次输出立即作废，随后分别在 Go 与 Legacy 根重跑并只采用独立结果。
+- Verification: 命令零退出、输出完整且所有路径属于同一根；失败、截断或混仓调用的全部输出立即作废并按仓重跑。历史实例已原样归档到 workflow archive，不再在 active 中重复事故日志。
 - Strengthening after localized-welcome recovery: compact 后首个启动读取再次把 Go matrix 绝对路径放入 Legacy 调用；该调用全部输出已作废，随后两仓 status、文档和 matrix 均以独立 workdir 重跑，并以重建 handoff 为恢复 authority。
 - Strengthening after TestServer/GameMaster selection: compact 硬门恢复时又在单次启动审计中通过 `git -C` 混读两仓；该调用全部输出已作废。后续只在对应 `workdir` 内使用相对路径，并分别重跑 Legacy 文档/status/C# 门禁与 Go matrix/status/C# 门禁后才刷新 handoff。
 - Strengthening after Superman recovery: 连续两次在 Go `workdir` 的上下文读取中追加 Legacy 相对路径，导致前段成功输出与尾部路径失败混杂；两次调用全部作废。此后构造命令前先把每个路径按仓库分类，命令文本只允许出现当前 `git rev-parse --show-toplevel` 下的相对路径；跨仓证据必须拆成相邻但独立的工具调用，并分别要求零退出后才可采用。
@@ -31,7 +31,7 @@ duplicate.
 - Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
 - Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
 - Strengthening through MAP-detail recovery: 新 Session 首调用仍用 `git -C` 混读双仓且输出截断；整调用作废后，文档/status/C# 门禁按单仓小段重跑。恢复命令发送前必须机械拒绝 `git -C`、对侧根和超限区段；只采用单仓、零退出、完整输出。
-- P6 item recovery recurrence: 多次双仓审计混用 `git -C` 或对侧路径；整次作废并拆仓重跑。发送前字面拒绝 `git -C` 与对侧根。
+- P6 item recovery recurrence: 本 Session 首个状态调用再次用 `git -C` 混读双仓；整次作废后 HEAD/status/六项 C# 门禁按仓重跑。发送前字面拒绝 `git -C` 与对侧根。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -58,7 +58,7 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
-- Strengthening through P6 item reviews: 未引用 glob、猜测路径及 `set -e` 下零匹配 `rg` 反复使搜索作废；均经目录参数加 `rg --glob`、精确枚举或显式 0/1 重跑。发送前逐项验证 argv 与退出码。
+- Strengthening through P6 item reviews: Mine 恢复先猜不存在的源码/测试路径，又数次使用 shell glob；相关输出均作废并经 `rg --files`、目录参数 `rg --glob` 或精确路径重跑。未来文件清单、惯例名称和“刚见过的路径”都不是存在性证据。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -85,7 +85,7 @@ duplicate.
 - Root cause: 依据相似模块、Legacy 名称或“应该对称”推断 Go API。
 - Prevention: 先读取声明、receiver、参数顺序、返回值、领域类型和包级符号，再接线。
 - Verification: 新调用接入后立即运行包级只编译门禁；编译器已分别拦截猜测的 `worldMagic.Spell`、`MarketStatusSold`、`Guild.Index` 和错误 bool 返回，复读真实声明后定向测试通过。
-- Strengthening through P6 grid mutation: 测试先猜成 `protocol.RentalInformation`，又把 `ParseChatPayload` 猜成三个返回值，两次均被编译门禁拦截；回读真实声明后改为 `ItemRentalInformation` 与 `ChatMessage,error` 并重跑通过。字段夹具和解析器必须先读完整类型、返回值及所有权。
+- Strengthening through P6: 编译门禁先后拦截猜测的 `RentalInformation`、错误 `ParseChatPayload` arity，以及不存在的 `ParseUserLocationPayload`/`ParseObjectAttackPayload`/`ServerQuestChanged`；均回读真实声明后修正并重测。测试 API 也必须先读完整类型、返回值和所有权。
 
 ### 2026-08-21 C06 — 行为判断前先通过 Go 语法、类型和 vet 门禁
 
@@ -93,8 +93,7 @@ duplicate.
 - Root cause: 一次写入过多逻辑，在编译失败时仍试图分析生产语义。
 - Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；显式转换不同领域类型，再进入行为测试。
 - Verification: 最小编译、定向测试和 `go vet` 分层通过。
-- Strengthening after NET frame-reader integration: 替换返回类型时漏改三个消费者，测试重构又留了未使用 import，均由只编译门禁捕获。接口变更先列声明与全部调用点，同一补丁改完后立即 gofmt/compile。
-- Strengthening through MAP detail: 新测试漏加 `config` import，被 touched-package compile 拦截；每组 hunk 先 gofmt/compile，再跑行为测试。
+- Strengthening through Mine review: 既有 NET/MAP 批次曾漏改消费者/import；本批 group-quest 三个嵌套 literal 漏一层 `}`。均只作 compile finding，复读最小范围修正并在行为测试前通过 touched compile；接口或复合 literal 每个小 hunk 后必须立即 gofmt/compile。
 
 ### 2026-08-21 C07 — 全量、race 和环境失败必须按实际栈归因
 
@@ -131,6 +130,7 @@ duplicate.
 - Root cause: 只按业务分支记录随机，没有展开嵌套 helper、构造、命中和防御抽样。
 - Prevention: 按调用栈列出每次随机调用、顺序、阶段和 bound，并使用记录型确定性源。
 - Verification: 分阶段断言随机序列，并重复普通/race 测试确认稳定；AI=77 HellPirate 的延迟命中还核对了固定范围 `Random.Next(1)`，确定性 hook 不再把合法的 unit-bound 消费误报为失败。
+- Strengthening through Mine: `.NET Random.Next(0)` 返回零但仍推进随机源，负数才拒绝；Go 对零/一 bound 必须归一成一次 unit draw，并在测试中锁定后续调用顺序，不能把退化区间当成“无 RNG”。
 
 ### 2026-08-21 C12 — 人工时钟必须隔离所有后台 tick 和全局时间源
 
@@ -180,6 +180,7 @@ duplicate.
 - Root cause: 把领域成功或一个响应包当作整个动作的完成屏障。
 - Prevention: 沿实际入队和广播点列出完整有序事件；禁止 map 驱动有序期望；保留中间状态。
 - Verification: 逐包核对数量、顺序、payload 和最终领域状态。
+- Strengthening through Mine: 多候选流程中前项 quest fanout 已提交后，后项分配/放置失败必须返回累计 notifications/changed，禁止用 `nil,false` 抹掉已持久化副作用。
 
 ### 2026-08-21 C19 — 通知必须按接收者和可见性矩阵验收
 
@@ -193,10 +194,10 @@ duplicate.
 - Symptom: 服务端先写导致阻塞，bootstrap 残留包抢占预期响应，或 cleanup 死锁。
 - Root cause: 假设请求后才有响应，或把最后一个 bootstrap 包当作稳定 game loop。
 - Prevention: 写入前启动所有 reader；并发消费多接收者；使用 post-bootstrap 屏障；异步 callback 不直接调用 `Fatal`。
-- Verification: 普通、重复和 race 模式均无阻塞，包数与接收者矩阵一致。Superman 认证
-  transcript 首版在测试 goroutine 中同步调用 `deliverWorldNotifications`，而客户端 reader
-  尚未启动，两个测试均等到 30 秒 pipe timeout 后失败；改为先启动 delivery goroutine、
-  主测试同步读取并回收发送结果；fatal 测试须把 `SetReadDeadline` 的 closed-pipe 当作成功关闭。
+- Verification: 普通、重复和 race 均无阻塞且包数/接收者一致。Superman 与 Mine session
+  都曾在 reader 前同步 `deliverWorldNotifications`，分别超时或 closed-pipe；修正为先启动
+  delivery goroutine、主测试读完整包后回收 error。fatal 测试仍把 deadline closed-pipe
+  视为成功关闭；持久化断言须按真实 `itemstate.Add` 槽位而非手写 slot 0。
 
 ### 2026-08-21 C21 — 迁移必须沿真实 Legacy 调用链、动态类型和 override
 
@@ -207,6 +208,7 @@ duplicate.
 - Strengthening after P1 config compatibility: 既有 `TestVersionCheckingRequiresAFile` 首次失败，因为测试把 Go 的 fail-fast 规则当成权威；Legacy `LoadVersion` 实际跳过缺失路径并保留空 hash 列表，启用版本检查时由客户端 gate 全部拒绝。测试已改为锁定空列表/全拒绝，缺失、空白、多文件和 partial MD5 定向/重复/race 全通过。任何“更严格更安全”的配置错误都必须先由 Legacy loader 和消费者共同裁决。
 - Strengthening after `NET-P1-GATES-001` tracing: Active acceptance 草稿把 MaxPacket reset 凭直觉写成一秒，Legacy `MirConnection.ReceiveData` 实际在严格 `< Now` 时重置并设为 `Now.AddSeconds(5)`。时间窗口、比较边界和计数单位必须从真实入口逐项抄录后再写验收清单；本次在任何 NET 代码写入前改回五秒并保留 equality 边界待测。
 - Strengthening after NET/lifecycle review: ordinal/IPv6 与“清理 occupied-status 泄漏”建议均回到源码裁决；保留真实的 153、`[2001` 及 stale Running/已绑定 game listener。安全直觉不得覆盖可观察怪癖。
+- Strengthening through Mine terminal review: 共享 `HumanObject.Attack` 不是完整入口；`PlayerObject.CanAttack` 与 mounted `spell=None` override 同样可达。继承层门禁、参数改写和失败后的累计通知必须在实现前逐层冻结。
 
 ### 2026-08-21 C22 — 不同 capability、门禁和业务阶段不得过度复用
 

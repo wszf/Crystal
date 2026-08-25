@@ -599,3 +599,10 @@
 - Root cause: 把“两仓启动核验”误写成一个复合命令，没有在发送前机械拒绝 `git -C`。
 - Prevention: 启动恢复命令先只写当前仓清单并结束调用；收到零退出结果后才能构造下一仓命令，命令文本内禁止出现对侧根或 `git -C`。
 - Verification: 整次混仓输出已作废；Legacy 与 Go 的 HEAD/status/三类 C# 门禁随后分别在各自 `workdir` 零退出重跑，准确 handoff 写入并通过控制检查。
+
+### 2026-08-26 — Canonical C01 historical verification compacted before Mine closure
+
+- The following pre-compaction active verification line is preserved verbatim:
+- Verification: 命令零退出且所有路径属于同一根；任一读取失败、非零退出或混合根调用时，丢弃该调用的全部输出（包括前面成功的片段），不得用于实现、测试归因或文档。 本次 BaseStats 审查又在 Go workdir 的只读调用中误带 Legacy `Shared/Data/Stat.cs`，整次输出已丢弃并按两仓分别重跑。本轮跨仓库 status 审计因混入另一根路径作废，随后已拆成两次单仓调用重跑；本批一次 Legacy workdir 混入 Go 文件路径的只读调用同样整体作废，随后按仓库拆开重跑；本轮 Legacy 方向核对命令再次混入 Go 相对路径，整次输出作废，随后按仓库边界重跑。 本轮一次 Legacy 读取调用误附 Go 相对路径，整次输出再次作废并已拆分重跑；一次委派消息误将已选 AI=8 写成 AI=80，相关 AI=80 tracing 已明确丢弃并按 AI=8 重做；本轮两次继续勘察时又把 Legacy lesson/archive 路径或 Go 源码路径混入对侧 workdir，相关调用输出均作废，随后已按仓库分别重跑。 本 Session 首次恢复读取又在 Legacy workdir 的同一命令中加入 Go migration-matrix 绝对路径；整次约 8 万 token 输出已作废，并按两仓独立调用重新读取。 本批 Notice 勘察又在 Go workdir 的同一读取中附带 Legacy `Server/Settings.cs`，整次输出立即作废，随后分别在 Go 与 Legacy 根重跑并只采用独立结果。
+- Mine-session recurrence: the first recovery status command again used `git -C` to mix both repositories; the entire output was discarded, and branch/HEAD/status plus all C# gates were rerun in independent repository-local calls.
+- Verification: subsequent startup, matrix, source, status and C# calls used one verified root each and exited zero.

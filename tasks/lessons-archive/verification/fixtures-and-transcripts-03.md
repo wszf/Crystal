@@ -773,3 +773,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: the synthetic account ID `adminrevisionguard` exceeded the production account-name constraint; the fixture built storage state successfully but did not satisfy authenticated entry.
 - Prevention: derive account IDs from existing authenticated fixtures or validate their length/syntax before using a low-level seed helper; a successful `AddPlaintextAccount` setup is not proof that the wire login gate will accept the identifier.
 - Verification: shortening the ID to `revisionguard` made the exact production-session test pass at count 20 without changing the behavior under test.
+
+### 2026-08-26 — Mine terminal review must retain prior quest fanout and inherited attack quirks
+
+- Symptom: terminal review found mounted requests were not coerced to `Spell.None`, and a later overlapping ordinary-payout failure discarded already committed quest notifications. Main review also had to distinguish `.NET Random.Next(0)` from negative bounds and preserve its source advancement.
+- Root cause: the implementation followed `HumanObject.Attack` without the reachable `PlayerObject`/mount override, and failure returns rebuilt an empty result instead of returning accumulated side effects; degenerate random bounds were initially treated as “no draw.”
+- Prevention: trace inherited overrides before the shared body; return the accumulated transaction result after any later failure; explicitly model zero/unit random calls and clamp only the source-clamped negative ore range.
+- Verification: mounted mining now broadcasts `Spell.None`; overlapping quest diversion retains `GainedQuestItem`/message/quest update after the next allocation fails; zero/unit mine draws retain source order. Focused count-20, race count-5, fresh full normal/race, vet/build passed, and Luna follow-up `01a03ab3-90e8-7de3-8f63-135618c86d34` returned `No findings`.

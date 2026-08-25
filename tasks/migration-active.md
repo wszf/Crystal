@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-26 03:48 (Asia/Singapore)
+Last verified: 2026-08-26 05:50 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,83 +39,61 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `MINE-P6-RUBBLE-001`
-- Status: `Active`; P6 is scope-frozen with eleven of nineteen children
-  Complete, this one Active and seven Ready. It is dependency-ready because P4
-  map loading and P5 shared SpellObject/combat/item adapters are Complete.
-- Outcome: migrate the finite mine-set/drop configuration, map mine zones and
-  spots, weapon/cell admission, stone regeneration/hit/drop RNG, Rubble
-  SpellObject refresh/spawn/expiry, delayed Mine effect and ore payout.
-- Go matrix anchors to read: only P6 summary row 901, this registry row 3206 and
-  completed administrator-item evidence 3263-3282; never the full matrix or
-  another phase section.
-- Legacy read authority: bounded mine settings and loaders, map mine zone/spot
-  state, reachable player mining request/action chain, Rubble SpellObject and
-  only their directly invoked RNG/timer/item helpers; every C# file is read-only.
-- Go write authority: only exact mine-related fields/tests in `internal/config`,
-  `internal/worlddata` and `internal/legacyworld`, plus bounded new mine/rubble
-  production/tests and proven callsites in `cmd/crystal-server`; freeze exact
-  filenames after tracing and before code. No unrelated schema, combat, map,
-  item-use, spell or command expansion.
-- Required gate: Go-only parser/export round trip; target cell/weapon and mine-
-  zone gates; exact RNG call order, 400ms delayed effect, five-minute Rubble,
-  stone regeneration/payout, authenticated session, restart and focused race;
-  standard touched compile/count-20/race-count-5, diff/status and six C# gates.
-  Integration/full-race are due immediately for shared schema/ticker/locking.
-- Forbidden scope: generic mining-adjacent map/combat redesign, unrelated
-  SpellObjects or item drops, another P6 child, broad schema cleanup and every
-  C# write.
+- Leaf ID: `SPELL-P5-MAP-HAZARD-001`
+- Status: `Active`; P5 is scope-frozen with eight of eleven children Complete,
+  this one Active and two Ready. It is dependency-ready because
+  `MAP-P4-LOAD-001` and the shared P5 SpellObject/combat authorities are
+  Complete.
+- Outcome: migrate the finite configured `MapLightning=202` and `MapLava=203`
+  schema, creation schedules, random location/damage, SpellObject ticks,
+  Observer exemption, player damage notifications and removal lifecycle.
+- Go matrix anchors to read: only P5 summary row 851, this registry row 3162 and
+  completed Mine evidence 3206-3231; never the full matrix or another phase.
+- Legacy read authority: bounded map Lightning/Fire serialized fields and map
+  creation/process entry points, the concrete MapLightning/MapLava SpellObject
+  implementations and only directly invoked RNG/timer/damage/broadcast helpers;
+  every C# file is read-only.
+- Go write authority: candidate existing schema fields/tests in
+  `internal/worlddata/world.go`, `internal/legacyworld/database.go` and bounded
+  export/map-schema tests; bounded callsites in `cmd/crystal-server/world.go`;
+  new `cmd/crystal-server/map_hazards.go`, `map_hazards_test.go` and one
+  authenticated session test. Freeze the exact filenames after tracing and
+  before code; no other file is owned without revising this index.
+- Required gate: Go-only parser/export round trip; all Legacy Lightning/Fire
+  gates; strict schedule/tick/removal boundaries; exact RNG order and damage;
+  self/observer/Observer-mode packet and HP transcript; restart semantics;
+  touched compile/count-20/race-count-5, diff/status and six C# gates.
+  Integration/full-race are due immediately for shared schema/ticker/damage.
+- Forbidden scope: unrelated player spells, monster AI, conquest decorations,
+  generic map/combat redesign, another P5 child and every C# write.
 
 ### Protected Go ownership
 
-- Completed administrator-item commit
-  `9e7edac7aaf22f35677f90427ca79da4e998b096` and all earlier P1-P6 evidence
-  remain read-only except for exact mine-child files frozen before writing.
-- P4/P5 map, SpellObject, combat and item adapters may be consumed but not
-  redesigned; their unrelated behavior remains protected.
+- Completed Mine/Rubble commit
+  `3f76a57b2059e6a43f2edf1f31b8430a20a347a4` and all earlier P1-P6 evidence
+  remain read-only; map loading and shared SpellObject/combat/item adapters may
+  be consumed but not redesigned.
 
 ### Remaining acceptance work
 
-- [x] Trace and freeze the finite Legacy call chain. Exact Go write set:
-  `internal/worlddata/{world.go,world_test.go}`;
-  `internal/legacyworld/{settings.go,database.go,export.go,reader_settings_test.go,map_schema_test.go,export_test.go}`;
-  mine-only `internal/protocol/{packet.go,packet_test.go}` `MapEffect` adapter;
-  `cmd/crystal-server/{world.go,main.go,mine.go,mine_test.go,mine_session_test.go}`.
-  `internal/config` needs no write because production imports `Mines.ini` through
-  Legacy-world export; no other file is owned without revising this index.
-- [ ] Implement only missing Mine/Rubble behavior and production-entry evidence.
+- [ ] Trace the finite Legacy call chain, search matching lessons archive
+  sections and freeze the exact Go write set/checklist before any hazard code.
+- [ ] Implement only missing map-hazard behavior and production-entry evidence.
 - [ ] Run the leaf gate, obtain bounded review, commit and route the next
-  dependency-ready P6 child.
+  dependency-ready child.
 
 ### Frozen behavior checklist
-- Mines parser: absent-file built-ins; exact `Mine0..n`/`D0..n` sentinel defaults;
-  JSON round trip; stable no-space/case-insensitive item resolution; ordered
-  map `MineZones` then `MineIndex`.
-- Map runtime: map-wide one-based mine assignment followed by ordered
-  half-open zones, with mine zero clearing; only an in-bounds non-walkable
-  front cell can mine. Generic accepted attack packets/timers precede silent
-  weapon/CanMine/durability/map/spot failures.
-- RNG/state: consume accepted attack power before mining; decrement a positive
-  stone before strict hit; only new Rubble consumes spawn-delay RNG; strict
-  drop, first inclusive slot match, drop-item/upgrade and ore draws retain source
-  order; weapon damage is `5+Next(15)`. Empty spots regenerate only at strict
-  `now > LastRegen`, schedule first, with no same-request hit.
-- Rubble/wire: reuse same-cell Rubble by refreshing strict five-minute expiry;
-  otherwise allocate one runtime ObjectID at the miner cell and emit
-  `ObjectSpell(Rubble)`. At inclusive 400ms due, emit `MapEffect(Mine)` with
-  the miner's then-current direction, increment Rubble direction through six,
-  then emit refreshed `ObjectSpell`; strict expiry emits `ObjectRemove`.
-- Payout/persistence: full inventory returns before slot/item RNG; no ground
-  fallback; rejected creations consume identity/RNG; existing adapters retain
-  quest and `NewItemInfo`/`GainedItem` order. Items/weapon persist across
-  relogin/restart; spot/Rubble survive only in-process, definitions persist.
+
+- Registry contract is finite: schema/export, configured creation gates,
+  schedule/tick/removal strictness, location/damage RNG, Observer exemption,
+  player HP/wire fanout and restart boundary. Exact source-order details remain
+  closed to implementation until bounded tracing records them here.
 
 ### P6 frozen child registry
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Eleven are Complete, one is
-Active and seven are Ready.
+accepted all nineteen children with no finding. Twelve are Complete and seven are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -137,21 +115,20 @@ Active and seven are Ready.
 | `REPAIR-P6-NPC-001` | Complete | P7 page authority | existing committed evidence | formulas/order/persistence |
 | `REFINE-P6-WORKBENCH-001` | Ready | P7 page authority | refine/session | delayed production/restart/race |
 | `CRAFT-P6-NPC-001` | Complete | P7/P10 | existing committed evidence | ingredients/RNG/order/persistence |
-| `MINE-P6-RUBBLE-001` | Active | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
+| `MINE-P6-RUBBLE-001` | Complete | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
 
 ### P5 frozen child registry
 
 Independent Legacy auditor `01a036ed-ee8f-7a50-a042-f1d665f83627` confirmed
 211 mapped/45 default AI ordinals and both map-hazard producers. Independent
 reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the eleven-child
-registry with no remaining finding. Eight children are Complete and three are
-Ready.
+registry with no remaining finding. Eight children are Complete, one is Active and two are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `SPELL-P5-PLAYER-CATALOG-001` | Complete | — | existing committed evidence | 130-ID partition / 109 user spells |
 | `SPELL-P5-INTERNAL-EFFECT-001` | Complete | mapped monster owners | existing committed evidence | 16 internal effects |
-| `SPELL-P5-MAP-HAZARD-001` | Ready | map load | worlddata/legacyworld schema + bounded server hazard files/tests | parser/export + timers/RNG/session/race |
+| `SPELL-P5-MAP-HAZARD-001` | Active | map load | worlddata/legacyworld schema + bounded server hazard files/tests | parser/export + timers/RNG/session/race |
 | `COMBAT-P5-HUMAN-HERO-001` | Complete | spell/state consumers | existing committed evidence | target/defence/death/relogin |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
