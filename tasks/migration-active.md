@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-26 00:04 (Asia/Singapore)
+Last verified: 2026-08-26 02:51 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,50 +39,46 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `ADMIN-P6-ITEM-COMMAND-001`
-- Status: `Active`; P6 is scope-frozen with ten of nineteen children Complete,
-  this one Active and eight Ready. It is dependency-ready because P3 runtime
-  administrator/TestServer authority and P5 random item creation are Complete.
-- Outcome: migrate reachable `@MAKE` by numeric item index or case-insensitive
-  name, Legacy ushort count fallback/stack splitting/early-return quirks and
-  `GMMade` creation; migrate `@CLEARBAG` for self or one online target with one
-  `DeleteItem` per occupied slot followed by the owning stat refresh.
-- Go matrix anchors to read: only the P6 summary row, this exact registry row
-  and the immediately preceding completed item-admission evidence; never the
-  full matrix or another phase section.
-- Legacy read authority: bounded `PlayerObject` chat-command dispatch and exact
-  `MAKE`/`CLEARBAG` cases, `Envir.CreateDropItem`, `CanGainItem`/`GainItem`,
-  item stack/definition lookup, online-player lookup, resulting packets/text/
-  reports and only directly invoked helpers; every C# file remains read-only.
-- Go write authority: bounded `cmd/crystal-server/{utility_command.go,
-  utility_command_test.go,utility_command_session_test.go,main.go,
-  item_transactions.go,item_transactions_test.go}` plus one new focused admin-
-  item command test when needed; bounded `internal/auth/{service.go,
-  service_test.go}` only for latest-authority atomic create/clear persistence;
-  no protocol/config schema write and no unrelated command expansion.
-- Required gate: touched-package compile; exhaustive permission/parser/count/
-  stack/full-bag/target and deterministic creation boundaries at `-count=20`;
-  authenticated transcript, persistence/relogin and focused race at `-count=5`;
-  `git diff --check`, exact status/process review and all six C# gates. Full
-  integration is not due solely from selection; rerun immediately if shared
-  allocator, persistence or dispatcher architecture changes.
-- Forbidden scope: item-use/equipment behavior, player drop/pickup, item catalog
-  expansion, other administrator commands, another P6 child, unrelated
-  refactors and every C# write.
+- Leaf ID: `MINE-P6-RUBBLE-001`
+- Status: `Active`; P6 is scope-frozen with eleven of nineteen children
+  Complete, this one Active and seven Ready. It is dependency-ready because P4
+  map loading and P5 shared SpellObject/combat/item adapters are Complete.
+- Outcome: migrate the finite mine-set/drop configuration, map mine zones and
+  spots, weapon/cell admission, stone regeneration/hit/drop RNG, Rubble
+  SpellObject refresh/spawn/expiry, delayed Mine effect and ore payout.
+- Go matrix anchors to read: only P6 summary row 901, this registry row 3206 and
+  completed administrator-item evidence 3263-3282; never the full matrix or
+  another phase section.
+- Legacy read authority: bounded mine settings and loaders, map mine zone/spot
+  state, reachable player mining request/action chain, Rubble SpellObject and
+  only their directly invoked RNG/timer/item helpers; every C# file is read-only.
+- Go write authority: only exact mine-related fields/tests in `internal/config`,
+  `internal/worlddata` and `internal/legacyworld`, plus bounded new mine/rubble
+  production/tests and proven callsites in `cmd/crystal-server`; freeze exact
+  filenames after tracing and before code. No unrelated schema, combat, map,
+  item-use, spell or command expansion.
+- Required gate: Go-only parser/export round trip; target cell/weapon and mine-
+  zone gates; exact RNG call order, 400ms delayed effect, five-minute Rubble,
+  stone regeneration/payout, authenticated session, restart and focused race;
+  standard touched compile/count-20/race-count-5, diff/status and six C# gates.
+  Integration/full-race are due immediately for shared schema/ticker/locking.
+- Forbidden scope: generic mining-adjacent map/combat redesign, unrelated
+  SpellObjects or item drops, another P6 child, broad schema cleanup and every
+  C# write.
 
 ### Protected Go ownership
 
-- Completed item admission commit
-  `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2` and all earlier P1-P6 evidence
-  remain read-only except for exact active-child files above.
-- P5 creation may be consumed but not redesigned; cross-grid and item-use
-  behavior remain their owning P6 leaves.
+- Completed administrator-item commit
+  `9e7edac7aaf22f35677f90427ca79da4e998b096` and all earlier P1-P6 evidence
+  remain read-only except for exact mine-child files frozen before writing.
+- P4/P5 map, SpellObject, combat and item adapters may be consumed but not
+  redesigned; their unrelated behavior remains protected.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact `MAKE`/`CLEARBAG` parser, permission, creation, packet/text and
-  early-return checklist against current Go command/item authorities.
-- [ ] Implement only missing command behavior and production-entry transcripts.
+- [ ] Trace and freeze exact mine config/schema/runtime files and the finite
+  Legacy RNG/timer/packet/persistence checklist before any Go write.
+- [ ] Implement only missing Mine/Rubble behavior and production-entry evidence.
 - [ ] Run the leaf gate, obtain bounded review, commit and route the next
   dependency-ready P6 child.
 
@@ -90,8 +86,8 @@ Keep this file at or below 300 lines and 32 KiB.
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Ten are Complete, one is
-Active and eight are Ready.
+accepted all nineteen children with no finding. Eleven are Complete, one is
+Active and seven are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -99,7 +95,7 @@ Active and eight are Ready.
 | `ITEM-P6-GRID-MUTATION-001` | Complete | logging/localization | committed/accepted grid mutation evidence | error/report/response order + normalized revision/CAS |
 | `ITEM-P6-GRID-CROSS-001` | Ready | P8/P11 feature owners | item/storage/trade/Hero/equipment | exact positive/negative grid matrix |
 | `CAPACITY-P6-GRIDS-001` | Ready | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
-| `ADMIN-P6-ITEM-COMMAND-001` | Active | P3 authority + P5 creation | command/item/session | MAKE/CLEARBAG quirks |
+| `ADMIN-P6-ITEM-COMMAND-001` | Complete | P3 authority + P5 creation | committed Go `9e7edac7aaf22f35677f90427ca79da4e998b096` | MAKE/CLEARBAG quirks |
 | `EQUIP-P6-CORE-001` | Ready | P8/P11 feature owners | equipment/session | slots/sockets/stats/order/race |
 | `ITEM-P6-USE-ADMISSION-001` | Complete | P1 LOC + P5 stats | committed Go `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2` | all gates and localized order |
 | `ITEM-P6-USE-BASIC-001` | Complete | — | existing committed evidence | potion/delete success paths |
@@ -113,7 +109,7 @@ Active and eight are Ready.
 | `REPAIR-P6-NPC-001` | Complete | P7 page authority | existing committed evidence | formulas/order/persistence |
 | `REFINE-P6-WORKBENCH-001` | Ready | P7 page authority | refine/session | delayed production/restart/race |
 | `CRAFT-P6-NPC-001` | Complete | P7/P10 | existing committed evidence | ingredients/RNG/order/persistence |
-| `MINE-P6-RUBBLE-001` | Ready | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
+| `MINE-P6-RUBBLE-001` | Active | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
 
 ### P5 frozen child registry
 

@@ -731,3 +731,45 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Review recurrence: `codex-auto-review` 终审发现 schedule 仍吃 host location、CallNPC 未执行 `CheckVisible`、logout 清 cache 无锁、queued tick 与 refresh 可重复发包、map iteration 顺序不稳、`uint16` Level 被截断。修复采用共享 UTC monotonic clock、普通 NPC call 的同一 runtime/player predicate、generation+mutex teardown、cache-aware send suppression、Legacy load/insertion 顺序和 int32 比较。
 - Failed-gate ruling: 首次补测猜测不存在的 `ParseObjectRemovePayload` 且把 bootstrap struct 当 slice，compile exit 1；首次 fresh full 又暴露旧 world fixture 依赖已接受的 NPC load sort，以及 conquest test 让战争中已隐藏 NPC 自己停止战争、违反 Legacy `CallNPC -> CheckVisible -> VisibleLog/Visible`。恢复 load sort，并把征服测试拆为可见 controller 与被隐藏 target，未削弱生产 gate。
 - Final verification: 后续复审继续修正 bootstrap callback 安装窗口、Observer/target-loss generation 失效、持锁网络写和逐包 reservation 交错；最终以同锁 cache claim + 单一 bounded FIFO NPC batch 落盘。parser/world/session focused `-count=20`、focused race `-count=5`、征服与旧 world 回归 race、fresh unexcluded `go test ./... -count=1`（server 79.853s）、`go vet ./...`、`go build ./...` 均 exit 0，终审 `resolved, no findings`。
+
+### 2026-08-26 — Legacy formatter arguments must cross a supported Go type boundary
+
+- Symptom: the first authenticated `@MAKE ... 0` transcript closed the server pipe before its KeepAlive barrier with `legacy composite format error: unsupported argument type`.
+- Root cause: the command passed a `uint16` count directly to `legacyfmt.Format`; compilation succeeded, but the formatter's supported runtime argument set does not include that width even though .NET formats `UInt16` normally.
+- Prevention: at each localized composite-format callsite, convert protocol-width numerics to the formatter's supported semantic integer type and drive the path through a production-entry transcript; compile-only gates cannot validate dynamic argument dispatch.
+- Verification: both `ItemHasBeenCreated` and `PlayerAttemptCreateItem` now receive `int(remaining)`; the exact authenticated session test passes and retains the zero-count System chat before its barrier.
+
+### 2026-08-26 — Administrator bootstrap has a post-ledger buff packet
+
+- Symptom: a raw net.Pipe `@MAKE` logging transcript timed out writing its first KeepAlive after `startGameBootstrapForTest` returned; server cleanup then reported a blocked final GameMaster buff.
+- Root cause: the generic bootstrap helper returns at `ServerGuildBuffList`, while an AdminAccount session still emits its private GameMaster `ServerAddBuff` afterward; the raw client had not consumed it, so the server could not resume reads.
+- Prevention: after generic bootstrap of an administrator, derive the object ID from `UserInformation` and consume/assert the final private GameMaster buff before sending a barrier or command. Buffered mail-session helpers may hide this direct-pipe ordering requirement.
+- Verification: the logging transcript now asserts that exact buff first, then passes its pre-command KeepAlive, zero-count chat, Server queue and post-command KeepAlive checks.
+
+### 2026-08-26 — Revision assertions must baseline after session bootstrap
+
+- Symptom: the new full-bag `@MAKE` test reported revision 2 instead of 1 even though the rejected command no longer committed an item mutation.
+- Root cause: the test captured its baseline before authenticated bootstrap, whose existing item-state preparation legitimately advanced the revision.
+- Prevention: when proving a command does not advance authority, capture the revision after login/bootstrap and immediately before the production command; do not compare against a pre-session fixture revision.
+- Verification: moving the no-op revision snapshot behind the bootstrap KeepAlive made the exact full-bag production-entry test pass while preserving the rejected ID/RNG assertions.
+
+### 2026-08-26 — Logout must distinguish administrator clears from ordinary item revisions
+
+- Symptom: the first latest-auth logout correction made fresh integration fail Craft success/failure, equipment remove, NPC give/take and other persistence transcripts because their legitimate session/world item changes were replaced by an older auth snapshot before write-back.
+- Root cause: a no-op auth transaction was treated as unconditional authority refresh; the session had no recorded login revision with which to distinguish a remote `CLEARBAG` advance from ordinary local dirty state.
+- Prevention: a broad item revision cannot identify why auth advanced. Keep a separate process-local `CLEARBAG` watermark, baseline it when the session enters, and merge latest auth grids during graceful logout, abrupt cleanup or observer transition only when that clear watermark advances. Ordinary craft/equip/NPC/hero revisions must not trigger rebase; the world still receives the ordinary item revision baseline for stale-result rejection.
+- Verification: the known Craft, equipment and NPC persistence regressions pass after the clear-specific watermark; stale-auth-clear tests pass through both `ClientLogout` and abrupt cleanup, while a separate production-session regression advances an ordinary auth revision, dirties the world inventory, logs out and proves that local item survives. Focused count 20, focused race count 5, fresh full normal/race, vet and build all pass.
+
+### 2026-08-26 — Shared result types must be copied from the declaration before wiring fallback paths
+
+- Symptom: the first detached `CLEARBAG` fallback used a guessed `playerEquipmentRefreshResult` and failed the touched-package compile; the real return type is `worldStatsRefreshResult`.
+- Root cause: the new fallback was patterned from an existing callsite without first reading the helper's complete declaration and named result type.
+- Prevention: locate and copy the exact helper signature before declaring an intermediate value, even when the fields used at the callsite look obvious.
+- Verification: the declaration at `world.go` was reread, the exact type substituted, and touched-package compile plus focused administrator tests passed.
+
+### 2026-08-26 — Authenticated fixture identifiers must satisfy the real account regex
+
+- Symptom: the first ordinary-revision/logout regression failed all twenty repetitions at login with result 1 before reaching its revision assertion.
+- Root cause: the synthetic account ID `adminrevisionguard` exceeded the production account-name constraint; the fixture built storage state successfully but did not satisfy authenticated entry.
+- Prevention: derive account IDs from existing authenticated fixtures or validate their length/syntax before using a low-level seed helper; a successful `AddPlaintextAccount` setup is not proof that the wire login gate will accept the identifier.
+- Verification: shortening the ID to `revisionguard` made the exact production-session test pass at count 20 without changing the behavior under test.
