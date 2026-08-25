@@ -515,3 +515,10 @@
 - Strengthening during Start/Logout archive search: 首次 `rg -l ... | sort` 在零匹配时被下游 `sort` 掩成 exit 0；该空输出未用于裁决，随后显式捕获 `rg` 返回码并仅接受 0/1 重跑，再用较宽但仍 leaf-specific 的 StartGame/LogOut 关键词定位六个文件。可为空检索禁止用排序/截断管道代替退出码分支。
 - Strengthening during Start/Logout compaction handoff: durable handoff 初稿把控制脚本要求的固定标题 `## Active leaf and protected work` 改写成同义标题，导致 `tasks/check-migration-control.sh` exit 1；该复合调用全部输出作废。以后 replace-in-place handoff 必须从现有结构复制固定标题，只替换正文；回读后以控制脚本零退出重跑验证。本次已恢复精确标题并重新执行完整单仓门禁。
 - Strengthening during Start/Logout runtime-persistence coverage: 在既有 re-entry transcript 中直接调用 `world.update(objectID, ...)`，却没有先从该测试自己的 StartGame `UserInfo` 提取 `objectID`，只编译门禁报 undefined。新增任何生产 seam 前必须在同一测试作用域列出 ID authority，不能借用相邻测试的同名局部变量；本次从首轮 bootstrap 回包解析 object ID 后，定向测试 `-count=10` exit 0，并锁定显式 logout 从 world snapshot 持久化最终位置。
+
+### 2026-08-25 — P5 closure/compact recovery must reuse single-repository and exact-row gates
+
+- Symptom: P5 closure first tried to patch only the visible leading cells of a physically long matrix row, then compact recovery again used `git -C` to mix both repositories and bundled oversized startup documents; a later matrix Active audit also put an expected zero-match `rg` under `set -e`.
+- Root cause: visual Markdown cells were mistaken for physical patch lines, and the recovery/search commands were assembled as narrative convenience rather than checked against the existing C01/C02 mechanical gates.
+- Prevention: replace long table rows only with full exact-line context or a unique-count Go replacer; recovery calls must be physically single-repository and size-bounded; every potentially empty search must declare and handle rc 0/1 before execution.
+- Verification: failed/nonzero/mixed calls and all preceding output were discarded; both repository states and C# gates were rerun separately, the matrix audit reran with explicit 0/1 handling, and the exact P4 leaf row was synchronized independently.

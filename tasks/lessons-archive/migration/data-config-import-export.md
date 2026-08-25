@@ -164,3 +164,10 @@
 - Root cause: 夹具按注释猜测相邻 header 字段，没有逐项对照现有 Go writer/parser 的实际宽度与顺序。
 - Prevention: 二进制夹具先复用现有 fixture writer，并从生产 parser/writer 逐字段列出 header、count 和 record 边界；新增语义断言前先跑单个 parse smoke。
 - Verification: 修正头部字段序列后，recent tombstone、严格归档边界和第五 retained record 测试的普通、`-count=10`、race `-count=3`、完整 package 与 vet 均退出 0。
+
+### 2026-08-25 — P5 map-hazard schema must preserve configured damage, not adjacent flags
+
+- Symptom: the initial P5 inventory treated loaded `MapInfo.Fire`/`Lightning` booleans as complete map-hazard metadata, but exact tracing showed `internal/legacyworld/database.go` reads and discards `FireDamage`/`LightningDamage`, while `worlddata.MapInfo` exposes neither value.
+- Root cause: adjacent imported flags were used as a proxy for the complete Legacy schema-to-runtime contract.
+- Prevention: audit each configuration field across Legacy storage order, Go parser, exported schema, runtime scheduling and session consumer before classifying support; do not infer a numeric authority from a neighboring boolean.
+- Verification: `DISC-P5-CLOSURE` registered one finite map-hazard child owning both damage fields, parser/export round trip, runtime timer/RNG semantics and authenticated packet/HP evidence.

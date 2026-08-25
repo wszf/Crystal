@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 10:07 (Asia/Singapore)
+Last verified: 2026-08-25 11:52 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -16,9 +16,8 @@ Keep this file at or below 300 lines and 32 KiB.
   not need to be calculated in one up-front pass.
 - `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
   are publishable only for a scope-frozen phase.
-- Current project-wide ETA and percentage remain `Unavailable`: P1-P4 now have
-  finite denominators, but seven other phases still have open
-  inventories.
+- Current project-wide ETA and percentage remain `Unavailable`: P1-P5 now have
+  finite denominators, but six other phases still have open inventories.
 
 ## Phase routing summary
 
@@ -29,7 +28,7 @@ Keep this file at or below 300 lines and 32 KiB.
 | P2 | In progress | Frozen | `DISC-P2-CLOSURE` (Complete) |
 | P3 | Complete | Frozen | `DISC-P3-CLOSURE` (Complete) |
 | P4 | In progress | Frozen | `DISC-P4-CLOSURE` (Complete) |
-| P5 | In progress | Open | `DISC-P5-CLOSURE` |
+| P5 | In progress | Frozen | `DISC-P5-CLOSURE` (Complete) |
 | P6 | In progress | Open | `DISC-P6-CLOSURE` |
 | P7 | In progress | Open | `DISC-P7-CLOSURE` |
 | P8 | Complete | Frozen | — |
@@ -40,125 +39,66 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `DISC-P5-CLOSURE`
-- Status: `Active`; P5 remains open-scope In progress. P4 has ten frozen children,
-  six Complete and four dependency-blocked unfinished, so no P4 child is currently
-  dependency-ready and the bounded P5 inventory audit is selected next.
-- Outcome: convert every vague remaining P5 spell/combat/AI/death/drop/respawn/
-  packet residual into a finite non-overlapping child registry, classify existing
-  completion evidence, and record dependencies without implementing behavior.
-- Go matrix anchors to read: exact `| P5 |` and all `| P5 ` rows plus P5-named
-  completion headings/residual prose only; never read another phase or the full
-  matrix.
-- Legacy read authority: phase-bounded spell/monster catalog and dispatch entry
-  points, player/monster combat processing, damage/death/drop/respawn and packet
-  producers located by exact `rg`; every C# file remains read-only.
-- Exact Go write authority: bounded P5 inventory/evidence in
-  `docs/migration-matrix.md` only; no Go production or test file may change.
-- Required gate: finite static counts, completed-vs-unfinished evidence and
-  dependency/ownership reconciliation, independent read-only denominator review,
-  matrix diff/status/process checks, control checker and all six C# gates.
-- Forbidden scope: implementation, tests, P1-P4/P6-P12 inventory, full-matrix or
-  broad source dumps, phase completion before review, and every C# write.
-
-`MAP-P4-LIGHT-001` is Complete at Go
-`fc6b98b6b312357d850f6710fbf697b8678fd4c2`. UTC startup plus
-monotonic elapsed authority, all 24 hours/two modulo cycles, eight exact
-boundaries, global change-only broadcasts, StartGame bootstrap, static map-light
-separation, non-UTC production initialization, repeated/focused-race and fresh
-full tests/vet/build pass. A reviewer finding about NPC MAPLIGHT local time was
-rejected from exact Legacy global-LightSetting authority; focused re-review
-reports `resolved, no remaining finding`.
-
-`MAP-P4-LOAD-001` is Complete at Go
-`7cceb308cef7232a1b02c64c301adc1f89275e9a`. Ordered v0-v7/v100
-loading, no synthetic/required exported primary, missing/read/corrupt
-continuation, loaded-only metadata/rules/StartPoints, Legacy diagnostic/count
-order, pre-bind production behavior, repeated/race and fresh integration/vet/
-build evidence are locked; final no-StartPoint rejection remains with Active
-`BOOT-P4-STARTPOINT-001`.
-
-`CHAR-P3-BAN-DELETE-001` is Complete at Go
-`c0f70e833b15599d8acb9ad3ebf423cb731fc6a9`. Exact wrong-stage lifetime,
-delete result/source order, retained/repeated/duplicate/signed tombstones,
-selection projection, strict persisted ban admission, ordinal-15 packet, JSON/
-ordinary-117 restart, importer retention/archive behavior, current ranking
-snapshot removal, focused/repeated/race, fresh full/full-race/vet/build, and
-independent `no findings` review are locked. Materialized class lifecycle stays
-with the active ranking child; corrupt-index 117 re-export stays P12.
-
-`PERSIST-P2-SOURCE-PRECEDENCE-001` is Complete at Go
-`4729fed32ded396d36b05c4bdafad6e17e4fc1dd`. Exact production startup with
-conflicting JSON/117 account and global sentinels proves JSON authority,
-non-merge, graceful final checkpoint replacement, and direct 117 reload under
-repeated/race tests. Retained-gap counters and global re-export remain P12.
-
-`CHAR-P3-CREATE-001` is Complete at Go
-`a7f16f8bfb5a0ec4e885d5101dce6635bfafd6e5`. Exact Select-
-stage dispatch, every result/source-order edge, first-request/one-stale-entry IP
-quirks and future admission, strict name range/current-culture DisabledChars,
-administrator/class/count/tombstone gates, unchecked IDs, constructor-zero
-returned SelectInfo, creation metadata/insertion, JSON counter gaps, and
-ordinary retained-record 117 checkpoint/reload are locked by focused,
-repeated, race, and fresh unexcluded integration evidence. Level-1 StartGame
-initialization remains with its named Start child; higher 117 header gaps remain
-P12.
-
-`CFG-P1-CONTRACT-001` is Complete in the verified Go candidate. Exact-case and
-first-match INI behavior, UInt16 fallback/write-back, default production path,
-CRYSTAL extension precedence, service mappings, version MD5 edge behavior, and
-startup-visible failures are locked by focused/repeated/race tests. Its required
-unexcluded integration run reproduced the established OmaMage flake; the
-precisely excluded rerun and vet/build passed as recorded in the handoff.
-
-`LOC-P1-CATALOG-001` is Complete at Go `d21681845090f0030e8f214628fd9aa3d60172b7`.
-The complete 768-key defaults, exact 766-key English/Chinese assets, two active
-English fallbacks, placeholders, unknown/malformed/rewrite/generation behavior,
-startup loading, repeated tests, focused race, and integration attribution are
-locked by Go-only production/test evidence.
-
-`LOG-P1-CATEGORY-001` is Complete at Go
-`0b7a68078e5bc4b182534ca5a5db7260b45267c7`. Production
-startup/session wiring now covers all five Legacy categories, the exact rolling
-layouts and three 100-entry queues, post-saturation file writes, Player/Spawn
-file-only behavior, isolated sink failure/recovery, repeated tests, focused
-race, fresh unexcluded integration, and full race.
-
-`DISC-P1-CLOSURE` is Complete in committed control. A bounded
-main-agent audit and independent read-only `luna_worker` review both found no
-missing, duplicate, cross-phase, or non-observable P1 child. Static evidence
-locks 768 default server keys, 981 direct lookups/765 used keys/three unused
-aliases, 142 MessageQueue business invocations, and four direct Player/Spawn/
-Server logger sites. P1 has three unfinished leaves and nine completed findings;
-this is a P1 denominator only, not a project percentage.
-
-`NET-P1-HTTP-001` is Complete at Go `dbbe12e8f53f944250a1bef52ba4a1446e491622`. Full configured
-URI authority, trusted IP, source-order query merging/current-culture routing,
-exact routes/headers/error prefix/non-GET behavior, Windows/BOM name-list
-semantics, POST lifetime, account metadata/counter, JSON and version-117
-shutdown persistence, all-player Shout2 broadcast, active-handler shutdown,
-focused/repeated/race, and fresh unexcluded full tests/full race/vet/build are
-locked. A read-only `luna_worker` re-review found six issues; five are resolved,
-and the imported higher-than-retained NextAccountID header is registered below
-as finite P12 authority rather than hidden HTTP work.
-
-`OPS-P1-LIFECYCLE-001` is Complete at Go
-`cb595b4e40aeffa9f94e22d2deddaeb9abc7b75f`. Operator state/control,
-bootstrap/bind quirks, exact lifecycle messages, HTTP→game→status→persistence
-shutdown, reason-0 normal fan-out, bounded reason-3→listener-close→reason-0
-fatal ordering under concurrent Stop, focused/repeated/race, fresh unexcluded
-full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
+- Leaf ID: `MAP-P4-NOREINCARNATION-AUTH-001`
+- Status: `Active`; accepted P5 discovery froze eleven children (eight Complete,
+  three Ready) and proved the P5 user-spell producer dependency complete, so
+  this previously dependency-blocked P4 child is selected next.
+- Outcome: preserve imported `NoReincarnation` denial through a real
+  authenticated Reincarnation request: mana/global action gates and the failed
+  `S.Magic.Cast=true` transcript remain Legacy-exact, while equipped Shape-3
+  Amulet count, Reincarnation links/objects, practice and persistence remain
+  unchanged.
+- Go matrix anchors to read: exact `MAP-P4-NOREINCARNATION-AUTH-001` row and
+  NoReincarnation/Reincarnation named completion prose only; never another phase
+  or the full matrix.
+- Legacy read authority: exact `MapInfo.NoReincarnation` load fields and
+  `HumanObject.Magic/Reincarnation` admission/source-order paths located by
+  `rg`; every C# file remains read-only.
+- Exact Go write authority: `cmd/crystal-server/reincarnation_session_test.go`;
+  production `reincarnation.go`/`world.go` only if the authenticated transcript
+  proves a defect.
+- Required gate: imported-map authenticated denial with exact self/observer
+  packet order, MP/cooldowns, unchanged equipment/runtime/persistence, positive
+  control, repeated test, focused race, diff/status/process checks, control
+  checker and all six C# gates.
+- Forbidden scope: P5 implementation, other P4 children, another phase inventory,
+  full-matrix/broad source dumps, unrelated refactors and every C# write.
 
 ### Protected Go ownership
 
-- `DISC-P5-CLOSURE` exclusively owns bounded P5 matrix inventory evidence and
-  Legacy control routing; no Go code is writable during discovery.
+- `MAP-P4-NOREINCARNATION-AUTH-001` exclusively owns the existing focused
+  Reincarnation session test and only evidence-driven bounded production fixes.
+- The accepted P5 frozen registry is read-only while this P4 child is Active.
 
 ### Remaining acceptance work
 
-- [ ] Enumerate every remaining P5 residual into finite non-overlapping children.
-- [ ] Classify completed evidence, dependencies and mutually exclusive ownership.
-- [ ] Obtain independent denominator review with no missing/duplicate boundary.
+- [ ] Drive the denial from imported `NoReincarnation=true` map metadata through
+  an authenticated client Magic request.
+- [ ] Lock exact MP/cooldown/location/Magic packet order and absence of chat,
+  SpellObject, DeleteItem, links, practice and equipment/persistence mutation.
+- [ ] Run repeated/focused-race leaf gates and obtain independent review.
+
+### P5 frozen child registry
+
+Independent Legacy auditor `01a036ed-ee8f-7a50-a042-f1d665f83627` confirmed
+211 mapped/45 default AI ordinals and both map-hazard producers. Independent
+reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the eleven-child
+registry with no remaining finding. Eight children are Complete and three are
+Ready.
+
+| Leaf ID | Status | Dependency | Go write authority | Additional gate |
+|---|---|---|---|---|
+| `SPELL-P5-PLAYER-CATALOG-001` | Complete | — | existing committed evidence | 130-ID partition / 109 user spells |
+| `SPELL-P5-INTERNAL-EFFECT-001` | Complete | mapped monster owners | existing committed evidence | 16 internal effects |
+| `SPELL-P5-MAP-HAZARD-001` | Ready | map load | worlddata/legacyworld schema + bounded server hazard files/tests | parser/export + timers/RNG/session/race |
+| `COMBAT-P5-HUMAN-HERO-001` | Complete | spell/state consumers | existing committed evidence | target/defence/death/relogin |
+| `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
+| `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
+| `MONSTER-P5-BASE-FAMILY-001` | Ready | mapped core | monster_ai/world + focused tests | 46 ordinals + target-kind/race |
+| `MONSTER-P5-ORDINARY-SPAWN-001` | Ready | base family | archer_summons/hell_lord/world + focused tests | AI=60-63/99 + restart/race |
+| `DROP-P5-LOOT-HARVEST-001` | Complete | item schema consumer | existing committed evidence | randomness/owner/inventory/ground |
+| `RESPAWN-P5-POPULATION-001` | Complete | — | existing committed evidence | strict timing/order/restart/race |
+| `WIRE-P5-CONTRACT-001` | Complete | functional owners | existing committed evidence | fixed vectors/transcripts |
 
 ### P4 frozen child registry
 
@@ -176,7 +116,7 @@ finding. Six children are Complete and four dependency-blocked children are unfi
 | `VIS-P4-OBJECT-001` | Ready | P5 hide/show producers | legacyworld/worlddata + bounded server visibility | recipient/filter/re-entry matrix |
 | `MAP-P4-DETAIL-001` | Complete | map load + StartPoint | verified Go protocol/probe/map-info candidate | payload/order/suppression/search |
 | `MAP-P4-LIGHT-001` | Complete | — | committed Go `fc6b98b6b312357d850f6710fbf697b8678fd4c2` | UTC production clock/non-UTC host |
-| `MAP-P4-NOREINCARNATION-AUTH-001` | Ready | P5 spell | focused authenticated session | unchanged amulet/no cast |
+| `MAP-P4-NOREINCARNATION-AUTH-001` | Active | P5 spell (Complete) | focused authenticated session | imported denial + unchanged amulet/no successful cast |
 | `CHAT-P4-MAP-CONTEXT-001` | Ready | P6 shout arming | map-rule import + bounded chat/session | NoNames/shout recipients/order |
 
 ### P1 frozen child registry
@@ -221,8 +161,8 @@ denominator only.
 ### P3 frozen child registry
 
 Independent reviewer `01a0327e-55a1-7f63-9fb7-0b8bdcc061af` accepted this
-exact eleven-child denominator after one revision. Ten are Complete and
-All eleven children are Complete; P3 is scope-frozen and Complete.
+exact eleven-child denominator after one revision. All eleven children are
+Complete; P3 is scope-frozen and Complete.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -249,7 +189,7 @@ broad unnamed scope.
 | `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 5 Complete + 3 unfinished |
 | `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: all Complete |
 | `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
-| `DISC-P5-CLOSURE` | P5 | Active | finite spell/combat/AI/respawn/packet children |
+| `DISC-P5-CLOSURE` | P5 | Complete | 11 finite children: 8 Complete + 3 Ready |
 | `DISC-P6-CLOSURE` | P6 | Discovery | finite item/equipment/craft children |
 | `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |
