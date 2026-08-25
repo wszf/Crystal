@@ -1,10 +1,10 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-26 02:55 (Asia/Singapore)
+Last updated: 2026-08-26 02:57 (Asia/Singapore)
 
-This replace-in-place snapshot closes the accepted administrator-item-command
-implementation and routes the same active Goal to the next finite P6 mining
-leaf. It claims no phase or project closure.
+This replace-in-place snapshot is the durable compaction recovery point after
+the accepted administrator-item-command commits. It routes the same active Goal
+to the finite P6 mining leaf and claims no phase or project closure.
 
 ## Goal and control-plane state
 
@@ -19,20 +19,12 @@ leaf. It claims no phase or project closure.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; observed pre-documentation HEAD:
-  `18be855c3fe2f70caeb3672a9e2a99d93a3bea1d`
-  (`Close P6 item admission and route admin item commands`).
-- Tracked unstaged files before the expected documentation commit are exactly:
-  - `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`
-  - `tasks/lessons.md`
-  - `tasks/migration-active.md`
-  - this handoff
-- Untracked before that commit is exactly
-  `tasks/migration-handoff-archive/2026-08-26-0045-admin-item-pre-review.md`,
-  preserving the superseded unique uncommitted snapshot once.
-- Staged set is empty before staging the documentation transaction. The expected
-  next Legacy commit contains only these five migration-control/evidence files;
-  recovery must compare this recorded pre-commit HEAD with actual HEAD/status.
+- Branch: `master`; observed pre-handoff-refresh HEAD:
+  `bd0e0319e6907df90dbed565872a04bf375f6d53`
+  (`Record P6 admin item closure and route mining`).
+- The worktree and index were clean immediately before this handoff refresh.
+  The expected next Legacy commit contains only this handoff; recovery must
+  compare the recorded pre-commit HEAD with actual HEAD/status.
 - Tracked, staged and untracked Legacy `.cs` gates are empty.
 
 ## Go repository state
@@ -93,7 +85,9 @@ leaf. It claims no phase or project closure.
 ## Active leaf and protected work
 
 - Active leaf: `MINE-P6-RUBBLE-001`.
-- No Go implementation is uncommitted and no Mine/Rubble file is yet owned.
+- The interrupted tracing produced no repository changes, no accepted behavior
+  ruling and no frozen write set. No Go implementation is uncommitted and no
+  Mine/Rubble file is yet owned.
 
 ## Exact recovery sequence
 
