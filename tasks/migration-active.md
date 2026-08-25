@@ -40,28 +40,38 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `MAP-P4-LOAD-001`
+- Leaf ID: `BOOT-P4-STARTPOINT-001`
 - Status: `Active`; P4 is scope-frozen In progress with ten finite children,
-  two Complete and eight unfinished, after independent reviewer
-  `01a03617-76c2-7652-ab64-7e27143ce72b` accepted the corrected denominator.
-- Outcome: preserve Legacy per-map v0-v7/v100 loading/registration without a
-  synthetic or specially required exported-world primary; continue after each
-  missing/read/corrupt map, retain source order, exclude failed-map StartPoints,
-  and emit the exact exception/localized title/filename/count observability.
-- Go matrix anchors to read: exact P4 inventory `MAP-P4-LOAD-001` row, exact
-  `| P4 |` stage row and named map-loading evidence only. Do not read the full
-  matrix.
-- Legacy read authority: `Map.Load`, `MapInfo.CreateMap`, bounded
-  `Envir.StartEnvir` map loop/message order and matching localization keys;
-  every C# file remains read-only.
-- Exact Go write authority: `cmd/crystal-server/{maps.go,maps_test.go,main.go,
-  process_lifecycle_test.go}` and P4 matrix evidence only.
-- Required gate: touched-package compile, focused production startup and loader
-  tests, repeated tests, focused race, diff/status/process checks and all six
-  C# gates; run integration gates if shared startup architecture changes.
-- Forbidden scope: `BOOT-P4-STARTPOINT-001` final no-startpoint validation,
-  P5 monster spawns/combat/AI, P6 item semantics, P7 NPC scripts, P8 companions,
-  P12 persistence mechanics, broad matrix/source dumps and every C# write.
+  three Complete and seven unfinished. `MAP-P4-LOAD-001` is Complete in the
+  verified Go candidate and this dependency-ready child is next.
+- Outcome: reject production exported-world startup unless at least one
+  successfully loaded map contributes a `SafeZoneInfo.StartPoint`; emit the
+  exact localized failure and stop before any game/status listener bind.
+- Go matrix anchors to read: exact P4 inventory `BOOT-P4-STARTPOINT-001` row,
+  exact `| P4 |` stage row and named StartPoint/startup evidence only. Do not
+  read the full matrix.
+- Legacy read authority: first `CanStartEnvir` `StartPoints.Count` check,
+  bounded `StartEnvir` successful-map StartPoint population, caller failure ->
+  message -> `StopEnvir`/`Stop` order and the matching localization key; every
+  C# file remains read-only.
+- Exact Go write authority: `cmd/crystal-server/main.go`, new
+  `cmd/crystal-server/p4_startpoint_startup_test.go` and bounded P4 matrix
+  evidence only.
+- Required gate: touched-package compile, focused production startup tests for
+  empty/all-failed/no-StartPoint/failed-map-only/loaded-StartPoint cases, exact
+  localized pre-bind failure, repeated tests, focused race, diff/status/process
+  checks and all six C# gates; startup architecture changes require integration.
+- Forbidden scope: P12 `EnforceDBChecks` monster/item checks, P5 monster
+  spawns/combat/AI, P6 item semantics, P7 NPC scripts, P8 companions, broad
+  matrix/source dumps and every C# write.
+
+`MAP-P4-LOAD-001` is Complete at Go
+`7cceb308cef7232a1b02c64c301adc1f89275e9a`. Ordered v0-v7/v100
+loading, no synthetic/required exported primary, missing/read/corrupt
+continuation, loaded-only metadata/rules/StartPoints, Legacy diagnostic/count
+order, pre-bind production behavior, repeated/race and fresh integration/vet/
+build evidence are locked; final no-StartPoint rejection remains with Active
+`BOOT-P4-STARTPOINT-001`.
 
 `CHAR-P3-BAN-DELETE-001` is Complete at Go
 `c0f70e833b15599d8acb9ad3ebf423cb731fc6a9`. Exact wrong-stage lifetime,
@@ -136,15 +146,15 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
 
 ### Protected Go ownership
 
-- `MAP-P4-LOAD-001` exclusively owns the four Go paths named in Active batch
-  until its leaf gate, matrix update and commit are complete.
+- `BOOT-P4-STARTPOINT-001` exclusively owns the two Go paths named in Active
+  batch until its leaf gate, matrix update and commit are complete.
 
 ### Remaining acceptance work
 
-- [ ] Replace exported-world synthetic/required primary behavior with ordered
-      independent per-map load results and Legacy-compatible diagnostics.
-- [ ] Prove missing/read/corrupt continuation, loaded-map/StartPoint exclusion,
-      metadata-count message and production pre-bind behavior under repeat/race.
+- [ ] Reject no-map, all-failed, loaded-without-StartPoint and failed-map-only
+      StartPoint candidates before any listener bind with the exact message.
+- [ ] Prove one successfully loaded StartPoint permits bind, while the P12
+      EnforceDBChecks branch remains untouched, under repeated/race tests.
 
 ### P4 frozen child registry
 
@@ -154,8 +164,8 @@ finding. Two children are Complete and eight are unfinished.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
-| `MAP-P4-LOAD-001` | Active | — | `cmd/crystal-server/{maps.go,maps_test.go,main.go,process_lifecycle_test.go}` | failure continuation/order + repeated/race |
-| `BOOT-P4-STARTPOINT-001` | Ready | map load + LOC | bounded `main.go` + startup test | localized pre-bind rejection |
+| `MAP-P4-LOAD-001` | Complete | — | committed Go `7cceb308cef7232a1b02c64c301adc1f89275e9a` | failure continuation/order + repeated/race |
+| `BOOT-P4-STARTPOINT-001` | Active | map load + LOC | `cmd/crystal-server/main.go`; new `cmd/crystal-server/p4_startpoint_startup_test.go` | localized pre-bind rejection |
 | `ENTRY-P4-LOCATION-001` | Complete | P3 start/logout | none | existing transition transcripts |
 | `MOVE-P4-ACTION-001` | Complete | — | none | existing movement/repeated/race |
 | `MOVE-P4-COLLISION-RULES-001` | Ready | P9 conquest state | bounded world/main + RequiredGroup test | authenticated gate/order matrix |
