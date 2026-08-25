@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 12:37 (Asia/Singapore)
+Last verified: 2026-08-25 15:43 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,45 +39,42 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `VIS-P4-OBJECT-001`
-- Status: `Active`; P5 scope-freeze proved the hide/show producers Complete,
-  so this previously dependency-blocked P4 visibility child is selected after
-  the authenticated NoReincarnation leaf completed.
-- Outcome: preserve Legacy player/NPC/monster Object* add/remove geometry,
-  per-player NPC visibility filters and interactive Observer non-blocking/
-  relative projection across join, map transition, town revive and appearance
-  refresh, including every imported NPC visibility field currently discarded.
-- Go matrix anchors to read: exact `VIS-P4-OBJECT-001` row plus only named
-  visibility/Observer completion prose; never another phase or the full matrix.
-- Legacy read authority: exact NPC visibility fields/load order and
-  `MapObject`/`PlayerObject` add/remove/search/Observer paths located by `rg`;
-  every C# file remains read-only.
-- Exact Go write authority: `internal/legacyworld/database.go`,
-  `internal/worlddata/world.go`, bounded `cmd/crystal-server/world.go` and
-  existing/new focused visibility/import/session tests discovered by exact file
-  enumeration; no unrelated protocol or phase owner.
-- Required gate: parser/export round trip for all visibility fields, actor/NPC/
-  monster/Observer recipient-filter matrix across join/transition/revive/
-  refresh, repeated test, focused race, due integration if schema is shared,
-  diff/status/process checks, control checker and all six C# gates.
-- Forbidden scope: P5 producer changes, movement/conquest/chat business behavior,
-  another phase inventory, broad source dumps, unrelated refactors and every C#
-  write.
+- Leaf ID: `DISC-P6-CLOSURE`
+- Status: `Active`; `VIS-P4-OBJECT-001` is Complete, while both remaining P4
+  children are dependency-blocked. P6 is selected as the bounded discovery leaf
+  that can freeze its own denominator and expose the map/server-shout dependency.
+- Outcome: convert every remaining reachable P6 inventory/equipment/item-move/
+  use/drop/storage/trade/rental/repair/refine/craft residual into a finite child
+  registry with dependency, owner and gate; do not implement a child yet.
+- Go matrix anchors to read: only the P6 summary row and exact P6 completion
+  prose located from named item/equipment/craft authorities; never another phase
+  or the full matrix.
+- Legacy read authority: bounded P6 packet handlers, item/database records and
+  reachable item/equipment/craft callsites located by `rg`; every C# file remains
+  read-only.
+- Go write authority: `docs/migration-matrix.md` inventory prose only. Control
+  routing remains in this Legacy index/handoff; production/test Go is read-only
+  until the reviewed finite registry selects a child.
+- Required gate: independent Legacy/Go inventory audits, denominator review,
+  matrix/index synchronization, control checker, status/process checks and all
+  six C# gates.
+- Forbidden scope: implementation, another phase inventory, broad source dumps,
+  reopening accepted P1-P5 registries, unrelated refactors and every C# write.
 
 ### Protected Go ownership
 
-- `VIS-P4-OBJECT-001` exclusively owns the imported NPC visibility schema and
-  bounded object projection/filter/re-entry evidence.
-- The accepted P5 frozen registry is read-only while this P4 child is Active.
+- The committed/accepted P1-P5 registries and completed VIS implementation are
+  read-only during this discovery leaf.
+- `DISC-P6-CLOSURE` may write only the finite P6 registry/evidence in the matrix
+  and synchronized Legacy routing documents.
 
 ### Remaining acceptance work
 
-- [ ] Trace and import every NPC TimeVisible/day/time/min-max-level/class/flag
-  field in exact Legacy load/source order.
-- [ ] Lock object add/remove recipients, geometry and relative Observer behavior
-  across join, transition, revive and appearance refresh.
-- [ ] Run parser/session repetition, focused race, integration gates and obtain
-  independent review.
+- [ ] Trace bounded Legacy and Go P6 residual families from exact handlers and
+  current matrix claims.
+- [ ] Reconcile them into a finite dependency/owner/gate registry with no vague
+  remainder and obtain independent review.
+- [ ] Run documentation/control/status/C# gates and select one ready child.
 
 ### P5 frozen child registry
 
@@ -105,7 +102,7 @@ Ready.
 
 Independent reviewer `01a03617-76c2-7652-ab64-7e27143ce72b` rejected two
 candidate revisions, then accepted this ten-child denominator with no remaining
-finding. Seven children are Complete and three dependency-blocked children are unfinished.
+finding. Eight children are Complete and two dependency-blocked children are unfinished.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -114,7 +111,7 @@ finding. Seven children are Complete and three dependency-blocked children are u
 | `ENTRY-P4-LOCATION-001` | Complete | P3 start/logout | none | existing transition transcripts |
 | `MOVE-P4-ACTION-001` | Complete | — | none | existing movement/repeated/race |
 | `MOVE-P4-COLLISION-RULES-001` | Ready | P9 conquest state | bounded world/main + RequiredGroup test | authenticated gate/order matrix |
-| `VIS-P4-OBJECT-001` | Active | P5 hide/show producers (Complete) | legacyworld/worlddata + bounded server visibility | recipient/filter/re-entry matrix |
+| `VIS-P4-OBJECT-001` | Complete | P5 hide/show producers (Complete) | committed/accepted visibility evidence | recipient/filter/re-entry matrix |
 | `MAP-P4-DETAIL-001` | Complete | map load + StartPoint | verified Go protocol/probe/map-info candidate | payload/order/suppression/search |
 | `MAP-P4-LIGHT-001` | Complete | — | committed Go `fc6b98b6b312357d850f6710fbf697b8678fd4c2` | UTC production clock/non-UTC host |
 | `MAP-P4-NOREINCARNATION-AUTH-001` | Complete | P5 spell (Complete) | committed Go `1aef1eac1953ca184d7e96c5394ae3c2cc5a3cc3` | imported denial + unchanged amulet/no successful cast |
@@ -191,7 +188,7 @@ broad unnamed scope.
 | `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: all Complete |
 | `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
 | `DISC-P5-CLOSURE` | P5 | Complete | 11 finite children: 8 Complete + 3 Ready |
-| `DISC-P6-CLOSURE` | P6 | Discovery | finite item/equipment/craft children |
+| `DISC-P6-CLOSURE` | P6 | Active | finite item/equipment/craft children |
 | `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |
 | `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system children |

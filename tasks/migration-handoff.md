@@ -1,99 +1,80 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 12:40 (Asia/Singapore)
+Last updated: 2026-08-25 15:43 (Asia/Singapore)
 
-This replace-in-place snapshot records committed
-`MAP-P4-NOREINCARNATION-AUTH-001` closure and synchronized routing to
-`VIS-P4-OBJECT-001`.
+This replace-in-place snapshot records the committed/reviewed VIS closure and
+the synchronized route to the bounded P6 discovery leaf.
 
 ## Goal and control-plane state
 
 - Goal remains Active and unchanged. It is neither complete nor blocked.
 - Main authority remains `gpt-5.6-sol/ultra`.
-- P4 remains scope-frozen In progress with seven Complete and three unfinished
-  children. P5 hide/show producers are Complete, so `VIS-P4-OBJECT-001` is the
-  unique dependency-ready Active child.
-- Read-only Legacy tracer `01a03714-50ab-7dc2-9e0f-7ccd267c4a5e` established
-  exact map-gate, timer, MP, packet/source-order and absent-side-effect evidence.
-  Read-only Go reviewer `01a03719-9519-7201-8674-ff4881bae13a` reported six
-  initial test findings and two re-review findings; all were resolved, and its
-  final report is `resolved, no finding`. Both threads are closed.
-- No Go/server process remains.
+- The Active Index and Go matrix route exactly `DISC-P6-CLOSURE` Active after
+  marking `VIS-P4-OBJECT-001` Complete; no P6 inventory work has started.
+- Two initial `luna_worker` read-only reviews returned no report and were
+  closed. Dedicated `codex-auto-review` then found six correctness gaps and
+  three lifecycle/send-sequencing follow-ups; all were fixed. Final reviewer
+  `01a037da-1df0-7b41-9f30-09d5308bc7c5` reports
+  `resolved, no findings` and is closed.
+- No `go` or `crystal-server` process remained at the final gate.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
 - Branch: `master`; HEAD before the expected control commit:
-  `19bc8768780542cdf23de90a9b223b7890e579db`.
-- Tracked unstaged before this handoff write:
-  `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md` and
-  `tasks/migration-active.md`; this handoff is now also tracked unstaged.
-  Staged and untracked sets are empty.
-- The archive records the failed direction/nil-grid persistence assumptions,
-  Legacy ruling and final verification. The Active Index routes only VIS.
-- Control checker passes after this replacement. All three Legacy C# gates are
-  empty.
+  `da05d7cb18380283fec0a2a32c4dfc2372990549`.
+- Tracked unstaged files are `tasks/lessons.md`,
+  `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`,
+  `tasks/migration-active.md`, and this handoff.
+- Untracked owned snapshot:
+  `tasks/migration-handoff-archive/2026-08-25-1245-pre-vis-closure.md`.
+  The staged set is empty.
+- Active Index contains one Active leaf, `DISC-P6-CLOSURE`, and records VIS
+  Complete. All three Legacy C# gates are empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
 - Branch: `main`; HEAD:
-  `1aef1eac1953ca184d7e96c5394ae3c2cc5a3cc3`
-  (`Complete authenticated no-reincarnation map gate`).
-- Worktree, index and untracked set are clean.
-- The commit adds an imported-map authenticated denial/positive-control
-  transcript, bounds every session read with deadlines/KeepAlive barriers, and
-  synchronizes runtime spell direction into the durable character snapshot.
-- Matrix closes the NoReincarnation leaf, records seven Complete/three unfinished
-  P4 children and marks exactly `VIS-P4-OBJECT-001` Active.
-- All three Go-repository C# gates are empty.
+  `1ba0e2fe754af9e2941506e813e2b9ea9780c4c9`
+  (`Complete object visibility equivalence`).
+- Tracked unstaged, staged and untracked sets are empty.
+- Matrix marks VIS Complete, P4 eight Complete/two dependency-blocked, and
+  `DISC-P6-CLOSURE` Active. All three Go-repository C# gates are empty.
 
 ## Active leaf and protected work
 
-- Active leaf: `VIS-P4-OBJECT-001`.
-- Outcome: preserve Legacy player/NPC/monster Object* add/remove geometry,
-  per-player NPC visibility filters and interactive Observer non-blocking/
-  relative projection across join, map transition, town revive and appearance
-  refresh, including every currently discarded imported NPC visibility field.
-- Matrix anchors: exact VIS row plus only named visibility/Observer completion
-  prose. Do not read another phase or the full matrix.
-- Exact Go authority: `internal/legacyworld/database.go`,
-  `internal/worlddata/world.go`, bounded `cmd/crystal-server/world.go`, and only
-  focused import/visibility/session tests found by exact enumeration.
-- Legacy authority: exact NPC visibility fields/load order and MapObject/
-  PlayerObject add/remove/search/Observer paths located by `rg`; every C# file
-  remains read-only.
-- Unresolved work: finite field/source-order checklist; parser/export round trip;
-  actor/NPC/monster/Observer recipient and geometry matrix across join/
-  transition/revive/refresh; repeated/race/integration gates and review.
+- Active leaf: `DISC-P6-CLOSURE`; VIS is committed and the accepted P1-P5
+  registries/implementations remain protected during this documentation-only
+  discovery leaf.
+- P6 outcome is a finite inventory/equipment/item movement/use/drop/storage/
+  trade/rental/repair/refine/craft registry only; production/test Go remains
+  read-only during discovery.
+- Read only the P6 summary row and exact named P6 completion prose. Do not read
+  another phase or the full matrix.
+- VIS now preserves v63-v117/JSON NPC fields/defaults, UTC-monotonic scheduling,
+  ordinary CallNPC visibility authorization, deterministic geometry/order,
+  cache generation across bootstrap/logout/Observer exits, one bounded FIFO NPC
+  packet batch, and complete live map/teleport/revive player projection.
 
 ## Verification ledger
 
-Final NoReincarnation leaf evidence:
-
-- `gofmt` on the two owned Go files and touched-package compile: exit 0.
-- Imported denial plus positive authenticated lifecycle and direct map-rule set:
-  focused `-count=20`: exit 0.
-- The same focused set under `-race -count=5`: exit 0.
-- Final fresh unexcluded `go test ./... -count=1`: exit 0; server 78.901s.
-- Final `go vet ./...` and `go build ./...`: exit 0.
-- Go `git diff --check`, exact status/process review and all three C# gates:
-  exit 0/empty before commit; committed worktree is clean.
-- Test-driven review fixes replaced a self-referential MP oracle with Legacy
-  cost 125, added bounded barriers/full payloads/deep semantic state checks, and
-  exposed the stale logout-direction production defect. Final re-review reports
-  no finding.
-- Full repository race is not due: P4 is not closing, the leaf has focused race,
-  the current cadence remains below eight commits/48 hours and the one-line
-  snapshot sync has no broad concurrency impact.
+- Touched-package compile: exit 0.
+- Parser/world/session focused repetition at `-count=20`: exit 0.
+- Focused race at `-count=5` plus final cache/lifecycle race at `-count=10`:
+  exit 0.
+- The first post-review full run exposed and corrected an invalid hidden
+  conquest-controller fixture and restored the accepted NPC load sort.
+- Final fresh unexcluded `go test ./... -count=1`: exit 0; server 79.853s.
+- Final `go vet ./...`, `go build ./...`, Go/Legacy `git diff --check`, control
+  checker, status/process review and all six C# gates: exit 0/empty.
+- Full repository race is not due: P4 is not closing, focused race covers the
+  concurrency change, and the cadence remains below the full-race threshold.
 
 ## Exact recovery sequence
 
-1. Verify the expected Legacy control commit delta, Go HEAD/clean status, unique
-   VIS Active rows and both repositories' six C# gates.
-2. Search the lessons archive with `VIS-P4-OBJECT-001`, NPC visibility,
-   TimeVisible, Observer and Object add/remove keywords; read matching sections
-   only.
-3. Read exact VIS matrix/Legacy/Go authorities, enumerate the finite field and
-   recipient checklist, then delegate bounded disjoint tracing/review to
-   `luna_worker` before writing only the owned files.
+1. Commit the exact owned Legacy control/archive files, then verify both
+   repositories' HEAD/status and all six C# gates.
+2. Resume only `DISC-P6-CLOSURE`: search matching lessons, read its named P6
+   matrix anchors, perform bounded independent Legacy/Go audits, and obtain
+   review of the finite child registry before selecting one Ready child.
