@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-25 09:11 (Asia/Singapore)
+Last updated: 2026-08-25 09:14 (Asia/Singapore)
 
 This replace-in-place snapshot records committed closure of
 `BOOT-P4-STARTPOINT-001` and synchronized routing to `MAP-P4-DETAIL-001`.
@@ -19,11 +19,12 @@ This replace-in-place snapshot records committed closure of
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; HEAD: `0a8373c4dcf829baa0fd46d87d1a342c428b40cc`
-  (`docs(migration): refresh p4 startpoint handoff`).
-- Tracked unstaged: `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`,
-  `tasks/migration-active.md`, and this handoff. Staged and untracked sets are
-  empty.
+- Branch: `master`; observed HEAD:
+  `c5f16466085ac3d1b758609724b1467f99a4ee01`
+  (`docs(migration): route p4 map detail closure`). The eventual handoff-only
+  commit is the one expected documentation delta from this observed HEAD.
+- Before this refresh the worktree, index and untracked set were empty; this
+  handoff is now the sole tracked unstaged file.
 - The archive strengthening records one fresh package exit 1 from the established
   30-second Hallucination closed-pipe flake, exact isolation count 10 exit 0 and
   fresh package rerun exit 0. No unrelated production/test change was made.
@@ -79,8 +80,6 @@ Final BOOT candidate commands and results:
 
 ## Exact recovery sequence
 
-1. Verify Go remains clean and the three Legacy files above are the only changes;
-   rerun final diff/process/C# gates.
-2. Commit Legacy archive/control/handoff, then verify both repositories clean
-   and all three Active fields agree.
-3. Begin `MAP-P4-DETAIL-001` under its exact nine-file authority.
+1. Verify both repositories clean and all three Active fields agree; the actual
+   Legacy HEAD may be one handoff-only commit after the observed ID.
+2. Begin `MAP-P4-DETAIL-001` under its exact nine-file authority.
