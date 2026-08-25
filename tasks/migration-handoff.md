@@ -1,10 +1,11 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-26 02:57 (Asia/Singapore)
+Last updated: 2026-08-26 04:07 (Asia/Singapore)
 
-This replace-in-place snapshot is the durable compaction recovery point after
-the accepted administrator-item-command commits. It routes the same active Goal
-to the finite P6 mining leaf and claims no phase or project closure.
+This replace-in-place snapshot reconstructs the durable state after recovery
+found an uncommitted mining implementation that was absent from the previous
+handoff. It preserves that work, resumes the same Goal and claims no leaf,
+phase or project closure.
 
 ## Goal and control-plane state
 
@@ -14,17 +15,20 @@ to the finite P6 mining leaf and claims no phase or project closure.
 - P6 is scope-frozen In progress: eleven of nineteen children are Complete,
   `MINE-P6-RUBBLE-001` is the unique Active leaf and seven are Ready.
 - Go matrix anchors are P6 summary row 901, Active registry row 3206 and
-  completed administrator-item evidence 3263-3282. Matrix/index parity holds.
+  completed administrator-item evidence 3263-3282. Independent recovery reads
+  found matrix/index parity.
+- The Active Index freezes the exact fifteen-file Go write set and finite
+  parser/map/RNG/timer/wire/payout/persistence checklist. Do not widen it.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
 - Branch: `master`; observed pre-handoff-refresh HEAD:
-  `bd0e0319e6907df90dbed565872a04bf375f6d53`
-  (`Record P6 admin item closure and route mining`).
-- The worktree and index were clean immediately before this handoff refresh.
-  The expected next Legacy commit contains only this handoff; recovery must
-  compare the recorded pre-commit HEAD with actual HEAD/status.
+  `5642e91d26567f575cc75ee2a5961223dad01bde`
+  (`Freeze P6 mining implementation scope`).
+- The worktree and index were clean before this handoff reconstruction. The
+  expected only Legacy change is this handoff; recovery must compare the
+  recorded pre-documentation HEAD with actual HEAD/status.
 - Tracked, staged and untracked Legacy `.cs` gates are empty.
 
 ## Go repository state
@@ -33,69 +37,75 @@ to the finite P6 mining leaf and claims no phase or project closure.
 - Branch: `main`; HEAD:
   `9e7edac7aaf22f35677f90427ca79da4e998b096`
   (`Complete P6 administrator item commands`).
-- Worktree and index are clean. Tracked, staged and untracked Go `.cs` gates are
-  empty. Preserve this commit and every earlier completed migration commit.
+- The index is unstaged. Exact tracked modifications are:
+  - `cmd/crystal-server/main.go`
+  - `cmd/crystal-server/world.go`
+  - `internal/legacyworld/database.go`
+  - `internal/legacyworld/export.go`
+  - `internal/legacyworld/export_test.go`
+  - `internal/legacyworld/map_schema_test.go`
+  - `internal/legacyworld/reader_settings_test.go`
+  - `internal/legacyworld/settings.go`
+  - `internal/protocol/packet.go`
+  - `internal/protocol/packet_test.go`
+  - `internal/worlddata/world.go`
+  - `internal/worlddata/world_test.go`
+- Exact untracked files are:
+  - `cmd/crystal-server/mine.go`
+  - `cmd/crystal-server/mine_session_test.go`
+  - `cmd/crystal-server/mine_test.go`
+- These fifteen files exactly match the frozen ownership set. Preserve every
+  byte until the main agent reviews and verifies it; do not reset, stash,
+  checkout, clean, delete, move or overwrite the batch.
+- Tracked, staged and untracked Go `.cs` gates are empty.
 
-## Completed administrator-item evidence
+## Uncommitted mining implementation
 
-- `ADMIN-P6-ITEM-COMMAND-001` is Complete at Go commit `9e7edac`.
-- Production preserves literal-space tokenization, raw numeric/name/count
-  parsing, ordered lookup, stack/zero/full quirks, GMMade creation, ID/RNG
-  consumption, rejected no-commit/no-save behavior, sibling definitions before
-  primary/GainedItem and connection-local cache suppression.
-- CLEARBAG resolves self by ObjectID, routes remote work through the target
-  session, uses a clear-specific auth revision watermark, retains slot deletion
-  and stat order, survives graceful/abrupt logout and relogin, and does not
-  misclassify ordinary dirty craft/equip/NPC item revisions as a clear.
-- Targeted read-only Luna audits
-  `01a039fb-a032-7c60-98ed-fe9155cbd350` and
-  `01a039fb-c22b-7ca0-a585-96de7cfdb055` supplied final identity/revision and
-  raw-token/sibling rulings. Three later no-write terminal-review attempts
-  (`01a03a1f-d36b-7df2-ab5b-8a57afecb4bc`,
-  `01a03a31-3705-7341-9ac4-bfea0eca5f48`, and
-  `01a03a3b-c7cf-7f11-8533-c4b6d5ffbd4c`) remained running without a report
-  despite bounded conclude requests and were closed; no conclusion from them is
-  claimed. No writer or reviewer remains active.
+- Recovery observed 495 tracked-file insertions/deletions plus 739 lines in the
+  three new files. The batch appears to implement Mines settings/export, map
+  mine state, the Mine `MapEffect` adapter, Rubble/runtime actions and focused
+  parser/world/session tests.
+- This description is status-level reconstruction only. The main agent has not
+  yet accepted the diff, re-read every Legacy ruling needed for review, or
+  established that all frozen checklist items are correct.
+- A previously returned read-only Luna tracing report was used to freeze the
+  checklist, but its ID was not preserved in the durable control documents; no
+  active writer or reviewer is claimed. A process audit found no `go` or
+  `crystal-server` process, and two status snapshots must remain stable before
+  verification resumes.
 
 ## Verification ledger
 
-- Touched compile `go test ./cmd/crystal-server ./internal/auth -run '^$'`
-  exited 0 after the final code.
-- The thirteen administrator/parser/auth/session/revision tests passed with
-  `go test ./cmd/crystal-server ./internal/auth -run '<focused-regex>'
-  -count=20` and the same `go test -race ... -count=5`, both exit 0.
-- Craft success/failure, equipment, NPC item persistence, clear logout and
-  ordinary-revision dirty-world regressions passed together at `-count=20`.
-- Final fresh unexcluded gates after the clear-watermark correction all exit 0:
-  - `go test ./... -count=1` (`cmd/crystal-server` 78.880s)
-  - `go vet ./...`
-  - `go build ./...`
-  - `go test -race ./... -count=1` (`cmd/crystal-server` 84.555s)
-- Attributed corrections are archived: guessed refresh result type caused one
-  compile failure; unconditional auth rebase caused Craft/equipment/NPC full-
-  test failures; it was replaced by the clear-specific watermark. One later
-  full package run hit a Hallucination closed-pipe failure whose isolated rerun
-  passed; subsequent fresh full normal and race gates passed. An overlength
-  synthetic account ID blocked a new fixture before admission and was corrected
-  to a production-valid identifier.
-- `git diff --check`, gofmt-diff, exact Go status/process review and all Go `.cs`
-  gates were clean immediately before commit. No `go` or `crystal-server`
-  process remains.
+- No compile, focused, repeated, race, integration or full-race result for the
+  current uncommitted mining implementation is accepted yet.
+- Recovery-only `git diff --check` in the Go repository exited 0.
+- Go status and mtimes were captured once at 04:06; no Go/server process was
+  present. Recheck stability after this handoff write before running tests.
+- The prior committed administrator-item leaf had fresh full gates, but those
+  results predate this shared schema/protocol/world batch and cannot satisfy its
+  mandatory immediate integration/full-race gate.
 
 ## Active leaf and protected work
 
 - Active leaf: `MINE-P6-RUBBLE-001`.
-- The interrupted tracing produced no repository changes, no accepted behavior
-  ruling and no frozen write set. No Go implementation is uncommitted and no
-  Mine/Rubble file is yet owned.
+- Owned files are exactly the fifteen paths listed above and in the Active
+  Index. All other Go files, every earlier migration commit and all C# files in
+  both repositories remain protected.
+- Unresolved decisions are limited to findings from main-agent diff/Legacy
+  review. Any required file expansion must first revise and validate the Active
+  Index; no implicit expansion is allowed.
 
 ## Exact recovery sequence
 
-- Resume by verifying both repositories separately and reading only matrix rows
-  901, 3206 and 3263-3282.
-- Search the lessons archive only for `MINE-P6-RUBBLE-001`, Mine, Rubble,
-  mining RNG/timer and parser/export keywords. Trace bounded Legacy settings,
-  map mine state, request/action, Rubble and direct helpers.
-- Before any Go write, freeze exact existing/new filenames and the finite
-  config/schema/RNG/400ms/five-minute/regen/payout/session/restart checklist in
-  the active index. Then delegate at most one bounded wave with disjoint writes.
+1. Verify both repositories separately, including exact status and all six C#
+   gates; read this handoff and the Active Index, not historical handoffs.
+2. In Go, re-read only matrix rows 901, 3206 and 3263-3282. Confirm the fifteen
+   file status/mtime set is stable and no writer/process remains.
+3. Main-review the full owned diff against the frozen checklist and bounded
+   Legacy entry points; correct only proven findings within frozen ownership.
+4. Run gofmt, touched-package compile, focused production-entry tests at
+   `-count=20`, focused race at `-count=5`, then the immediately due fresh
+   unexcluded full test/vet/build/full-race gates.
+5. Obtain one bounded read-only Luna terminal review, resolve findings, update
+   matrix/index/handoff, commit only owned files and route the next ready P6
+   child.
