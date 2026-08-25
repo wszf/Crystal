@@ -40,30 +40,35 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `BOOT-P4-STARTPOINT-001`
-- Status: `Active`; P4 is scope-frozen In progress with ten finite children,
-  three Complete and seven unfinished. `MAP-P4-LOAD-001` is Complete in the
-  verified Go candidate and this dependency-ready child is next.
-- Outcome: reject production exported-world startup unless at least one
-  successfully loaded map contributes a `SafeZoneInfo.StartPoint`; emit the
-  exact localized failure and stop before any game/status listener bind.
-- Go matrix anchors to read: exact P4 inventory `BOOT-P4-STARTPOINT-001` row,
-  exact `| P4 |` stage row and named StartPoint/startup evidence only. Do not
-  read the full matrix.
-- Legacy read authority: first `CanStartEnvir` `StartPoints.Count` check,
-  bounded `StartEnvir` successful-map StartPoint population, caller failure ->
-  message -> `StopEnvir`/`Stop` order and the matching localization key; every
-  C# file remains read-only.
-- Exact Go write authority: `cmd/crystal-server/main.go`, new
-  `cmd/crystal-server/p4_startpoint_startup_test.go` and bounded P4 matrix
-  evidence only.
-- Required gate: touched-package compile, focused production startup tests for
-  empty/all-failed/no-StartPoint/failed-map-only/loaded-StartPoint cases, exact
-  localized pre-bind failure, repeated tests, focused race, diff/status/process
-  checks and all six C# gates; startup architecture changes require integration.
-- Forbidden scope: P12 `EnforceDBChecks` monster/item checks, P5 monster
-  spawns/combat/AI, P6 item semantics, P7 NPC scripts, P8 companions, broad
-  matrix/source dumps and every C# write.
+- Leaf ID: `MAP-P4-DETAIL-001`
+- Status: `Active`; P4 is scope-frozen In progress with ten finite children, four Complete and six unfinished. Complete `BOOT-P4-STARTPOINT-001` unlocks this source-order map-detail child.
+- Outcome: preserve current-map `MapInformation`; exact full `NewMapInfo` and
+  one-per-connection `WorldMapSetup`; per-connection repeat suppression; and
+  `SearchMap` silence/sentinels, loaded-map source order, current-culture prefix
+  matching and NPC underscore-suffix `GameName`, with production probe evidence.
+- Go matrix anchors to read: exact `MAP-P4-DETAIL-001` and `| P4 |` rows plus named map-detail/SearchMap/probe evidence only; never read the full matrix.
+- Legacy read authority: bounded `PlayerObject` StartGame map packets,
+  `RequestMapInfo` and `SearchMap`; `MirConnection` dispatch gates; `MapInfo`/
+  `NPCInfo` ClientInfo/GameName; exact packet serializers and client consumers;
+  every C# file remains read-only.
+- Exact Go write authority: `cmd/crystal-server/{main.go,main_test.go,world.go,world_test.go}`, new `cmd/crystal-server/p4_map_detail_session_test.go`,
+  `internal/protocol/{packet.go,packet_test.go}`, `internal/probe/{network.go,
+  network_test.go}`, and bounded P4 matrix evidence only.
+- Required gate: touched-package compile, exact payload/vector tests,
+  authenticated multi-map request/search/suppression transcript, production
+  probe consumption, repeated tests, focused race, diff/status/process checks
+  and all six C# gates; protocol changes require integration.
+- Forbidden scope: map cell loading/StartPoint validation, P4 collision/light/
+  visibility/chat behavior, P5-P12 systems, broad matrix/source dumps and every
+  C# write.
+
+`BOOT-P4-STARTPOINT-001` is Complete at Go `6db6bbb002fe7e74d8b51473409252f5c407455e`.
+Empty, all-failed, loaded-without-StartPoint and failed-map-only exports return the
+exact localized typed validation failure in `EnvirStarted -> error ->
+EnvirStopped` order without listener bind; a loaded non-index-zero StartPoint
+permits game/status startup. Focused/repeated/race and fresh integration/vet/
+build evidence pass after exact isolation and clean rerun of the known
+Hallucination package flake; P12 retains `EnforceDBChecks`.
 
 `MAP-P4-LOAD-001` is Complete at Go
 `7cceb308cef7232a1b02c64c301adc1f89275e9a`. Ordered v0-v7/v100
@@ -146,15 +151,15 @@ full tests/full race, vet/build, and Plan 9/Windows/Linux builds are locked.
 
 ### Protected Go ownership
 
-- `BOOT-P4-STARTPOINT-001` exclusively owns the two Go paths named in Active
-  batch until its leaf gate, matrix update and commit are complete.
+- `MAP-P4-DETAIL-001` exclusively owns the nine Go paths named in Active batch
+  until its leaf gate, matrix update and commit are complete.
 
 ### Remaining acceptance work
 
-- [ ] Reject no-map, all-failed, loaded-without-StartPoint and failed-map-only
-      StartPoint candidates before any listener bind with the exact message.
-- [ ] Prove one successfully loaded StartPoint permits bind, while the P12
-      EnforceDBChecks branch remains untouched, under repeated/race tests.
+- [ ] Lock complete current-map/NewMapInfo/WorldMapSetup payload state, request
+      suppression and authenticated multi-map bootstrap/production probe use.
+- [ ] Lock SearchMap blank/short/invalid silence, sentinels, loaded source order,
+      current-culture prefix matching and NPC underscore GameName behavior.
 
 ### P4 frozen child registry
 
@@ -165,12 +170,12 @@ finding. Two children are Complete and eight are unfinished.
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `MAP-P4-LOAD-001` | Complete | — | committed Go `7cceb308cef7232a1b02c64c301adc1f89275e9a` | failure continuation/order + repeated/race |
-| `BOOT-P4-STARTPOINT-001` | Active | map load + LOC | `cmd/crystal-server/main.go`; new `cmd/crystal-server/p4_startpoint_startup_test.go` | localized pre-bind rejection |
+| `BOOT-P4-STARTPOINT-001` | Complete | map load + LOC | committed Go `6db6bbb002fe7e74d8b51473409252f5c407455e` | localized pre-bind rejection |
 | `ENTRY-P4-LOCATION-001` | Complete | P3 start/logout | none | existing transition transcripts |
 | `MOVE-P4-ACTION-001` | Complete | — | none | existing movement/repeated/race |
 | `MOVE-P4-COLLISION-RULES-001` | Ready | P9 conquest state | bounded world/main + RequiredGroup test | authenticated gate/order matrix |
 | `VIS-P4-OBJECT-001` | Ready | P5 hide/show producers | legacyworld/worlddata + bounded server visibility | recipient/filter/re-entry matrix |
-| `MAP-P4-DETAIL-001` | Ready | map load + StartPoint | protocol/probe + bounded map-info session | payload/order/suppression/search |
+| `MAP-P4-DETAIL-001` | Active | map load + StartPoint | exact nine-file protocol/probe/map-info authority above | payload/order/suppression/search |
 | `MAP-P4-LIGHT-001` | Ready | — | `time_of_day.go`, `main.go` + tests | UTC production clock/non-UTC host |
 | `MAP-P4-NOREINCARNATION-AUTH-001` | Ready | P5 spell | focused authenticated session | unchanged amulet/no cast |
 | `CHAT-P4-MAP-CONTEXT-001` | Ready | P6 shout arming | map-rule import + bounded chat/session | NoNames/shout recipients/order |

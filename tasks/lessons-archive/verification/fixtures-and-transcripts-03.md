@@ -678,6 +678,7 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Prevention: establish a per-service readiness/preamble barrier before Stop, then require EOF/reset after Stop; attribute broad failures by exact test and stack, and isolate them before changing the active leaf.
 - Verification: the corrected integrated HTTP→game→status closure test passes repeatedly and under race; the exact Hallucination test passed independently at `-count=5`.
 - Strengthening during `RANK-P3-CHAR-LIFECYCLE-001`: fresh unexcluded `go test ./... -count=1 -timeout=20m` again had exactly `TestSessionHallucinationTranscript` fail after 30 seconds with a closed-pipe stack outside every owned rank file; the failed full run is not a pass. Exact isolation `go test ./cmd/crystal-server -run '^TestSessionHallucinationTranscript$' -count=10 -timeout=10m` exited 0, and the next fresh unexcluded full rerun exited 0, so no Hallucination-scope change was made.
+- Strengthening during `BOOT-P4-STARTPOINT-001`: fresh unexcluded `go test ./cmd/crystal-server -count=1` again had only the same 30-second closed-pipe Hallucination failure; its stack did not enter `main.go` or either owned startup test. Exact isolation at `-count=10 -timeout=10m` exited 0, then the fresh unexcluded package rerun exited 0 in 75.352s. The first run remains recorded as exit 1 and no Hallucination-scope change was made.
 
 ### 2026-08-24 — Production source quirks and injectable seam cleanup must be tested separately
 
