@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 15:43 (Asia/Singapore)
+Last verified: 2026-08-25 16:27 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -16,8 +16,8 @@ Keep this file at or below 300 lines and 32 KiB.
   not need to be calculated in one up-front pass.
 - `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
   are publishable only for a scope-frozen phase.
-- Current project-wide ETA and percentage remain `Unavailable`: P1-P5 now have
-  finite denominators, but six other phases still have open inventories.
+- Current project-wide ETA and percentage remain `Unavailable`: P1-P6 now have
+  finite denominators, but five other phases still have open inventories.
 
 ## Phase routing summary
 
@@ -29,7 +29,7 @@ Keep this file at or below 300 lines and 32 KiB.
 | P3 | Complete | Frozen | `DISC-P3-CLOSURE` (Complete) |
 | P4 | In progress | Frozen | `DISC-P4-CLOSURE` (Complete) |
 | P5 | In progress | Frozen | `DISC-P5-CLOSURE` (Complete) |
-| P6 | In progress | Open | `DISC-P6-CLOSURE` |
+| P6 | In progress | Frozen | `DISC-P6-CLOSURE` (Complete) |
 | P7 | In progress | Open | `DISC-P7-CLOSURE` |
 | P8 | Complete | Frozen | — |
 | P9 | In progress | Open | `DISC-P9-CLOSURE` |
@@ -39,42 +39,71 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `DISC-P6-CLOSURE`
-- Status: `Active`; `VIS-P4-OBJECT-001` is Complete, while both remaining P4
-  children are dependency-blocked. P6 is selected as the bounded discovery leaf
-  that can freeze its own denominator and expose the map/server-shout dependency.
-- Outcome: convert every remaining reachable P6 inventory/equipment/item-move/
-  use/drop/storage/trade/rental/repair/refine/craft residual into a finite child
-  registry with dependency, owner and gate; do not implement a child yet.
-- Go matrix anchors to read: only the P6 summary row and exact P6 completion
-  prose located from named item/equipment/craft authorities; never another phase
-  or the full matrix.
-- Legacy read authority: bounded P6 packet handlers, item/database records and
-  reachable item/equipment/craft callsites located by `rg`; every C# file remains
-  read-only.
-- Go write authority: `docs/migration-matrix.md` inventory prose only. Control
-  routing remains in this Legacy index/handoff; production/test Go is read-only
-  until the reviewed finite registry selects a child.
-- Required gate: independent Legacy/Go inventory audits, denominator review,
-  matrix/index synchronization, control checker, status/process checks and all
-  six C# gates.
-- Forbidden scope: implementation, another phase inventory, broad source dumps,
-  reopening accepted P1-P5 registries, unrelated refactors and every C# write.
+- Leaf ID: `ITEM-P6-SHOUT-ARMING-001`
+- Status: `Active`; `DISC-P6-CLOSURE` is Complete with an accepted nineteen-child
+  denominator. This dependency-ready item-side child is selected first because
+  it unblocks `CHAT-P4-MAP-CONTEXT-001` without entering P4 routing authority.
+- Outcome: preserve Scroll shape 8/9 common item admission, one-shot transient
+  map/server-shout arming, localized Hint, count consumption and exact successful
+  `UseItem` order. A pre-existing armed flag still consumes another scroll.
+- Go matrix anchors to read: only the P6 summary row, exact P6 registry row for
+  this leaf, and exact `CHAT-P4-MAP-CONTEXT-001` dependency row; never another
+  phase section or the full matrix.
+- Legacy read authority: `HumanObject.CanUseItem`, bounded
+  `PlayerObject.UseItem` Scroll shape 8/9 and the chat consumer only; every C#
+  file remains read-only.
+- Go write authority: bounded `cmd/crystal-server/main.go`, `world.go`, new
+  `item_shout.go`, `item_shout_test.go`, and `item_shout_session_test.go`.
+- Required gate: touched-package compile; focused admission/arming/session tests
+  at `-count=20`; focused race at `-count=5`; `git diff --check`, exact status,
+  process review and all six C# gates. Integration/full-race cadence is not due
+  unless review expands shared chat/concurrency authority.
+- Forbidden scope: P4 shout consumption/routing/fan-out, another UseItem shape,
+  another P6 child, another phase inventory, unrelated refactors and every C#
+  write.
 
 ### Protected Go ownership
 
-- The committed/accepted P1-P5 registries and completed VIS implementation are
-  read-only during this discovery leaf.
-- `DISC-P6-CLOSURE` may write only the finite P6 registry/evidence in the matrix
-  and synchronized Legacy routing documents.
+- The committed/accepted P1-P6 registries and completed implementations remain
+  read-only except for the exact active-child Go files above.
+- `ITEM-P6-SHOUT-ARMING-001` may establish item-side runtime state only; P4 owns
+  its later consumption, cooldown, linked-item projection and recipients.
 
 ### Remaining acceptance work
 
-- [ ] Trace bounded Legacy and Go P6 residual families from exact handlers and
-  current matrix claims.
-- [ ] Reconcile them into a finite dependency/owner/gate registry with no vague
-  remainder and obtain independent review.
-- [ ] Run documentation/control/status/C# gates and select one ready child.
+- [ ] Trace exact shape 8/9 admission, mutation and packet ordering.
+- [ ] Implement the bounded item-side authority and authenticated transcripts.
+- [ ] Run the leaf gate, review, commit and route to the next ready P6 child or
+  the now-unblocked P4 chat consumer.
+
+### P6 frozen child registry
+
+Independent Legacy/Go auditors produced the finite denominator. Reviewer
+`01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
+accepted all nineteen children with no finding. Seven are Complete and twelve
+are Ready.
+
+| Leaf ID | Status | Dependency | Go write authority | Additional gate |
+|---|---|---|---|---|
+| `ITEM-P6-WIRE-CATALOG-001` | Complete | — | existing committed evidence | layouts/nesting/grids/definitions |
+| `ITEM-P6-GRID-MUTATION-001` | Ready | logging/localization | item transactions/session | error/report/response order |
+| `ITEM-P6-GRID-CROSS-001` | Ready | P8/P11 feature owners | item/storage/trade/Hero/equipment | exact positive/negative grid matrix |
+| `CAPACITY-P6-GRIDS-001` | Ready | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
+| `ADMIN-P6-ITEM-COMMAND-001` | Ready | P3 authority + P5 creation | command/item/session | MAKE/CLEARBAG quirks |
+| `EQUIP-P6-CORE-001` | Ready | P8/P11 feature owners | equipment/session | slots/sockets/stats/order/race |
+| `ITEM-P6-USE-ADMISSION-001` | Ready | P1 LOC + P5 stats | item use/session | all gates and localized order |
+| `ITEM-P6-USE-BASIC-001` | Complete | — | existing committed evidence | potion/delete success paths |
+| `ITEM-P6-USE-CATALOG-001` | Ready | P4/P5/P7/P9/P10 | item use/session | exact known/unknown shape partition |
+| `ITEM-P6-SHOUT-ARMING-001` | Active | — | bounded main/world + new item-shout files | Hint/UseItem/state/repeated/race |
+| `DROP-P6-GROUND-LIFECYCLE-001` | Ready | P5/P11 producers | ground/drop/death/session | actual death ground drops |
+| `ITEM-P6-EXPIRY-001` | Ready | P10/P12 consumers | item lifecycle/ticker/session | strict times/no-refresh/restart |
+| `STORAGE-P6-ACCOUNT-001` | Complete | P2/P7 final access | existing committed evidence | default 80-slot boundary |
+| `TRADE-P6-PLAYER-001` | Complete | P10 mail/economy | existing committed evidence | two-peer lifecycle/race |
+| `RENTAL-P6-LIFECYCLE-001` | Complete | P10 owner + P12 restart | existing committed evidence | expiry/death/return/idempotency |
+| `REPAIR-P6-NPC-001` | Complete | P7 page authority | existing committed evidence | formulas/order/persistence |
+| `REFINE-P6-WORKBENCH-001` | Ready | P7 page authority | refine/session | delayed production/restart/race |
+| `CRAFT-P6-NPC-001` | Complete | P7/P10 | existing committed evidence | ingredients/RNG/order/persistence |
+| `MINE-P6-RUBBLE-001` | Ready | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
 
 ### P5 frozen child registry
 
@@ -188,7 +217,7 @@ broad unnamed scope.
 | `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: all Complete |
 | `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
 | `DISC-P5-CLOSURE` | P5 | Complete | 11 finite children: 8 Complete + 3 Ready |
-| `DISC-P6-CLOSURE` | P6 | Active | finite item/equipment/craft children |
+| `DISC-P6-CLOSURE` | P6 | Complete | 19 finite children: 7 Complete + 12 unfinished at freeze |
 | `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |
 | `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system children |
