@@ -22,9 +22,9 @@
 ### 2026-08-13 — 跨 auth/world 物品事务必须先同步权威状态再投递网络
 
 - Symptom: P11 审查发现 Storage 附件已经在 auth 原子提交，但 world 物品快照直到 `RefreshItem`/结果包写出后才更新；钓鱼 Tick 也先投递通知再持久化，觉醒拆解新增的 `ItemInfos` 没有同步到 world。连接写失败后的 cleanup 可能用旧 world 快照覆盖已提交状态。
-- Root cause: 把成功响应顺序当成了整个事务顺序，没有区分“auth/world 双权威状态提交”和“可能失败的网络通知”；同时只同步物品格，遗漏了新物品定义目录。
-- Prevention: 所有跨 auth/world 的物品事务先完成 auth 提交、world `ItemInfos`/三类物品格同步及必要落盘，再按 Legacy 顺序投递网络包；网络失败只能影响通知，不能让 cleanup 从旧快照回滚事务。多个定时结果先选取最后一个 changed 快照持久化，再保持原结果顺序投递全部通知。
-- Verification: `advanceFishing` 已改为先持久化最后一个变化快照再投递 Tick 通知；`EquipSlotItem` 在任何响应写入前同步 world；觉醒持久化同时同步 `ItemInfos` 与物品格，并新增 world/auth 定义一致性测试和网络材料不足事务测试。提交前继续运行普通/race 全量门禁。
+- Root cause: 把成功响应顺序当成了整个事务顺序，没有区分“auth/world 双权威状态提交”和“可能失败的网络通知”；同时只同步物品格，遗漏了新物品定义目录。P6 shout arming 又尝试在 `world.mu` 内调用只返回 bool 的 auth callback，既新增 world→auth 嵌套锁序，又无法取得 rental normalization 后的真实 auth grids。
+- Prevention: 所有跨 auth/world 的物品事务先完成 auth 提交、world `ItemInfos`/三类物品格同步及必要落盘，再按 Legacy 顺序投递网络包；网络失败只能影响通知，不能让 cleanup 从旧快照回滚事务。多个定时结果先选取最后一个 changed 快照持久化，再保持原结果顺序投递全部通知。禁止用持锁 bool callback 伪造原子性；共享事务层必须显式规定 revision/CAS、normalized snapshot 返回值和唯一锁序，由 owning leaf 统一实现。
+- Verification: `advanceFishing` 已改为先持久化最后一个变化快照再投递 Tick 通知；`EquipSlotItem` 在任何响应写入前同步 world；觉醒持久化同时同步 `ItemInfos` 与物品格，并新增 world/auth 定义一致性测试和网络材料不足事务测试。P6 复审拦截并完整撤回了嵌套 callback；共享修复登记到 `ITEM-P6-GRID-MUTATION-001`，shout leaf 保留分层提交且继续运行 focused/repeated/race 门禁。
 
 ### 2026-08-12 — 拍卖到期与 stale Search 必须保留 legacy 生命周期
 
@@ -67,4 +67,3 @@
 - Root cause: 共享 push resolver 只传递了受击怪物和距离，没有沿调用链保留真实 pusher 的 ObjectID。
 - Prevention: 所有 Repulsion 入口显式传递 pusher ObjectID，并在 `ObjectStruck` payload 与世界测试中同时断言该 ID；不要从 target 或当前 AI attacker 推断推击者。
 - Verification: `TestGameWorldThunderElementPushedRepulsionDamageUsesPusher` 断言真实 ID 和自伤公式，AI=49 定向普通/race 测试通过。
-

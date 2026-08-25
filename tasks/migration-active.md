@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 16:27 (Asia/Singapore)
+Last verified: 2026-08-25 17:29 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,54 +39,64 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `ITEM-P6-SHOUT-ARMING-001`
-- Status: `Active`; `DISC-P6-CLOSURE` is Complete with an accepted nineteen-child
-  denominator. This dependency-ready item-side child is selected first because
-  it unblocks `CHAT-P4-MAP-CONTEXT-001` without entering P4 routing authority.
-- Outcome: preserve Scroll shape 8/9 common item admission, one-shot transient
-  map/server-shout arming, localized Hint, count consumption and exact successful
-  `UseItem` order. A pre-existing armed flag still consumes another scroll.
-- Go matrix anchors to read: only the P6 summary row, exact P6 registry row for
-  this leaf, and exact `CHAT-P4-MAP-CONTEXT-001` dependency row; never another
-  phase section or the full matrix.
-- Legacy read authority: `HumanObject.CanUseItem`, bounded
-  `PlayerObject.UseItem` Scroll shape 8/9 and the chat consumer only; every C#
-  file remains read-only.
-- Go write authority: bounded `cmd/crystal-server/main.go`, `world.go`, new
-  `item_shout.go`, `item_shout_test.go`, and `item_shout_session_test.go`.
-- Required gate: touched-package compile; focused admission/arming/session tests
-  at `-count=20`; focused race at `-count=5`; `git diff --check`, exact status,
-  process review and all six C# gates. Integration/full-race cadence is not due
-  unless review expands shared chat/concurrency authority.
-- Forbidden scope: P4 shout consumption/routing/fan-out, another UseItem shape,
-  another P6 child, another phase inventory, unrelated refactors and every C#
-  write.
+- Leaf ID: `ITEM-P6-GRID-MUTATION-001`
+- Status: `Active`; P6 is scope-frozen with eight of nineteen children Complete,
+  this one Active and ten Ready. It is dependency-ready because localization
+  and runtime logging are Complete, and it owns the shared transaction residual
+  exposed by the completed shout review.
+- Outcome: preserve inventory-only `MoveItem`, fresh-ID `SplitItem`, capacity-
+  limited `MergeItem` and explicit `DeleteItem`; add null-source Move's localized
+  System error, item report/log and failure response order. Shared inventory
+  commits must converge world/auth on rental-normalized grids with revision/CAS
+  conflict handling and no nested world→auth lock.
+- Go matrix anchors to read: only the P6 summary row, exact registry row for this
+  leaf and the completed shout evidence paragraph that registered the shared
+  transaction residual; never another phase section or the full matrix.
+- Legacy read authority: bounded `PlayerObject.MoveItem`, `SplitItem`,
+  `MergeItem`, `DeleteItem`, matching `MirConnection` dispatch, and bounded
+  `Player.Reporting` item error/move/split/merge/delete methods plus the exact
+  localization key; every C# file remains read-only.
+- Go write authority: bounded `cmd/crystal-server/{main.go,main_test.go,world.go,
+  item_transactions.go,item_transactions_test.go,runtime_logging.go,
+  runtime_logging_test.go}`, `internal/auth/{service.go,service_test.go}`, and new
+  focused `cmd/crystal-server/item_grid_mutation_session_test.go` and/or
+  `item_grid_commit_test.go`.
+- Required gate: touched-package compile; focused transaction/session/failure-
+  injection tests at `-count=20`; focused race at `-count=5`; due integration
+  `go test ./...`, `go vet ./...`, `go build ./...` and full `go test -race ./...`;
+  `git diff --check`, exact status, process review and all six C# gates.
+- Forbidden scope: Storage/Trade/Refine/Hero/equipment/fishing grid expansion,
+  another P6 child, P4 shout routing, unrelated refactors and every C# write.
 
 ### Protected Go ownership
 
-- The committed/accepted P1-P6 registries and completed implementations remain
-  read-only except for the exact active-child Go files above.
-- `ITEM-P6-SHOUT-ARMING-001` may establish item-side runtime state only; P4 owns
-  its later consumption, cooldown, linked-item projection and recipients.
+- The committed/accepted P1-P6 registries and completed implementations,
+  including shout arming commit `1d399992a690614a122cc46b3e64b4cda8272c2f`,
+  remain read-only except for the exact active-child files above.
+- The shared commit layer may synchronize only inventory mutations already in
+  this leaf. Cross-grid business rules remain `ITEM-P6-GRID-CROSS-001`; exact
+  localized item-use admission remains `ITEM-P6-USE-ADMISSION-001`.
 
 ### Remaining acceptance work
 
-- [ ] Trace exact shape 8/9 admission, mutation and packet ordering.
-- [ ] Implement the bounded item-side authority and authenticated transcripts.
-- [ ] Run the leaf gate, review, commit and route to the next ready P6 child or
-  the now-unblocked P4 chat consumer.
+- [ ] Trace exact invalid/success paths and report/chat/response ordering for all
+  four inventory operations.
+- [ ] Design and implement revision/CAS convergence around auth's rental-
+  normalized committed snapshot without cross-domain nested locks.
+- [ ] Run focused and due full gates, obtain bounded review, commit and route to
+  the next dependency-ready P6 child.
 
 ### P6 frozen child registry
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Seven are Complete and twelve
-are Ready.
+accepted all nineteen children with no finding. Eight are Complete, one is
+Active and ten are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `ITEM-P6-WIRE-CATALOG-001` | Complete | — | existing committed evidence | layouts/nesting/grids/definitions |
-| `ITEM-P6-GRID-MUTATION-001` | Ready | logging/localization | item transactions/session | error/report/response order |
+| `ITEM-P6-GRID-MUTATION-001` | Active | logging/localization | item transactions/session/auth/world | error/report/response order + normalized revision/CAS |
 | `ITEM-P6-GRID-CROSS-001` | Ready | P8/P11 feature owners | item/storage/trade/Hero/equipment | exact positive/negative grid matrix |
 | `CAPACITY-P6-GRIDS-001` | Ready | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
 | `ADMIN-P6-ITEM-COMMAND-001` | Ready | P3 authority + P5 creation | command/item/session | MAKE/CLEARBAG quirks |
@@ -94,7 +104,7 @@ are Ready.
 | `ITEM-P6-USE-ADMISSION-001` | Ready | P1 LOC + P5 stats | item use/session | all gates and localized order |
 | `ITEM-P6-USE-BASIC-001` | Complete | — | existing committed evidence | potion/delete success paths |
 | `ITEM-P6-USE-CATALOG-001` | Ready | P4/P5/P7/P9/P10 | item use/session | exact known/unknown shape partition |
-| `ITEM-P6-SHOUT-ARMING-001` | Active | — | bounded main/world + new item-shout files | Hint/UseItem/state/repeated/race |
+| `ITEM-P6-SHOUT-ARMING-001` | Complete | — | committed Go `1d399992a690614a122cc46b3e64b4cda8272c2f` | Hint/UseItem/state/repeated/race |
 | `DROP-P6-GROUND-LIFECYCLE-001` | Ready | P5/P11 producers | ground/drop/death/session | actual death ground drops |
 | `ITEM-P6-EXPIRY-001` | Ready | P10/P12 consumers | item lifecycle/ticker/session | strict times/no-refresh/restart |
 | `STORAGE-P6-ACCOUNT-001` | Complete | P2/P7 final access | existing committed evidence | default 80-slot boundary |
