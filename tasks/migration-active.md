@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-25 11:52 (Asia/Singapore)
+Last verified: 2026-08-25 12:37 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,44 +39,45 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `MAP-P4-NOREINCARNATION-AUTH-001`
-- Status: `Active`; accepted P5 discovery froze eleven children (eight Complete,
-  three Ready) and proved the P5 user-spell producer dependency complete, so
-  this previously dependency-blocked P4 child is selected next.
-- Outcome: preserve imported `NoReincarnation` denial through a real
-  authenticated Reincarnation request: mana/global action gates and the failed
-  `S.Magic.Cast=true` transcript remain Legacy-exact, while equipped Shape-3
-  Amulet count, Reincarnation links/objects, practice and persistence remain
-  unchanged.
-- Go matrix anchors to read: exact `MAP-P4-NOREINCARNATION-AUTH-001` row and
-  NoReincarnation/Reincarnation named completion prose only; never another phase
-  or the full matrix.
-- Legacy read authority: exact `MapInfo.NoReincarnation` load fields and
-  `HumanObject.Magic/Reincarnation` admission/source-order paths located by
-  `rg`; every C# file remains read-only.
-- Exact Go write authority: `cmd/crystal-server/reincarnation_session_test.go`;
-  production `reincarnation.go`/`world.go` only if the authenticated transcript
-  proves a defect.
-- Required gate: imported-map authenticated denial with exact self/observer
-  packet order, MP/cooldowns, unchanged equipment/runtime/persistence, positive
-  control, repeated test, focused race, diff/status/process checks, control
-  checker and all six C# gates.
-- Forbidden scope: P5 implementation, other P4 children, another phase inventory,
-  full-matrix/broad source dumps, unrelated refactors and every C# write.
+- Leaf ID: `VIS-P4-OBJECT-001`
+- Status: `Active`; P5 scope-freeze proved the hide/show producers Complete,
+  so this previously dependency-blocked P4 visibility child is selected after
+  the authenticated NoReincarnation leaf completed.
+- Outcome: preserve Legacy player/NPC/monster Object* add/remove geometry,
+  per-player NPC visibility filters and interactive Observer non-blocking/
+  relative projection across join, map transition, town revive and appearance
+  refresh, including every imported NPC visibility field currently discarded.
+- Go matrix anchors to read: exact `VIS-P4-OBJECT-001` row plus only named
+  visibility/Observer completion prose; never another phase or the full matrix.
+- Legacy read authority: exact NPC visibility fields/load order and
+  `MapObject`/`PlayerObject` add/remove/search/Observer paths located by `rg`;
+  every C# file remains read-only.
+- Exact Go write authority: `internal/legacyworld/database.go`,
+  `internal/worlddata/world.go`, bounded `cmd/crystal-server/world.go` and
+  existing/new focused visibility/import/session tests discovered by exact file
+  enumeration; no unrelated protocol or phase owner.
+- Required gate: parser/export round trip for all visibility fields, actor/NPC/
+  monster/Observer recipient-filter matrix across join/transition/revive/
+  refresh, repeated test, focused race, due integration if schema is shared,
+  diff/status/process checks, control checker and all six C# gates.
+- Forbidden scope: P5 producer changes, movement/conquest/chat business behavior,
+  another phase inventory, broad source dumps, unrelated refactors and every C#
+  write.
 
 ### Protected Go ownership
 
-- `MAP-P4-NOREINCARNATION-AUTH-001` exclusively owns the existing focused
-  Reincarnation session test and only evidence-driven bounded production fixes.
+- `VIS-P4-OBJECT-001` exclusively owns the imported NPC visibility schema and
+  bounded object projection/filter/re-entry evidence.
 - The accepted P5 frozen registry is read-only while this P4 child is Active.
 
 ### Remaining acceptance work
 
-- [ ] Drive the denial from imported `NoReincarnation=true` map metadata through
-  an authenticated client Magic request.
-- [ ] Lock exact MP/cooldown/location/Magic packet order and absence of chat,
-  SpellObject, DeleteItem, links, practice and equipment/persistence mutation.
-- [ ] Run repeated/focused-race leaf gates and obtain independent review.
+- [ ] Trace and import every NPC TimeVisible/day/time/min-max-level/class/flag
+  field in exact Legacy load/source order.
+- [ ] Lock object add/remove recipients, geometry and relative Observer behavior
+  across join, transition, revive and appearance refresh.
+- [ ] Run parser/session repetition, focused race, integration gates and obtain
+  independent review.
 
 ### P5 frozen child registry
 
@@ -104,7 +105,7 @@ Ready.
 
 Independent reviewer `01a03617-76c2-7652-ab64-7e27143ce72b` rejected two
 candidate revisions, then accepted this ten-child denominator with no remaining
-finding. Six children are Complete and four dependency-blocked children are unfinished.
+finding. Seven children are Complete and three dependency-blocked children are unfinished.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -113,10 +114,10 @@ finding. Six children are Complete and four dependency-blocked children are unfi
 | `ENTRY-P4-LOCATION-001` | Complete | P3 start/logout | none | existing transition transcripts |
 | `MOVE-P4-ACTION-001` | Complete | — | none | existing movement/repeated/race |
 | `MOVE-P4-COLLISION-RULES-001` | Ready | P9 conquest state | bounded world/main + RequiredGroup test | authenticated gate/order matrix |
-| `VIS-P4-OBJECT-001` | Ready | P5 hide/show producers | legacyworld/worlddata + bounded server visibility | recipient/filter/re-entry matrix |
+| `VIS-P4-OBJECT-001` | Active | P5 hide/show producers (Complete) | legacyworld/worlddata + bounded server visibility | recipient/filter/re-entry matrix |
 | `MAP-P4-DETAIL-001` | Complete | map load + StartPoint | verified Go protocol/probe/map-info candidate | payload/order/suppression/search |
 | `MAP-P4-LIGHT-001` | Complete | — | committed Go `fc6b98b6b312357d850f6710fbf697b8678fd4c2` | UTC production clock/non-UTC host |
-| `MAP-P4-NOREINCARNATION-AUTH-001` | Active | P5 spell (Complete) | focused authenticated session | imported denial + unchanged amulet/no successful cast |
+| `MAP-P4-NOREINCARNATION-AUTH-001` | Complete | P5 spell (Complete) | committed Go `1aef1eac1953ca184d7e96c5394ae3c2cc5a3cc3` | imported denial + unchanged amulet/no successful cast |
 | `CHAT-P4-MAP-CONTEXT-001` | Ready | P6 shout arming | map-rule import + bounded chat/session | NoNames/shout recipients/order |
 
 ### P1 frozen child registry
