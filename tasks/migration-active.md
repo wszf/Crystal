@@ -36,23 +36,22 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `SPELL-P5-SAFEZONE-BORDER-001`
-- Status: `Active`; P5 is scope-frozen with fifteen of eighteen children
-  Complete, this one Active and two Ready. Direct SafeZoneHealing is accepted
-  Complete pending this batch's Go/Legacy commits.
-- Outcome: preserve optional `[Optional] SafeZoneBorder` creation of permanent,
-  nonblocking Decoration TrapHexagon SpellObjects on exact safe-zone
-  perimeters, including payload, static visibility and entry/exit lifecycle.
+- Leaf ID: `MONSTER-P5-BASE-FAMILY-001`
+- Status: `Active`; P5 is scope-frozen with sixteen of eighteen children
+  Complete, this one Active and one Ready. SafeZoneBorder is accepted Complete
+  pending this batch's Go/Legacy commits.
+- Outcome: preserve the inherited search/target/move/melee lifecycle for the
+  exact 46 base-family ordinals (`0`, mapped `9`, and 44 default-factory AIs).
 - Go matrix anchors to read: only P5 summary row 851, registry rows 3168-3170
   and completed SafeZone evidence 3255-3277; never the full matrix or another phase.
-- Legacy read authority: bounded config declaration/load order, safe-zone
-  perimeter construction and Decoration SpellObject visibility/lifecycle;
-  every C# file is read-only.
+- Legacy read authority: bounded base `MonsterObject` constructor, factory
+  dispatch and inherited ProcessAI/search/target/move/attack call chains for
+  the registered 46 ordinals; every C# file is read-only.
 - Initial Go write authority is control/matrix routing only. Before production
-  writes, freeze exact config/main/world/effect-visibility files and exact new
-  static/session tests from the registered row.
-- Forbidden scope: committed scheduled/direct SafeZoneHealing, another P5
-  child and every C# write.
+  writes, freeze exact `monster_ai.go`/`world.go` subsets and exact focused/
+  authenticated tests from the registered row.
+- Forbidden scope: committed SafeZone owners, ordinary-spawn child, mapped
+  specialized AI behavior and every C# write.
 
 ### Protected Go ownership
 
@@ -67,18 +66,16 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Remaining acceptance work
 
-- [ ] Trace exact Legacy key/default/write-back order, perimeter geometry,
-  SpellObject constructor fields and static visibility transitions.
-- [ ] Reconcile Go config/startup/effect seams and freeze exact production/test
-  authority before any implementation.
-- [ ] Implement the frozen subset and prove geometry, payload, visibility,
-  runtime-toggle/restart behavior, repeated tests and focused race.
+- [ ] Trace the exact 46-ordinal factory/dynamic-type partition and inherited
+  search/target/move/melee gates, timing, packets and delayed impact.
+- [ ] Reconcile current Go dispatch and freeze exact production/test authority.
+- [ ] Implement and prove all 46 variants, Player/owned-Monster/Hero targets,
+  delayed revalidation, repeated behavior and focused race.
 
 ### Discovery inputs
 
-- SafeZoneBorder is independent decoration, not a gameplay tick or Healing
-  admission producer. It consumes committed safe-zone geometry and existing
-  static SpellObject visibility without reopening those owners.
+- This child consumes completed mapped-AI/shared combat infrastructure; it does
+  not reopen specialized AI rows or the serial ordinary-spawn child.
 
 ### P6 frozen child registry
 
@@ -132,10 +129,10 @@ is Active and three are Ready.
 | `STATE-P5-REVELATION-REFRESH-002` | Complete | Revelation expiry | committed Go `602c71055c8f417b182931e7292a494017a8522c` | all HP/MP/Monster refresh producers/order/race |
 | `REGEN-P5-SAFEZONE-001` | Complete | Human regen + map safe zones | committed Go `0ab4da7b091d131bdd99a0ff153b7981438262ea` | scheduled cells/ticks/recipients/restart/race |
 | `REGEN-P5-SAFEZONE-DIRECT-002` | Complete | scheduled SafeZone core | trace/freeze central/specialized movement ledger before writes | walk/run/push/turn bypass/order/race |
-| `SPELL-P5-SAFEZONE-BORDER-001` | Active | map safe-zone geometry | config/main/world/effect visibility + new focused tests | perimeter/payload/visibility/restart/race |
+| `SPELL-P5-SAFEZONE-BORDER-001` | Complete | map safe-zone geometry | config/main/world/effect visibility + new focused tests | perimeter/payload/visibility/restart/race |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
-| `MONSTER-P5-BASE-FAMILY-001` | Ready | mapped core | monster_ai/world + focused tests | 46 ordinals + target-kind/race |
+| `MONSTER-P5-BASE-FAMILY-001` | Active | mapped core | monster_ai/world + focused tests | 46 ordinals + target-kind/race |
 | `MONSTER-P5-ORDINARY-SPAWN-001` | Ready | base family | archer_summons/hell_lord/world + focused tests | AI=60-63/99 + restart/race |
 | `DROP-P5-LOOT-HARVEST-001` | Complete | item schema consumer | existing committed evidence | randomness/owner/inventory/ground |
 | `RESPAWN-P5-POPULATION-001` | Complete | — | existing committed evidence | strict timing/order/restart/race |
