@@ -667,3 +667,10 @@ The following active C01 evidence was archived verbatim before canonical compact
 - Root cause: the compaction checklist was treated as one reporting transaction rather than two repository-local evidence transactions, despite C01 already forbidding the convenience template.
 - Prevention: prepare and execute the Legacy verification call first, inspect its result, then prepare the Go-root call; reject every candidate repository command containing `git -C` or an opposite-root path.
 - Verification: all mixed-call evidence was discarded. Independent Legacy and Go branch/HEAD/status/diff/untracked/C# calls then exited 0; they confirmed only the self-changing Legacy handoff was dirty and the Go worktree was clean before tracing resumed.
+
+### 2026-08-26 — Revelation refresh startup again combined both statuses
+
+- Symptom: the first recovery command printed Legacy branch/HEAD/status and then used `git -C ../Crystal.GoServer` for the Go branch/HEAD/status in the same otherwise successful call.
+- Root cause: the startup checklist was formatted as one convenient report before applying C01's per-command repository closure.
+- Prevention: split startup/recovery status into two tool calls before drafting either shell command; reject headings or reporting convenience as a reason to combine roots.
+- Verification: the entire first result was discarded. Independent Legacy and Go calls then exited 0 and established Legacy `ea352c14` clean plus Go `a2cd1cc` with only the owned untracked Revelation-refresh ledger.

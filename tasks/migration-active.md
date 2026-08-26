@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-26 19:36 (Asia/Singapore)
+Last verified: 2026-08-26 20:29 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -43,19 +43,28 @@ Keep this file at or below 300 lines and 32 KiB.
   `BroadcastHealthChange` after HP/MP/stat/combat/poison/AI mutation, preserving
   active-map versus expired owner/group recipients and exact packet order.
 - Go matrix anchors to read: only P5 summary row 851, registry rows 3166-3167,
-  completed Revelation evidence 3198-3211 and refresh ruling 3212-3220; never
+  completed Revelation evidence 3198-3211 and refresh ruling 3212-3229; never
   the full matrix or another phase.
 - Legacy read authority: bounded `BroadcastHealthChange` callsites and the exact
   Human/Monster HP/MP mutation entries paired by the static ledger; every C#
   file is read-only.
-- Go write authority during discovery: new
-  `cmd/crystal-server/revelation_refresh_ledger_test.go` and bounded matrix
-  evidence only. Production writes remain closed until the ledger freezes the
-  exact subset, files and packet order.
-- Required discovery gate: a Go-AST ledger must classify all 23 non-test
-  `HealthChangedPayload` emitter files and 45 direct Monster-like HP candidate
-  files as Legacy broadcast producer, constructor/reset, Hero-only path or
-  false positive; then replace closed authority with an exact production set.
+- Frozen Go write authority: new `cmd/crystal-server/health_refresh.go`,
+  `health_refresh_test.go`, existing `revelation_refresh_ledger_test.go`, matrix
+  evidence, and only these production files under `cmd/crystal-server/`:
+  `armadillo.go`, `conquest_archers.go`, `conquest_npc_actions.go`,
+  `counter_attack.go`, `dark_oma_king.go`, `earth_golem.go`, `electric_shock.go`,
+  `energy_shield.go`, `floating_rock.go`, `flying_statue.go`,
+  `general_meow_meow.go`, `guard.go`, `healing_circle.go`, `hell_keeper.go`,
+  `hell_lord.go`, `heroes.go`, `horned_commander.go`, `human_assassin.go`,
+  `ice_pillar.go`, `main.go`, `manectric_blest.go`, `map_hazards.go`,
+  `monster_experience.go`, `oma_witch_doctor.go`, `ordinary_pets.go`,
+  `plague.go`, `poison.go`, `rhino_priest.go`, `scaly_beast.go`,
+  `stone_golem.go`, `thunder_element.go`, `tree.go`, `tree_queen.go`,
+  `tucson_egg.go`, `tucson_general.go`, `warrior_attack.go`, `witch_doctor.go`,
+  and `world.go`. `revelation.go` remains protected; consume its routing helpers.
+- Required discovery gate is Complete: the Go-AST ledger classifies every one
+  of the 23 health-emitter and 48 typed Monster-HP files, with no unresolved
+  candidate, and the production list above is the exact live producer subset.
 - Forbidden scope: completed Revelation expiry redesign, SafeZoneHealing,
   another P5 child and every C# write.
 
@@ -69,18 +78,26 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Remaining acceptance work
 
-- [ ] Generate the static Go ledger and prove the exact candidate denominator.
-- [ ] Pair every actual producer with authoritative Legacy recipient/order
+- [x] Generate the static Go ledger and prove the exact candidate denominator.
+- [x] Pair every actual producer with authoritative Legacy recipient/order
   behavior and freeze disjoint production/test write authority.
 - [ ] Implement only the frozen subset, run the leaf/integration gates, review,
   commit and route the next dependency-ready P5 child.
 
 ### Discovery inputs
 
-- Baseline denominator at Go `0db2cde`: 23 non-test files emitting
-  `HealthChangedPayload` and 45 non-test files matching direct Monster-like HP
-  mutation candidates. Recompute mechanically at the current HEAD before
-  freezing authority; do not infer actual omissions from textual matches.
+- Exact denominator at Go `a2cd1cc`: 23 non-test health-emitter files and 48
+  direct typed `worldMonster.HP` mutation files. The earlier textual 45-file
+  count was incomplete; `0db2cde..a2cd1cc` adds or removes no matching
+  production call/write, so the AST ledger also corrects that baseline.
+- The Human ledger found 39 payload callsites: 34 live shared-world gaps, three
+  existing follow-ups (two group-only and therefore still requiring generic
+  Revelation routing), and two valid no-world session fallbacks. The Monster
+  ledger classifies 30 live Legacy producers, 15 constructor/reset/death paths
+  and three other-authority paths; fifteen files contain direct missing live
+  refreshes, while existing pet/tree/poison producers converge on the same
+  exact helper. Legacy order is self `HealthChanged`, then `ObjectHealth`; for
+  Monster death it is `ObjectDied`, then `ObjectHealth`.
 - Completed Revelation routing helpers are consumers. This leaf owns missing
   producer calls and their order, not Revelation duration or visibility rules.
 
@@ -120,8 +137,8 @@ reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the original eleven
 children. Hazard Struck tracing proved one finite omitted regen child; its bounded attack
 trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
 proved one reachable long-Revelation expiry-width correction; its bounded trace
-proved one finite global refresh follow-up. Eleven are Complete, one is Active
-and four are Ready.
+proved one finite global refresh follow-up. Twelve are Complete, one is Active
+and three are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -131,8 +148,8 @@ and four are Ready.
 | `COMBAT-P5-HUMAN-HERO-001` | Complete | spell/state consumers | existing committed evidence | target/defence/death/relogin |
 | `COMBAT-P5-HP-DRAIN-001` | Complete | combat core | committed Go `0db2cdeae072dfed45d39c8e4824caf3597a76ff` | float accumulation/strict payout/remainder/packets/race |
 | `REGEN-P5-HUMAN-001` | Complete | combat + P1 weights + P6 potion pools | committed Go `194c209b46f84876c577085c94b5b3983178691a` | natural/Pot/Heal/Vamp timers, resets, packets, persistence/race |
-| `SPELL-P5-REVELATION-EXPIRE-001` | Active | Human regen review | frozen Revelation/observer/main/groups + tests | 255/256/260 wrap, SendHealth/passive/bootstrap/race |
-| `STATE-P5-REVELATION-REFRESH-002` | Ready | Revelation expiry | finite 23-emitter + direct-mutation ledger in matrix | all HP/MP/Monster refresh producers/order/race |
+| `SPELL-P5-REVELATION-EXPIRE-001` | Complete | Human regen review | committed Go `a2cd1cc3768eae92b69e839e14446f2debd9249f` | 255/256/260 wrap, SendHealth/passive/bootstrap/race |
+| `STATE-P5-REVELATION-REFRESH-002` | Active | Revelation expiry | finite 23-emitter + direct-mutation ledger in matrix | all HP/MP/Monster refresh producers/order/race |
 | `REGEN-P5-SAFEZONE-001` | Ready | Human regen + map safe zones | config/map healing objects + production tests | enabled/disabled, cells/ticks/recipients/restart/race |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
@@ -231,7 +248,7 @@ broad unnamed scope.
 | `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 5 Complete + 3 unfinished |
 | `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: all Complete |
 | `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
-| `DISC-P5-CLOSURE` | P5 | Complete | 15 finite children after regen/HP-drain/safe-zone/Revelation findings: 8 Complete + 7 unfinished |
+| `DISC-P5-CLOSURE` | P5 | Complete | 16 finite children after regen/HP-drain/safe-zone/Revelation findings: 12 Complete + 4 unfinished at refresh discovery |
 | `DISC-P6-CLOSURE` | P6 | Complete | 19 finite children: 7 Complete + 12 unfinished at freeze |
 | `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |

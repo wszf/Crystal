@@ -551,3 +551,10 @@
 - Root cause: a verified table row and a separately located evidence heading were incorrectly treated as adjacent patch context.
 - Prevention: locate the exact insertion boundary, read that contiguous range, then patch only that boundary; independently located anchors must never be combined into one hunk.
 - Verification: the rejected patch made no change; the frozen count was updated separately, the discovery prose was inserted at the exact reread boundary, and matrix `git diff --check` exited 0.
+
+### 2026-08-26 — Revelation refresh searches again bypassed the glob template
+
+- Symptom: one bounded helper search placed `--glob '*.go'` after ripgrep's `--`, emitted partial matches and exited 2; the next authority search passed an unquoted `cmd/crystal-server/*.go` to zsh and produced a broad truncated dump; a later expected-zero diff query omitted explicit rc handling and exited 1.
+- Root cause: the commands were assembled from natural-language order instead of the canonical ripgrep/absence templates despite repeated C02 findings.
+- Prevention: copy `rg -n --glob '*.go' -e 'pattern' -- path` literally; reject `-- --glob` and every shell-expanded source glob before sending.
+- Verification: all invalid outputs were discarded. The helper query reran with options before `--`; the struct was read from exact `world.go`; `ExperienceOwnerID` usages reran with ripgrep-owned globbing; and the bounded baseline diff reran with explicit rc 0/1 handling and reported `NO_MATCH`. All accepted calls exited 0.
