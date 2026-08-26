@@ -2,8 +2,8 @@
 
 Last updated: 2026-08-26 22:40 (Asia/Singapore)
 
-This replace-in-place snapshot closes the uncommitted Revelation refresh leaf
-and routes the next bounded SafeZoneHealing trace. It is the current recovery
+This replace-in-place snapshot records the clean Revelation refresh closure and
+routes the next bounded SafeZoneHealing trace. It is the current recovery
 authority, not a historical journal.
 
 ## Goal and control-plane state
@@ -14,23 +14,21 @@ authority, not a historical journal.
 - Active leaf: `REGEN-P5-SAFEZONE-001`.
 - P5 is scope-frozen with thirteen of sixteen children Complete, this leaf
   Active and two Ready. `STATE-P5-REVELATION-REFRESH-002` is committed Complete
-  in Go `602c71055c8f417b182931e7292a494017a8522c`; the Legacy control commit is
-  the only pending closure step in this snapshot.
+  in Go `602c71055c8f417b182931e7292a494017a8522c`; Legacy routing/evidence is
+  committed in `8540a5a5933b102e9bcb0c8189e97b6bb8626fc7`.
 - Normal recovery reads only matrix P5 row 851, registry rows 3167-3168 and
   completed refresh evidence 3231-3248.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; HEAD `bedf4857d27d66f4fccc99bc9a9af5aa8577766a`;
+- Branch `master`; observed HEAD
+  `8540a5a5933b102e9bcb0c8189e97b6bb8626fc7`;
   upstream `origin/master`.
-- Index and untracked set are empty. Six unstaged tracked files are owned:
-  `tasks/lessons-archive/migration/combat-general.md`,
-  `tasks/lessons-archive/workflow/repository-boundaries-02.md`,
-  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
-  `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff.
-- The active index now routes SafeZoneHealing and records Revelation refresh as
-  Complete. Every tracked, staged and untracked `.cs` gate is empty.
+- Worktree, index and untracked set were clean before this self-recording
+  handoff edit. Its documentation commit is the one expected delta above the
+  observed HEAD. The active index routes SafeZoneHealing and records Revelation
+  refresh Complete. Every tracked, staged and untracked `.cs` gate is empty.
 
 ## Go repository state
 
@@ -81,8 +79,8 @@ authority, not a historical journal.
 
 1. Verify each repository independently against the branches, HEADs and complete
    statuses above; rerun all six `.cs` gates.
-2. Run the control checker and commit the six exact Legacy documentation files;
-   read back its full hash and verify both repositories clean.
+2. If only this handoff is modified, run the control checker, commit it, read
+   back the full hash and verify both repositories clean.
 3. For `REGEN-P5-SAFEZONE-001`, read only the named matrix anchors and search the
    lessons archive with `SafeZoneHealing|safe zone|Healing SpellObject`.
 4. Trace bounded Legacy startup/config/map/healing call chains and exact Go
