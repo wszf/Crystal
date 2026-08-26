@@ -209,6 +209,11 @@ duplicate.
 - Root cause: 把相似布尔条件合并为一个过宽 helper。
 - Prevention: 分别建模搜索、移动、攻击、可见性、权限、冷却和状态门禁；复用前证明语义集合完全相同。
 - Verification: 为每个 gate 提供独立成功/失败组合测试。
+- Strengthening through HP drain: `worldMagicAction` initially reused one
+  `DamageWeapon` flag both to admit HP-drain and to execute durability, so the
+  wrapper's already-completed weapon damage ran twice. Keep observation/admission
+  context separate from side-effect execution flags; the durability regression,
+  HP-drain count-20/race-count-5 and fresh full gates pass after separation.
 
 ### 2026-08-21 C23 — 权威事务、锁、落盘和网络投递必须分层排序
 

@@ -36,62 +36,50 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `COMBAT-P5-HP-DRAIN-001`
-- Status: `Active`; P5 is scope-frozen with ten of fifteen children Complete,
-  this one Active and four Ready. Combat core and Human/Hero regen are Complete
+- Leaf ID: `SPELL-P5-REVELATION-EXPIRE-001`
+- Status: `Active`; P5 is scope-frozen with eleven of fifteen children Complete,
+  this one Active and three Ready. Human regen and HP drain are Complete
   dependencies.
-- Outcome: migrate the reachable `HumanObject.HpDrain` float accumulator from
-  successful Human/Monster target attacks through strict payout, HP cap loss,
-  Player/Hero notifications and runtime reset semantics.
-- Go matrix anchors to read: only P5 summary row 851, this registry row 3164 and
-  completed Regen evidence 3184-3199; never the full matrix/another phase.
-- Legacy read authority: bounded `HumanObject.HpDrain` declaration and every
-  write/read/payout callsite, the invoked Human/Monster `Attacked`/attack
-  families, HP change/notification helpers and runtime construction/reset paths;
-  every C# file is read-only.
-- Exact Go write authority: existing `cmd/crystal-server/{equipment_transactions.go,
-  world.go,warrior_attack.go,heroes.go}`; new `hp_drain.go`,
-  `hp_drain_test.go` and `hp_drain_session_test.go`. No other file may change.
-- Required gate: touched compile; exact float32 threshold/remainder/cap tests;
-  Player/Hero versus Human/ordinary-Monster production paths; damageWeapon and
-  miss gates; packet/persistence order; logout/relogin/restart reset;
-  count-20, race-count-5 and authenticated attack transcript.
-- Forbidden scope: natural regen redesign, SafeZoneHealing, Revelation expiry,
-  unrelated attack refactors, another P5 child and every C# write.
+- Outcome: preserve Legacy's reachable byte-wrap of Revelation
+  `ObjectHealth.Expire` above 255 seconds across cast completion, passive/static
+  visibility, movement/bootstrap and later health changes.
+- Go matrix anchors to read: only P5 summary row 851, this registry row 3166 and
+  completed HP-drain evidence 3200-3215; never the full matrix/another phase.
+- Legacy read authority: bounded Revelation completion/`RevTime` assignment,
+  `BroadcastHealthChange`, `SendHealth`, static/movement/bootstrap consumers and
+  configured/imported high-SC source; every C# file is read-only.
+- Go write authority is closed during tracing. No Go file may change until the
+  finite callsite trace replaces this sentence with an exact existing/new set.
+- Required discovery gate: freeze the exact cast formula and `byte` conversion
+  order at 255/256/260 seconds, minimum-five behavior, completion/passive/
+  bootstrap/movement recipients and packet order, then define compile,
+  count-20, race-count-5 and authenticated transcript evidence.
+- Forbidden scope: HP-drain redesign, SafeZoneHealing, another spell behavior,
+  another P5 child and every C# write.
 
 ### Protected Go ownership
 
-- Completed Regen commit
-  `194c209b46f84876c577085c94b5b3983178691a` remains read-only until the
-  bounded trace explicitly opens exact HP-drain files; earlier P1-P6 evidence
-  may be consumed, not redesigned.
+- Completed HP-drain commit
+  `0db2cdeae072dfed45d39c8e4824caf3597a76ff` and Regen commit
+  `194c209b46f84876c577085c94b5b3983178691a` remain read-only. Earlier P1-P6
+  evidence may be consumed, not redesigned.
 
 ### Remaining acceptance work
 
-- [ ] Trace every reachable Legacy/Go HP-drain callsite and freeze exact Go files.
-- [ ] Implement only the finite HP-drain behavior and production-entry tests.
+- [ ] Trace every reachable Revelation expiry producer/consumer and freeze exact
+  Go files.
+- [ ] Implement only the finite expiry-width behavior and owning transcripts.
 - [ ] Run the leaf gate, obtain bounded review, commit and route the next
   dependency-ready child.
 
-### Frozen behavior checklist
+### Discovery checklist
 
-- Only `Attacked(HumanObject, ..., damageWeapon=true)` after hit and strict
-  `armour < damage` accumulates. Player/Hero targets use the Human base path;
-  ordinary Monster subclasses that reach `MonsterObject.Attacked` use the
-  Monster path. Monster attackers and overrides returning before base do not.
-- A Hero hitting a Human target is normalized to its Player owner before armour,
-  stats, durability and drain; a Hero hitting an ordinary Monster keeps its own
-  stats, accumulator and HP.
-- Accumulate float32 `max(0,(float32(damage-armour)/100)*rate)`. Payout only at
-  strict `accumulator > 2`; floor to int, call capped HP change, then subtract
-  the full floored amount even when full HP loses the heal. Exact 2 is retained.
-- Player payout emits ordinary ChangeHP private/group/Revelation health packets
-  and persistence, but no regen indicator. Hero payout emits HeroHealthChanged,
-  owner/group ObjectHealth and owner ObjectMana, then durable Hero HP.
-- Player-on-Human payout precedes target Struck/ObjectStruck/indicator/damage;
-  Player/Hero-on-Monster payout follows ObjectStruck and precedes gather,
-  indicator and target HP. Accumulators are runtime-only zero defaults and are
-  discarded by logout/relogin/restart.
+- Prove whether Legacy casts the remaining seconds before or after minimum/
+  maximum operations and which exact durations wrap to 0, 1, 4 or 255.
+- Separate cast-completion packets from later `BroadcastHealthChange`,
+  `SendHealth`, static visibility and movement refresh consumers.
+- Freeze owner/group/observer visibility and packet ordering for ordinary and
+  Revelation-active states; do not infer expiry width from the Go serializer.
 
 ### P6 frozen child registry
 
@@ -128,8 +116,8 @@ Independent Legacy auditor `01a036ed-ee8f-7a50-a042-f1d665f83627` confirmed
 reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the original eleven
 children. Hazard Struck tracing proved one finite omitted regen child; its bounded attack
 trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
-proved one reachable long-Revelation expiry-width correction. Ten are Complete,
-one is Active and four are Ready.
+proved one reachable long-Revelation expiry-width correction. Eleven are Complete,
+one is Active and three are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -137,9 +125,9 @@ one is Active and four are Ready.
 | `SPELL-P5-INTERNAL-EFFECT-001` | Complete | mapped monster owners | existing committed evidence | 16 internal effects |
 | `SPELL-P5-MAP-HAZARD-001` | Complete | map load | accepted hazard schema/runtime/session evidence | parser/export + timers/RNG/session/race |
 | `COMBAT-P5-HUMAN-HERO-001` | Complete | spell/state consumers | existing committed evidence | target/defence/death/relogin |
-| `COMBAT-P5-HP-DRAIN-001` | Active | combat core | bounded human/monster attacked paths + focused tests | float accumulation/strict payout/remainder/packets/race |
+| `COMBAT-P5-HP-DRAIN-001` | Complete | combat core | committed Go `0db2cdeae072dfed45d39c8e4824caf3597a76ff` | float accumulation/strict payout/remainder/packets/race |
 | `REGEN-P5-HUMAN-001` | Complete | combat + P1 weights + P6 potion pools | committed Go `194c209b46f84876c577085c94b5b3983178691a` | natural/Pot/Heal/Vamp timers, resets, packets, persistence/race |
-| `SPELL-P5-REVELATION-EXPIRE-001` | Ready | Human regen review | revelation helper/tests + owning transcripts | 255/256/260 byte wrap, completion/passive/bootstrap/race |
+| `SPELL-P5-REVELATION-EXPIRE-001` | Active | Human regen review | exact authority pending bounded trace | 255/256/260 byte wrap, completion/passive/bootstrap/race |
 | `REGEN-P5-SAFEZONE-001` | Ready | Human regen + map safe zones | config/map healing objects + production tests | enabled/disabled, cells/ticks/recipients/restart/race |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
