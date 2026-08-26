@@ -178,3 +178,10 @@
 - Root cause: the implementation followed `PlayerObject.Teleport`'s `mapChanged` branch instead of tracing the inherited `MapObject.Teleport`, which always calls `CurrentMap.RemoveObject(this)` and `CurrentMap.AddObject(this)` even when the map is unchanged.
 - Prevention: distinguish ordinary cell movement from remove/add lifecycle; preserve `Map.Players` append order on every successful teleport or movement transition, not merely cross-map changes.
 - Verification: both Go teleport paths now record player append order unconditionally, while ordinary movement changes only cell order; the focused test proves reverse hazard iteration is stable after a step and reverses after same-map teleport/re-entry.
+
+### 2026-08-27 — New legacy INI keys must preserve write-back order
+
+- Symptom: SafeZoneHealing was initially read after GameMasterEffect, so missing/invalid Setup.ini write-back emitted the two `[Optional]` keys in the reverse of Legacy order.
+- Root cause: the field was inserted next to a related Go setting without tracing that the INI helper materializes keys in read-call order.
+- Prevention: when migrating a legacy INI key, copy its relative read/write position as well as section, name, default, and parse behavior; assert ordering against adjacent migrated keys.
+- Verification: SafeZoneHealing now precedes GameMasterEffect in the loader and focused tests assert both fallback value and exact relative write-back order.

@@ -16,7 +16,7 @@ duplicate.
 - Symptom: a tool call mixes Go and Legacy paths, yielding partial output, a late failure, or evidence from the wrong target.
 - Root cause: workdir, repository root and argv were reviewed separately, or a cross-repository recovery template was reused.
 - Prevention: one call belongs to one verified root. Reject the command before sending if it contains `git -C`, the opposite root, or an opposite-root relative path; never compose a combined two-root “summary” command, and finish and read back the first repository call before constructing the second. The first startup/recovery status call is mechanically split into two tool calls before either command is drafted; convenience headings do not justify a combined shell. Read-only/status/C#/compaction work is not exempt.
-- Verification: accept only zero-exit, complete output whose paths all belong to that root. Discard an entire failed, truncated or mixed-root call, including earlier successful fragments, and rerun per repository. Historical recurrences are preserved in `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
+- Verification: only zero-exit, complete, single-root output is evidence; discard failed/truncated/mixed calls wholesale and rerun per repository. SafeZoneHealing integration again appended Legacy paths to a Go-root query; all output was discarded and replaced by two independent zero-exit calls. History: `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
 - Symptom: 猜测目录、空 glob、裸反引号、错误正则或未闭合字符串导致勘察失败。
@@ -46,6 +46,7 @@ duplicate.
 - Strengthening during Regen Revelation audit: 主线程又在 Legacy 根的有效 `RevTime` 查询后追加 Go 相对路径，触发 zsh 未命中并污染整次调用。该结果已全部作废并按仓独立零退出重跑；跨仓语义对照必须预先写成两个物理调用，不能在首仓命令成形后追加另一侧搜索。
 - Strengthening during Revelation recovery: Go 检索又让 zsh 展开未核验的 `world*.go`/`*visibility*.go`；即使命中且 exit 0，整次结果仍作废。文件族只能对已验证目录使用 `rg --glob`，后续独立重跑 exit 0。
 - Strengthening during Revelation integration: 预期“零残余”的 post-patch `rg` 又裸跑并 exit 1；该调用作废后用显式 rc 0/1 分支重跑 exit 0。负向验收在发送前必须按 absence query 模板成形。
+- Strengthening during SafeZoneHealing integration: 启动顺序读取又附加猜测的 `npcs.go` 并 exit 2，整次输出作废；根因仍是把惯例文件名混入已验证路径。随后仅用已登记的 `main.go`/`world.go` 零退出重跑；任何附加路径都必须先独立枚举。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。

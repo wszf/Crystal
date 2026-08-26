@@ -67,3 +67,18 @@
 - Root cause: 共享 push resolver 只传递了受击怪物和距离，没有沿调用链保留真实 pusher 的 ObjectID。
 - Prevention: 所有 Repulsion 入口显式传递 pusher ObjectID，并在 `ObjectStruck` payload 与世界测试中同时断言该 ID；不要从 target 或当前 AI attacker 推断推击者。
 - Verification: `TestGameWorldThunderElementPushedRepulsionDamageUsesPusher` 断言真实 ID 和自伤公式，AI=49 定向普通/race 测试通过。
+
+### 2026-08-27 — Safe-zone field allocation must not record Cell.Add twice
+
+- Symptom: `loadSafeZoneHealing` called `nextIDLocked` and then explicitly called `recordObjectCellInsertionLocked`, assigning each invisible field two insertion sequence values.
+- Root cause: object identity allocation and cell insertion were treated as separate operations without rereading the Go helper, although `nextIDLocked` already records insertion for newly spawned world objects.
+- Prevention: before adding explicit insertion bookkeeping, read the allocation helper and assert the resulting sequence; call the explicit recorder only for moves/re-entry or reserved IDs that bypass it.
+- Recurrence: the independently written authenticated fixture repeated the same `nextIDLocked` plus explicit-recorder sequence; integration review removed it before accepting the test.
+- Verification: removed both duplicate recorders, added exact consecutive insertion-order assertions for overlapping/clipped fields, and the focused geometry/session tests pass.
+
+### 2026-08-27 — Safe-zone review must include scheduler and producer reachability
+
+- Symptom: review correctly found zero-MaxHP pools were skipped, but also proposed inclusive field ticks from the inner `SpellObject.Process` guard and required direct-map startup wiring without any safe-zone definitions.
+- Root cause: the valid-data assumption in the shared Go regen consumer hid a newly reachable producer edge; separately, reviewing the inner spell method or startup branch in isolation omitted the strict outer `Envir` scheduler and the definition authority.
+- Prevention: for timer/startup findings, trace both the caller scheduler and data producer. Safe-zone fields execute only after `Time > OperateTime`; direct-map mode has no `MapInfo.SafeZones`, while exported-world startup owns the definitions.
+- Verification: removed HP/MaxHP admission/regen shortcuts, added live zero-MaxHP arm/drain/indicator coverage, retained the strict exact-time regression, and rejected the two isolated-call-chain findings with exact outer-scheduler/definition evidence.

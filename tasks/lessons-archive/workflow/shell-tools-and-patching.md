@@ -600,3 +600,23 @@
 - Root cause: the fixture literal and read path were written from analogous APIs rather than the exact declaration and locator output.
 - Prevention: finish and read the symbol locator call, then use only its exact path and copy every composite field's declared type before constructing the fixture.
 - Verification: the exact `internal/worlddata/world.go` declaration showed `Stats []MonsterStat`; the corrected fixture passes the mixed-producer death/order test count-20.
+
+### 2026-08-26 — SafeZoneHealing seam search expanded every test file in zsh
+
+- Symptom: a bounded seam query passed unquoted `cmd/crystal-server/*test.go`, so zsh expanded the package's entire test set and produced a broad result that violated the targeted-context gate despite exiting zero.
+- Root cause: exact known files and a shell wildcard were mixed in one argv instead of applying ripgrep-owned filtering to the verified directory.
+- Prevention: source-file families must always use `rg --glob '*test.go' ... -- cmd/crystal-server`; never append an unquoted shell glob to an otherwise exact file list.
+- Verification: the broad output was discarded. The query reran against four exact verified files with ripgrep-owned `--glob '*.go'`, exited zero, and only that bounded result informed the startup-seam ruling.
+- Recurrence: recovery then combined broad `SafeZone|Healing|mapInfo` patterns over three Go directories, producing 1,206 truncated lines; later reads guessed nonexistent `regen.go` and `hero_runtime.go`, and two more commands appended shell-expanded `hero*.go`/`*visibility*.go` families. Every affected call was discarded even when an earlier segment or the shell expansion exited zero.
+- Strengthened prevention: split semantic locators into one exact concept at a time and use `rg -l` before line output; finish `rg --files | rg` enumeration before constructing a read argv, and reject every explicit path not copied from that result. A known directory plus an ripgrep-owned `--glob '*.go'` is the only allowed file-family form.
+- Verification: exact locators established `natural_regeneration.go`, `healing_circle.go`, `conquest_effects.go`, `heroes.go`, `maps.go`, `world.go`, `main.go`, and config files before bounded range reads; zero-match `SafeZoneHealing` was rerun with an explicit accepted rc=1 branch.
+- Further recurrence: a compound hero read ended with an expected-absence `rg` but no 0/1 branch, so exit 1 invalidated its earlier `sed` output; a later movement locator used many broad alternatives and emitted thousands of lines before `head`. Both calls were discarded and the hero ranges were rerun alone. Negative checks must be physically separate from positive reads, and a source-wide movement inventory belongs in a bounded auditor report rather than the main thread.
+
+### 2026-08-27 — Reconstructed handoff used a near-match heading
+
+- Symptom: `tasks/check-migration-control.sh` exited 1 after compaction recovery because the reconstructed handoff used `## Goal and control plane` instead of the required literal `## Goal and control-plane state`.
+- Root cause: the handoff body was reconstructed from semantics without first copying the checker's exact heading contract.
+- Prevention: when replacing a control document, preserve checker-recognized headings byte-for-byte or inspect the checker before drafting; semantic near-matches are invalid.
+- Recurrence: the first rerun then stopped at the next near-match, `Legacy repository snapshot`; checking only the first reported literal was insufficient because the checker is fail-fast.
+- Strengthened prevention: inspect and copy the checker's complete required-heading list before the next rerun, not just the first reported missing heading.
+- Verification: all required headings and the unique Active-leaf field were aligned with the checker, then the full control check was rerun.

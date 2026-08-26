@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-26 22:35 (Asia/Singapore)
+Last verified: 2026-08-27 01:16 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -36,24 +36,23 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `REGEN-P5-SAFEZONE-001`
-- Status: `Active`; P5 is scope-frozen with thirteen of sixteen children
-  Complete, this one Active and two Ready. Revelation refresh is Complete.
-- Outcome: preserve optional `[Optional] SafeZoneHealing`: when enabled, create
-  permanent value-25/two-second Healing SpellObjects on every valid safe-zone
-  cell and feed the existing delayed HealAmount path; default/disabled creates
-  none.
-- Go matrix anchors to read: only P5 summary row 851, registry rows 3167-3168
-  and completed refresh evidence 3231-3248; never the full matrix or another
-  phase.
-- Legacy read authority: bounded SafeZoneHealing setting/load, map safe-zone
-  enumeration, Healing SpellObject creation/process and Player/Monster/Hero
-  recipient call chains; every C# file is read-only.
+- Leaf ID: `REGEN-P5-SAFEZONE-DIRECT-002`
+- Status: `Active`; P5 is scope-frozen with fourteen of eighteen children
+  Complete, this one Active and three Ready. Scheduled SafeZoneHealing is
+  committed Complete in Go `0ab4da7b091d131bdd99a0ff153b7981438262ea`.
+- Outcome: preserve direct Healing `ProcessSpell(target)` after successful
+  turn/walk/run/push paths, including the Run traversed-cell-after-final-move
+  quirk, without waiting for the permanent field's schedule or current cell.
+- Go matrix anchors to read: only P5 summary row 851, registry rows 3168-3170
+  and completed SafeZone evidence 3255-3277; never the full matrix or another phase.
+- Legacy read authority: bounded `MapObject`/Player/Hero/Monster turn, walk,
+  run and push callsites that directly invoke Healing `ProcessSpell(target)`;
+  every C# file is read-only.
 - Initial Go write authority is control/matrix routing only. Before production
-  writes, bounded tracing must enumerate existing config/map/spell-object files
-  and freeze an exact disjoint production/test list here.
-- Forbidden scope: completed Revelation expiry/refresh, Human regen redesign,
-  another P5 child and every C# write.
+  writes, freeze an exact subset from the registered central/specialized
+  movement ledger plus exact focused/session test files.
+- Forbidden scope: committed scheduled SafeZone core, SafeZoneBorder, another
+  P5 child and every C# write.
 
 ### Protected Go ownership
 
@@ -61,27 +60,26 @@ Keep this file at or below 300 lines and 32 KiB.
   `a2cd1cc3768eae92b69e839e14446f2debd9249f`, HP-drain commit
   `0db2cdeae072dfed45d39c8e4824caf3597a76ff`, and Regen commit
   `194c209b46f84876c577085c94b5b3983178691a`, plus refresh commit
-  `602c71055c8f417b182931e7292a494017a8522c`, remain read-only. Earlier P1-P6
+  `602c71055c8f417b182931e7292a494017a8522c` and scheduled SafeZone commit
+  `0ab4da7b091d131bdd99a0ff153b7981438262ea`, remain read-only. Earlier P1-P6
   evidence may be consumed, not redesigned.
 
 ### Remaining acceptance work
 
-- [ ] Trace exact setting defaults/load order, map-cell enumeration and object
-  construction/timer/value semantics from reachable Legacy startup.
-- [ ] Trace Healing processing for Player, Monster and Hero targets, then freeze
-  exact Go production/test write authority before any implementation.
-- [ ] Implement the frozen subset and prove enabled/disabled, valid-cell order,
-  visibility, ticks/recipients, restart and focused race behavior.
+- [ ] Trace the finite central/specialized turn, walk, run and push callsites,
+  exact invocation order and failure bypasses from reachable Legacy entries.
+- [ ] Reconcile the registered Go movement ledger and freeze exact disjoint
+  production/test authority before any implementation.
+- [ ] Implement the frozen subset and prove direct bypass, traversed-cell quirk,
+  target admission, packet order, repeated behavior and focused race.
 
 ### Discovery inputs
 
-- The frozen registry already establishes value 25, a two-second tick, one
-  permanent Healing object per valid safe-zone cell, and optional/default-off
-  admission. The active trace must prove exact startup order, cell validity and
-  object lifetime rather than reopening that denominator.
-- Existing Human regen HealAmount processing is a consumer. This leaf owns only
-  SafeZoneHealing configuration, object creation and the missing target/tick
-  adapters required by the Legacy call chain.
+- Direct movement calls `ProcessSpell(target)` on Healing fields found along the
+  movement path; it bypasses the scheduled field timer and does not recheck the
+  target's final location. Run evaluates traversed cells only after final movement.
+- This leaf consumes the committed target-admission/effect helper. Independent
+  SafeZoneBorder decoration remains Ready and out of scope.
 
 ### P6 frozen child registry
 
@@ -119,8 +117,9 @@ reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the original eleven
 children. Hazard Struck tracing proved one finite omitted regen child; its bounded attack
 trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
 proved one reachable long-Revelation expiry-width correction; its bounded trace
-proved one finite global refresh follow-up. Thirteen are Complete, one is Active
-and two are Ready.
+proved one finite global refresh follow-up. Safe-zone tracing then split direct
+movement triggers and independent border decoration. Fourteen are Complete, one
+is Active and three are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -132,7 +131,9 @@ and two are Ready.
 | `REGEN-P5-HUMAN-001` | Complete | combat + P1 weights + P6 potion pools | committed Go `194c209b46f84876c577085c94b5b3983178691a` | natural/Pot/Heal/Vamp timers, resets, packets, persistence/race |
 | `SPELL-P5-REVELATION-EXPIRE-001` | Complete | Human regen review | committed Go `a2cd1cc3768eae92b69e839e14446f2debd9249f` | 255/256/260 wrap, SendHealth/passive/bootstrap/race |
 | `STATE-P5-REVELATION-REFRESH-002` | Complete | Revelation expiry | committed Go `602c71055c8f417b182931e7292a494017a8522c` | all HP/MP/Monster refresh producers/order/race |
-| `REGEN-P5-SAFEZONE-001` | Active | Human regen + map safe zones | trace first, then freeze exact config/map/healing files + tests | enabled/disabled, cells/ticks/recipients/restart/race |
+| `REGEN-P5-SAFEZONE-001` | Complete | Human regen + map safe zones | committed Go `0ab4da7b091d131bdd99a0ff153b7981438262ea` | scheduled cells/ticks/recipients/restart/race |
+| `REGEN-P5-SAFEZONE-DIRECT-002` | Active | scheduled SafeZone core | trace/freeze central/specialized movement ledger before writes | walk/run/push/turn bypass/order/race |
+| `SPELL-P5-SAFEZONE-BORDER-001` | Ready | map safe-zone geometry | config/main/world/effect visibility + new focused tests | perimeter/payload/visibility/restart/race |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
 | `MONSTER-P5-BASE-FAMILY-001` | Ready | mapped core | monster_ai/world + focused tests | 46 ordinals + target-kind/race |
