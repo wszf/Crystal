@@ -1,92 +1,87 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-26 05:55 (Asia/Singapore)
+Last updated: 2026-08-26 08:38 (Asia/Singapore)
 
-This replace-in-place snapshot records the verified Mine/Rubble leaf closure
-candidate and the route to the next bounded map-hazard leaf. It claims no phase
-or project closure.
+This replace-in-place snapshot records the committed map-hazard leaf and routes
+the next bounded P5 regen trace. It claims no phase or project closure.
 
 ## Goal and control-plane state
 
-- Goal remains Active and unchanged; it is neither complete nor blocked.
-- Main authority remains `gpt-5.6-sol/ultra`; bounded workers remain
-  `gpt-5.6-luna/max` through `luna_worker` without silent substitution.
-- P6 is scope-frozen In progress: twelve of nineteen children are Complete and
-  seven are Ready. `MINE-P6-RUBBLE-001` is committed Complete.
-- `SPELL-P5-MAP-HAZARD-001` is the unique Active leaf. P5 is scope-frozen with
-  eight of eleven children Complete, this one Active and two Ready.
-- Its matrix anchors are P5 summary row 851, registry row 3162 and completed
-  Mine evidence 3206-3231. No hazard implementation has begun.
+- Goal remains Active and unchanged; it is neither complete nor blocked. A real
+  context compaction triggered this refresh; no implementation or commit ran
+  across the safety gate.
+- Main authority is `gpt-5.6-sol/ultra`; bounded workers must use
+  `luna_worker` (`gpt-5.6-luna/max`) without substitution.
+- P5 remains scope-frozen In progress: nine of twelve children are Complete,
+  `REGEN-P5-HUMAN-001` is Active and two children are Ready.
+- Active matrix anchors are P5 summary row 851, registry row 3164 and completed
+  hazard evidence 3177-3191; matrix and Active Index agree.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch: `master`; observed HEAD:
-  `33036b56e94884722f326579c1a6f1862d72a1a9`
-  (`Reconstruct mining implementation handoff`).
-- Unstaged tracked changes before this handoff refresh are exactly:
+- Branch `master`; observed HEAD
+  `e632e071af89a80042dda0a92e781227cca81325`
+  (`Close mining leaf and route map hazards`).
+- Unstaged tracked files are exactly:
+  - `tasks/lessons-archive/migration/data-config-import-export.md`
   - `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`
   - `tasks/lessons-archive/workflow/repository-boundaries-02.md`
   - `tasks/lessons.md`
   - `tasks/migration-active.md`
-- This handoff is the expected fifth tracked modification after replacement;
-  the index is empty and there are no untracked files.
+  - this handoff after replacement
+- The index is empty and there are no untracked files.
 - Tracked, staged and untracked Legacy `.cs` gates are empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch: `main`; HEAD:
-  `3f76a57b2059e6a43f2edf1f31b8430a20a347a4`
-  (`Complete P6 Mine and Rubble lifecycle`).
-- Worktree and index are clean; there are no untracked files. Tracked, staged
-  and untracked Go `.cs` gates are empty.
-
-## Mine closure evidence
-
-- Legacy tracing covered Mines settings, MineInfo, Map.CreateMine,
-  HumanObject.Attack/Mining/GetMinePayout/CompleteMine, PlayerObject inherited
-  attack/quest behavior and MapObject/SpellObject spawning.
-- Production implements parser/export/schema, ordered map zones, attack and
-  mounted gates, exact random ordering including zero/unit bounds, strict spot
-  regeneration, Rubble spawn/refresh/effect/expiry, payout/quest fanout,
-  persistence and restart boundaries.
-- Luna terminal reviewer `01a03ab3-90e8-7de3-8f63-135618c86d34` found mounted
-  spell coercion, accumulated quest-notification and degenerate-RNG issues.
-  After fixes, its current-diff follow-up returned `No findings`; the thread is
-  closed.
-
-## Verification ledger
-
-All commands below ran in the Go root and exited 0 after the final fixes:
-
-- touched compile:
-  `go test ./cmd/crystal-server ./internal/legacyworld ./internal/protocol ./internal/worlddata -run '^$'`
-- focused repeated: Mine/session `-count=20`, legacyworld/parser/export
-  `-count=20`, protocol MapEffect/ordinals `-count=20`, worlddata schema
-  `-count=20`.
-- focused race: the same four package groups at `-count=5`.
-- fresh integration: `go test ./... -count=1 -timeout=30m`.
-- `go vet ./...` and `go build ./...`.
-- fresh full race: `go test -race ./... -count=1 -timeout=45m`.
-- `gofmt -d` on all fifteen owned Go files and `git diff --check` produced no
-  output; exact status and all six C# gates were reviewed after tests.
+- Branch `main`; observed HEAD
+  `f0f5e93e48ba2e79c3ce0a72e1cba61fad802b8d`
+  (`Complete P5 map hazard lifecycle`).
+- Tracked, staged and untracked status are clean. All three Go `.cs` gates are
+  empty.
 
 ## Active leaf and protected work
 
-- Active leaf: `SPELL-P5-MAP-HAZARD-001`.
-- Candidate hazard ownership is limited to bounded worlddata/legacyworld map
-  schema and tests, `cmd/crystal-server/world.go`, new `map_hazards.go`,
-  `map_hazards_test.go` and one authenticated session test. Exact filenames and
-  source-order behavior must be frozen in the Active Index before code.
-- Committed Mine closure, every earlier migration commit and every C# file in
-  both repositories remain protected.
+- Active leaf: `REGEN-P5-HUMAN-001`.
+- `SPELL-P5-MAP-HAZARD-001` is committed at
+  `f0f5e93e48ba2e79c3ce0a72e1cba61fad802b8d`. Schema/import retains
+  `FireDamage`/`LightningDamage`; runtime covers loaded-map schedules,
+  SpellObjects, exact RNG/order/timers, MAC Struck, packets and restart reset.
+- Live account identity, real transient `@LOGIN`, online grant/revoke,
+  removal/reused IDs, completed-death Brown time, revival timestamp/double
+  health fanout and deterministic session-loop isolation are covered.
+- Regen tracing has begun against `HumanObject.ProcessRegen`, its Settings
+  weights and existing Go Player/Hero/Heal/Vamp/potion surfaces. Its exact Go
+  write set is deliberately not open until the bounded call-site trace closes.
+- The committed hazard files and all earlier migration evidence remain
+  protected; no regen code has been written.
+
+## Verification ledger
+
+- Touched compile command for server/auth/legacyworld/worlddata exited 0.
+- Focused hazard/schema/auth/session command exited 0 at `-count=20`; the same
+  packages/regex under `-race -count=5` exited 0.
+- `TestSessionMapHazardSpawnDamageRemovalAndRestart -count=100` exited 0 after
+  isolating the connection loop. Before that fix, one fresh full test exited 1
+  at this test (`Next(12000)` displaced the expected MAC unit draw); the stack
+  proved session read-loop interference, not a production behavior failure.
+- Final fresh `go test ./... -count=1`, `go vet ./...`, `go build ./...` and
+  `go test -race ./... -count=1` all exited 0 after the correction.
+- Initial Luna `01a03b34-6c8b-7dc2-a65b-6113f56059a7` found Brown-time loss.
+  A broad replacement reviewer was shut down after repeated waits without a
+  report; bounded replacement `01a03b74-25f3-7b62-b826-21292ae36739` reviewed
+  the final death/live-authority diff read-only and returned `No findings`.
+- No `go`/`crystal-server` process or active subagent remains. At 08:38 after
+  compaction, separately rooted Legacy and Go calls verified HEAD/status/index/
+  untracked state and all six C# gates; `tasks/check-migration-control.sh`
+  exited 0. One earlier mixed-root audit was discarded in full.
 
 ## Exact recovery sequence
 
-1. Verify both repositories separately, including exact status and six C#
-   gates; run `tasks/check-migration-control.sh` in Legacy.
-2. Read only Go matrix rows 851, 3162 and 3206-3231; search the lessons archive
-   with `SPELL-P5-MAP-HAZARD-001`, MapLightning, MapLava, hazard, timer and RNG.
-3. Trace bounded Legacy/Go entry points, freeze exact hazard filenames and
-   source-order acceptance details in the Active Index, then begin code.
+1. Read this handoff back, verify its limits, rerun the final diff/status/C#
+   pre-commit gates, and commit only the current control/archive files in Legacy.
+2. Verify that Legacy commit ID and both clean worktrees.
+3. Resume `REGEN-P5-HUMAN-001`; finish the bounded call-site trace, freeze the
+   exact Go file set in Active Index, then begin implementation.

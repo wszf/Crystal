@@ -171,3 +171,10 @@
 - Root cause: adjacent imported flags were used as a proxy for the complete Legacy schema-to-runtime contract.
 - Prevention: audit each configuration field across Legacy storage order, Go parser, exported schema, runtime scheduling and session consumer before classifying support; do not infer a numeric authority from a neighboring boolean.
 - Verification: `DISC-P5-CLOSURE` registered one finite map-hazard child owning both damage fields, parser/export round trip, runtime timer/RNG semantics and authenticated packet/HP evidence.
+
+### 2026-08-26 — Map hazard player RNG order follows every Teleport remove/add
+
+- Symptom: the first Go hazard order tracker advanced only when `MapIndex` changed, so a same-map teleport left the player in the old hazard iteration position.
+- Root cause: the implementation followed `PlayerObject.Teleport`'s `mapChanged` branch instead of tracing the inherited `MapObject.Teleport`, which always calls `CurrentMap.RemoveObject(this)` and `CurrentMap.AddObject(this)` even when the map is unchanged.
+- Prevention: distinguish ordinary cell movement from remove/add lifecycle; preserve `Map.Players` append order on every successful teleport or movement transition, not merely cross-map changes.
+- Verification: both Go teleport paths now record player append order unconditionally, while ordinary movement changes only cell order; the focused test proves reverse hazard iteration is stable after a step and reverses after same-map teleport/re-entry.

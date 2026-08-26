@@ -31,7 +31,7 @@ duplicate.
 - Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
 - Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
 - Strengthening through MAP-detail recovery: 新 Session 首调用仍用 `git -C` 混读双仓且输出截断；整调用作废后，文档/status/C# 门禁按单仓小段重跑。恢复命令发送前必须机械拒绝 `git -C`、对侧根和超限区段；只采用单仓、零退出、完整输出。
-- P6 item recovery recurrence: 本 Session 首个状态调用再次用 `git -C` 混读双仓；整次作废后 HEAD/status/六项 C# 门禁按仓重跑。发送前字面拒绝 `git -C` 与对侧根。
+- P6 hazard/compaction recurrence: 恢复、主审与本次 compaction 安全门仍反复混仓，整调用均作废并按仓重跑。发送前逐项按根分组 argv，拒绝 `git -C`、对侧根/相对目录；即使只是 status/C# 核验或语义对照也不能例外。
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -49,7 +49,7 @@ duplicate.
 - Strengthening after utility-command hard-gate process audit: 首个进程检查因使用临时文件后 `rm -f` 被执行策略在启动前拒绝；第二个正则又匹配了自身命令行中的诊断文本，两个结果均作废。随后改用 `ps -Ao pid=,comm=,args=` 并只按 `comm` 精确匹配 `go`/`crystal-server`，零退出确认无残留进程。进程审计不得依赖临时文件清理，也不得用会命中自身正则或输出文案的全文匹配。
 - Strengthening after Goal model audit: 已有上述禁令后，Codex 配置验证仍再次使用 `mktemp` 后 `rm -f`，在启动前被策略拒绝；随后又凭记忆在错误数据库查询 `thread_goals`、并猜错时间戳列名，导致多次非零和部分输出作废。根因是没有在执行前把旧 lesson 转换成当前命令的机械检查。以后只读诊断默认用 shell command substitution 捕获 stdout/stderr，不创建需清理的临时文件；数据库先 `find` 定位当前 `$CODEX_HOME`，再用 `sqlite_master`/`pragma_table_info` 独立零退出确认库、表和列，每个尚未确认的查询必须单独调用。此次已用无临时文件的 `app-server --strict-config ... </dev/null` 验证 `gpt-5.6-sol/ultra` 退出 0，并从 Codex Box 的实际 `goals_1.sqlite`/`state_5.sqlite` 零退出回读 Goal 与线程模型状态。
 - Strengthening after Goal pause audit: 已有上述 schema 防猜规则后，首次 `pragma_table_info` 投影仍直接使用未引用的 SQLite 关键字列 `notnull`，两个查询退出 1，整次输出作废。以后 schema 勘察第一步固定为独立的 `SELECT * FROM pragma_table_info(...)`；完整回读真实列名后才允许自定义投影，关键字列必须引用。随后已分别零退出回读 `thread_goals` 与 continuation-deferral schema，再查询指定 Goal。
-- Strengthening after utility-command main review: 同一轮连续把 `--glob` 放到 `rg --` 之后、使用未验证 shell glob，并把不存在的目录加入搜索；相关调用均作废后按现有路径重跑。每次 `rg` 必须按固定 argv 模板构造：所有选项与 `-e` 在前，单个 `--` 居中，已验证路径在后；发送前拒绝含 `-- --glob` 或用 `|| true` 掩盖语法/路径错误的命令，只有事先声明“零匹配即有效答案”时才允许后者。
+- Strengthening through MAP hazard review: `--glob` 已多次被放到 `rg --` 之后，本次又复发并使整次调用作废。每次必须按固定 argv 模板构造：所有选项/`--glob`/`-e` 在前，单个 `--` 居中，已验证路径在后；发送前机械拒绝 `-- --glob`，且只有事先声明“零匹配即有效答案”时才能处理 exit 1。
 - Strengthening after P1 matrix reconciliation: 用记忆中的整句搜索实际跨行的 matrix prose 得到空行号，随后把负数范围交给 BSD `sed` 并 exit 1；恢复审计又把预期可为零的 archive `rg` 裸放在 `set -e` 下，并在 Go 定位中使用未引用 shell glob。相关调用均已作废并以稳定单行片段、显式接收 `rg` 退出 0/1、已确认精确路径重跑。不得对空搜索结果做算术，不得把“零匹配”或“glob 恰好命中”当成 argv 已验证。
 - Strengthening after `CFG-P1-CONTRACT-001` tracing: 查找 Legacy startup consumers 时再次把可能零匹配的 `rg` 裸放在 `set -e` 调用中，整次零输出结果已作废；随后先声明零匹配有效、显式接收退出码 0/1，并扩大到已验证的 `.cs` 路径后定位真实 `Server.MirForms/Program.cs` 入口。凡搜索“可能不存在的限定写法”必须在命令成形时就使用 0/1 分支，不能等退出 1 后补救。
 - Strengthening after `LOC-P1-CATALOG-001` discovery: Active Index 将 `server_text_catalog*.go` 列为允许新建文件，主线程却在枚举只返回现有 localization 两文件后仍把这两个未来路径交给 `wc`，调用退出 1 且整次输出作废。清单中的 write authority 不等于文件已存在；每个候选必须以本次 `rg --files` 结果分类为 existing/new，只有 existing 才能进入读取参数。
@@ -69,7 +69,7 @@ duplicate.
 - Strengthening after P1 inventory insertion: 一次四-hunk matrix 补丁因旧段落物理换行与草稿不一致而整体失败；随后已独立确认没有部分写入，再把新段插入、P1 单行精确替换和两个小 prose hunk 分开发送并逐项 `git diff --check`。长表插入与陈旧 prose 修订不得共用一个补丁事务；先复读每个唯一锚点，失败后先查 status/目标标记再重试。
 - Strengthening after `LOG-P1-CATEGORY-001` wiring: 一个三-hunk 主文件补丁因其中 `stage = stageGame` 上下文未匹配而整体失败；随后 handoff 刷新又把只存在于 Active Index 的 ownership 正文当成 handoff 锚点。两次均确认零部分写入后按目标文件实际物理行拆成独立 hunk。跨越数千行或相邻控制文档的接线都必须逐文件复读并拆事务，不能因相似语义而复用锚点。
 - Strengthening after NET closure: 单行日志补丁夹带不连续的陈旧上下文而失败；确认零写入后复读并用最小 hunk 成功。不得把记忆中的远端行拼进单行补丁。
-- Strengthening through MAP light: 跨文件长补丁因尾部括号不符被拒；独立确认零写入后拆成三个精确 hunk 并编译通过。多文件与长函数替换不得共用 patch transaction。
+- Strengthening through MAP hazard: 跨文件补丁因陈旧对齐被拒且未 fail-fast；非唯一 `cfg` hunk 又落入错误测试并伪通过。证据均作废后按文件/唯一函数锚点拆事务并回读落点。命令链必须 `set -e`，测试通过不能替代物理行核验。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -84,7 +84,7 @@ duplicate.
 - Symptom: helper 不存在、receiver 遗漏、返回值数量错误、字段或常量名称猜错。
 - Root cause: 依据相似模块、Legacy 名称或“应该对称”推断 Go API。
 - Prevention: 先读取声明、receiver、参数顺序、返回值、领域类型和包级符号，再接线。
-- Verification: 新调用接入后立即运行包级只编译门禁；编译器已分别拦截猜测的 `worldMagic.Spell`、`MarketStatusSold`、`Guild.Index` 和错误 bool 返回，复读真实声明后定向测试通过。
+- Verification: 新调用接入后立即运行包级只编译门禁；编译器已分别拦截猜测的 `worldMagic.Spell`、`MarketStatusSold`、`Guild.Index`、`boolPointer` 和错误 bool 返回，复读真实声明或改用局部值后定向测试通过。
 - Strengthening through P6: 编译门禁先后拦截猜测的 `RentalInformation`、错误 `ParseChatPayload` arity，以及不存在的 `ParseUserLocationPayload`/`ParseObjectAttackPayload`/`ServerQuestChanged`；均回读真实声明后修正并重测。测试 API 也必须先读完整类型、返回值和所有权。
 
 ### 2026-08-21 C06 — 行为判断前先通过 Go 语法、类型和 vet 门禁
@@ -92,7 +92,7 @@ duplicate.
 - Symptom: 未使用变量、自赋值、类型宽度、多返回值或复合字面量错误阻止行为测试。
 - Root cause: 一次写入过多逻辑，在编译失败时仍试图分析生产语义。
 - Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；显式转换不同领域类型，再进入行为测试。
-- Verification: 最小编译、定向测试和 `go vet` 分层通过。
+- Verification: 最小编译、定向测试和 `go vet` 分层通过；hazard authority 测试曾用 `%v` 打印函数值并被测试期 vet 拦截，改为显式 nil/presence 字段后重跑通过。
 - Strengthening through Mine review: 既有 NET/MAP 批次曾漏改消费者/import；本批 group-quest 三个嵌套 literal 漏一层 `}`。均只作 compile finding，复读最小范围修正并在行为测试前通过 touched compile；接口或复合 literal 每个小 hunk 后必须立即 gofmt/compile。
 
 ### 2026-08-21 C07 — 全量、race 和环境失败必须按实际栈归因
@@ -137,7 +137,7 @@ duplicate.
 - Symptom: 手工 tick 前 session loop 已移动、攻击、刷新状态或消费随机数。
 - Root cause: 停止 world ticker 被误认为同时停止连接维护循环和其他实体 AI。
 - Prevention: 冻结 ticker、session loop、独立实体计时和全局时间源；必要时等待 goroutine 完全退出。
-- Verification: 重复/race 运行只出现人工推进产生的事件和随机调用。
+- Verification: 重复/race 运行只出现人工推进产生的事件和随机调用；本次 hazard full gate 捕获 session read-loop 在 world ticker 停止后仍调用 `world.tick` 并额外消费 `Next(12000)`，测试改为在同一 world 锁内调用目标 create/process helper、恢复远期 schedule 后再解锁，单测 count-100 通过。
 
 ### 2026-08-21 C13 — 延迟动作必须区分 admission、snapshot、impact 和后续 tick
 
@@ -295,5 +295,5 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
-- Strengthening through P6 shout recovery: handoff 的 heading/field schema 必须从检查脚本逐字复制；本轮又把 Active 字段放错章节而失败。写前先复制 schema 并精确回读。
+- Strengthening through MAP hazard routing: 已知 handoff heading 是可执行 schema 后仍把 `## Active leaf and protected work` 改成自然语言，control gate exit 1；立即恢复精确标题并重跑通过。任何 handoff 重写前先从检查脚本复制固定 heading/field，禁止润色。
 - Strengthening after admin-item hard gate: 增补重复 C01 事故使 active lessons 超过 51200 bytes；合并同类复发、保留可执行规则并重跑 control gate，而非继续追加事故日志。

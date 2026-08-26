@@ -606,3 +606,10 @@
 - Verification: 命令零退出且所有路径属于同一根；任一读取失败、非零退出或混合根调用时，丢弃该调用的全部输出（包括前面成功的片段），不得用于实现、测试归因或文档。 本次 BaseStats 审查又在 Go workdir 的只读调用中误带 Legacy `Shared/Data/Stat.cs`，整次输出已丢弃并按两仓分别重跑。本轮跨仓库 status 审计因混入另一根路径作废，随后已拆成两次单仓调用重跑；本批一次 Legacy workdir 混入 Go 文件路径的只读调用同样整体作废，随后按仓库拆开重跑；本轮 Legacy 方向核对命令再次混入 Go 相对路径，整次输出作废，随后按仓库边界重跑。 本轮一次 Legacy 读取调用误附 Go 相对路径，整次输出再次作废并已拆分重跑；一次委派消息误将已选 AI=8 写成 AI=80，相关 AI=80 tracing 已明确丢弃并按 AI=8 重做；本轮两次继续勘察时又把 Legacy lesson/archive 路径或 Go 源码路径混入对侧 workdir，相关调用输出均作废，随后已按仓库分别重跑。 本 Session 首次恢复读取又在 Legacy workdir 的同一命令中加入 Go migration-matrix 绝对路径；整次约 8 万 token 输出已作废，并按两仓独立调用重新读取。 本批 Notice 勘察又在 Go workdir 的同一读取中附带 Legacy `Server/Settings.cs`，整次输出立即作废，随后分别在 Go 与 Legacy 根重跑并只采用独立结果。
 - Mine-session recurrence: the first recovery status command again used `git -C` to mix both repositories; the entire output was discarded, and branch/HEAD/status plus all C# gates were rerun in independent repository-local calls.
 - Verification: subsequent startup, matrix, source, status and C# calls used one verified root each and exited zero.
+
+### 2026-08-26 — Hazard world patches must separate declaration and constructor anchors
+
+- Symptom: one four-hunk `world.go` patch failed because the remembered constructor alignment did not match the formatted source, even though the three declaration anchors were otherwise current.
+- Root cause: independent struct/type/constructor edits were bundled behind one stale whitespace-sensitive hunk instead of being applied from separately reread physical ranges.
+- Prevention: split declarations, runtime structs and constructor literals into independent minimal patch transactions after reading each exact range; a semantic match is not a physical patch anchor.
+- Verification: the failed transaction left no partial hazard fields; four independently anchored patches then applied, `gofmt` and `git diff --check` exited zero, and touched-package compile passed.

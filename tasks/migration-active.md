@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-26 05:50 (Asia/Singapore)
+Last verified: 2026-08-26 08:33 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go
 `docs/migration-matrix.md` remains the detailed status/evidence authority. Do not
@@ -39,55 +39,63 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `SPELL-P5-MAP-HAZARD-001`
-- Status: `Active`; P5 is scope-frozen with eight of eleven children Complete,
-  this one Active and two Ready. It is dependency-ready because
-  `MAP-P4-LOAD-001` and the shared P5 SpellObject/combat authorities are
-  Complete.
-- Outcome: migrate the finite configured `MapLightning=202` and `MapLava=203`
-  schema, creation schedules, random location/damage, SpellObject ticks,
-  Observer exemption, player damage notifications and removal lifecycle.
-- Go matrix anchors to read: only P5 summary row 851, this registry row 3162 and
-  completed Mine evidence 3206-3231; never the full matrix or another phase.
-- Legacy read authority: bounded map Lightning/Fire serialized fields and map
-  creation/process entry points, the concrete MapLightning/MapLava SpellObject
-  implementations and only directly invoked RNG/timer/damage/broadcast helpers;
-  every C# file is read-only.
-- Go write authority: candidate existing schema fields/tests in
-  `internal/worlddata/world.go`, `internal/legacyworld/database.go` and bounded
-  export/map-schema tests; bounded callsites in `cmd/crystal-server/world.go`;
-  new `cmd/crystal-server/map_hazards.go`, `map_hazards_test.go` and one
-  authenticated session test. Freeze the exact filenames after tracing and
-  before code; no other file is owned without revising this index.
-- Required gate: Go-only parser/export round trip; all Legacy Lightning/Fire
-  gates; strict schedule/tick/removal boundaries; exact RNG order and damage;
-  self/observer/Observer-mode packet and HP transcript; restart semantics;
-  touched compile/count-20/race-count-5, diff/status and six C# gates.
-  Integration/full-race are due immediately for shared schema/ticker/damage.
-- Forbidden scope: unrelated player spells, monster AI, conquest decorations,
-  generic map/combat redesign, another P5 child and every C# write.
+- Leaf ID: `REGEN-P5-HUMAN-001`
+- Status: `Active`; P5 is scope-frozen with nine of twelve children Complete,
+  this one Active and two Ready. Combat, configured BaseStats/recovery stats and
+  P6 basic potion admission are Complete dependencies.
+- Outcome: migrate `HumanObject.ProcessRegen` for Player/Hero natural HP/MP,
+  normal-potion pools, `HealAmount`/`VampAmount`, exact timers/formulas,
+  attack/Struck/poison resets, notifications and runtime reset semantics.
+- Go matrix anchors to read: only P5 summary row 851, this registry row 3164 and
+  completed hazard evidence 3177-3191; never the full matrix/another phase.
+- Legacy read authority: bounded `HumanObject.ProcessRegen`, `CanRegen`,
+  directly invoked HP/MP/indicator/group helpers, Player/Hero potion producers,
+  Heal/Vamp producers, attack/Struck/poison reset sites and the two Settings
+  weights; every C# file is read-only.
+- Go write authority is not yet open: finish the bounded call-site trace and
+  replace this sentence with an exact existing/new file set before regen code.
+  Likely consumers are config, Player/Hero runtime, basic-potion session wiring,
+  existing Heal/Vamp ticks and focused tests; protected owners are read-only
+  until explicitly listed here.
+- Required gate: defaults/INI weights; exact Player/Hero timing/formulas/pools;
+  attack/Struck/poison resets; self/group/observer packet order; potion use,
+  logout/relogin/restart and authenticated production entry; touched compile,
+  count-20, race-count-5, diff/status and six C# gates.
+- Forbidden scope: new potion/spell admission, monster-only regen redesign,
+  another P5 child, generic combat refactor and every C# write.
 
 ### Protected Go ownership
 
-- Completed Mine/Rubble commit
-  `3f76a57b2059e6a43f2edf1f31b8430a20a347a4` and all earlier P1-P6 evidence
-  remain read-only; map loading and shared SpellObject/combat/item adapters may
-  be consumed but not redesigned.
+- Completed hazard commit `f0f5e93e48ba2e79c3ce0a72e1cba61fad802b8d`
+  and Mine/Rubble commit `3f76a57b2059e6a43f2edf1f31b8430a20a347a4`
+  remain read-only; earlier P1-P6 evidence may be consumed, not redesigned.
 
 ### Remaining acceptance work
 
-- [ ] Trace the finite Legacy call chain, search matching lessons archive
-  sections and freeze the exact Go write set/checklist before any hazard code.
-- [ ] Implement only missing map-hazard behavior and production-entry evidence.
+- [ ] Finish the finite Legacy/Go call-site trace and freeze exact Go files.
+- [ ] Implement only missing Human/Hero regen and production-entry evidence.
 - [ ] Run the leaf gate, obtain bounded review, commit and route the next
   dependency-ready child.
 
 ### Frozen behavior checklist
 
-- Registry contract is finite: schema/export, configured creation gates,
-  schedule/tick/removal strictness, location/damage RNG, Observer exemption,
-  player HP/wire fanout and restart boundary. Exact source-order details remain
-  closed to implementation until bounded tracing records them here.
+- Dead objects return before all timers. Natural regen uses inclusive
+  `now >= RegenTime`, always advances ten seconds, and independently computes
+  HP/MP base `int(Max*0.03F)+1` plus truncated recovery-stat/weight bonus.
+- Pot uses strict `now > PotTime`, advances 200ms and drains both saturated
+  `ushort` pools by `5+Level/10`; full HP/MP clears the corresponding pool after
+  the aggregate change. Heal uses strict 600ms and the pre-drain
+  `5+Level/10+HealAmount/10`; Vamp uses strict 500ms after its one-second arm.
+- Natural, Pot, Heal and Vamp contributions aggregate into one HP change and
+  one requested-amount `DamageIndicator`; MP changes once afterward. Preserve
+  private `HealthChanged`, group `ObjectHealth`, nearby indicator and
+  persistence order even when caps reduce the actual change.
+- `ProcessBuffs -> ProcessRegen -> ProcessPoison` order is observable. Accepted
+  melee/range/magic, every successful Attacked/Struck family and damaging
+  Green/Bleeding poison reset natural regen by ten seconds at the sampled time.
+- Player and Hero share formulas but retain distinct runtime identity and potion
+  producers. Pools/timers are runtime-only and reset on logout/relogin/restart;
+  durable HP/MP and consumed inventory remain persisted.
 
 ### P6 frozen child registry
 
@@ -121,15 +129,17 @@ accepted all nineteen children with no finding. Twelve are Complete and seven ar
 
 Independent Legacy auditor `01a036ed-ee8f-7a50-a042-f1d665f83627` confirmed
 211 mapped/45 default AI ordinals and both map-hazard producers. Independent
-reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the eleven-child
-registry with no remaining finding. Eight children are Complete, one is Active and two are Ready.
+reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the original eleven
+children. Hazard Struck tracing then proved one finite omitted regen child;
+nine are Complete, one is Active and two are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `SPELL-P5-PLAYER-CATALOG-001` | Complete | — | existing committed evidence | 130-ID partition / 109 user spells |
 | `SPELL-P5-INTERNAL-EFFECT-001` | Complete | mapped monster owners | existing committed evidence | 16 internal effects |
-| `SPELL-P5-MAP-HAZARD-001` | Active | map load | worlddata/legacyworld schema + bounded server hazard files/tests | parser/export + timers/RNG/session/race |
+| `SPELL-P5-MAP-HAZARD-001` | Complete | map load | accepted hazard schema/runtime/session evidence | parser/export + timers/RNG/session/race |
 | `COMBAT-P5-HUMAN-HERO-001` | Complete | spell/state consumers | existing committed evidence | target/defence/death/relogin |
+| `REGEN-P5-HUMAN-001` | Active | combat + P1 weights + P6 potion pools | exact write set pending bounded trace | natural/Pot/Heal/Vamp timers, resets, packets, persistence/race |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
 | `MONSTER-P5-BASE-FAMILY-001` | Ready | mapped core | monster_ai/world + focused tests | 46 ordinals + target-kind/race |
@@ -227,7 +237,7 @@ broad unnamed scope.
 | `DISC-P2-CLOSURE` | P2 | Complete | 8 finite children: 5 Complete + 3 unfinished |
 | `DISC-P3-CLOSURE` | P3 | Complete | 11 finite children: all Complete |
 | `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
-| `DISC-P5-CLOSURE` | P5 | Complete | 11 finite children: 8 Complete + 3 Ready |
+| `DISC-P5-CLOSURE` | P5 | Complete | 12 finite children after concrete regen finding: 8 Complete + 4 unfinished |
 | `DISC-P6-CLOSURE` | P6 | Complete | 19 finite children: 7 Complete + 12 unfinished at freeze |
 | `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |

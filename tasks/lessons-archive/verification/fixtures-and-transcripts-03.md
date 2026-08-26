@@ -780,3 +780,31 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: the implementation followed `HumanObject.Attack` without the reachable `PlayerObject`/mount override, and failure returns rebuilt an empty result instead of returning accumulated side effects; degenerate random bounds were initially treated as “no draw.”
 - Prevention: trace inherited overrides before the shared body; return the accumulated transaction result after any later failure; explicitly model zero/unit random calls and clamp only the source-clamped negative ore range.
 - Verification: mounted mining now broadcasts `Spell.None`; overlapping quest diversion retains `GainedQuestItem`/message/quest update after the next allocation fails; zero/unit mine draws retain source order. Focused count-20, race count-5, fresh full normal/race, vet/build passed, and Luna follow-up `01a03ab3-90e8-7de3-8f63-135618c86d34` returned `No findings`.
+
+### 2026-08-26 — Hazard restart fixtures must persist values within real derived caps
+
+- Symptom: the first authenticated map-hazard restart test persisted HP 90 after manually raising only the runtime maximum to 100, then expected 90 after relogin; production bootstrap correctly rebuilt the level-one maximum as 18 and clamped the character.
+- Root cause: the fixture replaced runtime vitals without installing a matching durable base-stat profile, so its restart expectation described an impossible persisted character rather than Legacy-derived state.
+- Prevention: restart tests for HP/MP damage should either seed a real durable stats profile or use the authenticated character's production-derived caps; never treat a session-local maximum override as restart authority.
+- Verification: the test now damages the real level-one 18 HP to 8, persists 8, relogs through production bootstrap and observes 8 with no runtime hazard objects; the focused authenticated test passes.
+
+### 2026-08-26 — Map-hazard Observer exemption needs live account authority, not `IsGM`
+
+- Symptom: terminal main review found the hazard tick checked `IsGM && ObserverMode`, so transient `@LOGIN` promotion would incorrectly gain the exemption; the first fix then froze account-admin state at login, and its first authenticated test used `ReplaceAccounts`, replacing the captured identity so a supposed online grant was invisible.
+- Root cause: command permission (`PlayerObject.IsGM`) and hazard admission (`player.Account.AdminAccount`) were collapsed even though Legacy snapshots the former in the constructor but retains a live shared AccountInfo reference for the latter; replacing an entire fixture store is not equivalent to mutating that object.
+- Prevention: capture a race-safe authority handle to the exact account identity and mutate fixtures through the real operator patch path; transient GM changes only `IsGM`, operator grant/revoke updates the captured object, removal retains it, and reused IDs create a distinct object.
+- Verification: focused auth/unit/authenticated-session tests now drive real `@LOGIN` promotion and cover ordinary account admin, live grant/revoke, removal and reused-ID identity independently; corrected count-20 and race-count-5 commands exit zero.
+
+### 2026-08-26 — Hazard death timestamps must distinguish completed death from revival
+
+- Symptom: terminal Luna review found lethal map-hazard damage called the shared death helper without assigning `BrownUntil`, while the first proposed fix assigned it before the helper and would also mark a successful revival-ring path.
+- Root cause: the Go death helper returns the revival transcript without exposing a separate outcome flag, and the existing combat caller's pre-helper assignment was treated as authority instead of tracing the early return in Legacy `PlayerObject.Die`.
+- Prevention: after the death helper, assign the death timestamp only when HP remains zero; do not infer pre/post-helper placement from another Go caller when Legacy has an early revival return.
+- Verification: the focused hazard test now asserts a completed death receives the exact sampled time and a successful revival retains its prior timestamp; focused count-20, race count-5, and fresh full normal/race, vet and build gates exit zero.
+
+### 2026-08-26 — Hazard session RNG must isolate the connection read loop too
+
+- Symptom: a fresh full test intermittently expected the impact-time MAC unit draw but observed a second hazard-schedule `Next(12000)`; isolated count-100 reproduced the failure.
+- Root cause: stopping the world ticker did not stop the authenticated connection loop's own pre-read `world.tick(time.Now())`; exposing a zero hazard schedule after releasing the world lock allowed that loop to consume deterministic RNG before the manual impact.
+- Prevention: session transcript tests may use focused create/process helpers when a separate unit test owns world-tick ordering; invoke them under the world lock and restore a far-future schedule before unlocking so the connection loop cannot enter the deterministic RNG window.
+- Verification: the spawn/damage/removal session test now keeps schedule mutation and focused helper calls in one lock domain, retains production packet delivery/restart evidence, and passes isolated count-100; focused count-20/race-count-5 and fresh full normal/race, vet and build gates all exit zero.
