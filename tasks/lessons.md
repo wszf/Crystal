@@ -11,27 +11,14 @@ matching sections. Keep active lessons within the recommended limit of 50 KB
 or 500 lines. Strengthen an existing canonical lesson instead of adding a
 duplicate.
 
-### 2026-08-21 C01 — 每次工具调用必须保持单仓库路径闭包
+### 2026-08-21 C01 -- Single-repository path closure per tool call
 
-- Symptom: Go/Legacy 路径混入同一调用，出现部分成功输出、尾部失败或错误目标。
-- Root cause: 把工作目录、仓库根和参数列表分开考虑，并复用了另一仓库的路径。
-- Prevention: 启动恢复也无例外：一次调用只属于一个仓库；先核验 `git rev-parse --show-toplevel`，参数只允许该根下已存在的路径；切换仓库必须新开调用；不得在当前 workdir 中用 `git -C`、绝对路径或脚本参数指向另一仓库；不得以只读、并行或减少往返为例外。
-- Verification: 命令零退出、输出完整且所有路径属于同一根；失败、截断或混仓调用的全部输出立即作废并按仓重跑。历史实例已原样归档到 workflow archive，不再在 active 中重复事故日志。
-- Strengthening after localized-welcome recovery: compact 后首个启动读取再次把 Go matrix 绝对路径放入 Legacy 调用；该调用全部输出已作废，随后两仓 status、文档和 matrix 均以独立 workdir 重跑，并以重建 handoff 为恢复 authority。
-- Strengthening after TestServer/GameMaster selection: compact 硬门恢复时又在单次启动审计中通过 `git -C` 混读两仓；该调用全部输出已作废。后续只在对应 `workdir` 内使用相对路径，并分别重跑 Legacy 文档/status/C# 门禁与 Go matrix/status/C# 门禁后才刷新 handoff。
-- Strengthening after Superman recovery: 连续两次在 Go `workdir` 的上下文读取中追加 Legacy 相对路径，导致前段成功输出与尾部路径失败混杂；两次调用全部作废。此后构造命令前先把每个路径按仓库分类，命令文本只允许出现当前 `git rev-parse --show-toplevel` 下的相对路径；跨仓证据必须拆成相邻但独立的工具调用，并分别要求零退出后才可采用。
-- Strengthening after Observer recovery: 新 Session 首次门禁读取又在 Legacy `workdir` 中追加 Go matrix 路径，整次 9 万余 token 输出已作废；随后 `agents.md`、三份 Legacy 文档、双仓 status/`.cs` 门禁与 Go matrix 全部按单仓调用重跑。恢复时还发现 handoff 声称 Go clean、实际已有 5 tracked + 2 untracked Observer 文件，因此在重建 handoff 前停止实现和测试。
-- Strengthening after ALLOWTRADE recovery: compact 后首个恢复读取再次在 Legacy `workdir` 中拼入 Go matrix 绝对路径，约 9.7 万 token 的整次输出已作废；随后按仓库分别完整重读启动文档与 matrix。恢复审计又发现 handoff 声称 Go clean、实际已有 3 tracked + 3 untracked ALLOWTRADE 文件，因此在补写并回读准确 handoff 前继续停止实现和测试。以后恢复命令必须先按仓库写成两个独立命令块，再逐块调用，禁止在一个 shell 字符串中“顺便”读取对侧文件。
-- Strengthening after `@TIME/@ROLL/@MAP` recovery: compact 后首个启动读取再次在 Legacy `workdir` 中同时 `cat` Go matrix，整次约 9.8 万 token 输出已立即作废；随后 Legacy 的 `agents.md`/三份任务文档与 Go matrix 均按独立 `workdir` 分块完整重读。恢复审计还发现旧 handoff 声称 Go clean、实际已有 4 tracked + 2 untracked utility-command 文件；实现和测试继续停止到准确 handoff 写入、回读并与双仓状态核对完成。本次接续又在 Legacy 启动命令末尾附加绝对 Go `find`，因此整次输出再次作废；恢复模板今后不得包含任何“定位对侧文件”的尾命令，第二仓的定位、读取和审计必须从新的工具调用开始。
-- Strengthening after utility-command compact continuation: 恢复命令再次把绝对 Go matrix 搜索拼进 Legacy 文档读取，导致整次 10 万余 token 输出作废。以后启动阶段先只执行 Legacy 固定清单并结束调用；收到其零退出结果后，才在新的 Go `workdir` 调用中读取 matrix，禁止用一条复合 shell 命令跨越仓库边界。
-- Strengthening after 18:24 utility-command rollover: 本次接续仍在 Legacy 启动读取中直接 `cat` 绝对 Go matrix，整次 10 万余 token 输出再次作废；随后不仅按仓拆开，还把超过输出上限的 matrix 区段进一步缩小重读到无截断。恢复模板必须物理拆成两个独立工具调用，且大文件必须按可完整返回的小段读取；“命令零退出”不能替代“输出完整可见”。
-- Strengthening after fourth utility-command compact: 本次恢复首调用又在 Legacy 文档读取末尾追加了对侧 Go 根的绝对 `find`，整次输出按 C01 作废；随后先以纯 Legacy 调用完整重读启动文档，再以纯 Go 调用分块重读 3223 行 matrix。恢复时禁止在第一仓命令中承担任何对侧“定位”工作；若 matrix 区段发生输出截断，该区段也必须整体作废并缩小范围重读。
-- Strengthening after bounded-control recovery: 控制面已经明确禁止跨仓后，首次恢复调用仍把绝对 Go matrix 路径附在 Legacy 文档读取后，约 8 万 token 输出再次全部作废。随后已物理拆成 Legacy 启动/状态与 Go 状态/matrix 两组调用，并以三项指纹核对十二文件未变。以后发送恢复命令前必须先做“命令文本内是否出现另一仓根”的机械检查，不能只检查 `workdir`。
-- Strengthening after `DISC-P1-CLOSURE`: P1 版本勘察又在 Legacy `workdir` 的同一命令中加入 Go 的 `internal/config`/`cmd/crystal-server` 相对路径；compact 恢复首调用随后再次把绝对 Go matrix 附在 Legacy 启动读取末尾。两次整调用均已作废并按两仓独立零退出重跑。即使核对同一 setting 或启动 authority，也必须在发送前机械检查“命令文本只含当前根”，且 Legacy 启动调用必须物理结束后才能构造 Go 调用。
-- Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
-- Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
-- Strengthening through MAP-detail recovery: 新 Session 首调用仍用 `git -C` 混读双仓且输出截断；整调用作废后，文档/status/C# 门禁按单仓小段重跑。恢复命令发送前必须机械拒绝 `git -C`、对侧根和超限区段；只采用单仓、零退出、完整输出。
-- P6 hazard/compaction recurrence: 恢复、主审与本次 compaction 安全门仍反复混仓，整调用均作废并按仓重跑。发送前逐项按根分组 argv，拒绝 `git -C`、对侧根/相对目录；即使只是 status/C# 核验或语义对照也不能例外。
+- Symptom: a tool call mixes Go and Legacy paths, yielding partial output, a late failure, or evidence from the wrong target.
+- Root cause: workdir, repository root and argv were reviewed separately, or a cross-repository recovery template was reused.
+- Prevention: one call belongs to one verified root. Reject the command before sending if it contains `git -C`, the opposite root, or an opposite-root relative path; never compose a combined two-root “summary” command, and finish and read back the first repository call before constructing the second. Read-only/status/C#/compaction work is not exempt.
+- Verification: accept only zero-exit, complete output whose paths all belong to that root. Discard an entire failed, truncated or mixed-root call, including earlier successful fragments, and rerun per repository. Historical recurrences are preserved in `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
+- Regen compaction recurrence: the first hard-gate audit again mixed both roots and was discarded even though it exited zero. Independent Legacy and Go status/C# calls then exited zero, the durable handoff records the real dirty Go candidate, and the control check is rerun after this canonical compaction.
+- Regen review recurrence: a Go `workdir` command appended three Legacy source paths after a valid Go helper lookup; the entire mixed result was discarded and both queries were rerun separately. Source comparison commands must be drafted as two calls before either is sent, not extended in-place after the first repository argv is already valid.
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -58,7 +45,8 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` recovery: 已用 `rg` 定位真实声明在 `internal/protocol/packet.go` 后，读取命令仍追加猜测的 `codec.go` 并 exit 1；整次输出作废并只用已枚举路径重跑。定位结果必须先结束并回读，下一调用的每个读取参数只能来自该结果，禁止再补惯例文件名。
 - Strengthening after NET closure: 读取又猜了 `Shared/Packets`，且 `go build ./cmd/crystal-server` 在根生成未跟踪二进制。读取参数只取本轮枚举结果；证据构建用 `go build ./...`，status 必须识别并精确移除本批自产物。
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
-- Strengthening through P6 item reviews: Mine 恢复先猜不存在的源码/测试路径，又数次使用 shell glob；相关输出均作废并经 `rg --files`、目录参数 `rg --glob` 或精确路径重跑。未来文件清单、惯例名称和“刚见过的路径”都不是存在性证据。
+- Strengthening through P5 Regen: Mine 恢复先猜不存在路径，本次又把惯例 `combat.go` 附加到已知文件后使定位 exit 2；整调用均作废。每个显式路径必须来自当前 `rg --files` 零退出结果；否则只对已验证目录使用 `rg --glob`，禁止在有效 argv 尾部补猜测文件。
+- Strengthening during Regen Revelation audit: 主线程又在 Legacy 根的有效 `RevTime` 查询后追加 Go 相对路径，触发 zsh 未命中并污染整次调用。该结果已全部作废并按仓独立零退出重跑；跨仓语义对照必须预先写成两个物理调用，不能在首仓命令成形后追加另一侧搜索。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -70,6 +58,8 @@ duplicate.
 - Strengthening after `LOG-P1-CATEGORY-001` wiring: 一个三-hunk 主文件补丁因其中 `stage = stageGame` 上下文未匹配而整体失败；随后 handoff 刷新又把只存在于 Active Index 的 ownership 正文当成 handoff 锚点。两次均确认零部分写入后按目标文件实际物理行拆成独立 hunk。跨越数千行或相邻控制文档的接线都必须逐文件复读并拆事务，不能因相似语义而复用锚点。
 - Strengthening after NET closure: 单行日志补丁夹带不连续的陈旧上下文而失败；确认零写入后复读并用最小 hunk 成功。不得把记忆中的远端行拼进单行补丁。
 - Strengthening through MAP hazard: 跨文件补丁因陈旧对齐被拒且未 fail-fast；非唯一 `cfg` hunk 又落入错误测试并伪通过。证据均作废后按文件/唯一函数锚点拆事务并回读落点。命令链必须 `set -e`，测试通过不能替代物理行核验。
+- Strengthening at Regen compaction gate: 首次 handoff 补丁对同一路径同时使用 Delete/Add operation，被 `apply_patch` 整体拒绝；随后把独立 lesson 补丁串入复合命令，前段 handoff/lesson 已写入而尾段陈旧锚点失败，进程整体 exit 1。根因是把“替换整文件”和“多目标增量补丁”混成一个事务，并在未复读 C03 物理行前追加第二个 patch。以后整文件 replacement 单独完成并回读；每个 `apply_patch` 一次只承担一个逻辑目标，任何复合调用失败都要逐文件核对部分写入，再以当前物理行重跑。此次已回读 handoff/C01 落点；archive append 又留下 EOF 额外空行并被 `git diff --check` 拦截，已规范为恰好一个终止换行并独立通过 diff check。
+- Strengthening during Regen fixture closure: 两个测试补丁仍以非唯一 `world := newGameWorld()`/`world.loadItemInfos` 落入同文件更早用例；一个无声污染无关 NPC 测试，另一个把局部 helper 声明放错作用域并被 compile gate 拦截。两次均先移除错误落点，再用唯一 `func Test...` 锚点重写并回读 `rg` 行号；同文件重复 fixture 也必须按函数名锚定，不能把“测试文件已精确”误当成 hunk 唯一。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -109,6 +99,8 @@ duplicate.
 - Root cause: 人工夹具只建立持久数据，未复现登录、world enter、summon 或 bootstrap 生命周期。
 - Prevention: 优先复用现有 helper；按 seed→load→enter→summon 顺序建立状态；满足真实账号、角色和配置约束。
 - Verification: 先确认夹具到达目标生产入口，再断言行为和 transcript。
+- Strengthening through Human regen: dead-target range test 在 `world.enter` 前写 `HP=0`，却被真实 enter bootstrap 规范成默认满血，导致预期 reject 的 focused test 实际 accepted。需要测试死亡/低血量等 post-bootstrap runtime 状态时，必须在 enter 后于 world lock 内覆盖并回读；修正后的精确测试 exit 0。
+- Strengthening after terminal Regen review: visibility-snapshot regression test 在 `world.enter` 前安装 `EnemyGuildIDs`，真实 enter authority 随即把该投影重建为 nil，后续 map mutation panic。任何由 enter 同步的 guild/runtime 投影必须在 bootstrap 后于 world lock 内安装；修正后的五项 focused rerun exit 0。
 
 ### 2026-08-21 C09 — Go value-map 实体修改后必须显式写回并回读
 
@@ -138,6 +130,7 @@ duplicate.
 - Root cause: 停止 world ticker 被误认为同时停止连接维护循环和其他实体 AI。
 - Prevention: 冻结 ticker、session loop、独立实体计时和全局时间源；必要时等待 goroutine 完全退出。
 - Verification: 重复/race 运行只出现人工推进产生的事件和随机调用；本次 hazard full gate 捕获 session read-loop 在 world ticker 停止后仍调用 `world.tick` 并额外消费 `Next(12000)`，测试改为在同一 world 锁内调用目标 create/process helper、恢复远期 schedule 后再解锁，单测 count-100 通过。
+- Strengthening through Human regen: 新增周期性生产行为后，所有跨过其 Due 的旧 synthetic tick 和 partial-vitals bootstrap 都必须显式冻结该实体计时器；否则额外 HealthChanged 会污染包数并在 net.Pipe 未设 reader 时反压整个 shared world。bootstrap 返回后再设 timer 可能已经晚于 connection loop 的下一次 pre-read tick；非目标 session fixture 必须在启动 server 前用 player-enter hook 安装远期 timer，不能关闭或延迟真实 production regen。
 
 ### 2026-08-21 C13 — 延迟动作必须区分 admission、snapshot、impact 和后续 tick
 
@@ -230,6 +223,8 @@ duplicate.
 - Root cause: 直接覆盖整快照，或在错误 authority/锁域内判定。
 - Prevention: 明确字段 authority；分离锁；按 revision 定向合并并主动唤醒目标会话。
 - Verification: 跨会话测试核对权威存储、在线状态与通知；测试只读切片也必须经锁内 deep snapshot，禁止复制外壳后读取共享 backing array。
+- Strengthening after Human regen full race: session callback 捕获 live `*worldPlayer` 并在无锁下整值复制；新增 ticker 字段写入后，关系传送测试稳定触发 race。异步 callback 不得解引用捕获的 live entity；调用时必须通过 world snapshot helper 在锁内复制所需状态。改用 `playerRuntimeSnapshot` 后精确 race `-count=10` 通过，fresh full race 仍须重跑。
+- Strengthening after terminal Regen review: 锁内 `worldPlayer` 整值复制仍会让 Buffs、Flags 与 enemy-guild map 的 backing storage 逃逸；所有解锁后用于 ObjectPlayer 序列化的 runtime、map-transition 和 TownRevive 投影必须在锁内深拷贝这些可变集合。补齐普通/复活 transition 后，定向 count-20/race-count-5 与 fresh full race 均 exit 0。
 
 ### 2026-08-21 C25 — 导入导出和 round-trip 必须验证语义规范化
 
@@ -295,5 +290,6 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
-- Strengthening through MAP hazard routing: 已知 handoff heading 是可执行 schema 后仍把 `## Active leaf and protected work` 改成自然语言，control gate exit 1；立即恢复精确标题并重跑通过。任何 handoff 重写前先从检查脚本复制固定 heading/field，禁止润色。
+- Strengthening through Regen compaction: 已知 handoff heading 是可执行 schema 后，MAP hazard routing 曾改写 `## Active leaf and protected work`，本次又把 `## Go repository state` 润色为带后缀标题并遗漏唯一 `- Active leaf: \`` 字段；control gate exit 1。每次 handoff replacement 前必须先从 `tasks/check-migration-control.sh` 复制全部固定 heading/field，完成后先按精确字符串回读再运行 checker；已恢复两个 schema 项并重新门禁。
 - Strengthening after admin-item hard gate: 增补重复 C01 事故使 active lessons 超过 51200 bytes；合并同类复发、保留可执行规则并重跑 control gate，而非继续追加事故日志。
+- Strengthening through Human regen: 为两个 integration fixture 扩展 Active authority 时先增行后跑 checker，立即触发 301/300 行失败；补丁虽已落地但门禁结论作废，随后把同一清单物理行重排回 300 行并重跑通过。控制面扩权发送前必须同时预算 schema 与行/字节上限，不能把 checker 当排版器。

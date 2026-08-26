@@ -613,3 +613,50 @@
 - Root cause: independent struct/type/constructor edits were bundled behind one stale whitespace-sensitive hunk instead of being applied from separately reread physical ranges.
 - Prevention: split declarations, runtime structs and constructor literals into independent minimal patch transactions after reading each exact range; a semantic match is not a physical patch anchor.
 - Verification: the failed transaction left no partial hazard fields; four independently anchored patches then applied, `gofmt` and `git diff --check` exited zero, and touched-package compile passed.
+
+### 2026-08-26 — Regen compaction canonical C01 recurrence archive
+
+The following active C01 evidence was archived verbatim before canonical compaction:
+
+### 2026-08-21 C01 — 每次工具调用必须保持单仓库路径闭包
+
+- Symptom: Go/Legacy 路径混入同一调用，出现部分成功输出、尾部失败或错误目标。
+- Root cause: 把工作目录、仓库根和参数列表分开考虑，并复用了另一仓库的路径。
+- Prevention: 启动恢复也无例外：一次调用只属于一个仓库；先核验 `git rev-parse --show-toplevel`，参数只允许该根下已存在的路径；切换仓库必须新开调用；不得在当前 workdir 中用 `git -C`、绝对路径或脚本参数指向另一仓库；不得以只读、并行或减少往返为例外。
+- Verification: 命令零退出、输出完整且所有路径属于同一根；失败、截断或混仓调用的全部输出立即作废并按仓重跑。历史实例已原样归档到 workflow archive，不再在 active 中重复事故日志。
+- Strengthening after localized-welcome recovery: compact 后首个启动读取再次把 Go matrix 绝对路径放入 Legacy 调用；该调用全部输出已作废，随后两仓 status、文档和 matrix 均以独立 workdir 重跑，并以重建 handoff 为恢复 authority。
+- Strengthening after TestServer/GameMaster selection: compact 硬门恢复时又在单次启动审计中通过 `git -C` 混读两仓；该调用全部输出已作废。后续只在对应 `workdir` 内使用相对路径，并分别重跑 Legacy 文档/status/C# 门禁与 Go matrix/status/C# 门禁后才刷新 handoff。
+- Strengthening after Superman recovery: 连续两次在 Go `workdir` 的上下文读取中追加 Legacy 相对路径，导致前段成功输出与尾部路径失败混杂；两次调用全部作废。此后构造命令前先把每个路径按仓库分类，命令文本只允许出现当前 `git rev-parse --show-toplevel` 下的相对路径；跨仓证据必须拆成相邻但独立的工具调用，并分别要求零退出后才可采用。
+- Strengthening after Observer recovery: 新 Session 首次门禁读取又在 Legacy `workdir` 中追加 Go matrix 路径，整次 9 万余 token 输出已作废；随后 `agents.md`、三份 Legacy 文档、双仓 status/`.cs` 门禁与 Go matrix 全部按单仓调用重跑。恢复时还发现 handoff 声称 Go clean、实际已有 5 tracked + 2 untracked Observer 文件，因此在重建 handoff 前停止实现和测试。
+- Strengthening after ALLOWTRADE recovery: compact 后首个恢复读取再次在 Legacy `workdir` 中拼入 Go matrix 绝对路径，约 9.7 万 token 的整次输出已作废；随后按仓库分别完整重读启动文档与 matrix。恢复审计又发现 handoff 声称 Go clean、实际已有 3 tracked + 3 untracked ALLOWTRADE 文件，因此在补写并回读准确 handoff 前继续停止实现和测试。以后恢复命令必须先按仓库写成两个独立命令块，再逐块调用，禁止在一个 shell 字符串中“顺便”读取对侧文件。
+- Strengthening after `@TIME/@ROLL/@MAP` recovery: compact 后首个启动读取再次在 Legacy `workdir` 中同时 `cat` Go matrix，整次约 9.8 万 token 输出已立即作废；随后 Legacy 的 `agents.md`/三份任务文档与 Go matrix 均按独立 `workdir` 分块完整重读。恢复审计还发现旧 handoff 声称 Go clean、实际已有 4 tracked + 2 untracked utility-command 文件；实现和测试继续停止到准确 handoff 写入、回读并与双仓状态核对完成。本次接续又在 Legacy 启动命令末尾附加绝对 Go `find`，因此整次输出再次作废；恢复模板今后不得包含任何“定位对侧文件”的尾命令，第二仓的定位、读取和审计必须从新的工具调用开始。
+- Strengthening after utility-command compact continuation: 恢复命令再次把绝对 Go matrix 搜索拼进 Legacy 文档读取，导致整次 10 万余 token 输出作废。以后启动阶段先只执行 Legacy 固定清单并结束调用；收到其零退出结果后，才在新的 Go `workdir` 调用中读取 matrix，禁止用一条复合 shell 命令跨越仓库边界。
+- Strengthening after 18:24 utility-command rollover: 本次接续仍在 Legacy 启动读取中直接 `cat` 绝对 Go matrix，整次 10 万余 token 输出再次作废；随后不仅按仓拆开，还把超过输出上限的 matrix 区段进一步缩小重读到无截断。恢复模板必须物理拆成两个独立工具调用，且大文件必须按可完整返回的小段读取；“命令零退出”不能替代“输出完整可见”。
+- Strengthening after fourth utility-command compact: 本次恢复首调用又在 Legacy 文档读取末尾追加了对侧 Go 根的绝对 `find`，整次输出按 C01 作废；随后先以纯 Legacy 调用完整重读启动文档，再以纯 Go 调用分块重读 3223 行 matrix。恢复时禁止在第一仓命令中承担任何对侧“定位”工作；若 matrix 区段发生输出截断，该区段也必须整体作废并缩小范围重读。
+- Strengthening after bounded-control recovery: 控制面已经明确禁止跨仓后，首次恢复调用仍把绝对 Go matrix 路径附在 Legacy 文档读取后，约 8 万 token 输出再次全部作废。随后已物理拆成 Legacy 启动/状态与 Go 状态/matrix 两组调用，并以三项指纹核对十二文件未变。以后发送恢复命令前必须先做“命令文本内是否出现另一仓根”的机械检查，不能只检查 `workdir`。
+- Strengthening after `DISC-P1-CLOSURE`: P1 版本勘察又在 Legacy `workdir` 的同一命令中加入 Go 的 `internal/config`/`cmd/crystal-server` 相对路径；compact 恢复首调用随后再次把绝对 Go matrix 附在 Legacy 启动读取末尾。两次整调用均已作废并按两仓独立零退出重跑。即使核对同一 setting 或启动 authority，也必须在发送前机械检查“命令文本只含当前根”，且 Legacy 启动调用必须物理结束后才能构造 Go 调用。
+- Strengthening after Goal restart for `CFG-P1-CONTRACT-001`: 新 Goal 的首个启动调用仍用 `git -C` 在 Legacy `workdir` 中核验 Go 仓库，整次输出已作废；随后每份启动文档、双仓 status/`.cs` 门禁和指定 matrix anchors 均拆为单仓零退出调用重读。今后启动模板的第一步必须先做字面预检：命令中出现 `git -C` 或对侧根即拒绝发送，而不是依靠执行后的人工发现。
+- Strengthening after `LOG-P1-CATEGORY-001` recovery: 本轮首个状态调用再次在 Legacy `workdir` 中用 `git -C` 混入 Go 仓库；整次输出立即作废，随后两仓 HEAD/status/三类 C# 门禁分别以独立零退出调用重跑。即使 handoff 已给出两仓命令，发送前仍必须逐字拒绝任何含 `git -C` 或对侧根的启动命令。
+- Strengthening through MAP-detail recovery: 新 Session 首调用仍用 `git -C` 混读双仓且输出截断；整调用作废后，文档/status/C# 门禁按单仓小段重跑。恢复命令发送前必须机械拒绝 `git -C`、对侧根和超限区段；只采用单仓、零退出、完整输出。
+- P6 hazard/compaction recurrence: 恢复、主审与 compaction 安全门仍反复混仓，整调用均作废并按仓重跑。发送前逐项按根分组 argv，拒绝 `git -C`、对侧根/相对目录；即使只是 status/C# 核验或语义对照也不能例外。Regen compaction 首调用再次用 `git -C` 在 Legacy 根读取 Go 状态；该调用虽零退出仍整体作废，证明“命令成功”不能挽救路径闭包违规。硬门模板以后只允许先完成一仓调用并回读结果，再构造另一仓调用。
+
+### 2026-08-26 — Regen helper review again mixed source roots
+
+- Symptom: a Go-root review command first printed `damageAncientBringerHeroLocked`, then appended Legacy `Server/MirObjects/*.cs` paths and exited nonzero.
+- Root cause: the valid Go argv was extended in place for a side-by-side comparison instead of ending the call before drafting the Legacy query.
+- Prevention: draft cross-repository comparisons as two explicit repository-local calls from the outset; never append the second side to an already valid first-side command.
+- Verification: the mixed output was discarded in full; the Go helper and Legacy `Attacked` implementation were rerun separately with zero exit, and only those independent results informed the Vampire-damage ruling.
+
+### 2026-08-26 — Regen post-compaction status summary mixed both roots
+
+- Symptom: the first post-compaction status command ran Legacy Git locally and appended `git -C ../Crystal.GoServer` branch, HEAD and status queries in the same zero-exit shell call.
+- Root cause: the recovery audit was composed as one convenient two-root summary despite active C01 explicitly requiring sequential repository-local calls.
+- Prevention: do not construct combined root/status summaries; finish and read one repository-local tool result before drafting the next, and reject any repository command containing `git -C`.
+- Verification: the complete mixed result was discarded. Independent Legacy and Go root/branch/HEAD/status/diff/C# audits then exited zero, exposed the stale 60-versus-66-file handoff, and the current durable snapshot was rebuilt and control-checked before work resumed.
+
+### 2026-08-26 — Regen Revelation audit appended the opposite root
+
+- Symptom: a Legacy-root `RevTime` query was followed in the same shell call by a Go-relative `cmd/crystal-server/*.go` query; zsh rejected the unmatched Go path after valid Legacy output.
+- Root cause: the semantic comparison was drafted incrementally instead of as two repository-local calls.
+- Prevention: write the Legacy and Go queries as two physical tool calls before sending either; never append the second side to a valid first-root command.
+- Verification: the entire mixed call was discarded. The Legacy assignment query and Go Revelation query were independently rerun from their own roots with exit 0, and only those reruns are evidence.
