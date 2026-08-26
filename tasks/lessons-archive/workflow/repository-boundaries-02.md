@@ -674,3 +674,10 @@ The following active C01 evidence was archived verbatim before canonical compact
 - Root cause: the startup checklist was formatted as one convenient report before applying C01's per-command repository closure.
 - Prevention: split startup/recovery status into two tool calls before drafting either shell command; reject headings or reporting convenience as a reason to combine roots.
 - Verification: the entire first result was discarded. Independent Legacy and Go calls then exited 0 and established Legacy `ea352c14` clean plus Go `a2cd1cc` with only the owned untracked Revelation-refresh ledger.
+
+### 2026-08-26 — Revelation producer-review recovery repeated the combined startup
+
+- Symptom: the first recovery command again printed Legacy status and appended `git -C ../Crystal.GoServer` branch, HEAD and status in one successful shell call.
+- Root cause: the startup report was drafted before mechanically applying C01's two-call split, even though the immediately preceding archived recurrence described the same failure.
+- Prevention: the first repository command of every recovery must be drafted only after the opposite root and every `git -C` token have been removed; read its result before drafting the second call.
+- Verification: the mixed result was discarded in full. Independent Legacy and Go status, index, untracked and all three `.cs` gates then exited 0 from their own roots and supplied the accepted recovery evidence.

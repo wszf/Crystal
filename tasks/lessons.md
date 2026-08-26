@@ -17,13 +17,11 @@ duplicate.
 - Root cause: workdir, repository root and argv were reviewed separately, or a cross-repository recovery template was reused.
 - Prevention: one call belongs to one verified root. Reject the command before sending if it contains `git -C`, the opposite root, or an opposite-root relative path; never compose a combined two-root “summary” command, and finish and read back the first repository call before constructing the second. The first startup/recovery status call is mechanically split into two tool calls before either command is drafted; convenience headings do not justify a combined shell. Read-only/status/C#/compaction work is not exempt.
 - Verification: accept only zero-exit, complete output whose paths all belong to that root. Discard an entire failed, truncated or mixed-root call, including earlier successful fragments, and rerun per repository. Historical recurrences are preserved in `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
-- Strengthening through Revelation recovery: status, review and source comparisons repeatedly reused two-root summary commands even after C01 existed. The main thread now discards every such result, reruns each repository independently, and archives each recurrence; drafting the first call is forbidden until the second repository has been removed from its argv entirely.
-
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
 - Symptom: 猜测目录、空 glob、裸反引号、错误正则或未闭合字符串导致勘察失败。
 - Root cause: 依赖 shell 隐式展开和记忆中的文件布局，没有先验证最小查询。
-- Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；含 glob 的固定模板是 `rg -n --glob '*.go' -e 'pattern' -- path`，发送前机械拒绝 `-- --glob`，因为 `--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名或 zsh 只读特殊参数（如 `status`）；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用 CLI 子命令前按对应 `--help` 核对全局与子命令选项位置；数据库对象名必须从实际 schema 复制，禁止查看 schema 后仍使用惯例名称猜测；精确 commit/thread/agent ID 必须从权威命令输出复制，禁止根据短 ID 猜测补全；调用语言模块前先核对运行时版本/可用性，并优先让目标程序自身解析配置；修改含非 ASCII 的文档时优先使用 `apply_patch`，若必须用脚本 here-doc，先最小验证解释器与源码编码。
+- Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；含 glob 的固定模板是 `rg -n --glob '*.go' -e 'pattern' -- path`，渲染 argv 后逐字拒绝 `-- --glob`，失败 argv 禁止复制修补，因为 `--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名或 zsh 只读特殊参数（如 `status`）；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用 CLI 子命令前按对应 `--help` 核对全局与子命令选项位置；数据库对象名必须从实际 schema 复制，禁止查看 schema 后仍使用惯例名称猜测；精确 commit/thread/agent ID 必须从权威命令输出复制，禁止根据短 ID 猜测补全；调用语言模块前先核对运行时版本/可用性，并优先让目标程序自身解析配置；修改含非 ASCII 的文档时优先使用 `apply_patch`，若必须用脚本 here-doc，先最小验证解释器与源码编码。
 - Verification: `rg` 选项、`path` 覆盖 `PATH`、未命中 glob 和 zsh 标量命令替换均已最小重跑；本批 archive 检索从失败的裸 `*.json`/换行标量改为直接 `rg --glob` 后零错误完成；Python 3.9 缺少 `tomllib` 时改由实际 Codex CLI 解析配置；Codex 验证脚本将只读 `status` 改为 `rc`，并把全局 approval 选项移到 `exec` 前后成功执行；Codex 0.148.0 不支持对 `features`/`debug` 使用全局 `--strict-config`，且 `| ... || true` 曾掩盖该错误后误打印 PASS；该证据已作废，后续先查目标子命令 `--help`、保留上游退出码，并只在命令真实零退出后报告通过，本次改由 `app-server --strict-config` 零退出与 `doctor` 的 `config loaded` 交叉验证；Goal 数据库查询从猜测的 `goals` 改为 schema 中实际的 `thread_goals` 后成功核对字段约束；本批从 `cmd/crystal-server` 子目录误用根级 `./cmd/crystal-server` 失败后，改用 `go test .`，并将仓库根/命令包路径作为同一最小验证；本 Session Legacy `/usr/bin/python3` 拒绝含中文的 here-doc 后，确认 Python 3.9.6 并改用 `apply_patch` 零错误写入文档；本批 handoff 初稿根据 `3e85ec4` 猜测完整哈希，随即以 Go 仓库 `git rev-parse HEAD` 的 `3e85ec4c4268bc4a24e5ec8cc0ff7a96ef58775c` 替换并回读核对。
 - Strengthening after localized-welcome review: 再次猜测仓库根存在 `Localization/` 导致 `rg` 读取报错；整次调用证据已丢弃，随后先用根级 `rg --files` 定位实际 tracked localization fixtures，确认 server 根目录文件由运行时生成而非仓库资产。
 - Strengthening after TestServer bootstrap: Go 勘察再次把不存在的 `world_player*.go` 作为未引用 glob 交给 zsh，并有数次让预期“零匹配”的 `rg` 在 `set -e` 下终止调用；相关调用输出均作废。后续先用 `rg --files` 定位文件，并仅在“零匹配本身是有效答案”时显式使用 `rg ... || true`，实现、测试和文档只采用零退出的重跑结果。
@@ -52,7 +50,7 @@ duplicate.
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
 - Root cause: 使用陈旧正文、模糊锚点或人工拼装错误 hunk 标记。
-- Prevention: patch 前复读精确物理行；按唯一函数锚点拆小 hunk；复杂多文件拆事务，复合调用启用 `set -e`；检查路径、上下文和闭合标记。
+- Prevention: patch 前复读精确物理行；同名调用必须带唯一函数锚点拆小 hunk；复杂多文件拆事务，复合调用首行固定 `set -e`；检查路径、上下文和闭合标记。
 - Verification: 逐段复读 diff，并运行格式化、最小编译和定向测试；任一 patch 失败时不采用同调用的其他结果。本批矩阵第二个 hunk 因正文换行与预期不符而失败；先复读并独立核验同调用已落地的第一个 hunk，再以精确物理行单独重跑第二个 hunk，最终 `git diff --check` 通过。
 - Strengthening after Goal continuity patch: 一个补丁同时修改互为 hard link 的 `AGENTS.md` 与 `agents.md`；首个 hunk 已经同步改变两个路径，第二个 hunk 因旧正文消失而失败，形成“调用失败但修改已落地”。以后 patch 前先用 `ls -li`/`git ls-files` 核对别名与 inode；hard link 只修改一个 tracked canonical 路径，并在失败后立即独立回读全部别名和 Git 状态。本次已确认两路径仍共享 inode、内容均为 Sol Ultra/checkpoint-not-blocker，Git 只跟踪 canonical `agents.md` 变化。
 - Strengthening after P1 inventory insertion: 一次四-hunk matrix 补丁因旧段落物理换行与草稿不一致而整体失败；随后已独立确认没有部分写入，再把新段插入、P1 单行精确替换和两个小 prose hunk 分开发送并逐项 `git diff --check`。长表插入与陈旧 prose 修订不得共用一个补丁事务；先复读每个唯一锚点，失败后先查 status/目标标记再重试。
@@ -75,7 +73,7 @@ duplicate.
 
 - Symptom: helper 不存在、receiver 遗漏、返回值数量错误、字段或常量名称猜错。
 - Root cause: 依据相似模块、Legacy 名称或“应该对称”推断 Go API。
-- Prevention: 先读取声明、receiver、参数顺序、返回值、领域类型和包级符号，再接线。
+- Prevention: 先读取声明、receiver、参数顺序、返回值、复合字段类型、领域类型和包级符号，再接线。
 - Verification: 新调用接入后立即运行包级只编译门禁；编译器已分别拦截猜测的 `worldMagic.Spell`、`MarketStatusSold`、`Guild.Index`、`boolPointer` 和错误 bool 返回，复读真实声明或改用局部值后定向测试通过。
 - Strengthening through P6: 编译门禁先后拦截猜测的 `RentalInformation`、错误 `ParseChatPayload` arity，以及不存在的 `ParseUserLocationPayload`/`ParseObjectAttackPayload`/`ServerQuestChanged`；均回读真实声明后修正并重测。测试 API 也必须先读完整类型、返回值和所有权。
 
@@ -83,7 +81,7 @@ duplicate.
 
 - Symptom: 未使用变量、自赋值、类型宽度、多返回值或复合字面量错误阻止行为测试。
 - Root cause: 一次写入过多逻辑，在编译失败时仍试图分析生产语义。
-- Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；显式转换不同领域类型，再进入行为测试。
+- Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；签名与其消费者须同一编译事务；显式转换不同领域类型，再进入行为测试。
 - Verification: 最小编译、定向测试和 `go vet` 分层通过；hazard authority 测试曾用 `%v` 打印函数值并被测试期 vet 拦截，改为显式 nil/presence 字段后重跑通过。
 - Strengthening through Mine review: 既有 NET/MAP 批次曾漏改消费者/import；本批 group-quest 三个嵌套 literal 漏一层 `}`。均只作 compile finding，复读最小范围修正并在行为测试前通过 touched compile；接口或复合 literal 每个小 hunk 后必须立即 gofmt/compile。
 
@@ -198,7 +196,7 @@ duplicate.
 
 - Symptom: 按名称、注释、陈旧矩阵或相似实现迁移，遗漏重载、尾部副作用或 Legacy 怪癖。
 - Root cause: 读取声明但没有追踪 Spawn、调用者、helper 和消费者。
-- Prevention: 从真实入口追到构造类型、override、共享 helper 和所有消费者；当前源码与测试优先于文档。Review finding 也必须回到 Legacy 实现裁决，不能把“通常不应发包”“应显示实际变化量”或“应避免整数回绕”等常规工程直觉覆盖原版怪癖。
+- Prevention: 从真实入口追到构造类型、override、共享 helper 和所有消费者；混合文件按调用点分类，并以 mutation 成功/命中门禁通知；当前源码与测试优先于文档。Review finding 也必须回到 Legacy 实现裁决，不能把“通常不应发包”“应显示实际变化量”或“应避免整数回绕”等常规工程直觉覆盖原版怪癖。
 - Verification: 用生产入口测试覆盖可达路径、历史怪癖和关键失败分支。本批只读 review 把 Plague 在零 MP 时仍发 `HealthChanged`、治疗接近满血时显示请求恢复量、`int32` unchecked 运算列为风险；主审回读 `Map.CompleteMagic`、`HumanObject.ProcessRegen/ChangeMP` 和项目 overflow 配置后确认三者均为 Legacy 行为，未按直觉“修正”，并保留对应边界测试。
 - Strengthening after P1 config compatibility: 既有 `TestVersionCheckingRequiresAFile` 首次失败，因为测试把 Go 的 fail-fast 规则当成权威；Legacy `LoadVersion` 实际跳过缺失路径并保留空 hash 列表，启用版本检查时由客户端 gate 全部拒绝。测试已改为锁定空列表/全拒绝，缺失、空白、多文件和 partial MD5 定向/重复/race 全通过。任何“更严格更安全”的配置错误都必须先由 Legacy loader 和消费者共同裁决。
 - Strengthening after `NET-P1-GATES-001` tracing: Active acceptance 草稿把 MaxPacket reset 凭直觉写成一秒，Legacy `MirConnection.ReceiveData` 实际在严格 `< Now` 时重置并设为 `Now.AddSeconds(5)`。时间窗口、比较边界和计数单位必须从真实入口逐项抄录后再写验收清单；本次在任何 NET 代码写入前改回五秒并保留 equality 边界待测。
@@ -299,4 +297,4 @@ duplicate.
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
 - Strengthening through Regen compaction: 已知 handoff heading 是可执行 schema 后，MAP hazard routing 曾改写 `## Active leaf and protected work`，本次又把 `## Go repository state` 润色为带后缀标题并遗漏唯一 `- Active leaf: \`` 字段；control gate exit 1。每次 handoff replacement 前必须先从 `tasks/check-migration-control.sh` 复制全部固定 heading/field，完成后先按精确字符串回读再运行 checker；已恢复两个 schema 项并重新门禁。
 - Strengthening after admin-item hard gate: 增补重复 C01 事故使 active lessons 超过 51200 bytes；合并同类复发、保留可执行规则并重跑 control gate，而非继续追加事故日志。
-- Strengthening through Human regen: 为两个 integration fixture 扩展 Active authority 时先增行后跑 checker，立即触发 301/300 行失败；补丁虽已落地但门禁结论作废，随后把同一清单物理行重排回 300 行并重跑通过。控制面扩权发送前必须同时预算 schema 与行/字节上限，不能把 checker 当排版器。
+- Strengthening through Human regen: 为两个 integration fixture 扩展 Active authority 时先增行后跑 checker，立即触发 301/300 行失败；补丁虽已落地但门禁结论作废，随后把同一清单物理行重排回 300 行并重跑通过。控制面扩权发送前必须按替换后物理行预算 schema 与行/字节上限，不能把 checker 当排版器。

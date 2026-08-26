@@ -558,3 +558,45 @@
 - Root cause: the commands were assembled from natural-language order instead of the canonical ripgrep/absence templates despite repeated C02 findings.
 - Prevention: copy `rg -n --glob '*.go' -e 'pattern' -- path` literally; reject `-- --glob` and every shell-expanded source glob before sending.
 - Verification: all invalid outputs were discarded. The helper query reran with options before `--`; the struct was read from exact `world.go`; `ExperienceOwnerID` usages reran with ripgrep-owned globbing; and the bounded baseline diff reran with explicit rc 0/1 handling and reported `NO_MATCH`. All accepted calls exited 0.
+
+### 2026-08-26 — Revelation integration review repeated the option-boundary failure
+
+- Symptom: a review query again put `--glob '*.go'` after ripgrep's `--`; it printed partial matches but exited 2, so none of that output was admissible.
+- Root cause: the rendered argv was not reread left-to-right against the canonical four-part template before execution.
+- Prevention: after rendering every ripgrep command, mechanically verify `rg [options including --glob] -e pattern -- verified-paths`; reject any option after the delimiter.
+- Verification: the entire exit-2 result was discarded and the exact query reran as `rg -n --glob '*.go' -e ... -- cmd/crystal-server`, exit 0.
+
+### 2026-08-26 — Revelation review recovery copied the failed argv and split a coupled signature
+
+- Symptom: the very next symbol query copied the same post-delimiter `--glob` shape and exited 2; the EnergyShield timestamp correction then changed the callee signature and ran compile before changing its sole consumer, producing an avoidable compile failure.
+- Root cause: the failed search was edited in place rather than rebuilt from the canonical template, and a coupled API/consumer edit was mistaken for two independently compilable transactions.
+- Prevention: rebuild failed ripgrep argv from the literal template; change a private signature and every verified consumer in one compile transaction, while still keeping unrelated behavior patches separate.
+- Verification: the search reran with all options before `--`, exit 0; `world.go` now passes the operation timestamp to EnergyShield, the deterministic 1970-clock regression and existing EnergyShield test pass count-20, and touched compile exits 0.
+
+### 2026-08-26 — Timestamp correction matched the wrong repeated helper call
+
+- Symptom: a two-occurrence replacement intended for FlamingSword and `magicAttack` matched TwinDrake and FlamingSword instead, introducing an undefined `now` and leaving the intended magic call unchanged.
+- Root cause: the patch matched repeated helper-call text without unique function context.
+- Prevention: every replacement among repeated calls must include the enclosing function's unique declaration or adjacent semantic fields.
+- Verification: the compile failure was discarded as behavior evidence; exact TwinDrake and `result.SelfPackets` anchors restored the current-time call only where no operation clock exists and installed explicit `now` in FlamingSword/magic, after which focused count-20 exits 0.
+
+### 2026-08-26 — Revelation authority correction exceeded the Active Index line gate
+
+- Symptom: adding five review-proven mixed producer files expanded `migration-active.md` to 301 lines, so the control checker failed after the patch had landed.
+- Root cause: authority prose was drafted semantically without first budgeting replacement physical lines against the existing 299-line file.
+- Prevention: calculate old-versus-new physical lines before every near-limit control patch and pre-wrap the replacement within the enforced limit.
+- Verification: the producer list was reflowed to 300 lines without removing evidence; the control checker then exited 0.
+
+### 2026-08-26 — Mixed-producer classification patch used stale map alignment
+
+- Symptom: a four-hunk ledger patch failed on the final stale line, but the compound command lacked `set -e`, so a later unchanged static test passed and made the overall shell exit 0.
+- Root cause: separately remembered map rows were bundled without a fresh contiguous reread, and the patch/test transaction did not fail fast.
+- Prevention: reread the exact map range immediately before patching and begin every patch-plus-format/test command with `set -e`.
+- Verification: diff review confirmed zero partial classification write; four exact current rows were then patched, formatted, and the static ledger exited 0.
+
+### 2026-08-26 — Mixed-producer regression guessed the MonsterInfo field type and path
+
+- Symptom: the new test first guessed `protocol.MonsterInfo`, then guessed `worlddata.MonsterInfo.Stats` was `protocol.ItemStats`; both compile gates failed. The declaration locator then appended a guessed `monsters.go` path after finding the real file and made that compound read exit 1.
+- Root cause: the fixture literal and read path were written from analogous APIs rather than the exact declaration and locator output.
+- Prevention: finish and read the symbol locator call, then use only its exact path and copy every composite field's declared type before constructing the fixture.
+- Verification: the exact `internal/worlddata/world.go` declaration showed `Stats []MonsterStat`; the corrected fixture passes the mixed-producer death/order test count-20.

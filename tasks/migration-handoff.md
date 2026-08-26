@@ -1,96 +1,90 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-26 20:31 (Asia/Singapore)
+Last updated: 2026-08-26 22:40 (Asia/Singapore)
 
-This replace-in-place snapshot records the in-progress bounded Revelation
-health-refresh ledger after recovery reconciliation. It is the current recovery
+This replace-in-place snapshot closes the uncommitted Revelation refresh leaf
+and routes the next bounded SafeZoneHealing trace. It is the current recovery
 authority, not a historical journal.
 
 ## Goal and control-plane state
 
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains Active; it is neither
   Complete nor Blocked. Main authority is `gpt-5.6-sol/ultra`; bounded workers
-  must use `luna_worker` (`gpt-5.6-luna/max`) without substitution.
-- Active leaf: `STATE-P5-REVELATION-REFRESH-002`.
-- P5 is scope-frozen with twelve of sixteen children Complete, this leaf Active
-  and three Ready. `SPELL-P5-REVELATION-EXPIRE-001` is Complete in Go commit
-  `a2cd1cc3768eae92b69e839e14446f2debd9249f`.
-- Normal recovery reads only Go matrix P5 row 851, registry rows 3166-3167,
-  completed Revelation evidence 3198-3211 and refresh ruling 3212-3229.
+  use `luna_worker` (`gpt-5.6-luna/max`) without substitution.
+- Active leaf: `REGEN-P5-SAFEZONE-001`.
+- P5 is scope-frozen with thirteen of sixteen children Complete, this leaf
+  Active and two Ready. `STATE-P5-REVELATION-REFRESH-002` is committed Complete
+  in Go `602c71055c8f417b182931e7292a494017a8522c`; the Legacy control commit is
+  the only pending closure step in this snapshot.
+- Normal recovery reads only matrix P5 row 851, registry rows 3167-3168 and
+  completed refresh evidence 3231-3248.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; HEAD `ea352c147f34e22536da9741929b55613c88ada3`;
-  upstream `origin/master`; the route commit is already present.
-- Complete current status before this self-changing handoff is four unstaged
-  tracked files: `tasks/lessons-archive/workflow/repository-boundaries-02.md`,
+- Branch `master`; HEAD `bedf4857d27d66f4fccc99bc9a9af5aa8577766a`;
+  upstream `origin/master`.
+- Index and untracked set are empty. Six unstaged tracked files are owned:
+  `tasks/lessons-archive/migration/combat-general.md`,
+  `tasks/lessons-archive/workflow/repository-boundaries-02.md`,
   `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
-  `tasks/lessons.md`, and `tasks/migration-active.md`. Staged and untracked sets
-  are empty.
-- The Active Index now agrees with the matrix: Revelation expiry is Complete,
-  refresh is Active, and P5 has twelve Complete plus three Ready children.
-  Every `.cs` file remains read-only.
-- The next Legacy documentation commit is expected to advance the observed HEAD
-  above by one authority-freeze commit.
+  `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff.
+- The active index now routes SafeZoneHealing and records Revelation refresh as
+  Complete. Every tracked, staged and untracked `.cs` gate is empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `ee8ec67da749445c5772a127b807c441ce4d6892`;
+- Branch `main`; HEAD `602c71055c8f417b182931e7292a494017a8522c`;
   no upstream is configured.
-- Worktree and index are clean. Commit `ee8ec67` freezes the passing 23/48
-  Go-AST classification, corrects the incomplete textual 45-file baseline and
-  records the exact production denominator in the matrix.
+- Worktree, index and untracked set are clean. Commit `602c710` contains the
+  shared helpers, 43 exact producer files, static/authenticated regressions and
+  the matrix completion/next-leaf route. Every tracked, staged and untracked
+  `.cs` gate is empty.
 
 ## Active leaf and protected work
 
-- Active leaf: `STATE-P5-REVELATION-REFRESH-002`
-- Discovery is Complete. The ledger classifies every 23 health-emitter and 48
-  typed Monster-HP file. Human evidence has 34 live gaps, three follow-ups (two
-  group-only) and two valid fallback-only sites; Monster evidence has 30 live
-  producers, 15 constructor/reset/death and three other-authority files.
-- Production write authority is now frozen to the exact 38 files plus new
-  helper/test and ledger/matrix paths listed in `tasks/migration-active.md`.
-  `revelation.go` remains protected and supplies routing consumers.
-- Completed Revelation expiry, HP drain, Human regen, SafeZoneHealing, another
-  P5 child and every `.cs` file are protected.
+- Active leaf: `REGEN-P5-SAFEZONE-001`
+- Initial authority is read-only tracing plus control/matrix routing. Before any
+  production write, enumerate and freeze exact Go config/map/healing files.
+- Required behavior is default/disabled no-op versus enabled permanent
+  value-25/two-second Healing SpellObjects on every valid safe-zone cell,
+  flowing through the existing Player/Monster/Hero HealAmount path with exact
+  startup, cell, visibility, tick and restart behavior.
+- Completed Revelation expiry/refresh, Human regen, other P5 children and every
+  `.cs` file are protected.
 
 ## Verification ledger
 
-- Revelation touched compile: `go test ./cmd/crystal-server -run '^$'` exit 0.
-- Focused repeated gate: `go test ./cmd/crystal-server -run
-  '^(TestRevelation|TestGameWorldGroupJoin|TestMapTransitionUsesViewerRelativePlayerProjection|TestTownReviveUsesViewerRelativePlayerProjection|TestSessionConfiguredHighSCRevelationPreservesWrappedExpire|TestPlayerNaturalRegenUsesActiveRevelationBroadcast)'
-  -count=20 -timeout=10m` exit 0.
-- Focused race gate: the same regex with `go test -race`, `-count=5` and
-  `-timeout=15m` exit 0.
-- Fresh integration: `go test ./... -count=1 -timeout=30m` exit 0; command
-  package completed in 79.802s. `go vet ./...` and `go build ./...` exit 0.
-- Full race was not due for this bounded leaf; focused race passed. The previous
-  accepted full-race baseline remains the HP-drain closure at Go `0db2cde`.
-- Two terminal Luna source-review attempts were closed after bounded finish and
-  interrupt requests without reports, so they contribute no evidence. The main
-  terminal source/diff review found no in-scope issue. All agents are closed;
-  an exact `comm` process audit found no `go` or `crystal-server` process.
-- Both repositories' tracked, staged and untracked `.cs` gates are empty.
-- Static ledger gate `go test ./cmd/crystal-server -run
-  '^TestRevelationRefreshStaticCandidateLedger$' -count=1` exits 0 in 2.168s;
-  the same exact test under `go test -race` exits 0 in 9.951s. Touched package
-  compile `go test ./cmd/crystal-server -run '^$'` exits 0.
-- Legacy auditor `01a03dde-e799-7553-a875-fb27645662b5` completed and was
-  closed after returning the twelve exact executable broadcast callsites and
-  recipient/order rules. Go auditors `01a03deb-5b23-7830-acf9-200c80357be9`,
-  `01a03dfb-b20e-7560-8225-ca3614917030` and
-  `01a03dfb-ddd9-7591-a089-02901ed67205` closed after the complete 23/48 file
-  and 39-Human-callsite classification. No subagent remains active.
+- Owned Go files are gofmt-clean; touched compile
+  `go test ./cmd/crystal-server -run '^$'` exits 0.
+- Final focused repeated command selects the eight refresh/static/session tests,
+  including all eight TucsonEgg miss adapters, with `-count=20 -timeout=10m`;
+  exit 0 in 56.579s.
+- The same exact focused selection under `go test -race`, `-count=5` and
+  `-timeout=15m` exits 0 in 49.713s.
+- Fresh final integration: `go test ./... -count=1 -timeout=30m` exits 0;
+  command package 83.222s. `go vet ./...` and `go build ./...` exit 0.
+- Fresh final full race `go test -race ./... -count=1 -timeout=45m` exits 0;
+  command package 97.905s.
+- Read-only Luna reviewer `01a03e69-fae4-7d61-8096-6dd3486ba74c` found five
+  TucsonEgg miss refreshes. Reviewer `01a03e6a-267d-75f1-a66d-97da874a3cb1`
+  found two more; main callsite closure found the eighth. All eight are fixed and
+  regression-tested. The second reviewer's stale-map claim was rejected because
+  the helper consumes the explicit post-mutation snapshot and delivery occurs
+  only after locked producers write back and return.
+- Both reviewers are closed. Exact process audit found no `go` or
+  `crystal-server`; only `.coordination.lock` and this Goal's main writer lock
+  remain. Both repositories' six `.cs` gates are empty.
 
 ## Exact recovery sequence
 
 1. Verify each repository independently against the branches, HEADs and complete
    statuses above; rerun all six `.cs` gates.
-2. Read only matrix rows/sections named above. The relevant archive search for
-   `STATE-P5-REVELATION-REFRESH-002|BroadcastHealthChange|HealthChangedPayload|HP mutation|Go AST` currently has no match.
-3. Implement the new shared helper/test first without changing protected
-   `revelation.go`; then split the exact Human and Monster producer files into
-   at most two disjoint Luna writer scopes, preserving `HealthChanged` then
-   `ObjectHealth` and lethal `ObjectDied` then `ObjectHealth` order.
+2. Run the control checker and commit the six exact Legacy documentation files;
+   read back its full hash and verify both repositories clean.
+3. For `REGEN-P5-SAFEZONE-001`, read only the named matrix anchors and search the
+   lessons archive with `SafeZoneHealing|safe zone|Healing SpellObject`.
+4. Trace bounded Legacy startup/config/map/healing call chains and exact Go
+   declarations; update the active index with frozen file authority before any
+   production code write, then run the leaf gates.
