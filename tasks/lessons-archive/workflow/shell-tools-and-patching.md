@@ -523,3 +523,31 @@
 - Root cause: visual Markdown cells were mistaken for physical patch lines, and the recovery/search commands were assembled as narrative convenience rather than checked against the existing C01/C02 mechanical gates.
 - Prevention: replace long table rows only with full exact-line context or a unique-count Go replacer; recovery calls must be physically single-repository and size-bounded; every potentially empty search must declare and handle rc 0/1 before execution.
 - Verification: failed/nonzero/mixed calls and all preceding output were discarded; both repository states and C# gates were rerun separately, the matrix audit reran with explicit 0/1 handling, and the exact P4 leaf row was synchronized independently.
+
+### 2026-08-26 — Revelation Go trace reused unverified shell globs
+
+- Symptom: a bounded health-producer query appended unquoted `world*.go` and `*visibility*.go` arguments; zsh happened to expand them and the compound call exited 0, but the paths were not from the current enumeration.
+- Root cause: exact candidate files and a convenient file family were combined in one argv instead of using ripgrep's own `--glob` over the verified directory.
+- Prevention: use only exact paths from the immediately preceding file enumeration, or use `rg --glob '*.go' -- cmd/crystal-server`; never let zsh select evidence paths.
+- Verification: the complete compound result was discarded and both Revelation-runtime and bounded-health searches were rerun against the verified directory with `rg --glob '*.go'`, exit 0.
+
+### 2026-08-26 — Revelation authority freeze used a phantom trailing hunk
+
+- Symptom: the first Active Index patch bundled valid timestamp/authority/checklist replacements with a second deletion context that did not exist, so the whole patch was rejected.
+- Root cause: the draft repeated remembered checklist text instead of ending after the exact range just reread.
+- Prevention: freeze routing changes as separate physical transactions: counters, authority, ruling, then registry; each patch may use only the immediately reread range.
+- Verification: the failed patch made no change; four exact-range replacements then succeeded, the Active Index is 280 lines, control check and `git diff --check` exit 0.
+
+### 2026-08-26 — Revelation post-patch negative search omitted rc handling
+
+- Symptom: the expected-zero audit for remaining ad-hoc `RevelationUntil.After` checks used bare `rg` and exited 1.
+- Root cause: the query was drafted as a positive locator even though zero matches was the acceptance result.
+- Prevention: post-patch absence checks must use the explicit rc-0/1 branch before execution, not be repaired only after a bare search fails.
+- Verification: the failed call was discarded; the same exact query reran with explicit rc handling, exited 0, and reported no remaining ad-hoc player Revelation checks.
+
+### 2026-08-26 — Revelation matrix insertion guessed table-to-evidence adjacency
+
+- Symptom: the first discovery-evidence insertion expected the HP-drain section immediately after the P5 table, but a frozen-count and Regen-evidence block intervened, so the patch was rejected.
+- Root cause: a verified table row and a separately located evidence heading were incorrectly treated as adjacent patch context.
+- Prevention: locate the exact insertion boundary, read that contiguous range, then patch only that boundary; independently located anchors must never be combined into one hunk.
+- Verification: the rejected patch made no change; the frozen count was updated separately, the discovery prose was inserted at the exact reread boundary, and matrix `git diff --check` exited 0.

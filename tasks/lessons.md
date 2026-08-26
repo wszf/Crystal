@@ -17,8 +17,7 @@ duplicate.
 - Root cause: workdir, repository root and argv were reviewed separately, or a cross-repository recovery template was reused.
 - Prevention: one call belongs to one verified root. Reject the command before sending if it contains `git -C`, the opposite root, or an opposite-root relative path; never compose a combined two-root “summary” command, and finish and read back the first repository call before constructing the second. Read-only/status/C#/compaction work is not exempt.
 - Verification: accept only zero-exit, complete output whose paths all belong to that root. Discard an entire failed, truncated or mixed-root call, including earlier successful fragments, and rerun per repository. Historical recurrences are preserved in `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
-- Regen compaction recurrence: the first hard-gate audit again mixed both roots and was discarded even though it exited zero. Independent Legacy and Go status/C# calls then exited zero, the durable handoff records the real dirty Go candidate, and the control check is rerun after this canonical compaction.
-- Regen review recurrence: a Go `workdir` command appended three Legacy source paths after a valid Go helper lookup; the entire mixed result was discarded and both queries were rerun separately. Source comparison commands must be drafted as two calls before either is sent, not extended in-place after the first repository argv is already valid.
+- Strengthening through Revelation recovery: status, review and source comparisons repeatedly reused two-root summary commands even after C01 existed. The main thread now discards every such result, reruns each repository independently, and archives each recurrence; drafting the first call is forbidden until the second repository has been removed from its argv entirely.
 
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
@@ -47,6 +46,8 @@ duplicate.
 - Strengthening after HTTP authority expansion: handoff 再次从短哈希 `88b0e15` 猜出错误完整值；立即以 Go 根 `git rev-parse HEAD` 的 `88b0e15771a909c18c64dd4040c12264251f5349` 修正。任何新 commit 的完整 ID 必须先在所属仓库独立回读，再允许写入对侧控制文档。
 - Strengthening through P5 Regen: Mine 恢复先猜不存在路径，本次又把惯例 `combat.go` 附加到已知文件后使定位 exit 2；整调用均作废。每个显式路径必须来自当前 `rg --files` 零退出结果；否则只对已验证目录使用 `rg --glob`，禁止在有效 argv 尾部补猜测文件。
 - Strengthening during Regen Revelation audit: 主线程又在 Legacy 根的有效 `RevTime` 查询后追加 Go 相对路径，触发 zsh 未命中并污染整次调用。该结果已全部作废并按仓独立零退出重跑；跨仓语义对照必须预先写成两个物理调用，不能在首仓命令成形后追加另一侧搜索。
+- Strengthening during Revelation recovery: Go 检索又让 zsh 展开未核验的 `world*.go`/`*visibility*.go`；即使命中且 exit 0，整次结果仍作废。文件族只能对已验证目录使用 `rg --glob`，后续独立重跑 exit 0。
+- Strengthening during Revelation integration: 预期“零残余”的 post-patch `rg` 又裸跑并 exit 1；该调用作废后用显式 rc 0/1 分支重跑 exit 0。负向验收在发送前必须按 absence query 模板成形。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -60,6 +61,7 @@ duplicate.
 - Strengthening through MAP hazard: 跨文件补丁因陈旧对齐被拒且未 fail-fast；非唯一 `cfg` hunk 又落入错误测试并伪通过。证据均作废后按文件/唯一函数锚点拆事务并回读落点。命令链必须 `set -e`，测试通过不能替代物理行核验。
 - Strengthening at Regen compaction gate: 首次 handoff 补丁对同一路径同时使用 Delete/Add operation，被 `apply_patch` 整体拒绝；随后把独立 lesson 补丁串入复合命令，前段 handoff/lesson 已写入而尾段陈旧锚点失败，进程整体 exit 1。根因是把“替换整文件”和“多目标增量补丁”混成一个事务，并在未复读 C03 物理行前追加第二个 patch。以后整文件 replacement 单独完成并回读；每个 `apply_patch` 一次只承担一个逻辑目标，任何复合调用失败都要逐文件核对部分写入，再以当前物理行重跑。此次已回读 handoff/C01 落点；archive append 又留下 EOF 额外空行并被 `git diff --check` 拦截，已规范为恰好一个终止换行并独立通过 diff check。
 - Strengthening during Regen fixture closure: 两个测试补丁仍以非唯一 `world := newGameWorld()`/`world.loadItemInfos` 落入同文件更早用例；一个无声污染无关 NPC 测试，另一个把局部 helper 声明放错作用域并被 compile gate 拦截。两次均先移除错误落点，再用唯一 `func Test...` 锚点重写并回读 `rg` 行号；同文件重复 fixture 也必须按函数名锚定，不能把“测试文件已精确”误当成 hunk 唯一。
+- Strengthening during Revelation authority freeze: Active patch 夹带不存在的 checklist context，matrix patch 又猜测两个独立 anchors 相邻；两次均被拒且零写入。随后只按刚回读的连续 counters/authority/ruling/registry/evidence 边界拆开并通过 checker/diff；控制面禁止拼接独立定位结果或追加未复读的“顺手清理” hunk。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 

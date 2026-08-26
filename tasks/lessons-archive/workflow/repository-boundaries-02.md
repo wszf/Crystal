@@ -660,3 +660,10 @@ The following active C01 evidence was archived verbatim before canonical compact
 - Root cause: the semantic comparison was drafted incrementally instead of as two repository-local calls.
 - Prevention: write the Legacy and Go queries as two physical tool calls before sending either; never append the second side to a valid first-root command.
 - Verification: the entire mixed call was discarded. The Legacy assignment query and Go Revelation query were independently rerun from their own roots with exit 0, and only those reruns are evidence.
+
+### 2026-08-26 — Revelation compaction recovery repeated a two-root summary
+
+- Symptom: immediately after reconstructing the durable handoff, the main agent again combined Legacy status/control checks with `git -C ../Crystal.GoServer` status and C# checks.
+- Root cause: the compaction checklist was treated as one reporting transaction rather than two repository-local evidence transactions, despite C01 already forbidding the convenience template.
+- Prevention: prepare and execute the Legacy verification call first, inspect its result, then prepare the Go-root call; reject every candidate repository command containing `git -C` or an opposite-root path.
+- Verification: all mixed-call evidence was discarded. Independent Legacy and Go branch/HEAD/status/diff/untracked/C# calls then exited 0; they confirmed only the self-changing Legacy handoff was dirty and the Go worktree was clean before tracing resumed.

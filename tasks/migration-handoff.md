@@ -1,88 +1,89 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-26 17:48 (Asia/Singapore)
+Last updated: 2026-08-26 19:40 (Asia/Singapore)
 
-This replace-in-place snapshot closes `COMBAT-P5-HP-DRAIN-001` and routes the
-same Goal to Revelation expiry. It is a current snapshot, not a journal.
+This replace-in-place snapshot records the completed Revelation-expiry leaf and
+routes the same active Goal to the bounded global Revelation health-refresh
+ledger. It is the current recovery authority, not a historical journal.
 
 ## Goal and control-plane state
 
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains Active; it is neither
   Complete nor Blocked. Main authority is `gpt-5.6-sol/ultra`; bounded workers
   must use `luna_worker` (`gpt-5.6-luna/max`) without substitution.
-- HP drain is committed in Go as
-  `0db2cdeae072dfed45d39c8e4824caf3597a76ff`. The unique Active Leaf is
-  `SPELL-P5-REVELATION-EXPIRE-001`; P5 has fifteen frozen children: eleven
-  Complete, this one Active and three Ready.
-- Normal recovery may read only matrix P5 summary row 851, Revelation registry
-  row 3166 and completed HP-drain evidence 3200-3215.
-- Revelation Go write authority remains closed pending its finite trace.
+- Active leaf: `STATE-P5-REVELATION-REFRESH-002`.
+- P5 is scope-frozen with twelve of sixteen children Complete, this leaf Active
+  and three Ready. `SPELL-P5-REVELATION-EXPIRE-001` is Complete in Go commit
+  `a2cd1cc3768eae92b69e839e14446f2debd9249f`.
+- Normal recovery reads only Go matrix P5 row 851, registry rows 3166-3167,
+  completed Revelation evidence 3198-3211 and refresh ruling 3212-3220.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; HEAD `8508bb0cb325bcf14f5b62894505fccfd2705fdd`;
-  upstream `origin/master`, ahead 478.
-- Index/staged set is empty. Four unstaged tracked files after this handoff write
-  are exactly:
-  - `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`
-  - `tasks/lessons.md`
-  - `tasks/migration-active.md`
-  - `tasks/migration-handoff.md`
-- Before the self-changing handoff, the other three diffs were 49 insertions/50
-  deletions with SHA-256
-  `843dac99e59031e3f7f4d033589348353bfa0a3f649d7138990ae7c424b44052`.
-- No untracked files, locks or active subagents remain. Control check,
-  `git diff --check` and all three Legacy `.cs` gates exited 0.
+- Branch `master`; HEAD `560f2f28442aa72a75d93d3101bfd8f8738a0217`;
+  upstream `origin/master`, ahead 479 and behind 0.
+- Complete current status is six unstaged tracked files:
+  `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`,
+  `tasks/lessons-archive/workflow/repository-boundaries-02.md`,
+  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
+  `tasks/lessons.md`, `tasks/migration-active.md`, and this handoff. Staged and
+  untracked sets are empty.
+- The first five non-handoff files preserve Revelation discovery/routing and
+  workflow/fixture corrections. Every `.cs` file remains read-only.
+- The handoff/control commit is expected to advance Legacy HEAD by one
+  documentation-only commit from the observed pre-commit HEAD above.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `0db2cdeae072dfed45d39c8e4824caf3597a76ff`.
-- Worktree and index are clean: no tracked, staged or untracked files.
-- Commit `0db2cde` contains the seven HP-drain production/test files plus the
-  matrix route/evidence (399 insertions/6 deletions). Staged diff/C# gates and
-  post-commit status are clean.
+- Branch `main`; HEAD `a2cd1cc3768eae92b69e839e14446f2debd9249f`;
+  no upstream is configured.
+- Worktree and index are clean: no tracked, staged or untracked paths.
+- Commit `a2cd1cc` preserves the 255/256/260 expiration wrap, strict direct
+  SendHealth routing, active/expired broadcast fanout, observer suppression,
+  group-join expiration sharing, static/bootstrap/transition ordering and the
+  authenticated configured-260-SC transcript.
 
 ## Active leaf and protected work
 
-- Active leaf: `SPELL-P5-REVELATION-EXPIRE-001`.
-- HP drain preserves float32 order, strict `>2`, floor/remainder/cap loss,
-  Human-target Hero-to-owner normalization, ordinary-Monster Hero ownership,
-  exact packet order, HP persistence and runtime-only reset.
-- Revelation tracing must freeze the Legacy cast formula and byte conversion at
-  255/256/260 seconds plus completion/passive/bootstrap/movement recipients.
-- Until then no Go file may change. HP drain, Regen, SafeZoneHealing, unrelated
-  spells, another P5 child and every `.cs` file are protected.
+- Active leaf: `STATE-P5-REVELATION-REFRESH-002`
+- Discovery outcome: generate a Go-AST ledger for all current non-test
+  `HealthChangedPayload` emitter files and direct Monster-like HP mutation
+  candidates; classify each against Legacy `BroadcastHealthChange` behavior,
+  recipients and packet order before opening production writes.
+- Go write authority is currently only new
+  `cmd/crystal-server/revelation_refresh_ledger_test.go` plus bounded matrix
+  evidence. No production Go file is writable until the exact subset and file
+  list are frozen in the active index.
+- Completed Revelation expiry, HP drain, Human regen, SafeZoneHealing, another
+  P5 child and every `.cs` file are protected.
 
 ## Verification ledger
 
-- Touched compile `go test ./cmd/crystal-server -run '^$'` exited 0.
-- Final focused `go test ./cmd/crystal-server -run 'HPDrain' -count=20
-  -timeout=20m` exited 0.
-- Final focused race `go test -race ./cmd/crystal-server -run 'HPDrain'
-  -count=5 -timeout=20m` exited 0.
-- Authenticated attack test proves ObjectAttack -> ObjectStruck -> attacker
-  HealthChanged -> target indicator, durable HP, fractional runtime state,
-  JSON save/load and zero accumulator after restarted entry.
-- The first fresh full `go test ./... -count=1 -timeout=30m` exited 1 only at
-  `TestCombatDurabilityOrdinaryPlayerMonsterContextControlsWeaponRoll`: the new
-  action flag executed weapon damage twice. Admission metadata was separated
-  from durability execution; the exact regression plus HP-drain tests passed.
-- Final fresh `go test ./... -count=1 -timeout=30m` exited 0; server 78.727s.
-- Final `go vet ./...` and `go build ./...` exited 0.
-- Final fresh unexcluded `go test -race ./... -count=1 -timeout=60m` exited 0;
-  server 87.603s.
-- Three bounded Luna read-only reviews remained running after repeated finish
-  requests and returned no report; they were closed without substitution. Main
-  terminal Legacy/source/diff review found no remaining in-scope issue.
+- Revelation touched compile: `go test ./cmd/crystal-server -run '^$'` exit 0.
+- Focused repeated gate: `go test ./cmd/crystal-server -run
+  '^(TestRevelation|TestGameWorldGroupJoin|TestMapTransitionUsesViewerRelativePlayerProjection|TestTownReviveUsesViewerRelativePlayerProjection|TestSessionConfiguredHighSCRevelationPreservesWrappedExpire|TestPlayerNaturalRegenUsesActiveRevelationBroadcast)'
+  -count=20 -timeout=10m` exit 0.
+- Focused race gate: the same regex with `go test -race`, `-count=5` and
+  `-timeout=15m` exit 0.
+- Fresh integration: `go test ./... -count=1 -timeout=30m` exit 0; command
+  package completed in 79.802s. `go vet ./...` and `go build ./...` exit 0.
+- Full race was not due for this bounded leaf; focused race passed. The previous
+  accepted full-race baseline remains the HP-drain closure at Go `0db2cde`.
+- Two terminal Luna source-review attempts were closed after bounded finish and
+  interrupt requests without reports, so they contribute no evidence. The main
+  terminal source/diff review found no in-scope issue. All agents are closed;
+  an exact `comm` process audit found no `go` or `crystal-server` process.
+- Both repositories' tracked, staged and untracked `.cs` gates are empty.
 
 ## Exact recovery sequence
 
-1. Verify both roots independently: control/diff/status/six `.cs` gates and the
-   stated hashes. Read only the named matrix anchors.
-2. Commit the four Legacy control/evidence files. This handoff records Legacy
-   HEAD immediately before that one expected documentation commit delta.
-3. Resume Revelation with read-only Legacy/Go tracing, search the archive only
-   for Revelation/RevTime/ObjectHealth/Expire/byte-wrap keywords, freeze exact
-   Go files, then implement and run its leaf gate.
+1. Verify each repository independently against the branches, HEADs and complete
+   statuses above; rerun all six `.cs` gates.
+2. Read only matrix rows/sections named above. Search the lesson archive only for
+   `STATE-P5-REVELATION-REFRESH-002|BroadcastHealthChange|HealthChangedPayload|HP mutation|Go AST` matches.
+3. Recompute the current 23-emitter/45-candidate denominator with a Go-only AST
+   ledger in the one allowed new test file. Pair candidates to bounded Legacy
+   callsites, then freeze exact production/test write authority before any
+   production edit.

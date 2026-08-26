@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-26 17:08 (Asia/Singapore)
+Last verified: 2026-08-26 19:36 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -36,50 +36,53 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `SPELL-P5-REVELATION-EXPIRE-001`
-- Status: `Active`; P5 is scope-frozen with eleven of fifteen children Complete,
-  this one Active and three Ready. Human regen and HP drain are Complete
-  dependencies.
-- Outcome: preserve Legacy's reachable byte-wrap of Revelation
-  `ObjectHealth.Expire` above 255 seconds across cast completion, passive/static
-  visibility, movement/bootstrap and later health changes.
-- Go matrix anchors to read: only P5 summary row 851, this registry row 3166 and
-  completed HP-drain evidence 3200-3215; never the full matrix/another phase.
-- Legacy read authority: bounded Revelation completion/`RevTime` assignment,
-  `BroadcastHealthChange`, `SendHealth`, static/movement/bootstrap consumers and
-  configured/imported high-SC source; every C# file is read-only.
-- Go write authority is closed during tracing. No Go file may change until the
-  finite callsite trace replaces this sentence with an exact existing/new set.
-- Required discovery gate: freeze the exact cast formula and `byte` conversion
-  order at 255/256/260 seconds, minimum-five behavior, completion/passive/
-  bootstrap/movement recipients and packet order, then define compile,
-  count-20, race-count-5 and authenticated transcript evidence.
-- Forbidden scope: HP-drain redesign, SafeZoneHealing, another spell behavior,
+- Leaf ID: `STATE-P5-REVELATION-REFRESH-002`
+- Status: `Active`; P5 is scope-frozen with twelve of sixteen children Complete,
+  this one Active and three Ready. Revelation expiry is Complete.
+- Outcome: enumerate and migrate every reachable missing Human/Monster
+  `BroadcastHealthChange` after HP/MP/stat/combat/poison/AI mutation, preserving
+  active-map versus expired owner/group recipients and exact packet order.
+- Go matrix anchors to read: only P5 summary row 851, registry rows 3166-3167,
+  completed Revelation evidence 3198-3211 and refresh ruling 3212-3220; never
+  the full matrix or another phase.
+- Legacy read authority: bounded `BroadcastHealthChange` callsites and the exact
+  Human/Monster HP/MP mutation entries paired by the static ledger; every C#
+  file is read-only.
+- Go write authority during discovery: new
+  `cmd/crystal-server/revelation_refresh_ledger_test.go` and bounded matrix
+  evidence only. Production writes remain closed until the ledger freezes the
+  exact subset, files and packet order.
+- Required discovery gate: a Go-AST ledger must classify all 23 non-test
+  `HealthChangedPayload` emitter files and 45 direct Monster-like HP candidate
+  files as Legacy broadcast producer, constructor/reset, Hero-only path or
+  false positive; then replace closed authority with an exact production set.
+- Forbidden scope: completed Revelation expiry redesign, SafeZoneHealing,
   another P5 child and every C# write.
 
 ### Protected Go ownership
 
-- Completed HP-drain commit
-  `0db2cdeae072dfed45d39c8e4824caf3597a76ff` and Regen commit
+- Completed Revelation commit
+  `a2cd1cc3768eae92b69e839e14446f2debd9249f`, HP-drain commit
+  `0db2cdeae072dfed45d39c8e4824caf3597a76ff`, and Regen commit
   `194c209b46f84876c577085c94b5b3983178691a` remain read-only. Earlier P1-P6
   evidence may be consumed, not redesigned.
 
 ### Remaining acceptance work
 
-- [ ] Trace every reachable Revelation expiry producer/consumer and freeze exact
-  Go files.
-- [ ] Implement only the finite expiry-width behavior and owning transcripts.
-- [ ] Run the leaf gate, obtain bounded review, commit and route the next
-  dependency-ready child.
+- [ ] Generate the static Go ledger and prove the exact candidate denominator.
+- [ ] Pair every actual producer with authoritative Legacy recipient/order
+  behavior and freeze disjoint production/test write authority.
+- [ ] Implement only the frozen subset, run the leaf/integration gates, review,
+  commit and route the next dependency-ready P5 child.
 
-### Discovery checklist
+### Discovery inputs
 
-- Prove whether Legacy casts the remaining seconds before or after minimum/
-  maximum operations and which exact durations wrap to 0, 1, 4 or 255.
-- Separate cast-completion packets from later `BroadcastHealthChange`,
-  `SendHealth`, static visibility and movement refresh consumers.
-- Freeze owner/group/observer visibility and packet ordering for ordinary and
-  Revelation-active states; do not infer expiry width from the Go serializer.
+- Baseline denominator at Go `0db2cde`: 23 non-test files emitting
+  `HealthChangedPayload` and 45 non-test files matching direct Monster-like HP
+  mutation candidates. Recompute mechanically at the current HEAD before
+  freezing authority; do not infer actual omissions from textual matches.
+- Completed Revelation routing helpers are consumers. This leaf owns missing
+  producer calls and their order, not Revelation duration or visibility rules.
 
 ### P6 frozen child registry
 
@@ -116,8 +119,9 @@ Independent Legacy auditor `01a036ed-ee8f-7a50-a042-f1d665f83627` confirmed
 reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the original eleven
 children. Hazard Struck tracing proved one finite omitted regen child; its bounded attack
 trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
-proved one reachable long-Revelation expiry-width correction. Eleven are Complete,
-one is Active and three are Ready.
+proved one reachable long-Revelation expiry-width correction; its bounded trace
+proved one finite global refresh follow-up. Eleven are Complete, one is Active
+and four are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -127,7 +131,8 @@ one is Active and three are Ready.
 | `COMBAT-P5-HUMAN-HERO-001` | Complete | spell/state consumers | existing committed evidence | target/defence/death/relogin |
 | `COMBAT-P5-HP-DRAIN-001` | Complete | combat core | committed Go `0db2cdeae072dfed45d39c8e4824caf3597a76ff` | float accumulation/strict payout/remainder/packets/race |
 | `REGEN-P5-HUMAN-001` | Complete | combat + P1 weights + P6 potion pools | committed Go `194c209b46f84876c577085c94b5b3983178691a` | natural/Pot/Heal/Vamp timers, resets, packets, persistence/race |
-| `SPELL-P5-REVELATION-EXPIRE-001` | Active | Human regen review | exact authority pending bounded trace | 255/256/260 byte wrap, completion/passive/bootstrap/race |
+| `SPELL-P5-REVELATION-EXPIRE-001` | Active | Human regen review | frozen Revelation/observer/main/groups + tests | 255/256/260 wrap, SendHealth/passive/bootstrap/race |
+| `STATE-P5-REVELATION-REFRESH-002` | Ready | Revelation expiry | finite 23-emitter + direct-mutation ledger in matrix | all HP/MP/Monster refresh producers/order/race |
 | `REGEN-P5-SAFEZONE-001` | Ready | Human regen + map safe zones | config/map healing objects + production tests | enabled/disabled, cells/ticks/recipients/restart/race |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |

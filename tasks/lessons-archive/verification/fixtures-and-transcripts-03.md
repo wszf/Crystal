@@ -826,3 +826,11 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Root cause: unit expectations flattened multi-recipient notifications without retaining duplicate broadcast IDs, and production reused a new `DamageWeapon` action field both as HP-drain admission evidence and as an instruction to execute durability after the wrapper had already damaged the weapon.
 - Prevention: derive transcript expectations per recipient, calculate payout from the preexisting accumulator plus the new float32 increment, initialize post-bootstrap maps explicitly, and keep capability/admission metadata separate from commands that perform a side effect.
 - Verification: corrected focused tests pass; the exact durability regression plus HP-drain tests pass together, current HP-drain count-20 and race-count-5 exit 0, and the post-fix fresh unexcluded full test exits 0.
+
+### 2026-08-26 — Revelation session fixtures must preserve CreateCharacter argument order
+
+- Symptom: the first authenticated high-SC Revelation test failed immediately with character result 2 instead of reaching bootstrap.
+- Root cause: the fixture passed class 2 in `CreateCharacter`'s gender position, relying on remembered semantic order instead of the actual `(id, name, gender, class)` declaration.
+- Prevention: reread mutation-helper declarations before constructing a production-entry fixture, especially adjacent same-type enum parameters; label or review each positional argument against the declaration.
+- Verification: changing the call from `(2, 0)` to `(0, 2)` made the exact authenticated high-SC Revelation test exit 0 and reach its wrapped-expiration transcript.
+- Recurrence: the first active-Revelation bootstrap extension then timed out waiting for the viewer session to stop because viewer logout synchronously broadcast `ObjectRemove` into two unread `net.Pipe` peers. Install both peer removal readers before closing the viewer; the corrected authenticated test exits 0 and verifies the full bootstrap/removal lifecycle.
