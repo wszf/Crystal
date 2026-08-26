@@ -1,93 +1,76 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-27 01:17 (Asia/Singapore)
+Last updated: 2026-08-27 03:25 (Asia/Singapore)
 
-This replace-in-place snapshot records the committed scheduled SafeZoneHealing
-leaf and routes the next bounded direct-movement trace. It is the current
-recovery authority, not a historical journal.
+This replace-in-place snapshot records the accepted direct SafeZoneHealing leaf
+and routes the next bounded SafeZoneBorder trace. It is the current recovery
+authority, not a historical journal.
 
 ## Goal and control-plane state
 
-- Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains Active; it is neither
-  Complete nor Blocked. Main authority is `gpt-5.6-sol/ultra`; bounded workers
-  use `luna_worker` (`gpt-5.6-luna/max`) without substitution.
-- Active leaf: `REGEN-P5-SAFEZONE-DIRECT-002`.
-- P5 is scope-frozen with fourteen of eighteen children Complete, this leaf
-  Active and three Ready. `REGEN-P5-SAFEZONE-001` is committed Complete in Go
-  `0ab4da7b091d131bdd99a0ff153b7981438262ea`.
-- Normal recovery reads only matrix P5 row 851, registry rows 3168-3170 and
-  completed SafeZone evidence 3255-3277.
+- Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains Active; neither Complete
+  nor Blocked. Main authority is `gpt-5.6-sol/ultra`; bounded workers use
+  `luna_worker` (`gpt-5.6-luna/max`) without substitution.
+- Active leaf: `SPELL-P5-SAFEZONE-BORDER-001`.
+- P5 is scope-frozen with fifteen of eighteen children Complete, this leaf
+  Active and two Ready. `REGEN-P5-SAFEZONE-DIRECT-002` is committed Complete in
+  Go `1042adbad7514318dcca0502876b87203222b37c`.
+- Normal recovery reads only matrix P5 row 851, registry rows 3168-3170 and the
+  direct/scheduled evidence around rows 3255-3295; never the full matrix.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; observed HEAD
-  `6754cdd653b61ad8d28bc49c3ad8f9f9751f46e5`; upstream `origin/master`.
-- Unstaged tracked documentation consists of this handoff, the next-leaf active
-  index, `tasks/lessons.md`, and four matched archive files:
-  `migration/data-config-import-export.md`,
-  `migration/world-state-lifecycle.md`,
-  `verification/race-and-flake-attribution.md`, and
-  `workflow/shell-tools-and-patching.md`.
-- Staged and untracked sets are empty. Every tracked, staged and untracked `.cs`
-  gate is empty.
+- Branch `master`; observed pre-commit HEAD
+  `25b389f380fe94e26beb9238575d58aba68b3bb8`; upstream `origin/master`.
+- Unstaged tracked work is this handoff, `tasks/migration-active.md`, and
+  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`. Staged and
+  untracked sets are empty before final documentation staging.
+- The archive edit records invalid shell-glob/rg-option-order recurrences. No
+  C# file is owned; tracked, staged and untracked `.cs` gates are empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `0ab4da7b091d131bdd99a0ff153b7981438262ea`;
+- Branch `main`; HEAD `1042adbad7514318dcca0502876b87203222b37c`;
   no upstream is configured.
-- Worktree, index and untracked set are clean. Commit `0ab4da7` contains config,
-  exported-world startup, invisible field runtime, exact Monster regen override
-  behavior, deterministic/authenticated tests, matrix completion and next-leaf
-  selection. Every tracked, staged and untracked `.cs` gate is empty.
-
-## Active leaf and protected work
-
-- Active leaf: `REGEN-P5-SAFEZONE-DIRECT-002`.
-- Initial authority is read-only Legacy/Go tracing plus control/matrix routing.
-  Before production writes, freeze an exact subset from the registered central
-  and specialized movement ledger and name exact focused/session tests.
-- Required behavior is direct Healing `ProcessSpell(target)` after successful
-  turn/walk/run/push paths, bypassing field schedule/location; Run evaluates
-  traversed cells after final movement. Preserve invocation/failure and packet
-  order.
-- Scheduled SafeZoneHealing commit `0ab4da7b091d131bdd99a0ff153b7981438262ea`,
-  SafeZoneBorder, other P5 children and every `.cs` file are protected.
+- Worktree, index and untracked set are clean. Commit `1042adb` contains the
+  direct helper, central/route/specialized movement wiring, focused/authenticated
+  tests and matrix completion/next-leaf selection. Every `.cs` gate is empty.
 
 ## Verification ledger
 
-- Owned Go files are gofmt-clean. Final touched compile
-  `go test ./cmd/crystal-server ./internal/config -run '^$'` exits 0.
-- Final config focused command selects `^TestSafeZoneHealing`, count 20; exit 0.
-- Final command focused selection covers every SafeZone/session test plus exact
-  HealingCircle, HumanWizard, Trainer and DragonStatue regressions, count 20;
-  exit 0.
-- The same config and command selections under `go test -race`, count 5, exit 0.
-- Fresh final integration `go test ./... -count=1 -timeout=30m` exits 0;
-  command package 81.592s. `go vet ./...` and `go build ./...` exit 0.
-- Final fresh `go test -race ./... -count=1 -timeout=45m` exits 1 only at the
-  known unrelated `TestSessionKirinIceThrustTranscript` fixture race. Exact
-  `go test -race ./cmd/crystal-server -run '^TestSessionKirinIceThrustTranscript$' -count=3 -timeout=10m`
-  also exits 1: the test writes `monsterAIRoll` and its callback while its own
-  session ticker reads them. No stack enters this leaf, and neither run is
-  reported as a full-race pass.
-- Writer `01a03eec-2120-7480-a78e-8146337af091` supplied the bounded session
-  test. Reviewer `01a03f02-1e55-78e2-80af-795b462f26d9` found the accepted
-  zero-MaxHP edge; its isolated inclusive-tick/direct-map findings were rejected
-  from the outer scheduler and definition authority. Both threads are closed.
-- Exact process audit finds no `go` or `crystal-server`; both repositories' six
-  `.cs` gates are empty.
+- Direct explicit-cell lookup bypasses scheduler/current location while target
+  admission and final-location ObjectEffect fan-out reuse scheduled authority.
+- Common AI/routes and every registered specialized Hero/owned-Monster
+  turn/walk/two-cell/push boundary preserve movement/turn/push packet order,
+  Run explicit traversed cells, final-only custom moves and invalid-point push
+  bypass. Reviewer `01a03f85-d823-7cf2-85a3-5d3affa584a5` found omitted
+  deer/Zuma/siege/route paths; all are wired and included in the AST ledger.
+- Authenticated net.Pipe uses production `world.tick` ordinary-pet AI and proves
+  immediate ObjectWalk/ObjectEffect with no ObjectSpell or scheduler advance.
+- Touched compile exits 0. SafeZone focused count-20 and race count-5 exit 0;
+  specialized movement regressions count-20 and race count-5 exit 0.
+- Fresh `go test ./... -count=1 -timeout=30m`, `go vet ./...`, `go build ./...`
+  and fresh `go test -race ./... -count=1 -timeout=45m` all exit 0 after the
+  review fixes. No Go or crystal-server process remains.
+
+## Active leaf and protected work
+
+- Active leaf: `SPELL-P5-SAFEZONE-BORDER-001`.
+- `SPELL-P5-SAFEZONE-BORDER-001` begins read-only. Trace exact Legacy config
+  order, perimeter geometry, Decoration TrapHexagon constructor/payload and
+  static visibility lifecycle; freeze exact Go config/main/world/effect and
+  focused/session test authority before production writes.
+- Committed direct-healing `1042adbad7514318dcca0502876b87203222b37c`,
+  scheduled healing and every other completed P5 owner remain protected.
 
 ## Exact recovery sequence
 
-1. Verify each repository independently against the branches, HEADs and complete
-   statuses above; rerun all six `.cs` gates.
-2. Run `git diff --check` and `tasks/check-migration-control.sh` in Legacy, stage
-   only the seven documentation files listed above, commit the scheduled-leaf
-   routing/evidence, read back the full hash, and verify both repositories clean.
-3. For `REGEN-P5-SAFEZONE-DIRECT-002`, read only the named matrix anchors and
-   search the lessons archive with `SafeZoneHealing|ProcessSpell|Turn|Walk|Run|Pushed`.
-4. Trace bounded Legacy direct movement call chains and reconcile exact Go
-   declarations; update the active index with frozen file/test authority before
-   any production code write, then run the leaf gates.
+- First finish the direct leaf documentation: independently verify each
+  repository status and all six `.cs` gates; in Legacy run the control checker,
+  stage only the three documentation files listed above, commit, and read back
+  its full hash. Verify both repositories clean.
+- Then search the lessons archive with
+  `SafeZoneBorder|TrapHexagon|Decoration|perimeter|ObjectSpell`, read only the
+  registered matrix anchors, and perform the bounded Border trace.

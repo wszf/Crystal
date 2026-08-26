@@ -36,23 +36,23 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `REGEN-P5-SAFEZONE-DIRECT-002`
-- Status: `Active`; P5 is scope-frozen with fourteen of eighteen children
-  Complete, this one Active and three Ready. Scheduled SafeZoneHealing is
-  committed Complete in Go `0ab4da7b091d131bdd99a0ff153b7981438262ea`.
-- Outcome: preserve direct Healing `ProcessSpell(target)` after successful
-  turn/walk/run/push paths, including the Run traversed-cell-after-final-move
-  quirk, without waiting for the permanent field's schedule or current cell.
+- Leaf ID: `SPELL-P5-SAFEZONE-BORDER-001`
+- Status: `Active`; P5 is scope-frozen with fifteen of eighteen children
+  Complete, this one Active and two Ready. Direct SafeZoneHealing is accepted
+  Complete pending this batch's Go/Legacy commits.
+- Outcome: preserve optional `[Optional] SafeZoneBorder` creation of permanent,
+  nonblocking Decoration TrapHexagon SpellObjects on exact safe-zone
+  perimeters, including payload, static visibility and entry/exit lifecycle.
 - Go matrix anchors to read: only P5 summary row 851, registry rows 3168-3170
   and completed SafeZone evidence 3255-3277; never the full matrix or another phase.
-- Legacy read authority: bounded `MapObject`/Player/Hero/Monster turn, walk,
-  run and push callsites that directly invoke Healing `ProcessSpell(target)`;
+- Legacy read authority: bounded config declaration/load order, safe-zone
+  perimeter construction and Decoration SpellObject visibility/lifecycle;
   every C# file is read-only.
 - Initial Go write authority is control/matrix routing only. Before production
-  writes, freeze an exact subset from the registered central/specialized
-  movement ledger plus exact focused/session test files.
-- Forbidden scope: committed scheduled SafeZone core, SafeZoneBorder, another
-  P5 child and every C# write.
+  writes, freeze exact config/main/world/effect-visibility files and exact new
+  static/session tests from the registered row.
+- Forbidden scope: committed scheduled/direct SafeZoneHealing, another P5
+  child and every C# write.
 
 ### Protected Go ownership
 
@@ -61,25 +61,24 @@ Keep this file at or below 300 lines and 32 KiB.
   `0db2cdeae072dfed45d39c8e4824caf3597a76ff`, and Regen commit
   `194c209b46f84876c577085c94b5b3983178691a`, plus refresh commit
   `602c71055c8f417b182931e7292a494017a8522c` and scheduled SafeZone commit
-  `0ab4da7b091d131bdd99a0ff153b7981438262ea`, remain read-only. Earlier P1-P6
-  evidence may be consumed, not redesigned.
+  `0ab4da7b091d131bdd99a0ff153b7981438262ea`, plus the uncommitted accepted
+  direct-healing batch, remain protected. Earlier P1-P6 evidence may be
+  consumed, not redesigned.
 
 ### Remaining acceptance work
 
-- [ ] Trace the finite central/specialized turn, walk, run and push callsites,
-  exact invocation order and failure bypasses from reachable Legacy entries.
-- [ ] Reconcile the registered Go movement ledger and freeze exact disjoint
-  production/test authority before any implementation.
-- [ ] Implement the frozen subset and prove direct bypass, traversed-cell quirk,
-  target admission, packet order, repeated behavior and focused race.
+- [ ] Trace exact Legacy key/default/write-back order, perimeter geometry,
+  SpellObject constructor fields and static visibility transitions.
+- [ ] Reconcile Go config/startup/effect seams and freeze exact production/test
+  authority before any implementation.
+- [ ] Implement the frozen subset and prove geometry, payload, visibility,
+  runtime-toggle/restart behavior, repeated tests and focused race.
 
 ### Discovery inputs
 
-- Direct movement calls `ProcessSpell(target)` on Healing fields found along the
-  movement path; it bypasses the scheduled field timer and does not recheck the
-  target's final location. Run evaluates traversed cells only after final movement.
-- This leaf consumes the committed target-admission/effect helper. Independent
-  SafeZoneBorder decoration remains Ready and out of scope.
+- SafeZoneBorder is independent decoration, not a gameplay tick or Healing
+  admission producer. It consumes committed safe-zone geometry and existing
+  static SpellObject visibility without reopening those owners.
 
 ### P6 frozen child registry
 
@@ -132,8 +131,8 @@ is Active and three are Ready.
 | `SPELL-P5-REVELATION-EXPIRE-001` | Complete | Human regen review | committed Go `a2cd1cc3768eae92b69e839e14446f2debd9249f` | 255/256/260 wrap, SendHealth/passive/bootstrap/race |
 | `STATE-P5-REVELATION-REFRESH-002` | Complete | Revelation expiry | committed Go `602c71055c8f417b182931e7292a494017a8522c` | all HP/MP/Monster refresh producers/order/race |
 | `REGEN-P5-SAFEZONE-001` | Complete | Human regen + map safe zones | committed Go `0ab4da7b091d131bdd99a0ff153b7981438262ea` | scheduled cells/ticks/recipients/restart/race |
-| `REGEN-P5-SAFEZONE-DIRECT-002` | Active | scheduled SafeZone core | trace/freeze central/specialized movement ledger before writes | walk/run/push/turn bypass/order/race |
-| `SPELL-P5-SAFEZONE-BORDER-001` | Ready | map safe-zone geometry | config/main/world/effect visibility + new focused tests | perimeter/payload/visibility/restart/race |
+| `REGEN-P5-SAFEZONE-DIRECT-002` | Complete | scheduled SafeZone core | trace/freeze central/specialized movement ledger before writes | walk/run/push/turn bypass/order/race |
+| `SPELL-P5-SAFEZONE-BORDER-001` | Active | map safe-zone geometry | config/main/world/effect visibility + new focused tests | perimeter/payload/visibility/restart/race |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
 | `MONSTER-P5-BASE-FAMILY-001` | Ready | mapped core | monster_ai/world + focused tests | 46 ordinals + target-kind/race |
