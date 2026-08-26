@@ -49,13 +49,13 @@ Keep this file at or below 300 lines and 32 KiB.
   write/read/payout callsite, the invoked Human/Monster `Attacked`/attack
   families, HP change/notification helpers and runtime construction/reset paths;
   every C# file is read-only.
-- Go write authority is closed during tracing. No Go file may change until the
-  finite callsite trace replaces this sentence with an exact existing/new set.
-- Required discovery gate: identify attacker/target kind matrix, damageWeapon and
-  armour/defence admission, exact float32/int operation order, strict `> 2`
-  payout, floor/remainder behavior, cap loss, packet/persistence order and
-  logout/relogin/restart reset. Then freeze touched compile, count-20,
-  race-count-5 and authenticated production-entry evidence.
+- Exact Go write authority: existing `cmd/crystal-server/{equipment_transactions.go,
+  world.go,warrior_attack.go,heroes.go}`; new `hp_drain.go`,
+  `hp_drain_test.go` and `hp_drain_session_test.go`. No other file may change.
+- Required gate: touched compile; exact float32 threshold/remainder/cap tests;
+  Player/Hero versus Human/ordinary-Monster production paths; damageWeapon and
+  miss gates; packet/persistence order; logout/relogin/restart reset;
+  count-20, race-count-5 and authenticated attack transcript.
 - Forbidden scope: natural regen redesign, SafeZoneHealing, Revelation expiry,
   unrelated attack refactors, another P5 child and every C# write.
 
@@ -73,15 +73,25 @@ Keep this file at or below 300 lines and 32 KiB.
 - [ ] Run the leaf gate, obtain bounded review, commit and route the next
   dependency-ready child.
 
-### Discovery checklist
+### Frozen behavior checklist
 
-- Prove which successful Player/Hero/Monster attack results add to whose
-  accumulator; do not infer the target or damage basis from the field name.
-- Freeze Legacy numeric order before choosing Go types: float accumulation,
-  strict threshold, integer payout, retained fractional remainder and healing
-  cap loss may each be separately observable.
-- Distinguish Player/Hero private, group and observer notifications from
-  ordinary regen indicators, and prove persistence plus relogin/restart reset.
+- Only `Attacked(HumanObject, ..., damageWeapon=true)` after hit and strict
+  `armour < damage` accumulates. Player/Hero targets use the Human base path;
+  ordinary Monster subclasses that reach `MonsterObject.Attacked` use the
+  Monster path. Monster attackers and overrides returning before base do not.
+- A Hero hitting a Human target is normalized to its Player owner before armour,
+  stats, durability and drain; a Hero hitting an ordinary Monster keeps its own
+  stats, accumulator and HP.
+- Accumulate float32 `max(0,(float32(damage-armour)/100)*rate)`. Payout only at
+  strict `accumulator > 2`; floor to int, call capped HP change, then subtract
+  the full floored amount even when full HP loses the heal. Exact 2 is retained.
+- Player payout emits ordinary ChangeHP private/group/Revelation health packets
+  and persistence, but no regen indicator. Hero payout emits HeroHealthChanged,
+  owner/group ObjectHealth and owner ObjectMana, then durable Hero HP.
+- Player-on-Human payout precedes target Struck/ObjectStruck/indicator/damage;
+  Player/Hero-on-Monster payout follows ObjectStruck and precedes gather,
+  indicator and target HP. Accumulators are runtime-only zero defaults and are
+  discarded by logout/relogin/restart.
 
 ### P6 frozen child registry
 
