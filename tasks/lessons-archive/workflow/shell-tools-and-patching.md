@@ -667,3 +667,52 @@
 - Verification: `command -v rg` confirmed absence, and the bounded candidate
   file and ordinary-spawn/AI/ownerless/respawn keyword searches were rerun with
   `find`/`grep` at exit 0 before exact matching sections were read.
+- Strengthening during `CHAT-P4-MAP-CONTEXT-001`: the next recovered session
+  repeated the same unverified `rg` call even though the active C02 rule already
+  required `command -v`; that output was discarded and the bounded archive
+  search was rerun with tracked `git grep` at exit 0. Tool availability checks
+  must be the first command of the workflow, not a diagnosis after failure.
+
+### 2026-08-28 — Compile-coupled imports and consumers belong in one patch transaction
+
+- Symptom: the CHAT map-context runtime-rule patch added the `config` import,
+  then ran the compile gate before adding the chat consumer, yielding an
+  expected-but-invalid unused-import failure.
+- Root cause: a compile-coupled import and its only consumer were split across
+  transactions despite C06 requiring signatures and consumers to compile
+  together.
+- Prevention: when a small patch introduces a package solely for the next
+  bounded function, add the import and first consumer in one patch/gofmt/compile
+  transaction; otherwise defer the import until the consumer exists.
+- Verification: `chatWithContext` and its config types were added, gofmt ran,
+  and `go test ./cmd/crystal-server -run '^$' -count=1` then exited 0.
+
+### 2026-08-28 — A zero-exit focused filter must prove it selected the protected tests
+
+- Symptom: the first current-candidate CHAT count-10/race commands exited zero
+  but the anchored `TestItemShout.*` alternative matched no protected P6 tests;
+  their real names begin with `TestSessionItemShout`, `TestUseItemShout`, and
+  `TestWorldItemShout`.
+- Root cause: the filter was composed from a feature noun instead of enumerated
+  physical test names, and exit zero was mistaken for selection evidence.
+- Prevention: before an acceptance gate, list the exact `func Test...` names
+  and verify every intended family can match the final anchored expression;
+  a passing command cannot prove an unmatched family ran.
+- Verification: tracked test declarations were enumerated with `grep`; the
+  corrected `Test.*ItemShout.*` command reran the full current CHAT family at
+  count 10 and focused race count 5, both exit 0.
+
+### 2026-08-28 — Reviewer model effort must follow the runtime's accepted surface
+
+- Symptom: after two bounded `luna_worker` reviews produced no report and were
+  closed, the explicit `codex-auto-review` fallback was first spawned with
+  `reasoning_effort=max`; the API rejected it because that model accepts only
+  through `xhigh`, despite deferred tool metadata advertising `max`.
+- Root cause: the generic spawn metadata was treated as stronger than the
+  selected review model's runtime validation.
+- Prevention: preserve the required Luna/max split for Luna workers, but when a
+  specialized fallback is explicitly justified, use that model's last confirmed
+  accepted effort and preserve any rejection as non-review evidence.
+- Verification: the rejected agent was closed, `codex-auto-review/xhigh` ran the
+  same read-only scope, returned four findings, and its post-ruling follow-up
+  returned `No findings`; all reviewer threads are closed.

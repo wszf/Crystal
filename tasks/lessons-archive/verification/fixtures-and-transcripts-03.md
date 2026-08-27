@@ -922,3 +922,18 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
   ownerless AI must enable the runtime explicitly; a separate negative test
   keeps the disabled state quiet. The corrected focused count-10 and race
   count-3 gates exit zero.
+
+### 2026-08-28 — One-shot player-enter hooks must be reinstalled per session
+
+- Symptom: the first authenticated CHAT map-context transcript froze natural
+  regeneration for only the first of three players; the next setup barrier saw
+  an unexpected `DamageIndicator` from a later player's live regen.
+- Root cause: `setPlayerEnteredHook` is intentionally consumed and cleared by
+  each successful `world.enter`, but the multi-session fixture installed it
+  only once before the loop.
+- Prevention: reinstall every one-shot enter hook immediately before each
+  session bootstrap, and update all already-entered runtime players inside that
+  hook when a shared-world timer must remain frozen.
+- Verification: the hook now runs once per client open; the exact authenticated
+  transcript, count-10 repetition and focused race count 5 all exit 0 with no
+  stray regen packet.

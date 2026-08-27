@@ -445,3 +445,46 @@
 - Prevention: Go-only probe 必须配套真实 production session；首登夹具 seed loaded StartPoint，多完成者用 buffered send/WaitGroup；每个 fake response 回到 Legacy producer和真实 Go entry 裁决。
 - Verification: production fixture 现加载 StartPoint、每个 server goroutine独立发送 done；probe/fake server 同步期待 `ProbeSelect: probe`。fake transcript `-count=10` 与真实 production probe 均 exit 0；两次原失败明确保留，后续完整 leaf gate 仍需重跑。
 - Strengthening after Select-state review: reviewer 发现新状态机只被直接单测调用、fake LoginSuccess 为空且 production 结束未证明 Disconnect；根因是把“从构造出的 Packet 调 handler”误当完整网络 transcript。失败分支现通过同一 `expectStateID` 在单连接双向 request/response 顺序中覆盖 result 0..4、Banned、LogOutFailed/Success、完整非零 SelectInfo、列表效果和最终 Disconnect；production 连接也记录并解析 client→server 帧，断言两次会话均以 ClientDisconnect 结束。修正后 touched compile、focused probe 与 production-entry 均 exit 0；repeated/race/full gate 仍必须按新 candidate 重跑。
+
+### 2026-08-28 — Composite-format call sites must use the formatter's actual type surface
+
+- Symptom: the first shout-cooldown transcript terminated the session with
+  `legacy composite format error: unsupported argument type` before emitting
+  the expected System chat.
+- Root cause: the Legacy source passed `Math.Ceiling(...)` as `double`, but the
+  current Go `legacyfmt` authority supports only string and Int32 arguments;
+  the call site copied the C# static type without checking the Go declaration.
+- Prevention: read the formatter's accepted argument types before wiring a new
+  localized path. When the reachable numeric domain is integral and bounded,
+  explicitly convert after applying the exact Legacy rounding operation; do
+  not broaden the shared formatter from a feature leaf without separate scope.
+- Verification: the ten-second shout window now passes
+  `int32(math.Ceil(...))`; exact cooldown text, count-10 transcript and focused
+  race count 5 exit 0 while malformed-format fatal handling remains intact.
+
+### 2026-08-28 — Connection caches do not define observer metadata admission
+
+- Symptom: CHAT review found linked-item notifications interleaved each
+  recipient's chat before later recipients' metadata, and a newly attached
+  observer received no ItemInfo when the observed target had cached it.
+- Root cause: the Go projection grouped metadata by final chat recipient and
+  checked the target's ItemInfo cache before observer fan-out. Legacy
+  `ProcessChatItems` completes every link's recipient metadata before any chat,
+  while `CheckItemInfo` recursively checks observers before consulting the
+  target connection's cache.
+- Prevention: trace producer loops and connection-level forwarding as separate
+  ordering layers. Build the complete linked-item prelude before chat packets;
+  for ItemInfo only, run observer cache/fan-out before the target cache gate.
+- Verification: the focused test now locks cross-recipient enqueue order,
+  observer-before-target ItemInfo, and a late observer receiving four definitions
+  while the cached target receives none. Current CHAT/map-schema/utility focused
+  count-1 exits 0.
+- Terminal-review ruling: the reviewer initially treated linked-whisper metadata,
+  a late observer's missing NewChatItem/NewHeroInfo, and leading-space target
+  suffixes as Go defects. Exact Legacy layering proves otherwise: ItemInfo checks
+  observers before target cache; NewChatItem/NewHeroInfo use the target cache and
+  remain Observable; only WhisperIn/Out Chat is non-observable; and the unsplit
+  body is sliced by target-name length. Dedicated tests now lock all three
+  defects. Binary import, JSON projection, main map loading and authenticated
+  NoNames runtime tests lock the fourth seam finding; follow-up review returned
+  `No findings`.

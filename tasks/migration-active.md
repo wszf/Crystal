@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-28 02:50 (Asia/Singapore)
+Last verified: 2026-08-28 03:10 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -36,46 +36,45 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `CHAT-P4-MAP-CONTEXT-001`
-- Status: `Active` tracing substep; P4 is scope-frozen with eight of ten
-  children Complete, this child Active and collision rules dependency-blocked.
-- Outcome: preserve NoNames-masked normal map-local chat, cross-map whisper,
-  ordinary range shout, one-shot map/server shout consumption and `@MAP`
-  source text/recipient behavior from the active map context.
-- Go matrix anchors to read: only leaf row 233 and P4 summary row 850; never
-  the full matrix or another phase.
-- Legacy read authority: bounded map-rule import plus normal/whisper/shout and
-  `@MAP` production handlers, linked-definition projection and recipient loops;
+- Leaf ID: `DISC-P7-CLOSURE`
+- Status: `Active` bounded discovery; no P1-P6 dependency-ready functional child
+  remains, so the empty ready queue activates one finite phase-discovery leaf.
+- Outcome: replace P7's vague remaining shop/script wording with an accepted
+  finite child denominator covering every reachable normal/default-NPC access,
+  action, condition, page, input, shop, teleport and quest family.
+- Go matrix anchors to read: registered P7 findings rows 152-157 and P7 summary
+  row 902 only; never the full matrix or another open phase.
+- Legacy read authority: bounded NPC connection gates, normal/default script
+  parser/dispatcher, shop and quest call chains needed to classify residuals;
   every C# file remains read-only.
-- Accepted Go production authority: exact existing map-rule import and
-  `cmd/crystal-server` chat/session paths identified during tracing; register
-  physical filenames here before the first production write.
-- Frozen Go test authority: one new focused authenticated map-context chat test
-  plus bounded existing chat/item-arming/probe expectations after exact path
-  enumeration.
-- Forbidden scope: Complete P6 item actions that arm map/server shout, unrelated
-  map movement/collision/visibility, other chat commands and every C# write.
+- Go read authority: existing NPC/script/shop/quest protocol, worlddata,
+  importer and authenticated-session implementations needed only to classify
+  evidence, gaps and dependencies.
+- Write authority: `docs/migration-matrix.md`, this Active Index and current
+  handoff only. Register physical Go implementation/test authority on each
+  child before any later functional write.
+- Forbidden scope: implementation, broad source inventory, another phase
+  discovery, reopening Complete evidence and every C# write.
 
 ### Protected Go ownership
 
-- P6 shout arming is committed at Go
-  `1d399992a690614a122cc46b3e64b4cda8272c2f`; P3 public utility and existing
-  chat/item authorization behavior remain protected inputs.
+- P7's existing NPC/script/shop/quest evidence, Complete P3-P6/P8 behavior and
+  all dependency-owned P2/P6 leaves are classification inputs, not authority to
+  alter production code.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact Legacy map NoNames import, normal/whisper/range shout,
-  map/server shout and `@MAP` source/recipient call chains before writes.
-- [ ] Prove one-shot shout state, cooldown/level/source order and linked-item
-  recipient projection without reopening P6 item arming.
-- [ ] Prove active Title/FileName, observer forwarding, authenticated packet
-  order, repeated behavior and focused race.
+- [ ] Reconcile every candidate child against existing Go evidence and exact
+  Legacy reachability; split mixed ownership instead of hiding residuals.
+- [ ] Register status, dependency, physical Go write/test authority and an
+  additional gate for every unfinished finite child.
+- [ ] Obtain independent read-only denominator review and resolve every finding;
+  discovery completion makes no claim that a functional child is implemented.
 
 ### Discovery inputs
 
-- Complete `ITEM-P6-SHOUT-ARMING-001`, `CMD-P3-PUBLIC-UTILITY-001`, existing
-  `TestSessionChatTranscript`, item authorization/cache tests and the protocol
-  probe are evidence inputs, not authority to rewrite their business logic.
+- Registered `NPC-P7-ACCESS-GATE-001` and `NPC-P7-SCRIPT-CLOSURE-001`, P7 matrix
+  summary evidence, dependency-blocked P2/P6 leaves and current Go tests.
 
 ### P6 frozen child registry
 
@@ -144,7 +143,7 @@ movement triggers and independent border decoration. All twenty-one children are
 
 Independent reviewer `01a03617-76c2-7652-ab64-7e27143ce72b` rejected two
 candidate revisions, then accepted this ten-child denominator with no remaining
-finding. Eight children are Complete, chat context is Active and collision rules remain dependency-blocked.
+finding. Nine children are Complete and collision rules remain dependency-blocked.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -157,7 +156,7 @@ finding. Eight children are Complete, chat context is Active and collision rules
 | `MAP-P4-DETAIL-001` | Complete | map load + StartPoint | verified Go protocol/probe/map-info candidate | payload/order/suppression/search |
 | `MAP-P4-LIGHT-001` | Complete | — | committed Go `fc6b98b6b312357d850f6710fbf697b8678fd4c2` | UTC production clock/non-UTC host |
 | `MAP-P4-NOREINCARNATION-AUTH-001` | Complete | P5 spell (Complete) | committed Go `1aef1eac1953ca184d7e96c5394ae3c2cc5a3cc3` | imported denial + unchanged amulet/no successful cast |
-| `CHAT-P4-MAP-CONTEXT-001` | Active | P6 shout arming (Complete) | trace exact map-rule import + bounded chat/session paths before writes | NoNames/shout recipients/order |
+| `CHAT-P4-MAP-CONTEXT-001` | Complete | P6 shout arming (Complete) | accepted map import/chat/session evidence | NoNames/shout recipients/order |
 
 ### P1 frozen child registry
 
@@ -231,7 +230,7 @@ broad unnamed scope.
 | `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
 | `DISC-P5-CLOSURE` | P5 | Complete | 16 finite children after regen/HP-drain/safe-zone/Revelation findings: 12 Complete + 4 unfinished at refresh discovery |
 | `DISC-P6-CLOSURE` | P6 | Complete | 19 finite children: 7 Complete + 12 unfinished at freeze |
-| `DISC-P7-CLOSURE` | P7 | Discovery | finite NPC/shop/quest/script children |
+| `DISC-P7-CLOSURE` | P7 | Active | finite NPC/shop/quest/script children |
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |
 | `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system children |
 | `DISC-P11-CLOSURE` | P11 | Discovery | finite miscellaneous-system children |
