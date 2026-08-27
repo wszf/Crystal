@@ -71,3 +71,69 @@
 - Verification: the 210-AI factory test now locks all six deadline families and
   HumanAssassin `Summoned`; focused normal count-10 and race count-3 pass after
   the terminal review corrections.
+
+### 2026-08-27 — Delayed dynamic children are constructed before they are registered
+
+- Symptom: RootSpider, HellKnight, SepHighTaoist, StoneTrap, SummonSkeleton and Mirroring consumed only partial constructor draws at admission, then allocated/materialized the child when the delayed spawn fired; immediate creators split the inherited prefix between package-global and world RNG streams.
+- Root cause: the Go delayed-action records captured definitions and compensating fields rather than the constructor-complete object that Legacy passes to `DelayedType.Spawn`/`CompleteMagic`.
+- Prevention: materialize every dynamic child with the creator's locked world stream at the Legacy `GetMonster` point, retain the unregistered value by reserved ObjectID, and only place/register/broadcast it at the delayed spawn boundary. Spawn-time overrides must not consume the constructor twice.
+- Verification: the finite 29-call/26-file ledger routes through the dynamic wrapper or pending queue; focused creator and protected constructor/natural-regeneration suites pass after failure-proved fixture corrections.
+
+### 2026-08-27 — Same-tick dynamic children are outside the existing-object process set
+
+- Symptom: a zero first-Regen draw let a FloatingRock child emit `DamageIndicator` later in the same world tick that created it, although Legacy map-object enumeration precedes the creator and delayed-action registration boundary.
+- Root cause: Go AI inserted the child before the later aggregate natural-Regen pass, which rebuilt its ID list from the mutated world map.
+- Prevention: stamp the actual dynamic registration time, skip both common AI and natural Regen when it equals the current tick, and retain the stamp rather than clearing it before the later Regen phase; delayed children replace construction time with registration time when they enter the map.
+- Verification: the exact zero-boundary failure no longer emits a same-tick packet; protected natural-Regen/BaseFamily/specialized-constructor tests and the dynamic creator focused set exit 0.
+
+### 2026-08-27 — Spawned packet projection must follow concrete GetInfo, not an internal summoned marker
+
+- Symptom: a review inferred that HumanAssassin's constructor-time `Summoned=true`
+  made its first `ObjectPlayer.Extra` true, while generic dynamically created
+  monsters exposed Go's internal `Summoned` marker through `ObjectMonster.Extra`.
+- Root cause: constructor state, the virtual `GetInfo` implementation, base
+  `Spawned` broadcast, and derived post-broadcast mutation were collapsed into
+  one steady-state packet helper. HumanAssassin actually hard-codes
+  `Extra=false`; HumanWizard exposes the constructor value on the first packet;
+  base `MonsterObject.GetInfo` leaves Extra false.
+- Prevention: project the packet from the concrete Legacy `GetInfo` at the base
+  broadcast boundary, then apply the derived `Spawned` mutation to runtime
+  state. Never expose a Go-only lifecycle marker through a base packet field.
+- Verification: a GeneralMeowMeow production-entry fixture first failed on the
+  generic `Extra=true` leak; HumanAssassin/HumanWizard production-entry cases,
+  generic ordinary-pet and session transcripts, the exact focused count-10
+  reruns, and the full dynamic creator focused group now pass.
+- Review ruling: a proposed repeated SummonSkeleton/Mirroring pending-child test
+  failed because the second production request is rejected by the Legacy
+  1800ms global `CanCast`/SpellTime gate before the 500ms action boundary. The
+  unreachable repeat-cancel finding was rejected rather than encoded in helper-
+  only behavior.
+
+### 2026-08-27 — Failed Spawn attempts still retain constructor side effects
+
+- Symptom: HornedCommander edge boulders and TrapRock edge children were
+  rejected before Go materialization, so invalid cells consumed neither their
+  reserved ObjectID nor the inherited constructor RNG prefix.
+- Root cause: Go used map validity as a creator admission gate, while Legacy
+  calls `GetMonster` first and lets `MonsterObject.Spawn` reject the cell.
+- Prevention: place construction and ObjectID allocation at the exact Legacy
+  `GetMonster` point; only the Spawned suffix, registration and packets remain
+  conditional on successful `Spawn`.
+- Verification: production-entry edge fixtures lock all eight rejected
+  HornedCommander constructions and TrapRock invalid/valid/invalid ID gaps;
+  the dynamic focused count-10 and race count-3 gates pass.
+
+### 2026-08-27 — Restore and item summon use the first Spawned projection
+
+- Symptom: restored or item-summoned derived pets emitted their steady
+  post-`Spawned` `Extra` value as the first object packet; the full server gate
+  exposed the stale HumanWizard session expectation after correction.
+- Root cause: the shared constructor helper returned post-derived runtime state
+  and two production callers serialized it directly instead of replaying the
+  base `Spawned` broadcast boundary.
+- Prevention: every production registration path must serialize the concrete
+  pre-derived `GetInfo` projection, then retain the derived runtime mutation;
+  login restoration is a real Spawn, not an already-spawned snapshot.
+- Verification: Shinsu restore/item production entries assert first
+  `Extra=false` and steady `true`; HumanWizard authenticated restore/relogin
+  asserts first `true` and steady `false` at count 10 and race count 3.

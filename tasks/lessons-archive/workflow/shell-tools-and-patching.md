@@ -621,3 +621,35 @@
 - Recurrence: the first rerun then stopped at the next near-match, `Legacy repository snapshot`; checking only the first reported literal was insufficient because the checker is fail-fast.
 - Strengthened prevention: inspect and copy the checker's complete required-heading list before the next rerun, not just the first reported missing heading.
 - Verification: all required headings and the unique Active-leaf field were aligned with the checker, then the full control check was rerun.
+
+### 2026-08-27 — Verify ripgrep availability before archive searches
+
+- Symptom: the required bounded lesson search failed immediately with `zsh: command not found: rg` and produced no admissible search evidence.
+- Root cause: the active execution image includes ripgrep-oriented workflow rules but no `rg` binary anywhere on its configured `PATH`.
+- Prevention: run `command -v rg` before the first search; when it is absent, preserve exact tracked path/glob boundaries with `git grep` rather than installing tools or treating the failed output as evidence.
+- Verification: the failed output was discarded; exact `git grep` queries over `tasks/lessons.md` and `tasks/lessons-archive/**/*.md` exited 0, and only their matching sections were read.
+- Recurrence: three later queries respectively combined a broad symbol list with long file reads, used a function regex broad enough to match every call, and left an expected-zero match at rc=1. All three outputs were discarded; the accepted reruns declared zero-match semantics first, used fixed full declarations, and read exact ranges separately.
+- Control finding: adding that historical evidence to the already-near-limit active lesson made `check-migration-control.sh` fail at 51,473 bytes versus 51,200. The evidence was moved here, the canonical C02 rule was left concise, and the full control gate was rerun.
+- Patch finding: a line-oriented Perl rewrite treated the nested `nextIDLocked()` close parenthesis as the end of two multiline constructor calls, yielding `nextIDLocked(, now)`. Automated call rewrites must not parse nested Go syntax; multiline calls now use exact `apply_patch` hunks, and `gofmt`, `git diff --check`, and touched compile verified the correction.
+- Compile finding: removing BoneLord's last package-global direction draw left `math/rand` imported, so the first touched compile failed only on the unused import. Symbol-removal patches must include their import cleanup in the same transaction; after deleting the import, `gofmt`, diff check, and touched compile exited 0.
+- Coupled-patch finding: Mirroring field removal was applied before its consumer because the consumer hunk guessed both a field layout and `action.MirroringMapIndex`; even the first reread was not copied literally and the second hunk repeated the wrong map expression. Both compiles failed only on the dangling field use. Coupled producer/consumer edits now copy the exact contiguous reread into one hunk; the literal `mapIndex` correction then passed gofmt, diff check, and compile.
+- Test-log finding: the first package gate used `tee`, so expected server logs and a fatal-under-lock timeout were streamed back as a broad truncated tool result despite also being saved under `/tmp`. Long package gates must redirect to a bounded log, print only rc and failure headings, and read exact failure ranges separately; all accepted follow-up gates use that shape.
+- Fail-fast recurrence: after `gofmt` changed test-field alignment, a stale patch hunk failed; the compound remediation command omitted `set -e`, so compile and focused tests still ran and repeated the known type error. Every patch/format/test compound call must begin with `set -e`; after any failed hunk, reread the exact physical lines before sending a new standalone patch. The corrected fail-fast call applied the explicit ID conversion, then diff check, touched compile, count-10 and race-count-3 exited 0.
+
+### 2026-08-27 — Silent read-only reviewers provide no acceptance verdict
+
+- Symptom: two serial bounded `luna_worker` final-diff reviewers remained
+  running for extended waits, returned no partial or final report after normal
+  and interrupting stop requests, and exposed no active Go process.
+- Root cause: the worker execution/report channel did not reach a terminal
+  response; absence of a process or workspace write cannot be promoted to a
+  no-finding review result.
+- Prevention: keep final review workers read-only and off the critical path;
+  never interrupt a writer under this rule. After bounded long waits and an
+  explicit stop/report request, close an unresponsive read-only thread, record
+  that it supplied no verdict, and have main reproduce every provisional
+  finding from authoritative Legacy source before acceptance.
+- Verification: workers `01a0431c-5f2f-7772-a941-dcac6ef04386` and
+  `01a04349-736b-72b0-ae15-892caedb6227` were closed with zero writes; main's
+  terminal review found and corrected invalid-Spawn constructor order and
+  restored-pet first packets, then focused/full/race/vet/build gates passed.

@@ -835,3 +835,18 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Prevention: reread mutation-helper declarations before constructing a production-entry fixture, especially adjacent same-type enum parameters; label or review each positional argument against the declaration.
 - Verification: changing the call from `(2, 0)` to `(0, 2)` made the exact authenticated high-SC Revelation test exit 0 and reach its wrapped-expiration transcript.
 - Recurrence: the first active-Revelation bootstrap extension then timed out waiting for the viewer session to stop because viewer logout synchronously broadcast `ObjectRemove` into two unread `net.Pipe` peers. Install both peer removal readers before closing the viewer; the corrected authenticated test exits 0 and verifies the full bootstrap/removal lifecycle.
+
+### 2026-08-27 — Dynamic-constructor convergence requires fixture-wide RNG prefixes
+
+- Symptom: the first server-package run failed creator fixtures at unexpected bounds `100/8/10000/3000/1000`, shifted HellLord quake values, added a valid later Regen indicator, and a ZumaTaurus session fataled while holding the world lock, leaving cleanup deadlocked until the ten-minute package timeout.
+- Root cause: old fixtures described creator-local choices only because `materializeMonster` consumed constructor draws on package-global randomness; once production correctly injected one stream, every deterministic callback and transcript had to include the full constructor prefix/suffix and isolate non-target Regen.
+- Prevention: constructor-bearing creator fixtures must record the complete ordered stream, return a future first-Regen value when Regen is not under test, and update downstream semantic rolls by their exact new positions rather than guessing a constant offset. Fatal callbacks used under a held world lock require focused execution before package gates.
+- Verification: all failure-proved creator fixtures were corrected from exact bounds; the combined dynamic creator focused set and protected constructor/natural-Regeneration set exit 0 without timeout.
+
+### 2026-08-27 — Cross-domain fixture IDs must retain their declared widths
+
+- Symptom: the new delayed-HellKnight production-entry test failed touched compile because a `uint32` object ID was assigned directly to `protocol.SelectInfo.Index`, which is `int32`.
+- Root cause: the fixture reused one numeric identity across world-object and character-protocol domains without checking the target field type.
+- Prevention: preserve typed IDs at each boundary and use an explicit checked conversion when a test intentionally projects one value into both domains; run touched compile before semantic test execution.
+- Verification: the exact `int32(observerID)` projection compiles, and the RootSpider/HellKnight delayed-spawn tests pass at count 10 and under race at count 3.
+- Transcript recurrence: the wider RootSpider group then failed five exact fixtures because they still expected only `ObjectMonster`; Legacy `MonsterObject.Spawned` broadcasts object then health. Updating the unit and authenticated-session transcripts to require `ObjectMonster,ObjectHealth` made the full dynamic/RootSpider/HellLord group pass at count 10 and under race at count 3.
