@@ -21,7 +21,7 @@ duplicate.
 
 - Symptom: 猜测目录、空 glob、裸反引号、错误正则或未闭合字符串导致勘察失败。
 - Root cause: 依赖 shell 隐式展开和记忆中的文件布局，没有先验证最小查询。
-- Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；含 glob 的固定模板是 `rg -n --glob '*.go' -e 'pattern' -- path`，渲染 argv 后逐字拒绝 `-- --glob`，失败 argv 禁止复制修补，因为 `--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名或 zsh 只读特殊参数（如 `status`）；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用 CLI 子命令前按对应 `--help` 核对全局与子命令选项位置；数据库对象名必须从实际 schema 复制，禁止查看 schema 后仍使用惯例名称猜测；精确 commit/thread/agent ID 必须从权威命令输出复制，禁止根据短 ID 猜测补全；调用语言模块前先核对运行时版本/可用性，并优先让目标程序自身解析配置；修改含非 ASCII 的文档时优先使用 `apply_patch`，若必须用脚本 here-doc，先最小验证解释器与源码编码。
+- Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；含 glob 的固定模板是 `rg -n --glob '*.go' -e 'pattern' -- path`，渲染 argv 后逐字拒绝 `-- --glob`，失败 argv 禁止复制修补，因为 `--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名或 zsh 只读特殊参数（如 `status`）；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用 CLI 子命令前按对应 `--help` 核对全局与子命令选项位置；数据库对象名必须从实际 schema 复制，禁止查看 schema 后仍使用惯例名称猜测；精确 commit/thread/agent ID 必须从权威命令输出复制，禁止根据短 ID 猜测补全；调用语言模块或 CLI 前先核对当前版本、`PATH` 与可用性，并优先让目标程序自身解析配置；修改含非 ASCII 的文档时优先使用 `apply_patch`，若必须用脚本 here-doc，先最小验证解释器与源码编码。
 - Verification: `rg` 选项、`path` 覆盖 `PATH`、未命中 glob 和 zsh 标量命令替换均已最小重跑；本批 archive 检索从失败的裸 `*.json`/换行标量改为直接 `rg --glob` 后零错误完成；Python 3.9 缺少 `tomllib` 时改由实际 Codex CLI 解析配置；Codex 验证脚本将只读 `status` 改为 `rc`，并把全局 approval 选项移到 `exec` 前后成功执行；Codex 0.148.0 不支持对 `features`/`debug` 使用全局 `--strict-config`，且 `| ... || true` 曾掩盖该错误后误打印 PASS；该证据已作废，后续先查目标子命令 `--help`、保留上游退出码，并只在命令真实零退出后报告通过，本次改由 `app-server --strict-config` 零退出与 `doctor` 的 `config loaded` 交叉验证；Goal 数据库查询从猜测的 `goals` 改为 schema 中实际的 `thread_goals` 后成功核对字段约束；本批从 `cmd/crystal-server` 子目录误用根级 `./cmd/crystal-server` 失败后，改用 `go test .`，并将仓库根/命令包路径作为同一最小验证；本 Session Legacy `/usr/bin/python3` 拒绝含中文的 here-doc 后，确认 Python 3.9.6 并改用 `apply_patch` 零错误写入文档；本批 handoff 初稿根据 `3e85ec4` 猜测完整哈希，随即以 Go 仓库 `git rev-parse HEAD` 的 `3e85ec4c4268bc4a24e5ec8cc0ff7a96ef58775c` 替换并回读核对。
 - Strengthening after localized-welcome review: 再次猜测仓库根存在 `Localization/` 导致 `rg` 读取报错；整次调用证据已丢弃，随后先用根级 `rg --files` 定位实际 tracked localization fixtures，确认 server 根目录文件由运行时生成而非仓库资产。
 - Strengthening after TestServer bootstrap: Go 勘察再次把不存在的 `world_player*.go` 作为未引用 glob 交给 zsh，并有数次让预期“零匹配”的 `rg` 在 `set -e` 下终止调用；相关调用输出均作废。后续先用 `rg --files` 定位文件，并仅在“零匹配本身是有效答案”时显式使用 `rg ... || true`，实现、测试和文档只采用零退出的重跑结果。
@@ -46,7 +46,7 @@ duplicate.
 - Strengthening during Regen Revelation audit: 主线程又在 Legacy 根的有效 `RevTime` 查询后追加 Go 相对路径，触发 zsh 未命中并污染整次调用。该结果已全部作废并按仓独立零退出重跑；跨仓语义对照必须预先写成两个物理调用，不能在首仓命令成形后追加另一侧搜索。
 - Strengthening during Revelation recovery: Go 检索又让 zsh 展开未核验的 `world*.go`/`*visibility*.go`；即使命中且 exit 0，整次结果仍作废。文件族只能对已验证目录使用 `rg --glob`，后续独立重跑 exit 0。
 - Strengthening during Revelation integration: 预期“零残余”的 post-patch `rg` 又裸跑并 exit 1；该调用作废后用显式 rc 0/1 分支重跑 exit 0。负向验收在发送前必须按 absence query 模板成形。
-- Strengthening during SafeZoneHealing integration: 启动顺序读取又附加猜测的 `npcs.go` 并 exit 2，整次输出作废；根因仍是把惯例文件名混入已验证路径。随后仅用已登记的 `main.go`/`world.go` 零退出重跑；任何附加路径都必须先独立枚举。
+- Strengthening during BaseFamily audit: 主线程三次在 Go 根追加 Legacy 路径，并另猜不存在的 `axe_skeleton.go`；相关调用即使前段有输出也全部作废并按仓独立零退出重跑。发送前必须检查每个显式路径属于 workdir 且来自本轮枚举，禁止采用失败调用的部分输出。
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -60,7 +60,7 @@ duplicate.
 - Strengthening through MAP hazard: 跨文件补丁因陈旧对齐被拒且未 fail-fast；非唯一 `cfg` hunk 又落入错误测试并伪通过。证据均作废后按文件/唯一函数锚点拆事务并回读落点。命令链必须 `set -e`，测试通过不能替代物理行核验。
 - Strengthening at Regen compaction gate: 首次 handoff 补丁对同一路径同时使用 Delete/Add operation，被 `apply_patch` 整体拒绝；随后把独立 lesson 补丁串入复合命令，前段 handoff/lesson 已写入而尾段陈旧锚点失败，进程整体 exit 1。根因是把“替换整文件”和“多目标增量补丁”混成一个事务，并在未复读 C03 物理行前追加第二个 patch。以后整文件 replacement 单独完成并回读；每个 `apply_patch` 一次只承担一个逻辑目标，任何复合调用失败都要逐文件核对部分写入，再以当前物理行重跑。此次已回读 handoff/C01 落点；archive append 又留下 EOF 额外空行并被 `git diff --check` 拦截，已规范为恰好一个终止换行并独立通过 diff check。
 - Strengthening during Regen fixture closure: 两个测试补丁仍以非唯一 `world := newGameWorld()`/`world.loadItemInfos` 落入同文件更早用例；一个无声污染无关 NPC 测试，另一个把局部 helper 声明放错作用域并被 compile gate 拦截。两次均先移除错误落点，再用唯一 `func Test...` 锚点重写并回读 `rg` 行号；同文件重复 fixture 也必须按函数名锚定，不能把“测试文件已精确”误当成 hunk 唯一。
-- Strengthening during Revelation authority freeze: Active patch 夹带不存在的 checklist context，matrix patch 又猜测两个独立 anchors 相邻；两次均被拒且零写入。随后只按刚回读的连续 counters/authority/ruling/registry/evidence 边界拆开并通过 checker/diff；控制面禁止拼接独立定位结果或追加未复读的“顺手清理” hunk。
+- Strengthening during BaseFamily integration: 仅按待替换的 CanAttack 文本寻找，使补丁落入更早 generic processor；立即用 diff/函数范围发现并恢复，再以 `func` anchor 重跑。即使新增代码块内文本看似唯一，补丁也必须携带目标函数声明，修改后核验只有预期函数。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -132,6 +132,7 @@ duplicate.
 - Prevention: 冻结 ticker、session loop、独立实体计时和全局时间源；必要时等待 goroutine 完全退出。
 - Verification: 重复/race 运行只出现人工推进产生的事件和随机调用；本次 hazard full gate 捕获 session read-loop 在 world ticker 停止后仍调用 `world.tick` 并额外消费 `Next(12000)`，测试改为在同一 world 锁内调用目标 create/process helper、恢复远期 schedule 后再解锁，单测 count-100 通过。
 - Strengthening through Human regen: 新增周期性生产行为后，所有跨过其 Due 的旧 synthetic tick 和 partial-vitals bootstrap 都必须显式冻结该实体计时器；否则额外 HealthChanged 会污染包数并在 net.Pipe 未设 reader 时反压整个 shared world。bootstrap 返回后再设 timer 可能已经晚于 connection loop 的下一次 pre-read tick；非目标 session fixture 必须在启动 server 前用 player-enter hook 安装远期 timer，不能关闭或延迟真实 production regen。
+- Strengthening through BaseFamily: common population 扩张后，非目标 AI=0/default fixture 还必须独立冻结 `MonsterAIRoamAt`；远期 Action/Search 不会阻止到期 roam 的 RNG 与 ObjectTurn。
 
 ### 2026-08-21 C13 — 延迟动作必须区分 admission、snapshot、impact 和后续 tick
 
@@ -267,7 +268,7 @@ duplicate.
 - Root cause: 把 compact 摘要当成迁移记录，或只在“快要 compact”之后才补 handoff，导致 compact 前没有可核验的完整状态边界。
 - Prevention: 每次 compact 前，或收到 compaction/上下文上限/rollover 信号时，立即停止实现和测试，先写/刷新 `tasks/migration-handoff.md`；即使当前批次只有 Markdown/文档变更也必须执行。记录两仓路径、分支/HEAD、完整 tracked/staged/untracked 状态、所属文件、测试退出码与失败归因、矩阵行、未提交工作和恢复命令；回读并对照两仓校验后再 compact。compact 后沿用同一 active Goal，不因 compact 单独重开 Goal；自动摘要仅作不可信上下文。
 - Verification: `agents.md`、`tasks/goal-task.md` 和 `tasks/migration-handoff.md` 均将其定义为 hard gate，并要求无 handoff 时先从两仓重建记录再继续；本次 compact 摘要声称已刷新，但 handoff 仍写 Go clean、实际却有 8 tracked + 2 untracked，因此已停止实现/测试并从两仓重建后才恢复。
-- Strengthening after third utility-command rollover: compact 恢复环境只列出一名 direct subagent，但首版 handoff 回读期间 Go 状态从九文件继续增长为十二文件，证明另一个未暴露 worker 尚在写入；仅看环境 `<subagents>` 和 `go`/server 进程不足以证明 quiescence。Hard gate 今后先关闭所有已知 agent，再核对当前 UUID thread-writer locks（不计 `.coordination.lock`）；对未知 lock ID 用 agent tool 停止并收取 memory-only 报告，直到只剩主线程 lock。随后至少两次对照工作树，第二次必须发生在 handoff 写入后；任一文件列表、mtime 或 status 变化都使草稿失效，须重新冻结并回读。本次据 lock 精确关闭 `01a02e52-2e36-7951-a009-65595fdd6d7e`，收取其三文件/测试记账，确认只剩主线程 lock、无 Go/server 进程且 Go 状态稳定为 6 tracked + 6 untracked 后重写 handoff。
+- Strengthening after hidden-writer recurrences: 恢复环境与旧 handoff 都可能漏报仍在写入的 worker；BaseFamily 本轮在新 writer 启动后才由未跟踪测试暴露旧 writer，造成同文件 authority 短暂重叠。恢复或 spawn 前先核对当前 UUID thread-writer locks（不计 `.coordination.lock`），关闭未知 agent 并收取报告，直到只剩主线程 lock；随后至少两次对照工作树。任一文件列表、mtime 或 status 变化都使 handoff/authority 草稿失效。本轮已停止新 writer、关闭两线程并确认只剩主 lock。
 
 ### 2026-08-23 C30 — Subagent 模型不可用时必须在执行前显式说明
 

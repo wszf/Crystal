@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-27 01:16 (Asia/Singapore)
+Last verified: 2026-08-27 13:01 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -36,22 +36,28 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `MONSTER-P5-BASE-FAMILY-001`
-- Status: `Active`; P5 is scope-frozen with sixteen of eighteen children
-  Complete, this one Active and one Ready. SafeZoneBorder is accepted Complete
-  pending this batch's Go/Legacy commits.
-- Outcome: preserve the inherited search/target/move/melee lifecycle for the
-  exact 46 base-family ordinals (`0`, mapped `9`, and 44 default-factory AIs).
-- Go matrix anchors to read: only P5 summary row 851, registry rows 3168-3170
-  and completed SafeZone evidence 3255-3277; never the full matrix or another phase.
-- Legacy read authority: bounded base `MonsterObject` constructor, factory
-  dispatch and inherited ProcessAI/search/target/move/attack call chains for
-  the registered 46 ordinals; every C# file is read-only.
-- Initial Go write authority is control/matrix routing only. Before production
-  writes, freeze exact `monster_ai.go`/`world.go` subsets and exact focused/
-  authenticated tests from the registered row.
-- Forbidden scope: committed SafeZone owners, ordinary-spawn child, mapped
-  specialized AI behavior and every C# write.
+- Leaf ID: `REGEN-P5-MONSTER-NATURAL-001`
+- Status: `Active`; P5 is scope-frozen with seventeen of nineteen children
+  Complete, this one Active and ordinary-spawn Ready.
+- Outcome: preserve inherited `MonsterObject.ProcessRegen`: constructor-random
+  first due, inclusive ten-second natural HP cadence/formula, strict 600ms
+  HealAmount drain, full-HP clearing and poison reset ordering.
+- Go matrix anchors to read: only P5 summary row 851, registry rows 3173-3175
+  and completed BaseFamily evidence 3192-3218; never the full matrix or another phase.
+- Legacy read authority: bounded `MonsterObject` constructor/CanRegen/Process,
+  `ProcessRegen`, poison reset and the dynamic regen overrides already exercised
+  by SafeZone tests; every C# file is read-only.
+- Frozen Go production authority: new
+  `cmd/crystal-server/monster_natural_regeneration.go`; bounded fields,
+  constructor timing and tick-order wiring in `world.go`; bounded convergence
+  with existing Monster HealAmount logic in `healing_circle.go`; only exact
+  poison/reset adapters proved by the trace may be added before writes.
+- Frozen Go test authority: new `monster_natural_regeneration_test.go` and
+  optional authenticated `monster_natural_regeneration_session_test.go`, plus
+  bounded fixture corrections in `safe_zone_healing_test.go`/`world_test.go`
+  only when an observed focused/full failure proves them necessary.
+- Forbidden scope: completed BaseFamily behavior, mapped specialized AI,
+  ordinary-spawn, Human/Hero regen semantics, config runtime leaf and every C# write.
 
 ### Protected Go ownership
 
@@ -66,16 +72,16 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Remaining acceptance work
 
-- [ ] Trace the exact 46-ordinal factory/dynamic-type partition and inherited
-  search/target/move/melee gates, timing, packets and delayed impact.
-- [ ] Reconcile current Go dispatch and freeze exact production/test authority.
-- [ ] Implement and prove all 46 variants, Player/owned-Monster/Hero targets,
-  delayed revalidation, repeated behavior and focused race.
+- [ ] Freeze the exact override/exclusion set and Process ordering against
+  existing HealAmount and poison owners before writes.
+- [ ] Implement constructor first-due and natural ten-second HP regeneration.
+- [ ] Prove natural/pool aggregation, full-HP clear, poison reset, packets,
+  repeated behavior and focused race through production entry points.
 
 ### Discovery inputs
 
-- This child consumes completed mapped-AI/shared combat infrastructure; it does
-  not reopen specialized AI rows or the serial ordinary-spawn child.
+- This child consumes completed BaseFamily constructor timing and accepted
+  SafeZone HealAmount logic; it does not reopen Human regen or specialized AI.
 
 ### P6 frozen child registry
 
@@ -114,8 +120,8 @@ children. Hazard Struck tracing proved one finite omitted regen child; its bound
 trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
 proved one reachable long-Revelation expiry-width correction; its bounded trace
 proved one finite global refresh follow-up. Safe-zone tracing then split direct
-movement triggers and independent border decoration. Fourteen are Complete, one
-is Active and three are Ready.
+movement triggers and independent border decoration. Seventeen are Complete,
+one is Active and one is Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -132,7 +138,8 @@ is Active and three are Ready.
 | `SPELL-P5-SAFEZONE-BORDER-001` | Complete | map safe-zone geometry | config/main/world/effect visibility + new focused tests | perimeter/payload/visibility/restart/race |
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
-| `MONSTER-P5-BASE-FAMILY-001` | Active | mapped core | monster_ai/world + focused tests | 46 ordinals + target-kind/race |
+| `MONSTER-P5-BASE-FAMILY-001` | Complete | mapped core | committed Go `3818544beea374ab47ee96bc59b9514dd1a1b476` | 46 ordinals + target-kind/race |
+| `REGEN-P5-MONSTER-NATURAL-001` | Active | base constructor timing | monster natural regen + focused/session tests | random first due/10s cadence/formula/reset/race |
 | `MONSTER-P5-ORDINARY-SPAWN-001` | Ready | base family | archer_summons/hell_lord/world + focused tests | AI=60-63/99 + restart/race |
 | `DROP-P5-LOOT-HARVEST-001` | Complete | item schema consumer | existing committed evidence | randomness/owner/inventory/ground |
 | `RESPAWN-P5-POPULATION-001` | Complete | — | existing committed evidence | strict timing/order/restart/race |
@@ -265,6 +272,9 @@ broad unnamed scope.
 - `PERSIST-P12-RESTART-EQUIV-001` (`Ready` input to `DISC-P12-CLOSURE`,
   dependent on P3-P11 authorities): preserve periodic save, atomic replacement,
   backup, global re-export, and complete multi-store restart/recovery.
+- `CFG-P1-MONSTER-AI-RUNTIME-001` (`Ready`, dependent on P5 lifecycle):
+  preserve `MonsterProcessWhenAlone`, recall enabled/range/cooldown defaults,
+  INI write-back and their inherited MonsterObject runtime consumers.
 
 ## Selection protocol
 
