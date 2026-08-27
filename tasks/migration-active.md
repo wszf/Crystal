@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-27 14:46 (Asia/Singapore)
+Last verified: 2026-08-27 16:25 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -36,45 +36,49 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `MONSTER-P5-SPECIALIZED-CONSTRUCTOR-002`
-- Status: `Active`; P5 is scope-frozen with eighteen of twenty children
-  Complete, this one Active and ordinary-spawn Ready.
-- Outcome: preserve every non-base dynamic Monster's inherited CoolEye,
-  direction, Regen/Search/Roam deadlines and concrete constructor RNG before
-  initial/respawn cell selection without reopening processor behavior.
-- Go matrix anchors to read: only P5 summary row 851, registry rows 3173-3176
-  and completed natural-Regen evidence 3193-3209; never the full matrix or another phase.
-- Legacy read authority: bounded factory table, `MonsterObject` base constructor,
-  every concrete constructor with a direct RNG/field override, and `Spawn` cell
-  selection; every C# file is read-only.
-- Frozen Go production authority: bounded constructor/RNG/projection helpers in
-  `cmd/crystal-server/world.go`; consume accepted natural-Regen timing without
-  changing combat, AI processors, lifecycle or spawn ownership.
-- Frozen Go test authority: new
-  `monster_specialized_constructor_inheritance_test.go`; bounded expected-
-  direction/session corrections only after a focused/full failure proves them.
-- Forbidden scope: completed natural/BaseFamily/processor behavior,
-  ordinary-spawn, config runtime, Human/Hero semantics and every C# write.
+- Leaf ID: `MONSTER-P5-DYNAMIC-CONSTRUCTOR-003`
+- Status: `Active` tracing substep; P5 is scope-frozen with nineteen of
+  twenty-one children Complete, this one Active and ordinary-spawn Ready.
+- Outcome: make every non-factory dynamic Monster creator consume inherited,
+  concrete and creator-specific RNG from one injected world stream while
+  preserving constructor fields, creator overrides and child lifecycle order.
+- Go matrix anchors to read: only P5 summary row 851, registry rows 3175-3177
+  and specialized-constructor evidence 3211-3229; never the full matrix or another phase.
+- Legacy read authority: bounded dynamic `GetMonster`/constructor/Spawn callers,
+  their target/timer/direction overrides and concrete constructors; every C#
+  file remains read-only.
+- Go production authority gate: no production writes until the exact non-test
+  `materializeMonster` creator partition is classified. Then replace this gate
+  with the finite accepted `world.go` plus creator-file write list before edits.
+- Frozen Go test authority: new `monster_dynamic_constructor_test.go`; bounded
+  existing creator-test corrections only after focused/full failure proves them.
+- Forbidden scope: completed factory/BaseFamily/natural/processor behavior,
+  ordinary AI=60-63/99 spawn, config runtime and every C# write.
 
 ### Protected Go ownership
 
 - Completed BaseFamily `3818544beea374ab47ee96bc59b9514dd1a1b476`
   and natural-Regen `fc0c66cc9de88db30c752bf1a430e58764605804`
-  remain protected. Earlier P1-P6
-  evidence may be consumed, not redesigned.
+  remain protected. Specialized constructor
+  `8c16d9e2a8d479091c43ab379bb090a09a0ef946` is also protected; earlier
+  P1-P6 evidence may be consumed, not redesigned.
 
 ### Remaining acceptance work
 
-- [ ] Freeze the finite non-base factory partition, inherited-vs-overridden
-  field matrix and complete concrete-constructor RNG suffix before writes.
-- [ ] Apply inherited projections and remove the temporary partial-direction seam.
-- [ ] Prove constructor fields/RNG/cell order through initial population,
-  respawn and authenticated repeated/race entry points.
+- [ ] Freeze every production dynamic creator, Legacy counterpart and exact RNG/
+  override order; update the authority gate before any production write.
+- [ ] Route inherited prefix, concrete suffix and creator-local random choices
+  through one locked injected stream without double-consuming existing draws.
+- [ ] Prove target capture, direction/timer overrides, child registration,
+  lifetime and repeated/race behavior through real creator entry points.
+- [ ] Keep direct ordinary AI=60-63/99 map-spawn behavior in its Ready sibling.
 
 ### Discovery inputs
 
-- This child consumes accepted BaseFamily/natural constructor streams and the
-  completed factory ledger; it does not reopen any specialized processor.
+- This child consumes the accepted factory ledger and its explicit non-factory
+  projection seam. The first bounded query found every production
+  `materializeMonster` callsite; classification must separate child creators,
+  top-level cross-phase spawns and ordinary AI=60-63/99 before writes.
 
 ### P6 frozen child registry
 
@@ -113,7 +117,7 @@ children. Hazard Struck tracing proved one finite omitted regen child; its bound
 trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
 proved one reachable long-Revelation expiry-width correction; its bounded trace
 proved one finite global refresh follow-up. Safe-zone tracing then split direct
-movement triggers and independent border decoration. Eighteen are Complete,
+movement triggers and independent border decoration. Nineteen are Complete,
 one is Active and one is Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -133,7 +137,8 @@ one is Active and one is Ready.
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
 | `MONSTER-P5-BASE-FAMILY-001` | Complete | mapped core | committed Go `3818544beea374ab47ee96bc59b9514dd1a1b476` | 46 ordinals + target-kind/race |
 | `REGEN-P5-MONSTER-NATURAL-001` | Complete | base constructor timing | committed Go `fc0c66cc9de88db30c752bf1a430e58764605804` | random first due/10s cadence/formula/reset/race |
-| `MONSTER-P5-SPECIALIZED-CONSTRUCTOR-002` | Active | natural-regen trace | world constructor + static/focused/session tests | non-base inherited fields/full RNG order/respawn/race |
+| `MONSTER-P5-SPECIALIZED-CONSTRUCTOR-002` | Complete | natural-regen trace | committed Go `8c16d9e2a8d479091c43ab379bb090a09a0ef946` | non-base inherited fields/full RNG order/respawn/race |
+| `MONSTER-P5-DYNAMIC-CONSTRUCTOR-003` | Active | specialized constructor | freeze exact dynamic child creators before writes | one injected stream/prefix/overrides/child lifecycle/race |
 | `MONSTER-P5-ORDINARY-SPAWN-001` | Ready | base family | archer_summons/hell_lord/world + focused tests | AI=60-63/99 + restart/race |
 | `DROP-P5-LOOT-HARVEST-001` | Complete | item schema consumer | existing committed evidence | randomness/owner/inventory/ground |
 | `RESPAWN-P5-POPULATION-001` | Complete | — | existing committed evidence | strict timing/order/restart/race |
