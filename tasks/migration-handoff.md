@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-27 13:01 (Asia/Singapore)
+Last updated: 2026-08-27 13:02 (Asia/Singapore)
 
 This replace-in-place snapshot closes the uncommitted
 `MONSTER-P5-BASE-FAMILY-001` batch and routes the next P5 leaf. It supersedes
@@ -19,11 +19,11 @@ the stale pre-terminal-review snapshot.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
 - Branch `master`; observed HEAD
-  `971248f95fd56c031e5f02ce7a724937fe2820f1`; upstream `origin/master`, ahead
-  486 at observation.
-- Unstaged tracked files: `tasks/lessons.md`, `tasks/migration-active.md`, and
-  this handoff. Untracked file:
-  `tasks/lessons-archive/migration/monster-base-family.md`. Index is empty.
+  `adf2a340043d5c84a11e17b84063c4ec6e4c00df`; upstream `origin/master`, ahead
+  487 at observation.
+- Worktree and index were clean immediately before this handoff refresh. The
+  handoff-only commit that records this snapshot is the expected one-commit
+  delta from the observed HEAD; there are no untracked files.
 - `tasks/check-migration-control.sh` exits 0. Tracked, staged and untracked `.cs`
   gates are empty.
 
@@ -71,7 +71,6 @@ the stale pre-terminal-review snapshot.
   `cmd/crystal-server/monster_natural_regeneration.go`, bounded world fields/
   constructor/tick wiring, convergence with `healing_circle.go`, new focused
   tests and only trace-proved poison reset adapters.
-- Commit the current Legacy control documents, then resume by searching the
-  lesson archive for natural Monster regen and tracing the
-  bounded override/exclusion set, and freezing exact reset adapters before new
-  production writes.
+- Commit this handoff-only snapshot, then resume by searching the lesson archive
+  for natural Monster regen, tracing the bounded override/exclusion set, and
+  freezing exact reset adapters before new production writes.
