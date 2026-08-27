@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-27 13:01 (Asia/Singapore)
+Last verified: 2026-08-27 14:46 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -36,52 +36,45 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `REGEN-P5-MONSTER-NATURAL-001`
-- Status: `Active`; P5 is scope-frozen with seventeen of nineteen children
+- Leaf ID: `MONSTER-P5-SPECIALIZED-CONSTRUCTOR-002`
+- Status: `Active`; P5 is scope-frozen with eighteen of twenty children
   Complete, this one Active and ordinary-spawn Ready.
-- Outcome: preserve inherited `MonsterObject.ProcessRegen`: constructor-random
-  first due, inclusive ten-second natural HP cadence/formula, strict 600ms
-  HealAmount drain, full-HP clearing and poison reset ordering.
-- Go matrix anchors to read: only P5 summary row 851, registry rows 3173-3175
-  and completed BaseFamily evidence 3192-3218; never the full matrix or another phase.
-- Legacy read authority: bounded `MonsterObject` constructor/CanRegen/Process,
-  `ProcessRegen`, poison reset and the dynamic regen overrides already exercised
-  by SafeZone tests; every C# file is read-only.
-- Frozen Go production authority: new
-  `cmd/crystal-server/monster_natural_regeneration.go`; bounded fields,
-  constructor timing and tick-order wiring in `world.go`; bounded convergence
-  with existing Monster HealAmount logic in `healing_circle.go`; only exact
-  poison/reset adapters proved by the trace may be added before writes.
-- Frozen Go test authority: new `monster_natural_regeneration_test.go` and
-  optional authenticated `monster_natural_regeneration_session_test.go`, plus
-  bounded fixture corrections in `safe_zone_healing_test.go`/`world_test.go`
-  only when an observed focused/full failure proves them necessary.
-- Forbidden scope: completed BaseFamily behavior, mapped specialized AI,
-  ordinary-spawn, Human/Hero regen semantics, config runtime leaf and every C# write.
+- Outcome: preserve every non-base dynamic Monster's inherited CoolEye,
+  direction, Regen/Search/Roam deadlines and concrete constructor RNG before
+  initial/respawn cell selection without reopening processor behavior.
+- Go matrix anchors to read: only P5 summary row 851, registry rows 3173-3176
+  and completed natural-Regen evidence 3193-3209; never the full matrix or another phase.
+- Legacy read authority: bounded factory table, `MonsterObject` base constructor,
+  every concrete constructor with a direct RNG/field override, and `Spawn` cell
+  selection; every C# file is read-only.
+- Frozen Go production authority: bounded constructor/RNG/projection helpers in
+  `cmd/crystal-server/world.go`; consume accepted natural-Regen timing without
+  changing combat, AI processors, lifecycle or spawn ownership.
+- Frozen Go test authority: new
+  `monster_specialized_constructor_inheritance_test.go`; bounded expected-
+  direction/session corrections only after a focused/full failure proves them.
+- Forbidden scope: completed natural/BaseFamily/processor behavior,
+  ordinary-spawn, config runtime, Human/Hero semantics and every C# write.
 
 ### Protected Go ownership
 
-- Completed Revelation commit
-  `a2cd1cc3768eae92b69e839e14446f2debd9249f`, HP-drain commit
-  `0db2cdeae072dfed45d39c8e4824caf3597a76ff`, and Regen commit
-  `194c209b46f84876c577085c94b5b3983178691a`, plus refresh commit
-  `602c71055c8f417b182931e7292a494017a8522c` and scheduled SafeZone commit
-  `0ab4da7b091d131bdd99a0ff153b7981438262ea`, plus the uncommitted accepted
-  direct-healing batch, remain protected. Earlier P1-P6 evidence may be
-  consumed, not redesigned.
+- Completed BaseFamily `3818544beea374ab47ee96bc59b9514dd1a1b476`
+  and natural-Regen `fc0c66cc9de88db30c752bf1a430e58764605804`
+  remain protected. Earlier P1-P6
+  evidence may be consumed, not redesigned.
 
 ### Remaining acceptance work
 
-- [ ] Freeze the exact override/exclusion set and Process ordering against
-  existing HealAmount and poison owners before writes.
-- [ ] Implement constructor first-due and natural ten-second HP regeneration.
-- [ ] Prove natural/pool aggregation, full-HP clear, poison reset, packets,
-  repeated behavior and focused race through production entry points.
+- [ ] Freeze the finite non-base factory partition, inherited-vs-overridden
+  field matrix and complete concrete-constructor RNG suffix before writes.
+- [ ] Apply inherited projections and remove the temporary partial-direction seam.
+- [ ] Prove constructor fields/RNG/cell order through initial population,
+  respawn and authenticated repeated/race entry points.
 
 ### Discovery inputs
 
-- This child consumes completed BaseFamily constructor timing and accepted
-  SafeZone HealAmount logic; it does not reopen Human regen or specialized AI.
+- This child consumes accepted BaseFamily/natural constructor streams and the
+  completed factory ledger; it does not reopen any specialized processor.
 
 ### P6 frozen child registry
 
@@ -120,7 +113,7 @@ children. Hazard Struck tracing proved one finite omitted regen child; its bound
 trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
 proved one reachable long-Revelation expiry-width correction; its bounded trace
 proved one finite global refresh follow-up. Safe-zone tracing then split direct
-movement triggers and independent border decoration. Seventeen are Complete,
+movement triggers and independent border decoration. Eighteen are Complete,
 one is Active and one is Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -139,7 +132,8 @@ one is Active and one is Ready.
 | `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
 | `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
 | `MONSTER-P5-BASE-FAMILY-001` | Complete | mapped core | committed Go `3818544beea374ab47ee96bc59b9514dd1a1b476` | 46 ordinals + target-kind/race |
-| `REGEN-P5-MONSTER-NATURAL-001` | Active | base constructor timing | monster natural regen + focused/session tests | random first due/10s cadence/formula/reset/race |
+| `REGEN-P5-MONSTER-NATURAL-001` | Complete | base constructor timing | committed Go `fc0c66cc9de88db30c752bf1a430e58764605804` | random first due/10s cadence/formula/reset/race |
+| `MONSTER-P5-SPECIALIZED-CONSTRUCTOR-002` | Active | natural-regen trace | world constructor + static/focused/session tests | non-base inherited fields/full RNG order/respawn/race |
 | `MONSTER-P5-ORDINARY-SPAWN-001` | Ready | base family | archer_summons/hell_lord/world + focused tests | AI=60-63/99 + restart/race |
 | `DROP-P5-LOOT-HARVEST-001` | Complete | item schema consumer | existing committed evidence | randomness/owner/inventory/ground |
 | `RESPAWN-P5-POPULATION-001` | Complete | — | existing committed evidence | strict timing/order/restart/race |
