@@ -850,3 +850,75 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Prevention: preserve typed IDs at each boundary and use an explicit checked conversion when a test intentionally projects one value into both domains; run touched compile before semantic test execution.
 - Verification: the exact `int32(observerID)` projection compiles, and the RootSpider/HellKnight delayed-spawn tests pass at count 10 and under race at count 3.
 - Transcript recurrence: the wider RootSpider group then failed five exact fixtures because they still expected only `ObjectMonster`; Legacy `MonsterObject.Spawned` broadcasts object then health. Updating the unit and authenticated-session transcripts to require `ObjectMonster,ObjectHealth` made the full dynamic/RootSpider/HellLord group pass at count 10 and under race at count 3.
+
+### 2026-08-28 — Ordinary SnakeTotem target fixtures must not create accidental stacking
+
+- Symptom: the first sibling-only target rejection extension made the later
+  parent-linked CharmedSnake impact remain at HP 100 in all ten focused runs.
+- Root cause: the copied sibling retained the tested child's exact cell, so the
+  real CharmedSnake `ProcessSearch` stacking branch moved the attacker before
+  the later adjacent-impact scenario; the target-link correction itself was
+  not the failure.
+- Prevention: when a fixture adds a relationship-only sibling, place it on a
+  distinct valid cell unless stacking is the behavior under test, and preserve
+  movement state separately from target-link state.
+- Verification: moving only the sibling to `(7,7)` made the exact target-link
+  test pass ten times while retaining the negative sibling-only assertion and
+  the positive parent-targeted Monster impact.
+- Death-order recurrence: the recovered SnakeTotem cleanup fixture expected
+  `killMonsterLocked` to return no packets and deferred both deaths to the next
+  tick. Legacy `SnakeTotem.Die` calls `base.Die()` first, which immediately
+  broadcasts the parent `ObjectDied`, then walks `SlaveList` in reverse and
+  calls each child `Die`, before zero-dead-time processing removes either
+  object. The fixture now asserts parent/child `ObjectDied` at the death call
+  and parent/child `ObjectRemove` at the cleanup tick; its exact count-10 and
+  the complete `TestOrdinarySpawn` focused run exit zero.
+- Protected-fixture recurrence: the existing summon-created expiry test still
+  indexed the child map entry after the parent-first tick. The parent has the
+  lower ObjectID, so its `SnakeTotem.Die` kills and zeroes the child's dead
+  timer before that child reaches its own process/removal position in the same
+  sweep. The test now requires the parent corpse and an already-removed child;
+  its exact count-10 exits zero. When a lifecycle correction changes packet or
+  removal order shared by protected siblings, update only the stale assertion
+  from the traced Legacy object order rather than reverting production order.
+- Callsite-ledger recurrence: the first ordinary CharmedSnake wrapper entry
+  guessed two calls, but the AST correctly found three syntactic paths: the
+  initial forward walk plus the clockwise and counter-clockwise fallback loops.
+  Static callsite counts must enumerate physical branches from the owned
+  function rather than infer them from semantic outcomes; the corrected ledger
+  count of three passes its exact count-10 gate.
+- Compile recurrence: the new table subtest used `fmt.Sprintf` without adding
+  `fmt` to the existing import block. The immediate focused compile caught the
+  undefined symbol before behavior analysis; after reconciling and formatting
+  imports, the exact single-death/suppression test passes at count ten.
+- Corpse-projection review finding: Go retained an ordinary CharmedSnake
+  child's `OwnerObjectID` for cleanup and projected it as `MasterObjectID` even
+  after death. Legacy `MonsterObject.Die` clears `Master` before a corpse can
+  be serialized, so `GetInfo` emits master zero while the CharmedSnake name
+  also loses its parent suffix. The serializer now exposes the retained owner
+  only while live, and the exact lifetime/death test locks corpse name/master
+  projection at count ten.
+- Shared-GetInfo review finding: the first ordinary-map fix forced subclass
+  images only in the ownerless serializer, leaving summoned AI=60-63 objects
+  on configured `MonsterInfo.Image` values even though all four Legacy
+  overrides always emit enum images 359-362. The bounded ordinary-pet
+  serializer now applies the same class image rule and clears the archer
+  owner/name projection after `Die`; a four-class live/corpse table and the
+  authenticated Vampire spawn transcript pass at count ten. When a concrete
+  virtual `GetInfo` override is independent of creator provenance, audit every
+  serializer dispatch branch rather than scoping the field fix by ownership.
+- Nested-master recurrence: a summon-created CharmedSnake used the player's
+  name directly even though its Legacy `Master` is the SnakeTotem, whose own
+  live name already includes the player. Child creation now snapshots the
+  parent's exact live display name, producing
+  `Child(Parent(Player))`, while `MasterObjectID` remains the parent; the
+  summon/expiry production test locks name, image, master and Extra at count
+  ten.
+- Runtime-admission fixture failure: after ownerless AI=60-63 was correctly
+  placed behind the production `monsterAIEnabled` seam, four hand-built
+  SnakeTotem/CharmedSnake tests still left that seam disabled and therefore
+  never reached movement, aggro, targeting or minion creation. The fixtures,
+  not production behavior, were stale. Every fixture that expects ordinary
+  ownerless AI must enable the runtime explicitly; a separate negative test
+  keeps the disabled state quiet. The corrected focused count-10 and race
+  count-3 gates exit zero.

@@ -88,3 +88,20 @@
 - Root cause: 高负载 full run 中既有 session transcript 超时；本叶只改 Hero Hiding，失败用例是 Player Hiding，不能据一次全包超时裁决 production regression，也不能忽略。
 - Prevention: 先精确单测和 repeated 复现，再跑 fresh touched package，最后重新执行完整 unexcluded gate；所有退出码都保留，禁止只报告成功重跑。
 - Verification: 精确单测 `-count=1`、`-count=10` 及 fresh `go test -count=1 ./cmd/crystal-server` 均 exit 0；最终 full rerun仍为 leaf closure 必需。
+
+### 2026-08-28 — Specialized ProcessAI overrides determine whether Alone applies
+
+- Symptom: ordinary and dynamically created HellBombs advanced their absolute
+  ten-second explosion deadline with no nearby players, while Legacy pauses
+  `ProcessTarget` behind the default `MonsterProcessWhenAlone=false` gate.
+- Root cause: the shared Go HellBomb ticker bypassed inherited
+  `MonsterObject.ProcessAI`; the neighboring AI=60-63 classes were incorrectly
+  treated as precedent even though their concrete `ProcessAI` overrides bypass
+  `CheckAlone` in Legacy.
+- Prevention: for every specialized class, resolve virtual dispatch before
+  applying a common lifecycle gate. Reuse the P5 runtime Alone seam only when
+  the concrete class actually inherits base `ProcessAI`, and keep delayed
+  actions outside that gate.
+- Verification: focused tests lock default pause, cached three-second
+  `AloneTime`, equality-time resume after a player arrives, and the enabled
+  option; ordinary/protected HellBomb count-10 and race-count-3 pass.

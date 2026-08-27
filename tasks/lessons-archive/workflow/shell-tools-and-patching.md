@@ -653,3 +653,17 @@
   `01a04349-736b-72b0-ae15-892caedb6227` were closed with zero writes; main's
   terminal review found and corrected invalid-Spawn constructor order and
   restored-pet first packets, then focused/full/race/vet/build gates passed.
+
+### 2026-08-28 — Archive search must verify ripgrep availability first
+
+- Symptom: the ordinary-spawn startup archive search invoked `rg` twice and
+  returned only `command not found`, so no keyword result from that call was
+  usable.
+- Root cause: the workflow assumed the prior session's ripgrep availability
+  without checking the current login-shell toolchain.
+- Prevention: run `command -v rg` before the first archive query in a recovered
+  environment; when absent, use repository-local `find` plus quoted `grep`
+  patterns rather than retrying the unavailable binary.
+- Verification: `command -v rg` confirmed absence, and the bounded candidate
+  file and ordinary-spawn/AI/ownerless/respawn keyword searches were rerun with
+  `find`/`grep` at exit 0 before exact matching sections were read.

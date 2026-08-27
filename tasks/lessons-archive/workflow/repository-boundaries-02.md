@@ -681,3 +681,22 @@ The following active C01 evidence was archived verbatim before canonical compact
 - Root cause: the startup report was drafted before mechanically applying C01's two-call split, even though the immediately preceding archived recurrence described the same failure.
 - Prevention: the first repository command of every recovery must be drafted only after the opposite root and every `git -C` token have been removed; read its result before drafting the second call.
 - Verification: the mixed result was discarded in full. Independent Legacy and Go status, index, untracked and all three `.cs` gates then exited 0 from their own roots and supplied the accepted recovery evidence.
+
+### 2026-08-28 — Ordinary-spawn Blocking audit appended a Go path to Legacy
+
+- Symptom: a Legacy-root query for C# `Blocking` overrides appended a second
+  grep over Go `cmd/crystal-server`; the missing opposite-root relative path was
+  hidden by the final pipeline status.
+- Root cause: a semantic comparison was drafted as one shell transaction after
+  the Legacy half was already valid, repeating the exact C01 anti-pattern.
+- Prevention: finish and read the Legacy declaration query before drafting the
+  Go query, and reject every explicit path that does not belong to the current
+  workdir even when a trailing `sed` could mask an upstream failure.
+- Verification: the whole mixed output was discarded; the Legacy Blocking
+  declarations were rerun alone with exit 0, and no conclusion uses the failed
+  call.
+- Immediate recurrence: the next Alone-gate query again appended Legacy
+  `Server/Settings.cs` to a Go-root grep. That entire output was discarded and
+  replaced by two sequential repository-local calls. Semantic comparisons now
+  require writing the two workdirs as separate checklist lines before either
+  command is drafted, not merely checking the final argv by memory.

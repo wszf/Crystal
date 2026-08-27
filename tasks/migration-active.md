@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-27 21:22 (Asia/Singapore)
+Last verified: 2026-08-28 02:50 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -25,7 +25,7 @@ Keep this file at or below 300 lines and 32 KiB.
 | P2 | In progress | Frozen | `DISC-P2-CLOSURE` (Complete) |
 | P3 | Complete | Frozen | `DISC-P3-CLOSURE` (Complete) |
 | P4 | In progress | Frozen | `DISC-P4-CLOSURE` (Complete) |
-| P5 | In progress | Frozen | `DISC-P5-CLOSURE` (Complete) |
+| P5 | Complete | Frozen | `DISC-P5-CLOSURE` (Complete) |
 | P6 | In progress | Frozen | `DISC-P6-CLOSURE` (Complete) |
 | P7 | In progress | Open | `DISC-P7-CLOSURE` |
 | P8 | Complete | Frozen | — |
@@ -36,47 +36,46 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `MONSTER-P5-ORDINARY-SPAWN-001`
-- Status: `Active` tracing substep; P5 is scope-frozen with twenty of
-  twenty-one children Complete and this final child Active.
-- Outcome: preserve the five direct ownerless map-respawn constructors for
-  `AI=60-63,99`, including constructor projection, target/lifetime/death
-  state and respawn/restart continuity, without reopening summon-created paths.
-- Go matrix anchors to read: only P5 summary row 851, registry rows 3175-3177
-  and completed dynamic-constructor evidence rows 3230-3249; never the full
-  matrix or another phase.
-- Legacy read authority: bounded factory branches and concrete constructors for
-  direct map-respawn `AI=60-63,99`, plus their ownerless targeting,
-  lifetime, death and respawn consumers; every C# file remains read-only.
-- Accepted Go production authority: bounded `cmd/crystal-server/archer_summons.go`,
-  `hell_lord.go` and `world.go` only.
-- Frozen Go test authority: new
-  `cmd/crystal-server/monster_ordinary_spawn_test.go` and one bounded
-  authenticated production-entry transcript.
-- Forbidden scope: committed dynamic/summon-created behavior, other AI
-  families, config runtime and every C# write.
+- Leaf ID: `CHAT-P4-MAP-CONTEXT-001`
+- Status: `Active` tracing substep; P4 is scope-frozen with eight of ten
+  children Complete, this child Active and collision rules dependency-blocked.
+- Outcome: preserve NoNames-masked normal map-local chat, cross-map whisper,
+  ordinary range shout, one-shot map/server shout consumption and `@MAP`
+  source text/recipient behavior from the active map context.
+- Go matrix anchors to read: only leaf row 233 and P4 summary row 850; never
+  the full matrix or another phase.
+- Legacy read authority: bounded map-rule import plus normal/whisper/shout and
+  `@MAP` production handlers, linked-definition projection and recipient loops;
+  every C# file remains read-only.
+- Accepted Go production authority: exact existing map-rule import and
+  `cmd/crystal-server` chat/session paths identified during tracing; register
+  physical filenames here before the first production write.
+- Frozen Go test authority: one new focused authenticated map-context chat test
+  plus bounded existing chat/item-arming/probe expectations after exact path
+  enumeration.
+- Forbidden scope: Complete P6 item actions that arm map/server shout, unrelated
+  map movement/collision/visibility, other chat commands and every C# write.
 
 ### Protected Go ownership
 
-- Dynamic constructor convergence is committed at Go
-  `9415ba8ed3594256f3ede8221e6459392c62a018`; BaseFamily
-  `3818544beea374ab47ee96bc59b9514dd1a1b476`, natural Regen
-  `fc0c66cc9de88db30c752bf1a430e58764605804` and specialized constructor
-  `8c16d9e2a8d479091c43ab379bb090a09a0ef946` also remain protected.
+- P6 shout arming is committed at Go
+  `1d399992a690614a122cc46b3e64b4cda8272c2f`; P3 public utility and existing
+  chat/item authorization behavior remain protected inputs.
 
 ### Remaining acceptance work
 
-- [ ] Freeze the exact five ordinary factory branches, concrete classes and
-  constructor RNG/field order before production writes.
-- [ ] Prove ownerless targeting, lifetime/death cleanup and distinction from
-  summon-created `AI=60-63/99` through production entries.
-- [ ] Prove map respawn, restart continuity, repeated behavior and focused race.
+- [ ] Freeze exact Legacy map NoNames import, normal/whisper/range shout,
+  map/server shout and `@MAP` source/recipient call chains before writes.
+- [ ] Prove one-shot shout state, cooldown/level/source order and linked-item
+  recipient projection without reopening P6 item arming.
+- [ ] Prove active Title/FileName, observer forwarding, authenticated packet
+  order, repeated behavior and focused race.
 
 ### Discovery inputs
 
-- Direct ordinary map population enters `materializeRespawnMonsterAtLocked`;
-  the completed sibling owns all 29 non-factory creator calls and must not be
-  reopened.
+- Complete `ITEM-P6-SHOUT-ARMING-001`, `CMD-P3-PUBLIC-UTILITY-001`, existing
+  `TestSessionChatTranscript`, item authorization/cache tests and the protocol
+  probe are evidence inputs, not authority to rewrite their business logic.
 
 ### P6 frozen child registry
 
@@ -115,7 +114,7 @@ children. Hazard Struck tracing proved one finite omitted regen child; its bound
 trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
 proved one reachable long-Revelation expiry-width correction; its bounded trace
 proved one finite global refresh follow-up. Safe-zone tracing then split direct
-movement triggers and independent border decoration. Twenty are Complete and the ordinary-spawn child is Active.
+movement triggers and independent border decoration. All twenty-one children are Complete; P5 is scope-frozen and Complete.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -136,7 +135,7 @@ movement triggers and independent border decoration. Twenty are Complete and the
 | `REGEN-P5-MONSTER-NATURAL-001` | Complete | base constructor timing | committed Go `fc0c66cc9de88db30c752bf1a430e58764605804` | random first due/10s cadence/formula/reset/race |
 | `MONSTER-P5-SPECIALIZED-CONSTRUCTOR-002` | Complete | natural-regen trace | committed Go `8c16d9e2a8d479091c43ab379bb090a09a0ef946` | non-base inherited fields/full RNG order/respawn/race |
 | `MONSTER-P5-DYNAMIC-CONSTRUCTOR-003` | Complete | specialized constructor | committed Go `9415ba8ed3594256f3ede8221e6459392c62a018` | one injected stream/prefix/overrides/child lifecycle/race |
-| `MONSTER-P5-ORDINARY-SPAWN-001` | Active | base family | archer_summons/hell_lord/world + focused tests | AI=60-63/99 + restart/race |
+| `MONSTER-P5-ORDINARY-SPAWN-001` | Complete | base family | accepted ordinary spawn/archetype/runtime/session evidence | AI=60-63/99 + restart/race |
 | `DROP-P5-LOOT-HARVEST-001` | Complete | item schema consumer | existing committed evidence | randomness/owner/inventory/ground |
 | `RESPAWN-P5-POPULATION-001` | Complete | — | existing committed evidence | strict timing/order/restart/race |
 | `WIRE-P5-CONTRACT-001` | Complete | functional owners | existing committed evidence | fixed vectors/transcripts |
@@ -145,7 +144,7 @@ movement triggers and independent border decoration. Twenty are Complete and the
 
 Independent reviewer `01a03617-76c2-7652-ab64-7e27143ce72b` rejected two
 candidate revisions, then accepted this ten-child denominator with no remaining
-finding. Eight children are Complete and two dependency-blocked children are unfinished.
+finding. Eight children are Complete, chat context is Active and collision rules remain dependency-blocked.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -158,7 +157,7 @@ finding. Eight children are Complete and two dependency-blocked children are unf
 | `MAP-P4-DETAIL-001` | Complete | map load + StartPoint | verified Go protocol/probe/map-info candidate | payload/order/suppression/search |
 | `MAP-P4-LIGHT-001` | Complete | — | committed Go `fc6b98b6b312357d850f6710fbf697b8678fd4c2` | UTC production clock/non-UTC host |
 | `MAP-P4-NOREINCARNATION-AUTH-001` | Complete | P5 spell (Complete) | committed Go `1aef1eac1953ca184d7e96c5394ae3c2cc5a3cc3` | imported denial + unchanged amulet/no successful cast |
-| `CHAT-P4-MAP-CONTEXT-001` | Ready | P6 shout arming | map-rule import + bounded chat/session | NoNames/shout recipients/order |
+| `CHAT-P4-MAP-CONTEXT-001` | Active | P6 shout arming (Complete) | trace exact map-rule import + bounded chat/session paths before writes | NoNames/shout recipients/order |
 
 ### P1 frozen child registry
 
