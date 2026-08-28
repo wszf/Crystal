@@ -412,6 +412,7 @@
 - Root cause: 把文件整体替换错误表达为两个互斥 path operation，而不是一个 update/replace transaction。
 - Prevention: 同一路径在一次 patch 中只允许一种操作；重写快照用单次 replace-in-place，失败后先独立确认无写入。
 - Verification: 被拒调用未修改文件；随后单次 here-doc replace 写入、控制检查、`git diff --check` 与完整回读均退出 0。
+- Recurrence during `NPC-P7-COND-LOCAL-001` context handoff: despite the active C03 guard, the main agent again sent Delete/Add operations for the same handoff path. The tool rejected the patch with no write; the snapshot was then replaced in a standalone here-doc and fully read back. The active prevention rule now requires a mechanical same-path multi-operation rejection before every full-file replacement.
 - Strengthening during candidate repair: 一个复合调用的首个 `service_test.go` patch 因格式化上下文不匹配失败，后续 `hero_test.go` patch 仍成功；主线程没有采用混合结果，先独立回读确认 Hero 两处实际写入，再按精确物理行单独修改 service 测试。补丁事务前必须启用 `set -e` 或拆调用，不能让失败后继续执行形成隐式部分写入。
 - Strengthening during 117 tracing: 读取 bridge 后追加猜测 `ReplaceAccounts` 位于 `service.go`，尾部 `rg` exit 1，整次输出作废；随后先在 `internal/auth` 定位真实 `accounts_import.go`，再以两个单独零退出调用重读 bridge 与 counter authority。已知符号也必须先定位，不能把猜测声明路径附在读取末尾。
 - Strengthening after IP-order test edit: 仅凭重复正文替换 `response = p2WriteAndRead(... invalid)` 命中了第一个 validation request，而不是最后一个 blocked request，focused test 因 malformed payload 提前断线/EOF。修复时以相邻 `service.AllowNewCharacter` 和 `blockedUntil` 两个唯一语义锚点分别恢复首包、修改末包；复跑 P3 focused 退出 0。重复测试语句必须带阶段语义上下文，不能只按首个文本匹配。

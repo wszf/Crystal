@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-28 18:26 (Asia/Singapore)
+Last updated: 2026-08-28 18:32 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -11,29 +11,31 @@ not evidence; do not startup-read historical handoff archives.
   nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - `NPC-P7-ACTION-STATE-001` is Complete in Go commit
-  `83a37867942edc42d780edacb1083db4bfebd13c`. The unique next Active leaf is
+  `83a37867942edc42d780edacb1083db4bfebd13c`. The unique Active leaf is
   dependency-ready `NPC-P7-COND-LOCAL-001`.
-- Exact next matrix scope is row 187, routing ledger I/J row 210 and P7 summary
-  row 966 only. P7 remains frozen at 24 children: 10 Complete, 1 Active and 13
+- Exact matrix scope is row 187, routing ledger I/J row 210 and P7 summary row
+  966 only. P7 remains frozen at 24 children: 10 Complete, 1 Active and 13
   Ready.
-- No subagent remains open. Terminal reviewer
-  `01a047ca-c519-77f2-a76a-6e537e9c7a87` found four integration/message issues
-  over two revisions; all were repaired or source-adjudicated, and final
-  revision returned `No findings`.
+- The context-handoff gate stopped and closed read-only workers
+  `01a047e9-e803-7cc1-992d-1fab127e0fab` and
+  `01a047ea-0b05-7822-bf54-a4562f713aa6`; neither changed files.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; pre-documentation HEAD
-  `8dba3bd82b7f413712d74ef35bd05374ef457fe0`; upstream `origin/master`, ahead
-  501 and behind 0 at startup.
-- Current owned unstaged documents are `tasks/lessons-archive/misc.md`,
-  `tasks/migration-active.md`, and this handoff. There are no staged or
-  untracked paths.
-- The active index routes Action State Complete to Local Conditions Active.
-  Historical evidence records parser/runtime return separation, source-proven
-  unsafe I/O/INI/arithmetic quirks, item authority, clock/message repairs and
-  final gates.
+- Branch `master`; HEAD `25d94781093dc6caacac4d2a12b46eab4cf70f06`;
+  upstream `origin/master`, ahead 502 and behind 0.
+- HEAD is documentation-only commit `Route P7 NPC local conditions migration`,
+  covering `tasks/lessons-archive/misc.md`, `tasks/migration-active.md` and the
+  preceding handoff.
+- Immediately before this refresh the index and worktree were clean. Current
+  owned unstaged paths are `tasks/lessons.md`,
+  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`, and this handoff;
+  there are no staged or untracked paths and no implementation work here.
+- Post-refresh control checks caught an oversized active lesson and two invented
+  required-heading variants. Historical detail was archived, the active rule
+  condensed, and the exact checker headings restored. The final control check
+  must exit 0 before recovery. All three C# gates were empty.
 
 ## Go repository state
 
@@ -42,50 +44,49 @@ not evidence; do not startup-read historical handoff archives.
   no upstream. The index and worktree are clean.
 - Commit `83a3786 Complete P7 NPC action state` changes bounded
   parser/protocol/world/flow/default/main wiring, adds Action State runtime and
-  parser/protocol/session tests, and updates the matrix (13 paths, 1,717
-  insertions, 41 deletions).
+  parser/protocol/session tests, and updates the matrix.
 - Matrix row 184 is Complete, row 187 is the sole Active row, ledger F contains
   accepted evidence, and P7 summary is exactly 10+1+13.
-
-## Completed Action State behavior
-
-- All fourteen PARAM/MOV/CALC/value-file/random-text/timer/UI/experience/unequip
-  branches preserve exact parser minima, per-line skips, runtime tail abort,
-  one resolved snapshot and action-before-response order.
-- PARAM state is shared only with its direct future MONGEN consumer. Value and
-  random files preserve BOM/newlines, parser-time creation, restart and exact
-  replacement/INI/path/failure quirks; random draw/order and localized server
-  messages carry the current queued page.
-- Local/global timers preserve key, type, Int32 time arithmetic, packet
-  asymmetry, equality expiry, relogin lifetime and restart loss. CanGainExp is
-  runtime-only and resets on entry.
-- UNEQUIPITEM rebases latest auth item authority, applies the revision to world
-  and session, preserves slot/cursed/wedding/riding/full-bag restrictions,
-  reports accepted moves, sends full slot arrays before stat notifications and
-  is covered by a stale-session production transcript.
+- No local-condition implementation or tests have started. There is no
+  uncommitted Go work and no owned Go path currently modified.
 
 ## Verification ledger
 
 - Owned gofmt and `git diff --check` passed.
-- Minimum touched-package compile passed; final focused parser/protocol/runtime/
-  ordinary/default/Control Flow corpus with `-count=10` exited 0 for all three
-  packages.
-- Final focused race over the same corpus with `-race -count=3` exited 0 for all
-  three packages.
-- Fresh final `go test -count=1 ./...` exit 0; server 81.796s.
-- Fresh final `go vet ./...` and `go build ./...` both exit 0.
-- Fresh final unexcluded `go test -race -count=1 ./...` exit 0; server 100.225s.
+- Final focused parser/protocol/runtime/ordinary/default/Control Flow corpus with
+  `-count=10` exited 0 for all three packages; focused `-race -count=3` also
+  exited 0.
+- Fresh final `go test -count=1 ./...`, `go vet ./...`, `go build ./...`, and
+  fresh unexcluded `go test -race -count=1 ./...` each exited 0.
 - The first full attempt failed at over-broad unexported segment-state equality
   plus the archived OmaMage `[2 1]`/`[1]` fixture. Segment ownership was fixed;
   OmaMage isolated `-count=10` passed, and every final unexcluded gate passed.
-- Both repository tracked/staged/untracked `.cs` gates were empty before the Go
-  commit and this handoff refresh; rerun them immediately before the Legacy
-  documentation commit.
+
+## Active Local Conditions evidence
+
+- Legacy read-only trace found parser minima/defaults and runtime branches in
+  `Server/MirObjects/NPC/NPCSegment.cs`; call paths are in `NPCScript.cs`.
+- The seven keys are `CHECKNAMELIST`, `CHECKGUILDNAMELIST`, `ISADMIN`,
+  `CHECKCALC`, `ISNEWHUMAN`, `CHECKTIMER`, and `HASGT`.
+- Name-list paths resolve below `Settings.NameListPath`; parsing creates parent
+  directories and retains only existing files. Player list membership is exact
+  and case-sensitive. `ISADMIN` uses `IsGM`; `ISNEWHUMAN` fails above one
+  account character.
+- Legacy has no `HasGT` switch case, so parsed `HASGT` succeeds. Timer lookup is
+  global-first then local; a present timer exits its branch early, while the
+  absent-timer comparison consumes `param[0]` and leaves `param[2]` unused.
+  Territory ownership authority is `GTRent > DateTime.Now`.
+- Go read-only trace found generic condition parsing/evaluation in
+  `internal/worlddata/npcscript.go`; none of the seven is implemented and the
+  default evaluator currently fail-closes. Ordinary/default context wiring in
+  `cmd/crystal-server/main.go` and `default_npc.go` lacks the seven authorities.
+  Existing Action State timer/CALC state is reusable authority, not yet exposed
+  through condition context.
 
 ## Active leaf and protected work
 
 - Active leaf: `NPC-P7-COND-LOCAL-001`.
-- Next authority is bounded seven-key parsing/evaluation in
+- Write authority is bounded seven-key parsing/evaluation in
   `internal/worlddata/npcscript.go`, bounded local context adapters in
   `cmd/crystal-server/{main.go,default_npc.go}` and a new
   `npc_script_context.go`, focused tests, matrix/index/handoff.
@@ -95,10 +96,12 @@ not evidence; do not startup-read historical handoff archives.
 
 ## Exact recovery sequence
 
-1. Rerun the Legacy control checker/status/`.cs` gates, then commit exactly the
-   three owned Legacy documentation paths. This handoff observes Legacy HEAD
-   `8dba3bd82b7f413712d74ef35bd05374ef457fe0` immediately before that expected
-   documentation-only commit delta.
-2. Verify both worktrees clean. Read only matrix row 187, ledger I/J row 210 and
-   summary row 966; search the archive only for Local Conditions and the seven
-   named keywords, then freeze the exact Legacy checklist before implementation.
+1. Read this handoff and `tasks/migration-active.md`, then separately verify the
+   Legacy HEAD/status/control/C# gates and Go HEAD/status/C# gates. Do not trust
+   the compact summary over these checks.
+2. Read only matrix row 187, ledger I/J row 210 and P7 summary row 966. Search
+   only matching Local Conditions archive sections; then finish the bounded
+   Legacy seven-key pass/fail/exception checklist before implementing.
+3. Resume `NPC-P7-COND-LOCAL-001`; first recovery command in the Go root is
+   `git status --short`, followed by exact-range reads of the already identified
+   parser/context/runtime symbols. Do not open a new discovery leaf.
