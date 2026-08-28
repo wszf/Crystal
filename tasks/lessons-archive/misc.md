@@ -954,3 +954,45 @@
   active index and handoff before any Shop Quirks code write. The finite contract
   now requires stable `G/U` source counts, per-open `G+U` enabled snapshots,
   BUYNEW=`G`, and disabled BUYBACK/BUYUSED panel absence.
+
+### 2026-08-28 — Read-only shop snapshots must not erase empty BuyBack owners
+
+- Symptom: the enabled two-user session expected two empty owner keys after
+  each user's first BUYBACK open, but only the second owner's key remained.
+- Root cause: Go reused expiry processing on every shop snapshot, and that
+  helper deleted entries that were already empty before the pass; Legacy
+  `ProcessSpecial` creates the key and does not run `ProcessGoods` on open.
+- Prevention: page reads must not run expiry processing at all. Preserve empty
+  keys and nominally expired items until the strict scheduled NPC pass, then
+  remove every empty owner exactly as `ProcessGoods` does.
+- Verification: enabled first/repeated/two-user opens preserve both empty keys;
+  an explicit due-time pass removes them. Nonempty items remain buy-back eligible
+  after nominal expiry until that pass, then drain in stable owner order.
+
+### 2026-08-28 — Mutable UsedGoods needs an explicit empty restart override
+
+- Symptom: a read-only review found that buying the last runtime UsedGoods item
+  updated only `world.npcs`; restart reloaded the static export and resurrected
+  that item, unlike Legacy `NeedSave`/`SaveGoods`.
+- Root cause: the mutable world sidecar persisted only respawn state, and an
+  omitted/empty UsedGoods list was not represented as authoritative state.
+- Prevention: persist a deterministic per-NPC UsedGoods snapshot in the atomic
+  runtime companion; retain an entry with an empty list so it overrides static
+  import, clone item state under the world lock, and mark every add/remove/
+  restore path dirty for retry-safe persistence.
+- Follow-up findings: terminal review found that the last-player ticker stop
+  could strand a dirty removal, empty owners lacked their scheduled cleanup,
+  owner-map iteration randomized UsedGoods append order, and read helpers moved
+  expired BuyBack items before Legacy's scheduled pass. All four are now closed:
+  stop-to-empty persists, scheduled processing owns every drain, normalized
+  owners are sorted, and reads/mutations never process expiry.
+- Forced-save ruling: `SaveGoods(true)` clears every remaining BuyBack list at
+  graceful shutdown; owner association is transient, but eligible items become
+  public persisted UsedGoods. Go now forces that conversion before its atomic
+  runtime snapshot rather than silently dropping the items.
+- Verification: authenticated BUYUSED removal, forced BuyBack conversion,
+  explicit-empty overlay, owner-key loss and relogin G+U all pass. Early fixture
+  failures came from nil-versus-empty expectation, a missing registered map and
+  forgetting the fixture's initial UsedGoods; each was repaired at the fixture
+  boundary without weakening behavior. Focused count 10/race count 3 plus fresh
+  full test, race, vet and build exit 0.

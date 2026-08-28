@@ -795,3 +795,7 @@
   and the bounded archive query was rerun with NUL-safe `find`/`grep` at exit 0.
   Session recovery must translate the lesson into an argv checklist rather than
   treating the read itself as compliance.
+- Handoff-schema recurrence during Shop closure: a full snapshot replacement
+  renamed required `## Verification ledger` to a feature-specific heading, so
+  the control checker exited 1. The failed result was not adopted; the heading
+  was restored from checker output and the unchanged snapshot then passed.

@@ -48,6 +48,7 @@ duplicate.
 - Strengthening during Revelation integration: 预期“零残余”的 post-patch `rg` 又裸跑并 exit 1；该调用作废后用显式 rc 0/1 分支重跑 exit 0。负向验收在发送前必须按 absence query 模板成形。
 - Strengthening during BaseFamily audit: 主线程三次在 Go 根追加 Legacy 路径，并另猜不存在的 `axe_skeleton.go`；相关调用即使前段有输出也全部作废并按仓独立零退出重跑。发送前必须检查每个显式路径属于 workdir 且来自本轮枚举，禁止采用失败调用的部分输出。
 - Strengthening during Control Flow closure: 新恢复已读到“首次调用非 POSIX 工具必须先裸 `command -v`”后，主线程仍直接调用缺失的 `rg` 并 exit 127。该输出已作废，随后以单独裸 `command -v rg` 确认 exit 1，再用 `find -print0 | xargs -0 grep` 零退出完成定向 archive 查询。读过 lesson 不等于执行了门禁；每次新 session/compact 后应把工具探针列为首个机械 argv 检查项。
+- Strengthening after Shop review: a resend copied a stale agent suffix and was rejected; rereading the latest resume output and copying its full ID succeeded. Agent targets must come from the latest tool result, never memory.
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。

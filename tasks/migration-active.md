@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-28 22:42 (Asia/Singapore)
+Last verified: 2026-08-29 00:49 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -36,53 +36,51 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `NPC-P7-SHOP-QUIRKS-001`
-- Status: `Active` dependency-ready functional leaf; Shop Core and Item Grid
-  Mutation are Complete prerequisites.
-- Outcome: preserve stable per-open base-Goods snapshots without source-count
-  mutation, enabled-only UsedGoods merge for BUY/BUYSELL, BUYNEW separation,
-  and `GoodsOn=false` BuyBack/BuyUsed panel absence with persistence/race bounds.
-- Go matrix anchors to read: active row 192, routing ledger N row 214 and P7
+- Leaf ID: `NPC-P7-TELEPORT-ACTIONS-001`
+- Status: `Active` dependency-ready functional leaf; Control Flow,
+  `MOVE-P4-ACTION-001` and `RENTAL-P6-LIFECYCLE-001` are Complete prerequisites.
+- Outcome: preserve exact `MOVE`, `INSTANCEMOVE`, `TIMERECALL`,
+  `TIMERECALLGROUP`, `BREAKTIMERECALL`, `GROUPRECALL` and `GROUPTELEPORT`
+  parser/effect quirks, including coordinate-less MOVE's bounded 200-draw RNG.
+- Go matrix anchors to read: active row 194, routing ledger P row 216 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: only `NPCScript.ProcessSpecial` Buy/BuySell/BuyNew/
-  BuySellNew/BuyBack/BuyUsed branches, local Goods snapshot construction,
-  `GoodsOn` gates and the exact calling-NPC used/buyback collections; C# remains
-  read-only.
-- Go read/write authority: bounded `cmd/crystal-server/shop_transactions.go`,
-  the minimum world shop snapshot/mutation symbols, focused new
-  `npc_shop_quirks_session_test.go`, minimum existing shop tests and
-  matrix/index/handoff.
-- Forbidden scope: ordinary shop formulas already owned by Shop Core, item-grid
-  CAS semantics, conquest pricing, all other panels, action/condition catalogs,
-  callback-family execution, protocol layouts and every C# write.
+- Legacy read authority: only `NPCSegment.ParseAct` and action execution for the
+  seven keys above, their exact PlayerObject/group/instance/time-recall/rental
+  consumers and transition serializers; C# remains read-only.
+- Go read/write authority: new bounded `cmd/crystal-server/npc_teleport_actions.go`
+  and tests, minimum shared Flow parser/execution wiring, world/group/rental
+  adapters, transition session tests and matrix/index/handoff.
+- Forbidden scope: generic movement/collision, ordinary rental lifecycle,
+  unrelated actions/conditions, conquest teleport, callback/monster/Robot
+  execution, protocol layouts and every C# write.
 
 ### Protected Go ownership
 
-- Complete Shop Core, Item Grid Mutation and Panel Routing are protected inputs.
-  This leaf owns only snapshot no-growth/UsedGoods inclusion and disabled-goods
-  panel absence, not ordinary buy/sell transaction behavior.
+- Complete Control Flow, movement, rental and panel-routing authorities are
+  protected inputs. This leaf owns only the seven teleport action adapters and
+  their parser/effect boundaries, not generic movement or rental state.
 
 ### Remaining acceptance work
 
-- [ ] Preserve exact no-growth source counts and stable `G+U` enabled BUY/
-  BUYSELL snapshots across same-user reopen and a second user; BUYNEW stays `G`.
-- [ ] Preserve `GoodsOn=false` BuyBack/BuyUsed complete panel absence without
-  changing enabled-goods payloads or transaction formulas.
-- [ ] Prove persistence/relogin and race behavior for the bounded shared state.
+- [ ] Freeze seven-key parse minima/defaults and exact malformed/unknown behavior.
+- [ ] Preserve instance/group/time-recall equality, cancellation and delayed
+  Flow ordering, plus coordinate-less MOVE's exact 200-draw RNG/failure rules.
+- [ ] Prove recipient/transition packet order, persisted location/rental effects,
+  relogin and race behavior through authenticated production entries.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Corrected source-authoritative row/ledger N, Complete Shop Core/Item Grid
-  prerequisites and existing shop world/session evidence.
+- Frozen row/ledger P, Complete Flow/movement/rental prerequisites and existing
+  world/group/transition session evidence.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. Control Flow terminal review withdrew its
 only provisional finding after tracing the serialized production call chain. The
-frozen 24-child denominator is now 12 Complete + 1 Active + 11 Ready; the matrix
+frozen 24-child denominator is now 13 Complete + 1 Active + 10 Ready; the matrix
 owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -104,9 +102,9 @@ owns exact routing evidence.
 | `NPC-P7-DEFAULT-CALLBACK-001` | Ready | `NPC-P7-CONTROL-FLOW-001` + `NPC-P7-SPEECH-INPUT-001` + all three Action and both Condition IDs in rows above | ledger K | all 12 production callbacks |
 | `NPC-P7-MONSTER-ROBOT-SCRIPT-001` | Ready | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-CONTROL-FLOW-001` + `NPC-P7-ACTION-WORLD-001` + both Condition IDs | ledger L | Spawn/Die execution + full TIME/restart/race |
 | `NPC-P7-PANEL-ROUTING-001` | Complete | `NPC-P7-ACCESS-GATE-001` + `NPC-P7-PAGE-GRAMMAR-001` | committed/accepted panel routing evidence | missing-page/direct storage/GOTO/craft matrix |
-| `NPC-P7-SHOP-QUIRKS-001` | Active | `SHOP-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger N | snapshot no-growth + GoodsOn absence/race |
+| `NPC-P7-SHOP-QUIRKS-001` | Complete | `SHOP-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | accepted shop/runtime-state evidence | snapshot no-growth + GoodsOn absence/race |
 | `NPC-P7-CONQUEST-ECONOMY-001` | Ready | `SHOP-P7-CORE-001` + `REPAIR-P6-NPC-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger O | owner/rates/storage/atomicity matrix |
-| `NPC-P7-TELEPORT-ACTIONS-001` | Ready | `NPC-P7-CONTROL-FLOW-001` + `MOVE-P4-ACTION-001` + `RENTAL-P6-LIFECYCLE-001` | ledger P | instance/time/group/RNG/transitions |
+| `NPC-P7-TELEPORT-ACTIONS-001` | Active | `NPC-P7-CONTROL-FLOW-001` + `MOVE-P4-ACTION-001` + `RENTAL-P6-LIFECYCLE-001` | ledger P | instance/time/group/RNG/transitions |
 | `QUEST-P7-REWARD-RATES-001` | Ready | `QUEST-P7-CORE-001` + `CFG-P1-CONTRACT-001` | ledger Q | non-unit rates/truncation/order |
 | `QUEST-P7-LIFECYCLE-TIMER-001` | Ready | `QUEST-P7-CORE-001` + `PERSIST-P2-CHECKPOINT-RESTART-001` | ledger R | 24h/completion/zero-task/relogin/race |
 | `QUEST-P7-PROGRESS-QUIRKS-001` | Ready | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger S | class/name/flag boundaries |

@@ -719,3 +719,7 @@ The following active C01 evidence was archived verbatim before canonical compact
   before finishing the startup lesson read. It was discarded (also truncated),
   then both roots were rerun independently at exit 0. C01 now makes “read lessons
   before status” part of the mechanical split rather than an assumed preface.
+- Further recurrence: the following Goal resume repeated the same combined
+  Legacy/`git -C` startup summary and was again truncated. The whole result was
+  discarded; lessons/control/status/C# evidence was re-established through
+  complete, sequential repository-local calls before Shop Quirks resumed.
