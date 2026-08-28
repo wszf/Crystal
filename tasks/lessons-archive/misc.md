@@ -260,6 +260,13 @@
 - Prevention: request 中可由客户端伪造的 NPC ID 和 session 中缓存的 active NPC 只用于 UI/script 状态，不参与 Quest accept/finish 授权；回归测试必须覆盖错误 ID 仍能通过。
 - Verification: Quest NPC range/request-ID 测试和同连接重登后的接取/完成会话测试通过。
 
+### 2026-08-29 — Quest carry session fixture 必须使用合法账号 ID
+
+- Symptom: `TestQuestP7AcceptCarryQuirkSessionOrderAndRelogin` 两个子用例都在登录阶段收到 `ServerLogin` result 1，尚未到达目标 AcceptQuest 入口。
+- Root cause: 新夹具使用了带连字符的 `qtcarry-delete`/`qtcarry-retain`，违反生产 `accountIDPattern` 的 `[A-Za-z0-9]{3,15}` 约束；测试 bootstrap helper 不能绕过真实认证门禁。
+- Prevention: 新认证 session 夹具先按生产账号、密码和角色名正则逐项核对字面值，尤其禁止凭“长度合法”推断连字符可用；到达目标入口前的失败只归因为夹具。
+- Verification: 改为 `qtcarrydel`/`qtcarryret` 后，精确 `^TestQuestP7AcceptCarryQuirk` 普通门禁全部通过，两类 retained/deleted transcript 均到达生产 AcceptQuest 路径。
+
 ### 2026-08-11 — 工具链格式化必须按语言分组
 
 - Symptom: Quest 收尾时把 C# exporter 文件和 Go 文件一起传给 `gofmt`，命令在 C# 文件处报 `expected 'package'`，导致格式化门禁中断。

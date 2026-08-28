@@ -799,3 +799,8 @@
   renamed required `## Verification ledger` to a feature-specific heading, so
   the control checker exited 1. The failed result was not adopted; the heading
   was restored from checker output and the unchanged snapshot then passed.
+- Control-timestamp recurrence during Accept Carry closure: the Active Index
+  was drafted with a remembered `08:02` instead of querying the host, while
+  authoritative `date` still reported `07:56`. Control snapshots must copy the
+  current timezone-aware `date` output rather than estimate elapsed time; the
+  index was corrected before the Legacy control commit and checker rerun.

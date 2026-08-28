@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-29 07:04 (Asia/Singapore)
+Last verified: 2026-08-29 07:56 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -37,53 +37,55 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `QUEST-P7-ACCEPT-CARRY-QUIRK-001`
-- Status: `Active` dependency-ready functional leaf; `QUEST-P7-CORE-001` and
-  `ITEM-P6-GRID-MUTATION-001` are Complete prerequisites.
-- Outcome: preserve Legacy's sequential carry-item acceptance quirk: already
-  gained carry stacks, reports and quest-bag recalculation remain observable
-  when a later carry stack fails capacity, without adding the quest or running
-  its callback.
-- Go matrix anchors to read: active row 198, routing ledger T row 220 and P7
-  summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: AcceptQuest's carry loop, `CanGainQuestItem`,
-  `GainQuestItem`, report/recalculate/delete ordering and directly consumed
-  logout persistence only; C# remains read-only.
-- Go read/write authority: bounded `cmd/crystal-server/{quests_runtime.go,
-  quests_runtime_test.go,main.go}`, their quest-only tests, one new bounded
-  carry-failure session test, and matrix/index/handoff.
-- Forbidden scope: completed lifecycle/timer, reward-rate and progress-quirk
-  behavior, generic item/economy/NPC behavior, protocol layouts and every C#
+- Leaf ID: `STORAGE-P2-NPC-GATE-001`
+- Status: `Active` dependency-ready functional leaf; P7-owned
+  `NPC-P7-ACCESS-GATE-001` is Complete.
+- Outcome: require every storage-password handler to originate from the current
+  authorized, visible ordinary-NPC `[@STORAGE]` script transition, then preserve
+  exact wrong-stage and stale/no/wrong NPC rejection responses without closing
+  the authenticated connection.
+- Go matrix anchors to read: active row 139 and P2 summary row 912 only; never
+  the full matrix or another child registry.
+- Legacy read authority: `PlayerObject.CallNPC`,
+  `MirConnection.CanAccessStorageNpc`, `NPCScript.StorageKey`,
+  `Globals.DataRange`, `Functions.InRange` and the three directly gated storage
+  password handlers only; C# remains read-only.
+- Go read/write authority: bounded storage branches in
+  `cmd/crystal-server/main.go`, existing storage-only session tests, one new
+  `cmd/crystal-server/p2_storage_npc_gate_test.go`, and matrix/index/handoff.
+- Forbidden scope: generic P7 CallNPC visibility/page grammar, account storage
+  capacity/economy, completed quest behavior, protocol layouts and every C#
   write.
 
 ### Protected Go ownership
 
-- Complete Quest Core, Lifecycle Timer, Progress Quirks, item-grid, protocol and
-  persistence authorities are protected inputs. This leaf owns only sequential
-  carry admission failure and its exact retained/deleted side effects.
+- Complete P7 NPC access/page authority, P2 storage-password service/protocol,
+  P6 account storage, protocol and persistence behavior are protected inputs.
+  This leaf owns only final ordinary-NPC authorization at the three handlers.
 
 ### Remaining acceptance work
 
-- [ ] Freeze per-stack creation/admission order and the first later capacity
-  failure boundary for one and multiple carry definitions.
-- [ ] Preserve exact gained-item/report/recalculate/delete order, both when an
-  existing quest still needs the partial carry and when no quest retains it.
-- [ ] Prove no quest Add/default callback after partial failure and exact
-  logout/relogin persistence for every retained or deleted stack.
+- [ ] Freeze wrong-stage response and keepalive behavior for all three storage
+  password handlers before any Go write.
+- [ ] Freeze no/wrong/stale key, unauthorized page jump, invisible/default
+  pseudo-NPC, stale object, wrong map, movement and exact inclusive 16/17 range
+  boundaries against the completed P7 authority.
+- [ ] Preserve each handler's exact response flags and storage lifetime while
+  rejecting every invalid authority state.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Frozen row/ledger T, Complete Quest Core/item-grid prerequisites and accepted
-  lifecycle/progress persistence evidence.
+- Frozen P2 row/summary, Complete P7 NPC access evidence and existing storage
+  service/protocol/session authority.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. Control Flow terminal review withdrew its
 only provisional finding after tracing the serialized production call chain. The
-frozen 24-child denominator is now 17 Complete + 1 Active + 6 Ready; the matrix
+frozen 24-child denominator is now 18 Complete + 6 Ready; the matrix
 owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -111,7 +113,7 @@ owns exact routing evidence.
 | `QUEST-P7-REWARD-RATES-001` | Complete | `QUEST-P7-CORE-001` + `CFG-P1-CONTRACT-001` | committed Go `3bee34a358a0bed47ab0ff659429520f6731803b` | non-unit rates/truncation/order |
 | `QUEST-P7-LIFECYCLE-TIMER-001` | Complete | `QUEST-P7-CORE-001` + `PERSIST-P2-CHECKPOINT-RESTART-001` | accepted lifecycle/runtime/session evidence | 24h/completion/zero-task/relogin/race |
 | `QUEST-P7-PROGRESS-QUIRKS-001` | Complete | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | accepted runtime/session evidence | class/name/flag boundaries |
-| `QUEST-P7-ACCEPT-CARRY-QUIRK-001` | Active | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger T | sequential partial failure transcript |
+| `QUEST-P7-ACCEPT-CARRY-QUIRK-001` | Complete | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | accepted production/runtime/session evidence | sequential partial failure transcript |
 
 ### P6 frozen child registry
 
@@ -185,7 +187,7 @@ selected now.
 
 Independent read-only reviewer `01a031c0-18ea-71e3-ba9f-b6cf96be57d4`
 accepted this exact eight-child denominator after two rounds. Seven are Complete
-and one remains dependency-blocked Ready. This is a P2
+and the now-unblocked storage NPC gate is Active. This is a P2
 denominator only.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -194,7 +196,7 @@ denominator only.
 | `AUTH-P2-ACCOUNT-SESSION-001` | Complete | crypto/wire | `internal/auth/service.go` + tests; bounded `cmd/crystal-server/main.go`; new `p2_account_session_test.go`; optional one account-session helper | authenticated repeated/race + JSON/117 |
 | `AUTH-P2-CHAR-METADATA-001` | Complete | account session + P3 mutation authority (Complete) | verified auth/main metadata lifecycle candidate | login/logout projections + persistence/race |
 | `STORAGE-P2-PASSWORD-001` | Complete | — | none | existing service/protocol/valid-page sessions |
-| `STORAGE-P2-NPC-GATE-001` | Ready | `NPC-P7-ACCESS-GATE-001` | bounded storage handlers + new `p2_storage_npc_gate_test.go` | all-handler wrong-stage + NPC boundary/race |
+| `STORAGE-P2-NPC-GATE-001` | Active | `NPC-P7-ACCESS-GATE-001` (Complete) | bounded storage handlers + new `p2_storage_npc_gate_test.go` | all-handler wrong-stage + NPC boundary/race |
 | `PERSIST-P2-ACCOUNT-BRIDGE-001` | Complete | — | none | existing JSON/117/global merge evidence |
 | `PERSIST-P2-CHECKPOINT-RESTART-001` | Complete | bridge | none | existing production checkpoint/restart smoke |
 | `PERSIST-P2-SOURCE-PRECEDENCE-001` | Complete | bridge | new `p2_account_precedence_test.go`; bounded startup if needed | conflicting-source startup/checkpoint/reload |
