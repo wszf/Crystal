@@ -20,15 +20,12 @@ not evidence; do not startup-read historical handoff archives.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; observed pre-control-commit HEAD
-  `fc13241ffa1f631f8ed50b46a979ae6ff2185695`; upstream `origin/master`, ahead
-  495 and behind 0.
-- Owned pending control changes are this handoff, `tasks/migration-active.md`,
-  `tasks/lessons-archive/migration/data-config-import-export.md`, and
-  `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`, plus the
-  exact-heading recurrence in `tasks/lessons-archive/workflow/
-  shell-tools-and-patching.md`. They are intended for one control commit;
-  recovery must compare actual HEAD/status with that documentation-only delta.
+- Branch `master`; observed pre-handoff-finalization HEAD
+  `2bb6ead48958a69618fa86a7ced84b8cc2bd0309`; upstream `origin/master`, ahead
+  496 and behind 0. Index/worktree were clean before this handoff-only update;
+  its own commit is the one expected HEAD delta.
+- Commit `2bb6ead4` records Script Load lessons, Page Grammar routing and the
+  verified closure snapshot.
 - Latest separate tracked/staged/untracked `.cs` checks are empty.
 
 ## Go repository state
