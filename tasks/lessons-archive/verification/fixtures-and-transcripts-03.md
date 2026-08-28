@@ -1006,3 +1006,20 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
   repetitions and focused race count-3 pass. Fresh `go test -count=1 ./...`,
   `go vet ./...`, `go build ./...`, and fresh `go test -race -count=1 ./...`
   all exit 0 after the access-only fixture corrections.
+
+### 2026-08-28 — Panel-routing negatives must reach the intended boundary and authoritative NPC fixtures need maps
+
+- Symptom: the first direct-storage negative was described as a missing-page
+  test even though the selected-button gate rejected it before lookup; a later
+  exact-active-NPC unit test rejected both candidates instead of only the
+  out-of-range one.
+- Root cause: the test name inferred the production branch from the requested
+  key, and the unit fixture supplied authoritative NPC ObjectIDs without first
+  registering their map, so `loadNPCs` correctly skipped both objects.
+- Prevention: prove lookup absence independently from client button admission,
+  name each negative for the gate it actually reaches, and register a real map
+  with valid coordinates before loading authoritative runtime ObjectIDs.
+- Verification: the routing helper now has an explicit matched/unmatched
+  dispatch test; the session test is named for direct-storage admission; the
+  exact-active-NPC fixture registers a 20x4 map and distinguishes an out-of-range
+  active NPC from an in-range decoy. Focused count-10 and race count-3 pass.
