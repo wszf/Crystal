@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-28 13:11 (Asia/Singapore)
+Last updated: 2026-08-28 16:29 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -10,103 +10,101 @@ not evidence; do not startup-read historical handoff archives.
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains Active; neither Complete
   nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
-- `NPC-P7-SPEECH-INPUT-001` is Complete in Go commit
-  `826842e7cd63caa356c3efd86b646bae79ee56d0`. The unique next Active leaf is
-  dependency-ready `NPC-P7-CONTROL-FLOW-001`.
-- Exact next matrix scope is row 183, routing ledger E row 206 and P7 summary
-  row 966 only. P7 remains frozen at 24 children: 8 Complete, 1 Active and 15
+- `NPC-P7-CONTROL-FLOW-001` is Complete in Go commit
+  `8b39791ae9e0a660c3cb77661df86a2e09c71a91`. The unique next Active leaf is
+  dependency-ready `NPC-P7-ACTION-STATE-001`.
+- Exact next matrix scope is row 184, routing ledger F row 207 and P7 summary
+  row 966 only. P7 remains frozen at 24 children: 9 Complete, 1 Active and 14
   Ready.
-- The real compaction recovery is complete. No agent or Go process remains;
-  terminal reviewer `01a04696-568d-7ca0-bbd6-17e21e9376cd` returned `No
-  findings` after inspecting the final candidate including index-zero caches.
+- No subagent remains open. Terminal reviewer
+  `01a04744-35d7-7350-89b0-7d371aa18764` withdrew its only provisional BREAK
+  concurrency finding after tracing every production entry under the global
+  flow mutex; no unwrapped production runner exists.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; HEAD `3e679049b3411d409a9af3f2939d8c25f766eb5c`;
-  upstream `origin/master`, ahead 499 and behind 0.
-- Exactly four tracked unstaged migration-control paths differ:
-  `tasks/lessons.md`, `tasks/lessons-archive/migration/protocol-session-wire.md`,
+- Branch `master`; pre-documentation HEAD
+  `c8209d99109404aab2c7fa246d13ec16524fd3c9`; upstream `origin/master`, ahead
+  500 and behind 0.
+- Current owned unstaged documents are `tasks/lessons.md`,
+  `tasks/lessons-archive/misc.md`,
+  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
   `tasks/migration-active.md`, and this handoff. There are no staged or
   untracked paths.
-- The active index routes Speech/Input Complete to Control Flow Active. Lessons
-  record the missing-import compile closure, compact-time tool check and the
-  feature-specific parser-placeholder/no-page fixture correction.
+- The active index routes Control Flow Complete to Action State Active. Lessons
+  preserve the flow/input/BREAK/roll/full-gate evidence and the repeated missing
+  `rg` first-probe workflow failure.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `826842e7cd63caa356c3efd86b646bae79ee56d0`;
-  no upstream. Commit `826842e Complete P7 NPC speech and input` contains exactly
-  the six owned server code/test paths and `docs/migration-matrix.md`.
-- Index and worktree are clean; there are no staged or untracked paths. The
-  commit records 2,041 insertions and 24 deletions across seven paths.
-- Matrix row 182 is Complete, row 183 is the sole Active row, ledger D contains
-  accepted evidence, and P7 summary is exactly 8+1+15.
+- Branch `main`; HEAD `8b39791ae9e0a660c3cb77661df86a2e09c71a91`;
+  no upstream. The index and worktree are clean.
+- Commit `8b39791 Complete P7 NPC control flow` changes bounded `main.go`,
+  `default_npc.go`, parser/protocol files, required existing session fixtures
+  and `docs/migration-matrix.md`; it adds
+  `npc_script_flow.go`, `npc_script_flow_test.go`,
+  `npc_control_flow_session_test.go`, and
+  `internal/worlddata/npcscript_controlflow_test.go` (24 paths, 3,463 insertions,
+  878 deletions).
+- Matrix row 183 is Complete, row 184 is the sole Active row, ledger E contains
+  accepted evidence, and P7 summary is exactly 9+1+14.
 
-## Completed Speech/Input behavior
+## Completed Control Flow behavior
 
-- SAY formatting preserves space-token/global-replace and greedy regex quirks,
-  CurrentCulture token/link casing including Turkish dotted-I behavior, unknown
-  and empty fallback, malformed conquest/OUTPUT panic paths, culture-specific
-  date/general-number rendering and all finite scalar/function/equipment/guild/
-  conquest/roll placeholder branches.
-- Production snapshots use the Legacy UTC Envir clock and live-only first-map
-  monster count. Equipment FriendlyName/count, mail awaiting collection, map,
-  user, HP/MP, balances, guild rental and definition-catalog sources are wired.
-- Link replacement preserves raw display names and source duplicates. ITEM
-  sibling definitions, ITEM/MONSTER/NPC caches, observer-before-target forwarding
-  and target response order match Legacy; linked NPC ClientInformation uses
-  ObjectID zero/Icon=BigMapIcon and can resolve an unmaterialized definition.
-- Input values are stored before authorization, ordinary resume ignores wire
-  NPCID, default resume requires matching identity, rejected values remain
-  sticky, successful/no-page/default-callback calls consume them, `%INPUTSTR`
-  remains action-only, and stale input cannot bypass a later direct 31-unit key
-  disconnect. Variable/roll writers and action-before-SAY scheduling remain the
-  new Control Flow/Action owners, not a Speech residual.
+- Production ordinary/default runners share one delayed/immediate queue model,
+  route group calls by stored group order, preserve the Legacy forward-removal
+  scan quirks and have no artificial 128-page/job cap.
+- GOTO/CALL/BREAK, DELAYGOTO/GROUPGOTO and ROLLDIE/ROLLYUT preserve raw parameter
+  resolution, malformed-tail abort, RNG/state/wire order, fake-clock delay,
+  action-before-SAY/response/special ordering and cross-script/page state.
+- Every detached page call consumes `%INPUTSTR`; queued input pages request input
+  before page lookup. Parsed page copies share race-safe BREAK carry, while the
+  global flow mutex preserves Legacy's single work-loop interval across the
+  originating call and immediate scan.
+- `ServerRoll=273` and its .NET-shaped payload/parser are covered by fixed wire
+  vectors. Existing action-bearing NPC session fixtures now assert action
+  packets before the terminal `NPCResponse` instead of their old approximation.
 
 ## Verification ledger
 
-- Owned gofmt and minimum compile passed:
-  `go test ./cmd/crystal-server -run '^$' -count=1` exit 0.
-- Focused final repeated gate passed:
-  `go test ./cmd/crystal-server -run '^(TestNPCP7SpeechInput|TestSessionNPCConfirmInputResumesAtInputPage|TestSessionNPCDefaultRequiresActiveObjectAndMatchingInputID)' -count=10` exit 0.
-- Focused final race passed with the same regex and `-count=3`, exit 0.
-- `go test ./cmd/crystal-server -count=1` exit 0 (80.744s).
-- Final fresh integration `go test -count=1 ./...`, `go vet ./...`, and
-  `go build ./...` all exit 0; final server package time was 83.912s.
-- First due `go test -race ./...` exited 1 only at archived
-  `TestSessionOmaMageRangeSlowFrozenTranscript` (`[2 1]` vs `[1]`) with no race
-  detector report and no owned stack. Exact isolated race `-count=10` and the
-  explicit-skip remainder both exited 0. A subsequent fresh unexcluded
-  `go test -race ./...` exited 0; server package time was 95.131s.
-- Legacy auditor `01a0467c-f8b6-7a42-bd05-9eb08f953aad` supplied exact source
-  ordering; Go auditor `01a0467d-2917-7a80-b502-8579a0764332` found sticky key
-  bypass/Turkish risks and verified the interrupted candidate; terminal review
-  returned `No findings`. All three agents are closed.
-- Initial post-catalog compile failed on a missing `worlddata` import and the
-  first no-page test mistook a parser placeholder for an absent page; both are
-  preserved as failed evidence, corrected, and all final gates above pass.
+- Owned gofmt and `git diff --check` passed.
+- Minimum compile:
+  `go test ./internal/worlddata ./internal/protocol ./cmd/crystal-server -run '^$' -count=1`
+  exit 0.
+- Focused final repeated gate over parser/protocol/unit/production Control Flow
+  tests with `-count=10` exited 0 for all three packages.
+- Focused race gate over the same corpus with `-race -count=3` exited 0 for all
+  three packages.
+- `go test ./cmd/crystal-server -count=1` exit 0; server 86.007s.
+- Fresh `go test -count=1 ./...` exit 0; server 85.013s.
+- Fresh `go vet ./...` and `go build ./...` both exit 0.
+- Fresh unexcluded `go test -race -count=1 ./...` exit 0; server 97.385s.
+- Earlier broad attempts failed only at archived
+  `TestSessionHallucinationTranscript`; isolated count-1/count-10 and both final
+  fresh unexcluded full runs passed. No unrelated production change was made.
+- Both repository tracked/staged/untracked `.cs` gates were empty before this
+  handoff refresh; rerun them immediately before each commit.
 
 ## Active leaf and protected work
 
-- Active leaf: `NPC-P7-CONTROL-FLOW-001`.
-- Next Go authority is bounded flow data in `internal/worlddata/npcscript.go`,
-  `cmd/crystal-server/{main.go,default_npc.go}`, new `npc_script_flow.go`,
-  `npc_script_flow_test.go`, bounded `npc_control_flow_session_test.go`, required
-  existing session fixtures, and matrix/index/handoff.
-- Complete loading, page grammar, Speech/Input formatter/metadata/input lifetime,
-  action/condition catalogs, callbacks, protocol layouts and every C# are
-  protected.
+- Active leaf: `NPC-P7-ACTION-STATE-001`.
+- Next Go authority is bounded parser fields in
+  `internal/worlddata/npcscript.go`, bounded runtime adapters in
+  `cmd/crystal-server/{main.go,default_npc.go}`, new
+  `npc_script_actions_state.go` and tests, narrowly required session fixtures,
+  matrix/index/handoff.
+- Complete Load, Grammar, Speech/Input and Control Flow are protected. Social,
+  world and teleport actions, conditions, callbacks, unrelated protocol layouts
+  and every `.cs` are forbidden.
 
 ## Exact recovery sequence
 
-1. Run the control checker and both-repository diff/status/C# gates, then commit
-   exactly the four Legacy control/lesson paths. This handoff observes Legacy
-   HEAD `3e679049b3411d409a9af3f2939d8c25f766eb5c` immediately before that one
-   expected documentation commit delta.
-2. Verify both worktrees clean and exact row 182 Complete / row 183 Active / P7
-   8+1+15. Read only matrix row 183, ledger E row 206 and summary row 966.
-3. Search archives only for Control Flow, delayed queue, action-before-response,
-   GOTO/CALL/BREAK/DELAYGOTO/GROUPGOTO/ROLLDIE/ROLLYUT keywords and freeze the
-   seven-key Legacy checklist before any Control Flow implementation.
+1. Rerun the Legacy control checker/status/`.cs` gates, then commit exactly the
+   five owned Legacy documentation paths. This handoff observes Legacy HEAD
+   `c8209d99109404aab2c7fa246d13ec16524fd3c9` immediately before that expected
+   documentation-only commit delta.
+2. Verify both worktrees clean. Read only matrix row 184, ledger F row 207 and
+   summary row 966; search the archive only for Action State and the 14 named
+   keywords, then freeze the exact Legacy checklist before implementation.

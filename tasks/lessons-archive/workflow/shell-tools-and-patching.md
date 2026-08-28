@@ -749,3 +749,43 @@
   was discarded; the exact returned path was copied into a separate rerun at
   exit 0 before reading `CheckVisible`. A locator result must end one call and be
   copied literally into the next argv, without reinserting a remembered folder.
+
+### 2026-08-28 — Control-flow recovery repeated regex, glob and repository-boundary failures
+
+- Symptom: the first archive query used a PCRE-only non-capturing group with
+  `git grep -E` and exited 128; a later Go search let zsh expand an unquoted
+  `cmd/crystal-server/*.go`; a protocol comparison then appended the Legacy
+  `Shared/ServerPackets.cs` path to a Go-root command and exited 1.
+- Root cause: the command was composed from semantic intent without first
+  closing the regex dialect, pathspec ownership and single-repository argv.
+- Prevention: use repeated fixed `-e` patterns unless an ERE feature has been
+  verified; pass Git pathspec globs as quoted arguments; before every call scan
+  every explicit path against the selected workdir and split cross-repository
+  comparisons into two physical calls.
+- Verification: all three failed or contaminated outputs were discarded. The
+  archive search was rerun with fixed `-e` patterns, the Go search with a quoted
+  Git pathspec, and protocol ranges with separate zero-exit Go and Legacy calls.
+- Recurrence during integration: a Legacy enum/serializer read again appended a
+  Go `packet.go` grep and exited 2; the mixed output was discarded and both
+  repositories were rerun separately at exit 0. A protocol test edit then
+  treated a pre-shift expected ordinal as final, because only the assignment was
+  read and the table's later `+1` normalization loop was not. The resulting
+  focused failure was preserved, the complete assertion pipeline was reread,
+  and the original pre-shift value restored before the same test passed.
+- Patch-process recurrence: three independent patches plus formatting/testing
+  were sent without fail-fast; the first two production patches landed before
+  the third test hunk missed, leaving an overall exit 1 with partial writes.
+  Every touched file was reread, the missing hunk was applied from current
+  physical lines, and compile passed. Multi-patch commands must begin with
+  `set -e`; an overall failure never implies earlier patch processes rolled back.
+- Startup recurrence: the next recovery again queried both repositories in one
+  status call before reading active lessons. That mixed output was discarded;
+  lessons were read completely, then Legacy and Go status plus all three C#
+  gates were rerun in separate zero-exit calls. Startup headings never waive
+  C01's one-root argv review.
+- Tool-probe recurrence at closure: despite reading the canonical first-use
+  rule, the next main recovery called unavailable `rg` before a bare probe and
+  exited 127. The output was discarded; a standalone `command -v rg` exited 1,
+  and the bounded archive query was rerun with NUL-safe `find`/`grep` at exit 0.
+  Session recovery must translate the lesson into an argv checklist rather than
+  treating the read itself as compliance.

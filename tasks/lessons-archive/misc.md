@@ -803,3 +803,56 @@
   execute-every-matching-root behavior remains owned by
   `NPC-P7-DEFAULT-CALLBACK-001`/`NPC-P7-MONSTER-ROBOT-SCRIPT-001`; this leaf must
   record that dependency rather than widening into callback execution.
+
+### 2026-08-28 — NPC control-flow calls have per-call input lifetime and page-shared BREAK carry
+
+- Symptom: an immediate `GOTO` reused `%INPUTSTR` from its producer and awarded
+  gold, while `BREAK` in a page's final segment failed to stop a queued
+  self-`GOTO`; the second call repeated the page instead of returning empty.
+- Root cause: the Go runner treated an initial page plus queued pages as one
+  input transaction and represented `BreakFromSegments` as a call-local bool.
+  Legacy removes `NPCInputStr` at the end of every `NPCScript.Call`, but stores
+  `BreakFromSegments` on the shared `NPCPage`; a final-segment BREAK is consumed
+  only by the next call's first segment iteration.
+- Prevention: consume input after each detached page call before scanning its
+  immediate queue, and attach race-safe BREAK carry to parsed page values so
+  script/page copies share it. Keep a local fallback only for hand-built unit
+  pages, and test a BREAK+self-GOTO rather than only mid-page BREAK.
+- Verification: the two production-entry regressions first failed with
+  `ServerGainedGold` before the chained response and repeated `First pass.`;
+  after the repair the exact pair, all control-flow/Speech-Input tests and the
+  full `internal/worlddata` package pass.
+- Review strengthening: read-only terminal review found Roll's page parameter
+  was resolved after `SetRollResult`, unlike Legacy's all-parameters-before-
+  switch loop. Control parameters are now resolved as one snapshot before any
+  RNG/state mutation; the focused test proves consecutive roll pages observe
+  the prior results `0` then `1`, while emitted results are `1` then `6`.
+- Further closure: parameter resolution now clones immutable script actions and
+  preserves Legacy's `FindVariable` → per-space-token `ReplaceValue` → literal
+  `%INPUTSTR` order, so client input cannot recursively invoke a formatter.
+  Parsed page arguments are always wrapped, including Legacy's double-wrap for
+  an already bracketed token. A queued `GOTO` to `[@@...]` now requests input
+  before page lookup/execution and uses the player's prior active NPC ID.
+- Concurrency review: terminal review initially reported that another session
+  could steal the page-shared BREAK carry. Full production tracing showed every
+  direct ordinary/default call, immediate scan and due scan executes inside one
+  global flow mutex, matching Legacy's single work-loop interval; the reviewer
+  explicitly withdrew the finding. Shared parser state is safe only while that
+  serialization remains a protected invariant, so future entry points must be
+  added under the same wrapper and traced before acceptance.
+
+### 2026-08-28 — Control-flow full gate exposed an unrelated Hallucination timeout
+
+- Symptom: the first full server package and first full-repository test each
+  failed only at `TestSessionHallucinationTranscript` after 30 seconds with a
+  closed pipe; no stack entered the NPC control-flow candidate.
+- Root cause: the archived Hallucination session fixture is scheduling-sensitive
+  under a broad run, not a demonstrated control-flow regression.
+- Prevention: preserve the full-gate exits, isolate the exact test repeatedly,
+  and require a fresh unexcluded full pass; do not change unrelated production
+  code or describe an excluded run as success.
+- Verification: exact isolated `-count=1` and `-count=10` both passed, followed
+  by fresh full server-package passes in 81.555 and 86.007 seconds. The final
+  fresh unexcluded `go test -count=1 ./...` passed with server 85.013 seconds,
+  and full `go test -race -count=1 ./...` passed with server 97.385 seconds;
+  `go vet ./...` and `go build ./...` also exited 0.

@@ -36,53 +36,56 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `NPC-P7-CONTROL-FLOW-001`
-- Status: `Active` dependency-ready functional leaf; Script Load and Page
-  Grammar are Complete prerequisites and Speech/Input is now Complete.
-- Outcome: preserve Legacy `GOTO`, `CALL`, `BREAK`, `DELAYGOTO`, `GROUPGOTO`,
-  `ROLLDIE` and `ROLLYUT`, the shared delayed queue, action-before-response
-  ordering, cross-segment state and the absence of Go's artificial chain cap.
-- Go matrix anchors to read: active row 183, routing ledger E row 206 and P7
+- Leaf ID: `NPC-P7-ACTION-STATE-001`
+- Status: `Active` dependency-ready functional leaf; Control Flow,
+  `CFG-P1-CONTRACT-001` and `EQUIP-P6-CORE-001` are Complete prerequisites.
+- Outcome: preserve the exact 14-key local state action surface:
+  `PARAM1/2/3`, `MOV`, `CALC`, `LOADVALUE`, `SAVEVALUE`, `GETRANDOMTEXT`,
+  `SETTIMER`, `EXPIRETIMER`, `OPENBROWSER`, `PLAYSOUND`, `CANGAINEXP` and
+  `UNEQUIPITEM`, including conversion-tail abort, RNG/file/timer/UI order and
+  restart-visible state.
+- Go matrix anchors to read: active row 184, routing ledger F row 207 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: `NPCScript.Call/Response`, `PlayerObject.CallNPCNextPage`
-  and `CompleteNPC`, delayed-action storage/dispatch, and only the seven named
-  `NPCSegment.Act` branches plus their direct state/RNG consumers; C# read-only.
-- Go read/write authority: bounded flow data in `internal/worlddata/npcscript.go`,
-  `cmd/crystal-server/{main.go,default_npc.go}`; new `npc_script_flow.go`,
-  `npc_script_flow_test.go`, bounded `npc_control_flow_session_test.go`, existing
-  default/NPC session fixtures as required; matrix/index/handoff.
-- Forbidden scope: new state/social/world actions, conditions, callback-family
-  execution, script loading/page grammar/formatter changes, protocol layouts and
-  every C# write.
+- Legacy read authority: only the 14 named `NPCSegment.Act` branches, their
+  parser fields and direct `PlayerObject`/settings/equipment/file/timer/RNG/UI
+  consumers; C# remains read-only.
+- Go read/write authority: bounded action parse fields in
+  `internal/worlddata/npcscript.go`; bounded runtime adapters in
+  `cmd/crystal-server/{main.go,default_npc.go}`; new
+  `npc_script_actions_state.go` and tests; narrowly required existing session
+  fixtures; matrix/index/handoff.
+- Forbidden scope: social/world/teleport actions, conditions, callback-family
+  execution, control scheduler changes, formatter/catalog changes, unrelated
+  protocol layouts and every C# write.
 
 ### Protected Go ownership
 
-- Complete loading, page grammar and Speech/Input formatter/metadata/input
-  lifetime are protected inputs. This leaf owns only shared control scheduling,
-  execution order and the bounded state required by the seven keywords.
+- Complete loading, page grammar, Speech/Input and Control Flow are protected
+  inputs. This leaf owns only the 14 named state actions and bounded adapters.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact parse/dispatch order, state mutation, RNG calls, delay
-  boundaries and malformed-tail behavior for all seven keywords.
-- [ ] Replace the artificial 128-page cap with Legacy finite queue semantics and
-  preserve action packets before SAY metadata/response plus special-panel order.
-- [ ] Drive ordinary/default finite long chains, cross-script calls, delayed and
-  group/roll branches through production with deterministic clocks/RNG.
+- [ ] Freeze exact parser fields, conversion boundaries, mutation/writeback and
+  error-tail behavior for all 14 keys from the direct Legacy consumers.
+- [ ] Preserve random-text draw/order, value-file and timer lifecycle/restart,
+  browser/sound wire ordering, experience-cap result and UNEQUIPITEM authority.
+- [ ] Drive ordinary and default production entries through deterministic
+  pass/fail/malformed cases, relogin/restart where state is durable, and race.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Accepted frozen row/ledger E, Complete Load/Grammar/Speech prerequisites,
-  current Page.Select/job-loop approximations and exact Legacy direct consumers.
+- Accepted frozen row/ledger F, Complete Control Flow/config/equipment
+  prerequisites, existing partial state actions and exact Legacy consumers.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
-accepted revision 2 with `No findings`. Speech/Input terminal review also returned
-`No findings`. The frozen 24-child denominator is now 8 Complete + 1 Active +
-15 Ready; the matrix owns exact routing evidence.
+accepted revision 2 with `No findings`. Control Flow terminal review withdrew its
+only provisional finding after tracing the serialized production call chain. The
+frozen 24-child denominator is now 9 Complete + 1 Active + 14 Ready; the matrix
+owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -94,8 +97,8 @@ accepted revision 2 with `No findings`. Speech/Input terminal review also return
 | `NPC-P7-SCRIPT-LOAD-001` | Complete | `CFG-P1-CONTRACT-001` | ledger B | INSERT/INCLUDE/CALL/custom files |
 | `NPC-P7-PAGE-GRAMMAR-001` | Complete | `NPC-P7-SCRIPT-LOAD-001` | ledger C | reachable pages/directives/links/args/casing |
 | `NPC-P7-SPEECH-INPUT-001` | Complete | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-WIRE-STATIC-001` + `ITEM-P6-WIRE-CATALOG-001` | ledger D | placeholders/info order/sticky input |
-| `NPC-P7-CONTROL-FLOW-001` | Active | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger E | 7 keywords/order/state/delay/chain |
-| `NPC-P7-ACTION-STATE-001` | Ready | Control Flow + `CFG-P1-CONTRACT-001` + `EQUIP-P6-CORE-001` | ledger F | 14-key table/restart/RNG/UI |
+| `NPC-P7-CONTROL-FLOW-001` | Complete | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger E | 7 keywords/order/state/delay/chain |
+| `NPC-P7-ACTION-STATE-001` | Active | Control Flow + `CFG-P1-CONTRACT-001` + `EQUIP-P6-CORE-001` | ledger F | 14-key table/restart/RNG/UI |
 | `NPC-P7-ACTION-SOCIAL-001` | Ready | Control Flow + `GUILD-P9-NPC-SCRIPT-001` + `MAIL-P10-NPC-SCRIPT-001` | ledger G | 12-key table/persistence/recipients |
 | `NPC-P7-ACTION-WORLD-001` | Ready | Control Flow + `MONSTER-P5-BASE-FAMILY-001` + `ITEM-P6-GRID-MUTATION-001` + `GUILD-P9-NPC-SCRIPT-001` | ledger H | 11-key recipient/persistence/race matrix |
 | `NPC-P7-COND-LOCAL-001` | Ready | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-ACTION-STATE-001` | ledger I | exact 7-key + shared malformed/operator quirks |
