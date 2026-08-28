@@ -716,3 +716,36 @@
 - Verification: the rejected agent was closed, `codex-auto-review/xhigh` ran the
   same read-only scope, returned four findings, and its post-ruling follow-up
   returned `No findings`; all reviewer threads are closed.
+
+### 2026-08-28 — Tool discovery, absence queries, and output bounds are separate gates
+
+- Symptom: P7 archive discovery put `command -v rg` and the first exact search
+  under one `set -e`; absent ripgrep aborted before a useful diagnostic, and the
+  same unavailable command was retried. A later broad recursive Go grep emitted
+  truncated output, invalidating the whole call.
+- Root cause: tool availability, valid zero-match results, and output-size
+  bounds were treated as properties of one compound command rather than three
+  preconditions checked before evidence collection.
+- Prevention: run `command -v` alone before the first non-POSIX tool use; if it
+  fails, choose the bounded fallback before searching. Encode expected absence
+  with an explicit exit-1 branch, and split recursive searches by file/range so
+  the complete result fits the requested output budget.
+- Verification: archive search was rerun with repository-local `find`/quoted
+  `grep` and explicit no-match handling; exact matching sections were then read
+  by bounded `sed`. The truncated Go search was discarded and replaced by
+  smaller zero-exit file/range calls.
+- Recurrence: after reading C02, main still put `command -v rg` under `set -e`
+  with a follow-up version command, then later let an optional writer-lock grep
+  exit 1. Both calls were discarded; bounded `grep`/`find` reruns completed at
+  exit 0. C02 now requires the literal first probe to be a bare one-command call.
+- Build recurrence: Access-gate compile validation used `go build
+  ./cmd/crystal-server` from the repository root and created an untracked Mach-O
+  `crystal-server`. The command choice ignored the already-recorded no-artifact
+  build rule. The exact self-created file was verified with `file`, removed with
+  `unlink`, and status proved it absent; evidence builds now use `go build ./...`.
+- Path recurrence: a locator returned the exact
+  `Server/MirObjects/NPCObject.cs`, but the immediately following grep reverted
+  to the guessed `Server/MirObjects/NPC/NPCObject.cs` and exited 2. That output
+  was discarded; the exact returned path was copied into a separate rerun at
+  exit 0 before reading `CheckVisible`. A locator result must end one call and be
+  copied literally into the next argv, without reinserting a remembered folder.

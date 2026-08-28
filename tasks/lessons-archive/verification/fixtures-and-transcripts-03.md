@@ -937,3 +937,70 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
 - Verification: the hook now runs once per client open; the exact authenticated
   transcript, count-10 repetition and focused race count 5 all exit 0 with no
   stray regen packet.
+
+### 2026-08-28 — Access tightening requires explicit default activation and dead-call silence
+
+- Symptom: the first full server-package run after the P7 access candidate
+  produced five failures: two guild-buff, one mail and one wedding fixture timed
+  out after calling a default NPC object directly, while the dead-shop fixture
+  waited for panels after an ordinary NPC call that Legacy rejects. The first
+  correction then failed compile by guessing a nonexistent
+  `shopSession.npcObjectID` field.
+- Root cause: old tests encoded Go's permissive direct-default fallback and
+  dead ordinary navigation instead of Legacy `CallDefaultNPC` identity and
+  `PlayerObject.CallNPC` dead gates; the correction reused a presumed symmetric
+  fixture field without reading the actual helper, which fixes the runtime NPC
+  ID at 1.
+- Prevention: when tightening a production admission gate, enumerate every
+  fixture that configures its producer. Default-NPC transcripts must enter via
+  the max-uint Client sentinel, consume `NPCUpdate`, select a real `[@_CLIENT]`
+  response link, and only then call the default object. Dead ordinary calls are
+  silent and require a KeepAlive barrier, not expected panels. Read the concrete
+  fixture struct/helper before naming an ID field, and register expanded test
+  authority before editing protected files.
+- Follow-up finding: the candidate still assigned the default object before
+  looking up `[@_CLIENT]`, so a sentinel with a missing page wrongly authorized
+  later direct calls. Legacy changes `NPCObjectID` only in
+  `NPCScript.ProcessSegment`; Go now changes active default identity only from
+  `setActivePage`. The regression first proves missing Client page + sentinel is
+  still silent, then reloads a real Client page for the positive/input path.
+- Compile recurrence: removing the eager assignment left the destructured
+  `defaultScript` unused. The first minimum compile failed and was discarded;
+  the snapshot call now binds that return to `_`, and the exact compile rerun
+  passes. Gate-owner refactors must update producer outputs and consumers in the
+  same compile transaction.
+- Visibility-log failure: the first separate Legacy `VisibleLog` map was only
+  populated by `NPCVisibilitySend`, but bootstrap/static refresh mutates the
+  wire cache in a reserved batch and bypasses that callback. Three quest tests
+  timed out because their initially visible NPCs had no access-log entry. The
+  access lookup now lazily promotes an already-sent wire-cache entry, while
+  later global removals do not clear the Legacy log and player-gate failures do.
+  Exact failed tests were rerun together at exit 0.
+- Fixture recurrence: the new persistent-VisibleLog quest case then waited for
+  `NPCUpdate` even though that isolated world never configured a default NPC.
+  Ten repetitions each timed out at the same read; the invented packet was
+  removed and the exact test now passes ten times. Callback packets may only be
+  expected after the fixture proves a configured default producer.
+- Integration finding: the first fresh `go test -count=1 ./...` stopped before
+  vet/build because five storage tests still called `[@STORAGE]` on an NPC with
+  no script or selected link. That was the removed direct-storage access
+  fallback, not a storage response defect. After expanding access-only test
+  authority, each fixture now loads a real MAIN link plus existing STORAGE page,
+  consumes MAIN, then enters STORAGE. The exact main/operator/P11/two storage
+  tests pass together; the full integration command must be rerun from test.
+- Second integration finding: the next server-package run exposed market,
+  refine, repair, P11 awakening and four shop fixtures whose special pages had
+  no segment. Legacy only changes `NPCPage` from `NPCScript.ProcessSegment`, so
+  an empty page may display its special panel but cannot authorize the later
+  transaction. The fixtures now retain empty response payloads with an explicit
+  `#SAY` segment; exact reruns pass without weakening any business assertion.
+- Unrelated-gate attribution: one subsequent server-package run failed only
+  `TestSessionHallucinationTranscript` after its 30-second pipe timeout. A clean
+  `git archive` of the pre-leaf Go HEAD passed once but reproduced the same
+  failure under `-count=20`; current exact rerun then passed. The failure is a
+  pre-existing time-sensitive fixture, not an access-gate stack. The next fresh
+  unexcluded full test and full race both passed.
+- Verification: owned minimum compile, focused production sessions, count-10
+  repetitions and focused race count-3 pass. Fresh `go test -count=1 ./...`,
+  `go vet ./...`, `go build ./...`, and fresh `go test -race -count=1 ./...`
+  all exit 0 after the access-only fixture corrections.

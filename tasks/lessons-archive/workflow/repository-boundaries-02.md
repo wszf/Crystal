@@ -700,3 +700,22 @@ The following active C01 evidence was archived verbatim before canonical compact
   replaced by two sequential repository-local calls. Semantic comparisons now
   require writing the two workdirs as separate checklist lines before either
   command is drafted, not merely checking the final argv by memory.
+
+### 2026-08-28 — P7 compaction recovery repeated both C01 failure forms
+
+- Symptom: the first recovery command combined Legacy status/control reads with
+  `git -C ../Crystal.GoServer`; later, a Go-root NPC parser read appended three
+  Legacy `Server/...cs` paths and exited 1 after valid Go output.
+- Root cause: the recovery report and semantic comparison were each drafted as
+  convenient two-sided shell transactions instead of enforcing repository
+  closure before argv construction.
+- Prevention: the first status check and every cross-language comparison are
+  physically two tool calls. Reject `git -C`, the opposite root, and any path
+  outside the current workdir before sending; headings never justify merging.
+- Verification: both mixed outputs were discarded in full. Legacy and Go status,
+  C# gates, NPC parser, and NPCPage/ReplaceValue ranges were rerun separately at
+  exit 0; only those reruns are evidence for the P7 denominator.
+- Recurrence: the next main recovery again drafted a two-root status command
+  before finishing the startup lesson read. It was discarded (also truncated),
+  then both roots were rerun independently at exit 0. C01 now makes “read lessons
+  before status” part of the mechanical split rather than an assumed preface.

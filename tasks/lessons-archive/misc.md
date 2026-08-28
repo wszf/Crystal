@@ -228,6 +228,17 @@
 - Prevention: 会话测试在断言 NPC 动作副作用前发送并消费 `ClientKeepAlive`/`ServerKeepAlive`，把 keep-alive 返回作为当前请求处理完成的屏障。
 - Verification: `SET` + `BREAK` + 下一页面 `CHECK` 会话测试改用 keep-alive 屏障后稳定通过。
 
+- P7 source correction (2026-08-28): this historical conclusion described the
+  then-current Go implementation, not Legacy authority. Current Legacy
+  `NPCScript.ProcessSegment -> NPCSegment.Check -> Success/Failed` executes the
+  selected action list and formats SAY text before `NPCScript.Response` enqueues
+  `NPCResponse`; Go still sends most actions after the response. The symptom was
+  treating a passing Go transcript as proof of Legacy order. Prevention is to
+  trace the complete producer call chain before naming a packet a completion
+  boundary. Verification: exact Legacy ranges `NPCScript.cs:895-917` and
+  `NPCSegment.cs:2077-2967,4956-4974` were reread separately; P7 routes this
+  ordering gap to `NPC-P7-CONTROL-FLOW-001` instead of preserving the old test.
+
 ### 2026-08-11 — NPC 链式页必须逐页执行特殊面板
 
 - Symptom: GOTO/CALL 初版只在整条链最后按 active page 发送 shop/repair/refine 面板，链中间进入功能页时客户端只能收到文本，缺少对应功能包。
@@ -715,3 +726,17 @@
 - Root cause: 把“正常运行中的第一个 process tick”简化成无条件 first-send，没有保留 Legacy `Time > NextSendTime` 的初始严格边界；同时把可测试 service 当成 production runtime 本身。
 - Prevention: status timer 必须分别测试 elapsed zero、首个正毫秒、十秒 equality 和下一毫秒；生产入口必须在同一 runtime 函数中注入最小 listener opener，断言 game listener 之后确实请求 `Settings.IPAddress:3000`。
 - Verification: service 已移除 zero-time 特判并锁定 strict positive first tick；runtime-entry test 记录真实 opener 调用序列、固定地址与双 listener 关闭，独立 TCP 测试覆盖五连接 backpressure/release。
+
+### 2026-08-28 — NPC GOTO access tests must preserve the literal page-key token
+
+- Symptom: the first selected-button regression used `GOTO HIDDEN` but asserted
+  the parser would expose `[@HIDDEN]`; the focused worlddata test failed because
+  the actual grammar preserves the token as `[HIDDEN]`.
+- Root cause: the test normalized a control-flow argument by intent instead of
+  using the Legacy parser's literal `"[" + parts[1] + "]"` rule.
+- Prevention: derive NPC page keys from the exact script token; use
+  `GOTO @HIDDEN` when the target header is `[@HIDDEN]`, and keep flow targets
+  separate from client-authorized SAY buttons.
+- Verification: the fixture now uses `GOTO @HIDDEN`; the exact two selected-
+  button tests pass and prove the page grammar retains the flow target while
+  the active access set excludes it.

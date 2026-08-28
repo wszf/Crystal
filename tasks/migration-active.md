@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-28 03:10 (Asia/Singapore)
+Last verified: 2026-08-28 08:01 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -27,7 +27,7 @@ Keep this file at or below 300 lines and 32 KiB.
 | P4 | In progress | Frozen | `DISC-P4-CLOSURE` (Complete) |
 | P5 | Complete | Frozen | `DISC-P5-CLOSURE` (Complete) |
 | P6 | In progress | Frozen | `DISC-P6-CLOSURE` (Complete) |
-| P7 | In progress | Open | `DISC-P7-CLOSURE` |
+| P7 | In progress | Frozen | `DISC-P7-CLOSURE` (Complete) |
 | P8 | Complete | Frozen | — |
 | P9 | In progress | Open | `DISC-P9-CLOSURE` |
 | P10 | In progress | Open | `DISC-P10-CLOSURE` |
@@ -36,45 +36,76 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `DISC-P7-CLOSURE`
-- Status: `Active` bounded discovery; no P1-P6 dependency-ready functional child
-  remains, so the empty ready queue activates one finite phase-discovery leaf.
-- Outcome: replace P7's vague remaining shop/script wording with an accepted
-  finite child denominator covering every reachable normal/default-NPC access,
-  action, condition, page, input, shop, teleport and quest family.
-- Go matrix anchors to read: registered P7 findings rows 152-157 and P7 summary
-  row 902 only; never the full matrix or another open phase.
-- Legacy read authority: bounded NPC connection gates, normal/default script
-  parser/dispatcher, shop and quest call chains needed to classify residuals;
-  every C# file remains read-only.
-- Go read authority: existing NPC/script/shop/quest protocol, worlddata,
-  importer and authenticated-session implementations needed only to classify
-  evidence, gaps and dependencies.
-- Write authority: `docs/migration-matrix.md`, this Active Index and current
-  handoff only. Register physical Go implementation/test authority on each
-  child before any later functional write.
-- Forbidden scope: implementation, broad source inventory, another phase
-  discovery, reopening Complete evidence and every C# write.
+- Leaf ID: `NPC-P7-SCRIPT-LOAD-001`
+- Status: `Active` dependency-ready functional leaf; its prerequisite
+  `CFG-P1-CONTRACT-001` is Complete.
+- Outcome: load configured default, monster and robot NPC script file graphs in
+  pure Go with Legacy `#INSERT`, `#INCLUDE` and parse-time `CALL` path, ordering
+  and failure behavior instead of the current flat hard-coded loader.
+- Go matrix anchors to read: active row 180, routing ledger B row 203 and P7
+  summary row 966 only; never the full matrix or another child registry.
+- Legacy read authority: NPCScript construction/load, configured DefaultNPC/
+  MonsterNPC/RobotNPC filenames, `#INSERT`, `#INCLUDE`, parse-time `CALL` and
+  their direct file/error consumers only; C# is read-only.
+- Go read/write authority: `internal/legacyworld/{text.go,settings.go,export.go}`;
+  new `internal/legacyworld/npc_script_load_test.go`; new bounded
+  `cmd/crystal-server/npc_script_load_session_test.go`; matrix/index/handoff.
+- Forbidden scope: page grammar, runtime CALL/GOTO/control flow, actions,
+  conditions, callbacks, unrelated startup/import behavior and every C# write.
 
 ### Protected Go ownership
 
-- P7's existing NPC/script/shop/quest evidence, Complete P3-P6/P8 behavior and
-  all dependency-owned P2/P6 leaves are classification inputs, not authority to
-  alter production code.
+- Existing parser/runtime behavior and Complete P3-P6/P8 plus Access evidence
+  are protected inputs. This leaf owns only script source selection and load-time
+  graph expansion; Page Grammar and Control Flow consume its output later.
 
 ### Remaining acceptance work
 
-- [ ] Reconcile every candidate child against existing Go evidence and exact
-  Legacy reachability; split mixed ownership instead of hiding residuals.
-- [ ] Register status, dependency, physical Go write/test authority and an
-  additional gate for every unfinished finite child.
-- [ ] Obtain independent read-only denominator review and resolve every finding;
-  discovery completion makes no claim that a functional child is implemented.
+- [ ] Freeze exact configured filename defaults/overrides and load-time
+  `#INSERT`/`#INCLUDE`/`CALL` ordering, clearing and error continuation.
+- [ ] Cover nested and cyclic graphs, missing/quoted/case-sensitive paths,
+  ordered growing insertion, include-clears-script and custom production files.
+- [ ] Drive the real Go export/startup load path, not a helper-only parser.
+- [ ] Run owned gofmt/compile, focused/repeated/race gates, diff/status and both-
+  repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Registered `NPC-P7-ACCESS-GATE-001` and `NPC-P7-SCRIPT-CLOSURE-001`, P7 matrix
-  summary evidence, dependency-blocked P2/P6 leaves and current Go tests.
+- Accepted frozen row/ledger B, Complete config contract, current Go flat script
+  loader/export path and exact Legacy load-time producers/consumers.
+
+### P7 frozen child registry
+
+Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
+accepted revision 2 with `No findings`. The frozen 24-child denominator is now
+5 Complete + 1 Active + 18 Ready; the matrix owns exact routing evidence.
+
+| Leaf ID | Status | Dependency | Go write authority | Additional gate |
+|---|---|---|---|---|
+| `NPC-P7-WIRE-STATIC-001` | Complete | — | existing protocol/import/world evidence | layouts/static visibility |
+| `SHOP-P7-CORE-001` | Complete | — | existing shop/repair/craft evidence; P6 owns refine | ordinary/unit-rate cores |
+| `TELEPORT-P7-STATIC-001` | Complete | — | existing main/world evidence | static/MOVE-coordinate/ENTERMAP |
+| `QUEST-P7-CORE-001` | Complete | — | existing quest protocol/runtime/session evidence | ordinary/unit-rate core |
+| `NPC-P7-ACCESS-GATE-001` | Complete | —; unblocks `STORAGE-P2-NPC-GATE-001` | ledger A | identity/dead/key/map/range/visibility/branch/quest |
+| `NPC-P7-SCRIPT-LOAD-001` | Active | `CFG-P1-CONTRACT-001` | ledger B | INSERT/INCLUDE/CALL/custom files |
+| `NPC-P7-PAGE-GRAMMAR-001` | Ready | `NPC-P7-SCRIPT-LOAD-001` | ledger C | reachable pages/directives/links/args/casing |
+| `NPC-P7-SPEECH-INPUT-001` | Ready | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-WIRE-STATIC-001` + `ITEM-P6-WIRE-CATALOG-001` | ledger D | placeholders/info order/sticky input |
+| `NPC-P7-CONTROL-FLOW-001` | Ready | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger E | 7 keywords/order/state/delay/chain |
+| `NPC-P7-ACTION-STATE-001` | Ready | Control Flow + `CFG-P1-CONTRACT-001` + `EQUIP-P6-CORE-001` | ledger F | 14-key table/restart/RNG/UI |
+| `NPC-P7-ACTION-SOCIAL-001` | Ready | Control Flow + `GUILD-P9-NPC-SCRIPT-001` + `MAIL-P10-NPC-SCRIPT-001` | ledger G | 12-key table/persistence/recipients |
+| `NPC-P7-ACTION-WORLD-001` | Ready | Control Flow + `MONSTER-P5-BASE-FAMILY-001` + `ITEM-P6-GRID-MUTATION-001` + `GUILD-P9-NPC-SCRIPT-001` | ledger H | 11-key recipient/persistence/race matrix |
+| `NPC-P7-COND-LOCAL-001` | Ready | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-ACTION-STATE-001` | ledger I | exact 7-key + shared malformed/operator quirks |
+| `NPC-P7-COND-WORLD-001` | Ready | `NPC-P7-COND-LOCAL-001` + `GUILD-P9-NPC-SCRIPT-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger J | exact 24-key snapshot/no-side-effect/race matrix |
+| `NPC-P7-DEFAULT-CALLBACK-001` | Ready | `NPC-P7-CONTROL-FLOW-001` + `NPC-P7-SPEECH-INPUT-001` + all three Action and both Condition IDs in rows above | ledger K | all 12 production callbacks |
+| `NPC-P7-MONSTER-ROBOT-SCRIPT-001` | Ready | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-CONTROL-FLOW-001` + `NPC-P7-ACTION-WORLD-001` + both Condition IDs | ledger L | Spawn/Die execution + full TIME/restart/race |
+| `NPC-P7-PANEL-ROUTING-001` | Ready | `NPC-P7-ACCESS-GATE-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger M | missing-page/direct storage/GOTO/craft matrix |
+| `NPC-P7-SHOP-QUIRKS-001` | Ready | `SHOP-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger N | static count + GoodsOn absence/race |
+| `NPC-P7-CONQUEST-ECONOMY-001` | Ready | `SHOP-P7-CORE-001` + `REPAIR-P6-NPC-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger O | owner/rates/storage/atomicity matrix |
+| `NPC-P7-TELEPORT-ACTIONS-001` | Ready | `NPC-P7-CONTROL-FLOW-001` + `MOVE-P4-ACTION-001` + `RENTAL-P6-LIFECYCLE-001` | ledger P | instance/time/group/RNG/transitions |
+| `QUEST-P7-REWARD-RATES-001` | Ready | `QUEST-P7-CORE-001` + `CFG-P1-CONTRACT-001` | ledger Q | non-unit rates/truncation/order |
+| `QUEST-P7-LIFECYCLE-TIMER-001` | Ready | `QUEST-P7-CORE-001` + `PERSIST-P2-CHECKPOINT-RESTART-001` | ledger R | 24h/completion/zero-task/relogin/race |
+| `QUEST-P7-PROGRESS-QUIRKS-001` | Ready | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger S | class/name/flag boundaries |
+| `QUEST-P7-ACCEPT-CARRY-QUIRK-001` | Ready | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger T | sequential partial failure transcript |
 
 ### P6 frozen child registry
 
@@ -103,41 +134,6 @@ accepted all nineteen children with no finding. Twelve are Complete and seven ar
 | `REFINE-P6-WORKBENCH-001` | Ready | P7 page authority | refine/session | delayed production/restart/race |
 | `CRAFT-P6-NPC-001` | Complete | P7/P10 | existing committed evidence | ingredients/RNG/order/persistence |
 | `MINE-P6-RUBBLE-001` | Complete | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
-
-### P5 frozen child registry
-
-Independent Legacy auditor `01a036ed-ee8f-7a50-a042-f1d665f83627` confirmed
-211 mapped/45 default AI ordinals and both map-hazard producers. Independent
-reviewer `01a036ff-6ca2-7f50-ada6-1c68c2ded15d` accepted the original eleven
-children. Hazard Struck tracing proved one finite omitted regen child; its bounded attack
-trace then proved HP-drain combat and optional SafeZoneHealing children. Regen review
-proved one reachable long-Revelation expiry-width correction; its bounded trace
-proved one finite global refresh follow-up. Safe-zone tracing then split direct
-movement triggers and independent border decoration. All twenty-one children are Complete; P5 is scope-frozen and Complete.
-
-| Leaf ID | Status | Dependency | Go write authority | Additional gate |
-|---|---|---|---|---|
-| `SPELL-P5-PLAYER-CATALOG-001` | Complete | — | existing committed evidence | 130-ID partition / 109 user spells |
-| `SPELL-P5-INTERNAL-EFFECT-001` | Complete | mapped monster owners | existing committed evidence | 16 internal effects |
-| `SPELL-P5-MAP-HAZARD-001` | Complete | map load | accepted hazard schema/runtime/session evidence | parser/export + timers/RNG/session/race |
-| `COMBAT-P5-HUMAN-HERO-001` | Complete | spell/state consumers | existing committed evidence | target/defence/death/relogin |
-| `COMBAT-P5-HP-DRAIN-001` | Complete | combat core | committed Go `0db2cdeae072dfed45d39c8e4824caf3597a76ff` | float accumulation/strict payout/remainder/packets/race |
-| `REGEN-P5-HUMAN-001` | Complete | combat + P1 weights + P6 potion pools | committed Go `194c209b46f84876c577085c94b5b3983178691a` | natural/Pot/Heal/Vamp timers, resets, packets, persistence/race |
-| `SPELL-P5-REVELATION-EXPIRE-001` | Complete | Human regen review | committed Go `a2cd1cc3768eae92b69e839e14446f2debd9249f` | 255/256/260 wrap, SendHealth/passive/bootstrap/race |
-| `STATE-P5-REVELATION-REFRESH-002` | Complete | Revelation expiry | committed Go `602c71055c8f417b182931e7292a494017a8522c` | all HP/MP/Monster refresh producers/order/race |
-| `REGEN-P5-SAFEZONE-001` | Complete | Human regen + map safe zones | committed Go `0ab4da7b091d131bdd99a0ff153b7981438262ea` | scheduled cells/ticks/recipients/restart/race |
-| `REGEN-P5-SAFEZONE-DIRECT-002` | Complete | scheduled SafeZone core | trace/freeze central/specialized movement ledger before writes | walk/run/push/turn bypass/order/race |
-| `SPELL-P5-SAFEZONE-BORDER-001` | Complete | map safe-zone geometry | config/main/world/effect visibility + new focused tests | perimeter/payload/visibility/restart/race |
-| `STATE-P5-EFFECT-LIFECYCLE-001` | Complete | — | existing committed evidence | recipients/expiry/persistence/race |
-| `MONSTER-P5-MAPPED-AI-001` | Complete | — | existing committed evidence | 201 mapped ordinals |
-| `MONSTER-P5-BASE-FAMILY-001` | Complete | mapped core | committed Go `3818544beea374ab47ee96bc59b9514dd1a1b476` | 46 ordinals + target-kind/race |
-| `REGEN-P5-MONSTER-NATURAL-001` | Complete | base constructor timing | committed Go `fc0c66cc9de88db30c752bf1a430e58764605804` | random first due/10s cadence/formula/reset/race |
-| `MONSTER-P5-SPECIALIZED-CONSTRUCTOR-002` | Complete | natural-regen trace | committed Go `8c16d9e2a8d479091c43ab379bb090a09a0ef946` | non-base inherited fields/full RNG order/respawn/race |
-| `MONSTER-P5-DYNAMIC-CONSTRUCTOR-003` | Complete | specialized constructor | committed Go `9415ba8ed3594256f3ede8221e6459392c62a018` | one injected stream/prefix/overrides/child lifecycle/race |
-| `MONSTER-P5-ORDINARY-SPAWN-001` | Complete | base family | accepted ordinary spawn/archetype/runtime/session evidence | AI=60-63/99 + restart/race |
-| `DROP-P5-LOOT-HARVEST-001` | Complete | item schema consumer | existing committed evidence | randomness/owner/inventory/ground |
-| `RESPAWN-P5-POPULATION-001` | Complete | — | existing committed evidence | strict timing/order/restart/race |
-| `WIRE-P5-CONTRACT-001` | Complete | functional owners | existing committed evidence | fixed vectors/transcripts |
 
 ### P4 frozen child registry
 
@@ -230,7 +226,7 @@ broad unnamed scope.
 | `DISC-P4-CLOSURE` | P4 | Complete | 10 finite children: 2 Complete + 8 unfinished |
 | `DISC-P5-CLOSURE` | P5 | Complete | 16 finite children after regen/HP-drain/safe-zone/Revelation findings: 12 Complete + 4 unfinished at refresh discovery |
 | `DISC-P6-CLOSURE` | P6 | Complete | 19 finite children: 7 Complete + 12 unfinished at freeze |
-| `DISC-P7-CLOSURE` | P7 | Active | finite NPC/shop/quest/script children |
+| `DISC-P7-CLOSURE` | P7 | Complete | 24 finite children: 4 Complete + 20 unfinished at freeze |
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |
 | `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system children |
 | `DISC-P11-CLOSURE` | P11 | Discovery | finite miscellaneous-system children |
@@ -238,6 +234,13 @@ broad unnamed scope.
 
 ### Registered cross-phase finding
 
+- `GUILD-P9-NPC-SCRIPT-001` (`Ready` input to `DISC-P9-CLOSURE`): expose the
+  finite guild/list/gold mutation and snapshot authority consumed by P7 social,
+  world-action and world-condition leaves; P7 owns script parsing/execution.
+- `CONQUEST-P9-NPC-ECONOMY-001` (`Ready` input to `DISC-P9-CLOSURE`): expose
+  conquest owner/rate/GoldStorage authority; P7 owns NPC price/repair adapters.
+- `MAIL-P10-NPC-SCRIPT-001` (`Ready` input to `DISC-P10-CLOSURE`): expose finite
+  mail persistence/delivery authority; P7 owns script action parsing/execution.
 - `PERSIST-P12-ACCOUNT-ID-001` (`Ready` input to `DISC-P12-CLOSURE`): preserve
   the version-117 `Server.MirADB` header `NextAccountID` through Go import,
   retained-record gaps, checkpoint write, restart, and the next account create.
@@ -257,12 +260,10 @@ broad unnamed scope.
   `CharacterInfo.Index` values through version-117 checkpoint/re-export and
   restart. P3 owns current-process first-match client lookup/mutation outcomes;
   P12 owns writer normalization/rejection and recovery continuity.
-- `NPC-P7-ACCESS-GATE-001` (`Ready` input to `DISC-P7-CLOSURE`): preserve
-  normal NPC map/range/visibility and script-page/button authorization plus the
-  distinct default-NPC object gate before special pages become active.
-- `NPC-P7-SCRIPT-CLOSURE-001` (`Ready` input to `DISC-P7-CLOSURE`): enumerate
-  all remaining reachable normal/default-NPC action/condition/page/input
-  families without hiding them in P2 storage behavior.
+- `NPC-P7-ACCESS-GATE-001` is Complete and unblocks
+  `STORAGE-P2-NPC-GATE-001`; P2 retains storage response/lifetime ownership.
+- `NPC-P7-SCRIPT-CLOSURE-001` is Complete as a discovery input: accepted
+  `DISC-P7-CLOSURE` partitions it into the named script/action/condition leaves.
 - `PERSIST-P12-RESTART-EQUIV-001` (`Ready` input to `DISC-P12-CLOSURE`,
   dependent on P3-P11 authorities): preserve periodic save, atomic replacement,
   backup, global re-export, and complete multi-store restart/recovery.
