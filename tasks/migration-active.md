@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-29 06:45 (Asia/Singapore)
+Last verified: 2026-08-29 07:04 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -37,52 +37,53 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `QUEST-P7-PROGRESS-QUIRKS-001`
+- Leaf ID: `QUEST-P7-ACCEPT-CARRY-QUIRK-001`
 - Status: `Active` dependency-ready functional leaf; `QUEST-P7-CORE-001` and
   `ITEM-P6-GRID-MUTATION-001` are Complete prerequisites.
-- Outcome: preserve the exact quest progress edge semantics for zero
-  `RequiredClass`, item-task matching by name rather than definition identity,
-  and the terminal versus adjacent flag-loop boundary across relogin.
-- Go matrix anchors to read: active row 197, routing ledger S row 219 and P7
+- Outcome: preserve Legacy's sequential carry-item acceptance quirk: already
+  gained carry stacks, reports and quest-bag recalculation remain observable
+  when a later carry stack fails capacity, without adding the quest or running
+  its callback.
+- Go matrix anchors to read: active row 198, routing ledger T row 220 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: quest admission class-mask checks, item/flag task
-  matching and progress loops, plus directly consumed persistence/relogin
-  projections only; C# remains read-only.
+- Legacy read authority: AcceptQuest's carry loop, `CanGainQuestItem`,
+  `GainQuestItem`, report/recalculate/delete ordering and directly consumed
+  logout persistence only; C# remains read-only.
 - Go read/write authority: bounded `cmd/crystal-server/{quests_runtime.go,
-  quests_runtime_test.go,main.go,default_npc.go}`, their quest-only tests, one
-  new bounded progress relogin test, and matrix/index/handoff.
-- Forbidden scope: completed lifecycle/timer and reward-rate behavior, partial
-  carry admission, generic item/economy/NPC behavior, protocol layouts and every
-  C# write.
+  quests_runtime_test.go,main.go}`, their quest-only tests, one new bounded
+  carry-failure session test, and matrix/index/handoff.
+- Forbidden scope: completed lifecycle/timer, reward-rate and progress-quirk
+  behavior, generic item/economy/NPC behavior, protocol layouts and every C#
+  write.
 
 ### Protected Go ownership
 
-- Complete Quest Core, Lifecycle Timer, item-grid, protocol and persistence
-  authorities are protected inputs. This leaf owns only the named class/item/
-  flag progress boundaries and their direct session projections.
+- Complete Quest Core, Lifecycle Timer, Progress Quirks, item-grid, protocol and
+  persistence authorities are protected inputs. This leaf owns only sequential
+  carry admission failure and its exact retained/deleted side effects.
 
 ### Remaining acceptance work
 
-- [ ] Freeze zero-mask `RequiredClass` admission and every adjacent valid class
-  bit without broadening ordinary quest gates.
-- [ ] Preserve item progress's exact name/identity rule for same-name and
-  different-index definitions through production item gain.
-- [ ] Preserve the terminal flag-loop boundary and adjacent flag behavior,
-  including relogin/persistence without reopening lifecycle timers.
+- [ ] Freeze per-stack creation/admission order and the first later capacity
+  failure boundary for one and multiple carry definitions.
+- [ ] Preserve exact gained-item/report/recalculate/delete order, both when an
+  existing quest still needs the partial carry and when no quest retains it.
+- [ ] Prove no quest Add/default callback after partial failure and exact
+  logout/relogin persistence for every retained or deleted stack.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Frozen row/ledger S, Complete Quest Core/item-grid prerequisites and accepted
-  lifecycle/session persistence evidence.
+- Frozen row/ledger T, Complete Quest Core/item-grid prerequisites and accepted
+  lifecycle/progress persistence evidence.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. Control Flow terminal review withdrew its
 only provisional finding after tracing the serialized production call chain. The
-frozen 24-child denominator is now 16 Complete + 1 Active + 7 Ready; the matrix
+frozen 24-child denominator is now 17 Complete + 1 Active + 6 Ready; the matrix
 owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -109,8 +110,8 @@ owns exact routing evidence.
 | `NPC-P7-TELEPORT-ACTIONS-001` | Complete | `NPC-P7-CONTROL-FLOW-001` + `MOVE-P4-ACTION-001` + `RENTAL-P6-LIFECYCLE-001` | committed Go `2983b87ec6b4cd8aa6a8ef2352bea51de2cc0f74` | instance/time/group/RNG/transitions |
 | `QUEST-P7-REWARD-RATES-001` | Complete | `QUEST-P7-CORE-001` + `CFG-P1-CONTRACT-001` | committed Go `3bee34a358a0bed47ab0ff659429520f6731803b` | non-unit rates/truncation/order |
 | `QUEST-P7-LIFECYCLE-TIMER-001` | Complete | `QUEST-P7-CORE-001` + `PERSIST-P2-CHECKPOINT-RESTART-001` | accepted lifecycle/runtime/session evidence | 24h/completion/zero-task/relogin/race |
-| `QUEST-P7-PROGRESS-QUIRKS-001` | Active | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger S | class/name/flag boundaries |
-| `QUEST-P7-ACCEPT-CARRY-QUIRK-001` | Ready | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger T | sequential partial failure transcript |
+| `QUEST-P7-PROGRESS-QUIRKS-001` | Complete | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | accepted runtime/session evidence | class/name/flag boundaries |
+| `QUEST-P7-ACCEPT-CARRY-QUIRK-001` | Active | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger T | sequential partial failure transcript |
 
 ### P6 frozen child registry
 

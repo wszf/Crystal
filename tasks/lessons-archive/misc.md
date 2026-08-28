@@ -1142,3 +1142,15 @@
 - Verification: after the relogin test and marker fix were finalized, the exact
   focused count-10 plus race count-3 command was rerun without writes and both
   invocations exited 0.
+
+### 2026-08-29 — Name-based quest counting must test sparse grids first
+
+- Symptom: the first Progress Quirks count-20 run panicked in
+  `questItemCountByName` because it read `item.ItemIndex` before checking the
+  sparse quest-inventory slot for nil.
+- Root cause: the new catalog lookup was placed before the existing sparse-grid
+  admission guard while converting index counting to Legacy name counting.
+- Prevention: every inventory scan must reject nil before any field access;
+  focused name/identity fixtures must include populated and empty slots.
+- Verification: the guard now precedes lookup, compile-only passes, and all
+  `TestQuestP7ProgressQuirks*` cases pass at count 20.
