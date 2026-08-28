@@ -41,7 +41,8 @@ Keep this file at or below 300 lines and 32 KiB.
   `MOVE-P4-ACTION-001` and `RENTAL-P6-LIFECYCLE-001` are Complete prerequisites.
 - Outcome: preserve exact `MOVE`, `INSTANCEMOVE`, `TIMERECALL`,
   `TIMERECALLGROUP`, `BREAKTIMERECALL`, `GROUPRECALL` and `GROUPTELEPORT`
-  parser/effect quirks, including coordinate-less MOVE's bounded 200-draw RNG.
+  parser/effect quirks, including coordinate-less MOVE's one walkable-cell RNG
+  draw even though its `200` attempts and distance arguments are ignored.
 - Go matrix anchors to read: active row 194, routing ledger P row 216 and P7
   summary row 966 only; never the full matrix or another child registry.
 - Legacy read authority: only `NPCSegment.ParseAct` and action execution for the
@@ -63,8 +64,9 @@ Keep this file at or below 300 lines and 32 KiB.
 ### Remaining acceptance work
 
 - [ ] Freeze seven-key parse minima/defaults and exact malformed/unknown behavior.
-- [ ] Preserve instance/group/time-recall equality, cancellation and delayed
-  Flow ordering, plus coordinate-less MOVE's exact 200-draw RNG/failure rules.
+- [ ] Preserve instance `0`/`1` aliasing, group/time-recall equality,
+  cancellation and delayed Flow ordering, plus coordinate-less MOVE's exact
+  one-draw walkable-cell RNG/failure rules.
 - [ ] Prove recipient/transition packet order, persisted location/rental effects,
   relogin and race behavior through authenticated production entries.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,

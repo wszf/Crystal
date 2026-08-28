@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-29 00:56 (Asia/Singapore)
+Last updated: 2026-08-29 01:39 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -15,23 +15,18 @@ not evidence; do not startup-read historical handoff archives.
   dependency-ready `NPC-P7-TELEPORT-ACTIONS-001`.
 - Next matrix scope is row 194, routing ledger P row 216 and P7 summary row 966
   only. P7 remains frozen at 24 children: 13 Complete, 1 Active and 10 Ready.
-- Test writer `01a048d8-317e-7630-abf4-fb8433599a05`, production reviewer
-  `01a048e0-9906-71e3-b295-d61c5af13bee` and terminal reviewer
-  `01a04904-4cc1-7632-9e35-221b6b62ee42` are closed. Terminal review revision 6
-  returned `No findings`; no agent or test process remains active.
+- Teleport read-only tracers `01a04951-412a-7482-af13-a294f3da4f46` and
+  `01a04951-73a3-7da1-9279-18d47f1c0350` are closed; no agent or test process
+  remains active.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; HEAD `b8993facff66520d9394e919468328503e7165ef`;
-  upstream `origin/master`, ahead 506 and behind 0.
-- Unstaged owned paths are `tasks/lessons.md`,
-  `tasks/lessons-archive/misc.md`,
-  `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`,
-  `tasks/lessons-archive/workflow/repository-boundaries-02.md`,
-  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
-  `tasks/migration-active.md`, and this handoff. There are no staged or
-  untracked paths and no Legacy implementation changes.
+- Branch `master`; HEAD `3625f02618fd4a7fe4168d143a3ec024b38ec0d1`;
+  upstream `origin/master`, ahead 507 and behind 0.
+- Unstaged owned paths are `tasks/lessons-archive/misc.md`,
+  `tasks/migration-active.md`, and this handoff. There are no staged or untracked
+  paths and no Legacy implementation changes.
 - The active index routes only Teleport Actions and names its seven keys. Control
   check and `git diff --check` exit 0. Tracked, staged and untracked C# gates are
   empty.
@@ -39,10 +34,10 @@ not evidence; do not startup-read historical handoff archives.
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `e122f1208a18373fe29f52b66547ad032c1e18a2`;
+- Branch `main`; HEAD `19a2762344475a1fce237e08e09a0e79775d7a7b`;
   no upstream; index and worktree are clean.
-- Commit `e122f12 Complete P7 NPC shop quirks` owns the seven bounded Go
-  source/test files plus the matrix transition. No Teleport code has started.
+- Commit `19a2762 Correct P7 teleport RNG scope` corrects the source-proven RNG
+  contract before implementation. No Teleport code has started.
 - Matrix row 192/ledger N are Complete, row 194/ledger P are Active, and the P7
   summary is exactly 13+1+10. `git diff --check`, `go mod verify`, and all three
   Go C# gates exit 0.
@@ -51,7 +46,8 @@ not evidence; do not startup-read historical handoff archives.
 
 - Active leaf: `NPC-P7-TELEPORT-ACTIONS-001`.
 - Outcome: exact seven-key MOVE/instance/time-recall/group teleport parsing and
-  effects, including coordinate-less MOVE's bounded 200-draw RNG.
+  effects, including coordinate-less MOVE's one walkable-cell RNG draw despite
+  the ignored `200` attempts argument.
 - Write authority is new bounded `npc_teleport_actions.go` and tests, minimum
   shared Flow wiring, world/group/rental adapters, transition sessions and
   matrix/index/handoff. No Teleport implementation or tests have started.
@@ -62,33 +58,29 @@ not evidence; do not startup-read historical handoff archives.
 
 ## Verification ledger
 
-- Stable local `G+U` BUY/BUYSELL and `G` BUYNEW snapshots do not mutate source
-  membership across repeated/same/second-user authenticated opens.
-- `GoodsOn=false` suppresses only BUYBACK/BUYUSED panels; enabled owner keys,
-  strict scheduled expiry, deterministic owner drains and pre-due reads match
-  Legacy. Repeated session setup cannot postpone the schedule.
-- Atomic runtime state persists UsedGoods, including explicit empty overrides.
-  Last-player stop flushes dirty state; graceful shutdown forces remaining
-  BuyBack items into public UsedGoods while owner association stays transient.
-- Final minimum compile exits 0. Focused/relevant count-10 and race count-3,
-  scheduler count-20/race count-5, and runtime schema count-10/race count-3 exit
-  0. Fresh `go test -count=1 ./...`, `go vet ./...`, `go build ./...`, and fresh
-  `go test -race -count=1 ./...` exit 0 after the final candidate.
-- An earlier fresh full test failed only `TestSessionHallucinationTranscript`
-  after its known 30-second closed-pipe timeout. Exact isolation count-3 and the
-  original fresh full rerun passed; the failed run remains exit 1 and no
-  Hallucination file changed.
-- Writer's first focused run exposed immediate deletion of the first empty owner.
-  Reviewers then exposed missing durable UsedGoods, stop-time flush, scheduled
-  cleanup/order, early read-time expiry, forced-save and fixture observability
-  gaps. Each was source-corrected; terminal revision 6 reports `No findings`.
+- Legacy parser/runtime minima, early-return behavior, instance `0`/`1` alias,
+  inclusive delayed due, captured origin, all-NPC flag cancellation and ordered
+  live group membership are frozen with exact source citations.
+- Source correction: `TeleportRandom(200,0,map)` ignores both arguments and does
+  exactly one `Random.Next(WalkableCells.Count)` selection; empty/cell-null maps
+  fail before RNG and the action ignores the teleport result.
+- Successful teleport sends source removal and target visibility/effect packets
+  before trade/rental cancellation; location fields mutate immediately but save
+  occurs through later persistence. Timed recall teleports before delayed page
+  execution, and teleport failure does not suppress that page.
+- Go has reusable locked transition projection and per-recipient callbacks but
+  lacks generic instance/group/time-recall authorities. Existing deterministic
+  first-walkable MOVE behavior is known non-equivalent and must be replaced.
+- Matrix correction, Legacy `git diff --check`, control check, Go
+  `git diff --check`, and both-repository C# gates exit 0. No behavior tests have
+  run for this leaf yet.
 
 ## Exact recovery sequence
 
-1. Independently verify both repository HEAD/status/C# gates and Go commit
-   `e122f1208a18373fe29f52b66547ad032c1e18a2`.
-2. Rerun Legacy control/C#/diff gates, stage only the seven owned Legacy
-   documents, commit, and verify clean status.
-3. Resume only `NPC-P7-TELEPORT-ACTIONS-001`; read row 194, ledger P row 216 and
-   P7 row 966, search matching archive sections,
-   then freeze the seven-key Legacy parser/execution checklist before Go edits.
+1. Rerun Legacy control/C#/diff gates, commit only the three owned correction
+   documents, and verify clean status.
+2. Resume only `NPC-P7-TELEPORT-ACTIONS-001` at Go
+   `19a2762344475a1fce237e08e09a0e79775d7a7b`.
+3. Freeze parser tests first, then implement the bounded action adapter and
+   world delayed/group/instance transition authority before authenticated
+   session, persistence, relogin and race gates.

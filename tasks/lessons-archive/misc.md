@@ -996,3 +996,19 @@
   forgetting the fixture's initial UsedGoods; each was repaired at the fixture
   boundary without weakening behavior. Focused count 10/race count 3 plus fresh
   full test, race, vet and build exit 0.
+
+### 2026-08-29 — NPC MOVE's `200` argument is not a 200-draw algorithm
+
+- Symptom: the frozen Teleport Actions row and active index described
+  coordinate-less `MOVE` as a bounded 200-draw search.
+- Root cause: discovery inferred behavior from the call
+  `TeleportRandom(200, 0, targetmap)` without tracing the current virtual helper.
+  Legacy `MapObject.TeleportRandom` ignores both arguments and performs exactly
+  one `Random.Next(WalkableCells.Count)` selection.
+- Prevention: RNG acceptance must enumerate the callee body, not arguments at
+  the callsite. Preserve the one draw, empty/cell-null failure and ignored
+  return value; do not migrate the separate 200-attempt `GetRandomPoint` helper.
+- Verification: exact Legacy ranges `NPCSegment.cs:3075-3088` and
+  `MapObject.cs:803-813` were reread before any Teleport code write; matrix row
+  194, ledger P, active index and current handoff now state the source-proven
+  one-draw contract.
