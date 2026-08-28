@@ -45,12 +45,13 @@ Keep this file at or below 300 lines and 32 KiB.
   conversion/truncation/overflow and level-up/packet ordering.
 - Go matrix anchors to read: active row 195, routing ledger Q row 217 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: only reachable quest reward completion paths, their
-  Gold/Experience/Credit/item rate consumers, level-up effects and exact packet
-  order; C# remains read-only.
-- Go read/write authority: bounded `cmd/crystal-server/quests_runtime.go` and
-  existing quest/session tests plus new `quest_rewards_test.go` if needed,
-  minimum main-session reward wiring and matrix/index/handoff.
+- Legacy read authority: `PlayerObject.FinishQuest` reward block and directly
+  called GainGold/GainExp/GainCredit/item/level-up helpers, `QuestInfo` reward
+  field types and `Settings` DropRate/ExpRate load/write-back only; C# remains
+  read-only.
+- Go read/write authority: new bounded `cmd/crystal-server/quest_rewards.go`
+  and tests, `internal/config/{config.go,config_test.go}`, minimum finish-quest
+  wiring in `main.go`, bounded `quests_session_test.go`, and matrix/index/handoff.
 - Forbidden scope: quest lifecycle timers, acceptance/progress quirks, generic
   economy/item-grid behavior, unrelated NPC actions/conditions, protocol
   layouts and every C# write.
@@ -63,8 +64,8 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Remaining acceptance work
 
-- [ ] Freeze every reachable reward producer and the exact rate/arithmetic type
-  boundary, including non-unit, fractional, zero and overflow cases.
+- [ ] Freeze every reachable reward producer, ExpRate config default/INI/env,
+  Single-precision multiplication and exact fractional/overflow conversion.
 - [ ] Preserve Gold/Experience scaling while proving Credit/items remain
   unscaled and no reward-side effect is duplicated or reordered.
 - [ ] Prove level-up, quest completion, gold/credit/item/experience packet order,
