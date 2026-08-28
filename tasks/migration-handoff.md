@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-28 10:07 (Asia/Singapore)
+Last updated: 2026-08-28 10:09 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -22,12 +22,11 @@ not evidence; do not startup-read historical handoff archives.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
 - Branch `master`; observed pre-handoff-finalization HEAD
-  `e583d54294bc71fc758e7778bbae7b4a3edb5cd0`; upstream `origin/master`, ahead
-  497 and behind 0.
-- Exactly four unstaged tracked documentation paths are owned:
-  `tasks/lessons.md`, `tasks/lessons-archive/misc.md`,
-  `tasks/migration-active.md`, and this handoff. There are no staged or
-  untracked paths.
+  `dc05bf55f0511e8a819b23378906a2cb643485aa`; upstream `origin/master`, ahead
+  498 and behind 0. Commit `dc05bf55 Document P7 page grammar closure` records
+  lessons, Page Grammar completion and Speech/Input routing.
+- Index/worktree were clean before this handoff-only refresh; its own commit is
+  the one expected HEAD delta. There are no staged or untracked paths.
 - The active index records Page Grammar Complete, Speech/Input Active and the
   exact 7+1+16 denominator. Lessons preserve the two signature-closure compile
   failures, Turkish fixture correction, marker-neutral root correction, terminal
