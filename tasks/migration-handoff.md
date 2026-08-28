@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-28 10:09 (Asia/Singapore)
+Last updated: 2026-08-28 13:11 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -10,96 +10,103 @@ not evidence; do not startup-read historical handoff archives.
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains Active; neither Complete
   nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
-- `NPC-P7-PAGE-GRAMMAR-001` is Complete in Go commit
-  `3672281ed9f60d5be0b06c742243857bd57e9616`.
-- The one Active leaf is dependency-ready `NPC-P7-SPEECH-INPUT-001`; Page
-  Grammar, static NPC wire and item wire catalog prerequisites are Complete.
-- Exact matrix read scope is row 182, routing ledger D row 205 and P7 summary
-  row 966 only. P7 remains scope-frozen at 24 children: 7 Complete, 1 Active and
-  16 Ready.
+- `NPC-P7-SPEECH-INPUT-001` is Complete in Go commit
+  `826842e7cd63caa356c3efd86b646bae79ee56d0`. The unique next Active leaf is
+  dependency-ready `NPC-P7-CONTROL-FLOW-001`.
+- Exact next matrix scope is row 183, routing ledger E row 206 and P7 summary
+  row 966 only. P7 remains frozen at 24 children: 8 Complete, 1 Active and 15
+  Ready.
+- The real compaction recovery is complete. No agent or Go process remains;
+  terminal reviewer `01a04696-568d-7ca0-bbd6-17e21e9376cd` returned `No
+  findings` after inspecting the final candidate including index-zero caches.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; observed pre-handoff-finalization HEAD
-  `dc05bf55f0511e8a819b23378906a2cb643485aa`; upstream `origin/master`, ahead
-  498 and behind 0. Commit `dc05bf55 Document P7 page grammar closure` records
-  lessons, Page Grammar completion and Speech/Input routing.
-- Index/worktree were clean before this handoff-only refresh; its own commit is
-  the one expected HEAD delta. There are no staged or untracked paths.
-- The active index records Page Grammar Complete, Speech/Input Active and the
-  exact 7+1+16 denominator. Lessons preserve the two signature-closure compile
-  failures, Turkish fixture correction, marker-neutral root correction, terminal
-  review findings and their verified repairs.
-- `git diff --check`, the control checker and separate tracked/staged/untracked
-  `.cs` checks exit 0/are empty.
+- Branch `master`; HEAD `3e679049b3411d409a9af3f2939d8c25f766eb5c`;
+  upstream `origin/master`, ahead 499 and behind 0.
+- Exactly four tracked unstaged migration-control paths differ:
+  `tasks/lessons.md`, `tasks/lessons-archive/migration/protocol-session-wire.md`,
+  `tasks/migration-active.md`, and this handoff. There are no staged or
+  untracked paths.
+- The active index routes Speech/Input Complete to Control Flow Active. Lessons
+  record the missing-import compile closure, compact-time tool check and the
+  feature-specific parser-placeholder/no-page fixture correction.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `3672281ed9f60d5be0b06c742243857bd57e9616`;
-  no upstream. Commit `3672281 Complete P7 NPC page grammar` owns implementation,
-  tests, grammar-only fixture corrections, matrix completion and next routing.
-- Index and worktree are clean; no untracked paths. Separate tracked, staged and
-  untracked `.cs` checks are empty. Exact-command process audit found no `go` or
-  `crystal-server` process.
+- Branch `main`; HEAD `826842e7cd63caa356c3efd86b646bae79ee56d0`;
+  no upstream. Commit `826842e Complete P7 NPC speech and input` contains exactly
+  the six owned server code/test paths and `docs/migration-matrix.md`.
+- Index and worktree are clean; there are no staged or untracked paths. The
+  commit records 2,041 insertions and 24 deletions across seven paths.
+- Matrix row 182 is Complete, row 183 is the sole Active row, ledger D contains
+  accepted evidence, and P7 summary is exactly 8+1+15.
 
-## Completed Page Grammar behavior
+## Completed Speech/Input behavior
 
-- Ordinary scripts construct only the breadth-first graph reachable from the
-  first CurrentCulture prefix match for `[@MAIN]`; automatic special scripts
-  construct every marker-neutral `[@_]` root graph. Raw duplicate links/order,
-  first duplicate headers, missing placeholder pages and Legacy's one-line
-  lookahead bugs are preserved.
-- Column-zero comment/directive/header boundaries, exact markup and GOTO-family
-  discovery, unknown directive panics, recognized directive tails, whitespace,
-  tab and greedy page-argument quirks match the direct C# constructors.
-- `%ARG` replacement now mutates a token slice, preserving arguments containing
-  spaces, out-of-range and lowercase replacement quirks. Turkish CurrentCulture
-  casing reaches parsing, page lookup, selected-button authorization and action
-  command/page-key parsing through production startup/session wiring.
-- Authenticated ordinary/default transcripts prove culture-sensitive reachable
-  pages and dotted-I denial. Static links in existing fixtures now use Legacy
-  `<text/@PAGE>` grammar rather than the former permissive bare `/@PAGE` form.
-- Duplicate automatic-root execution and marker side effects are explicitly
-  retained by `NPC-P7-DEFAULT-CALLBACK-001` and
-  `NPC-P7-MONSTER-ROBOT-SCRIPT-001`; parser construction is Complete.
+- SAY formatting preserves space-token/global-replace and greedy regex quirks,
+  CurrentCulture token/link casing including Turkish dotted-I behavior, unknown
+  and empty fallback, malformed conquest/OUTPUT panic paths, culture-specific
+  date/general-number rendering and all finite scalar/function/equipment/guild/
+  conquest/roll placeholder branches.
+- Production snapshots use the Legacy UTC Envir clock and live-only first-map
+  monster count. Equipment FriendlyName/count, mail awaiting collection, map,
+  user, HP/MP, balances, guild rental and definition-catalog sources are wired.
+- Link replacement preserves raw display names and source duplicates. ITEM
+  sibling definitions, ITEM/MONSTER/NPC caches, observer-before-target forwarding
+  and target response order match Legacy; linked NPC ClientInformation uses
+  ObjectID zero/Icon=BigMapIcon and can resolve an unmaterialized definition.
+- Input values are stored before authorization, ordinary resume ignores wire
+  NPCID, default resume requires matching identity, rejected values remain
+  sticky, successful/no-page/default-callback calls consume them, `%INPUTSTR`
+  remains action-only, and stale input cannot bypass a later direct 31-unit key
+  disconnect. Variable/roll writers and action-before-SAY scheduling remain the
+  new Control Flow/Action owners, not a Speech residual.
 
 ## Verification ledger
 
 - Owned gofmt and minimum compile passed:
-  `go test ./internal/worlddata ./cmd/crystal-server -run '^$'` exit 0.
-- `go test ./internal/worlddata ./cmd/crystal-server -run
-  '^TestNPCP7PageGrammar' -count=10` exit 0.
-- `go test ./internal/worlddata -count=1` and
-  `go test ./cmd/crystal-server -count=1` both exit 0.
-- `go test -race ./internal/worlddata ./cmd/crystal-server -run
-  '^TestNPCP7PageGrammar' -count=3` exit 0.
-- Fresh integration `go test -count=1 ./...`, `go vet ./...`, and
-  `go build ./...` all exit 0 after the final review fixes.
-- Read-only Legacy auditor `01a045f2-5a45-7d33-8514-76c52d1f7674` supplied the
-  exact constructor/runtime trace. Terminal reviewer
-  `01a04605-bda5-7001-8f21-441e84623ce9` found ARG/culture/tab issues in revision
-  1; after repair its bounded revision 2 returned `No findings`. Both are closed.
-- `git diff --check`, both-repository C# gates and the control checker pass.
+  `go test ./cmd/crystal-server -run '^$' -count=1` exit 0.
+- Focused final repeated gate passed:
+  `go test ./cmd/crystal-server -run '^(TestNPCP7SpeechInput|TestSessionNPCConfirmInputResumesAtInputPage|TestSessionNPCDefaultRequiresActiveObjectAndMatchingInputID)' -count=10` exit 0.
+- Focused final race passed with the same regex and `-count=3`, exit 0.
+- `go test ./cmd/crystal-server -count=1` exit 0 (80.744s).
+- Final fresh integration `go test -count=1 ./...`, `go vet ./...`, and
+  `go build ./...` all exit 0; final server package time was 83.912s.
+- First due `go test -race ./...` exited 1 only at archived
+  `TestSessionOmaMageRangeSlowFrozenTranscript` (`[2 1]` vs `[1]`) with no race
+  detector report and no owned stack. Exact isolated race `-count=10` and the
+  explicit-skip remainder both exited 0. A subsequent fresh unexcluded
+  `go test -race ./...` exited 0; server package time was 95.131s.
+- Legacy auditor `01a0467c-f8b6-7a42-bd05-9eb08f953aad` supplied exact source
+  ordering; Go auditor `01a0467d-2917-7a80-b502-8579a0764332` found sticky key
+  bypass/Turkish risks and verified the interrupted candidate; terminal review
+  returned `No findings`. All three agents are closed.
+- Initial post-catalog compile failed on a missing `worlddata` import and the
+  first no-page test mistook a parser placeholder for an absent page; both are
+  preserved as failed evidence, corrected, and all final gates above pass.
 
 ## Active leaf and protected work
 
-- Active leaf: `NPC-P7-SPEECH-INPUT-001`.
-- Owned Go authority is bounded `internal/worlddata/npcscript.go`,
-  `cmd/crystal-server/{main.go,default_npc.go,npc_input_session_test.go,
-  default_npc_session_test.go}`, new `npc_script_format.go`,
-  `npc_script_format_test.go`, `npc_speech_input_session_test.go`, and
-  matrix/index/handoff.
-- Page grammar/load, static wire/access/item catalog, control flow,
-  action/condition execution, callbacks, protocol layouts and C# are protected.
+- Active leaf: `NPC-P7-CONTROL-FLOW-001`.
+- Next Go authority is bounded flow data in `internal/worlddata/npcscript.go`,
+  `cmd/crystal-server/{main.go,default_npc.go}`, new `npc_script_flow.go`,
+  `npc_script_flow_test.go`, bounded `npc_control_flow_session_test.go`, required
+  existing session fixtures, and matrix/index/handoff.
+- Complete loading, page grammar, Speech/Input formatter/metadata/input lifetime,
+  action/condition catalogs, callbacks, protocol layouts and every C# are
+  protected.
 
 ## Exact recovery sequence
 
-1. Read this handoff back, run `tasks/check-migration-control.sh`, and separately
-   verify both statuses, diff checks and three-way C# gates.
-2. Confirm only matrix row 182, ledger D row 205 and summary row 966: Page
-   Grammar Complete / Speech Input Active / counts 7+1+16.
-3. Search the archive only for Speech/Input/placeholder/metadata/sticky-input
-   keywords, then trace exact Legacy SAY/Response/input consumers and freeze the
-   finite placeholder/order checklist before any Go implementation.
+1. Run the control checker and both-repository diff/status/C# gates, then commit
+   exactly the four Legacy control/lesson paths. This handoff observes Legacy
+   HEAD `3e679049b3411d409a9af3f2939d8c25f766eb5c` immediately before that one
+   expected documentation commit delta.
+2. Verify both worktrees clean and exact row 182 Complete / row 183 Active / P7
+   8+1+15. Read only matrix row 183, ledger E row 206 and summary row 966.
+3. Search archives only for Control Flow, delayed queue, action-before-response,
+   GOTO/CALL/BREAK/DELAYGOTO/GROUPGOTO/ROLLDIE/ROLLYUT keywords and freeze the
+   seven-key Legacy checklist before any Control Flow implementation.

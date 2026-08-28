@@ -21,8 +21,8 @@ duplicate.
 
 - Symptom: 猜测目录、空 glob、裸反引号、错误正则或未闭合字符串导致勘察失败。
 - Root cause: 依赖 shell 隐式展开和记忆中的文件布局，没有先验证最小查询。
-- Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；含 glob 的固定模板是 `rg -n --glob '*.go' -e 'pattern' -- path`，渲染 argv 后逐字拒绝 `-- --glob`，失败 argv 禁止复制修补，因为 `--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名或 zsh 只读特殊参数（如 `status`）；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用 CLI 子命令前按对应 `--help` 核对选项位置；数据库对象名必须从实际 schema 复制；精确 commit/thread/agent ID 必须从权威命令输出复制；首次调用非 POSIX 工具时，第一条调用只能是裸 `command -v tool`（无 `set -e`、无后续命令），按退出 0/1 选择工具或 fallback，再构造业务命令；构建证据固定用 `go build ./...`；修改非 ASCII 文档优先用 `apply_patch`，here-doc 前先验证解释器和编码。
-- Verification: `rg` 不可用、选项错误、`path` 覆盖 `PATH`、未命中 glob 和 zsh 标量命令替换均已最小重跑；本批 archive 检索从失败的裸 `*.json`/换行标量改为直接 `rg --glob` 后零错误完成；Python 3.9 缺少 `tomllib` 时改由实际 Codex CLI 解析配置；Codex 验证脚本将只读 `status` 改为 `rc`，并把全局 approval 选项移到 `exec` 前后成功执行；Codex 0.148.0 不支持对 `features`/`debug` 使用全局 `--strict-config`，且 `| ... || true` 曾掩盖该错误后误打印 PASS；该证据已作废，后续先查目标子命令 `--help`、保留上游退出码，并只在命令真实零退出后报告通过，本次改由 `app-server --strict-config` 零退出与 `doctor` 的 `config loaded` 交叉验证；Goal 数据库查询从猜测的 `goals` 改为 schema 中实际的 `thread_goals` 后成功核对字段约束；本批从 `cmd/crystal-server` 子目录误用根级 `./cmd/crystal-server` 失败后，改用 `go test .`，并将仓库根/命令包路径作为同一最小验证；本 Session Legacy `/usr/bin/python3` 拒绝含中文的 here-doc 后，确认 Python 3.9.6 并改用 `apply_patch` 零错误写入文档；本批 handoff 初稿根据 `3e85ec4` 猜测完整哈希，随即以 Go 仓库 `git rev-parse HEAD` 的 `3e85ec4c4268bc4a24e5ec8cc0ff7a96ef58775c` 替换并回读核对。
+- Prevention: 先用 `rg --files` 列精确文件；优先 fixed pattern 或显式 `-e`；引用正则并检查字符串、反引号和参数边界；含 glob 的固定模板是 `rg -n --glob '*.go' -e 'pattern' -- path`，渲染 argv 后逐字拒绝 `-- --glob`，失败 argv 禁止复制修补，因为 `--` 后只能放 pattern/路径；禁止未引用 glob，也禁止把换行文件列表放进 zsh 标量命令替换后期待自动分词；shell 变量不得使用 `PATH`/`path` 等环境保留名或 zsh 只读特殊参数（如 `status`）；多文件列表直接用 `rg --glob`，或用 NUL 分隔加 `xargs -0`；调用 CLI 子命令前按对应 `--help` 核对选项位置；数据库对象名必须从实际 schema 复制；精确 commit/thread/agent ID 必须从权威命令输出复制；首次调用非 POSIX 工具（包括 compact 后首次复用）时，第一条调用只能是裸 `command -v tool`（无 `set -e`、无后续命令），按退出 0/1 选择工具或 fallback，再构造业务命令；构建证据固定用 `go build ./...`；修改非 ASCII 文档优先用 `apply_patch`，here-doc 前先验证解释器和编码。
+- Verification: 本 Session 未先 `command -v` 就调用缺失的 `rg`，随后又把猜测的 `map_light.go` 混入有效定位；两次结果均作废，分别以裸 `command -v rg` 确认不可用、改用 `find`/`grep`/`git grep`，并只读取枚举出的 `time_of_day.go` 后零退出重跑。既往 `path` 覆盖 `PATH`、错误 CLI 选项、空 glob、错误 schema/commit/path 和被管道掩盖的非零退出也均按同一最小验证规则重跑；只有权威命令回读的真实路径、schema、完整哈希和零退出结果可作证据。
 - Strengthening after localized-welcome review: 再次猜测仓库根存在 `Localization/` 导致 `rg` 读取报错；整次调用证据已丢弃，随后先用根级 `rg --files` 定位实际 tracked localization fixtures，确认 server 根目录文件由运行时生成而非仓库资产。
 - Strengthening after TestServer bootstrap: Go 勘察再次把不存在的 `world_player*.go` 作为未引用 glob 交给 zsh，并有数次让预期“零匹配”的 `rg` 在 `set -e` 下终止调用；相关调用输出均作废。后续先用 `rg --files` 定位文件，并仅在“零匹配本身是有效答案”时显式使用 `rg ... || true`，实现、测试和文档只采用零退出的重跑结果。
 - Strengthening after Superman recovery: 勘察 session-local MP 扣减入口时又让预期可为零匹配的 `rg` 在 `set -e` 下退出 1；该调用证据已作废并以显式 `|| true` 零退出重跑。后续每个搜索在执行前先声明“零匹配是答案还是错误”，前者禁止与裸 `set -e` 组合。
@@ -75,7 +75,7 @@ duplicate.
 - Symptom: helper 不存在、receiver 遗漏、返回值数量错误、字段或常量名称猜错。
 - Root cause: 依据相似模块、Legacy 名称或“应该对称”推断 Go API。
 - Prevention: 先读取声明、receiver、参数顺序、返回值、复合字段类型、领域类型和包级符号，再接线。
-- Verification: 新调用接入后立即运行包级只编译门禁；编译器已分别拦截猜测的 `worldMagic.Spell`、`MarketStatusSold`、`Guild.Index`、`boolPointer` 和错误 bool 返回，复读真实声明或改用局部值后定向测试通过。
+- Verification: 新调用接入后立即运行包级只编译门禁；本轮先从跨行测试调用误判 `loadMonsters` arity，后又在 formatter 引入 `worlddata.NPCInfo` 时遗漏 import；两次均由最小编译拦截，复读声明/import 闭包后修正并零退出重跑。既往猜测符号、字段和返回值也都只在声明回读后修复。
 - Strengthening through P6: 编译门禁先后拦截猜测的 `RentalInformation`、错误 `ParseChatPayload` arity，以及不存在的 `ParseUserLocationPayload`/`ParseObjectAttackPayload`/`ServerQuestChanged`；均回读真实声明后修正并重测。测试 API 也必须先读完整类型、返回值和所有权。
 
 ### 2026-08-21 C06 — 行为判断前先通过 Go 语法、类型和 vet 门禁
@@ -204,6 +204,7 @@ duplicate.
 - Strengthening after `NET-P1-GATES-001` tracing: Active acceptance 草稿把 MaxPacket reset 凭直觉写成一秒，Legacy `MirConnection.ReceiveData` 实际在严格 `< Now` 时重置并设为 `Now.AddSeconds(5)`。时间窗口、比较边界和计数单位必须从真实入口逐项抄录后再写验收清单；本次在任何 NET 代码写入前改回五秒并保留 equality 边界待测。
 - Strengthening after NET/lifecycle review: ordinal/IPv6 与“清理 occupied-status 泄漏”建议均回到源码裁决；保留真实的 153、`[2001` 及 stale Running/已绑定 game listener。安全直觉不得覆盖可观察怪癖。
 - Strengthening through Mine terminal review: 共享 `HumanObject.Attack` 不是完整入口；`PlayerObject.CanAttack` 与 mounted `spell=None` override 同样可达。继承层门禁、参数改写和失败后的累计通知必须在实现前逐层冻结。
+- Strengthening through P7 Speech/Input: read-only worker summary claimed missing conquest owner/gold/rate preserved the token, but exact `NPCSegment.ReplaceValue` returns `string.Empty` before the shared empty fallback. Subagent summaries are bounded leads, not authority; main must reread the cited edge range before changing production/tests. Restored the direct empty return and focused formatter tests pass.
 
 ### 2026-08-21 C22 — 不同 capability、门禁和业务阶段不得过度复用
 
@@ -277,7 +278,7 @@ duplicate.
 - Prevention: 每批开始先发现并核对 subagent 工具、角色、model 和 reasoning effort；可用时把非关键路径的 bounded 独立工作委派并记录 agent ID/范围，不可用时在本地执行前立即明确说明缺失项、禁止替代规则和 fallback。不得既不委派也不解释，也不得用其他模型静默冒充指定 worker。
 - Verification: 本批实际 spawn model 列表只有 `codex-auto-review`、`deepseek-v4-flash`、`deepseek-v4-pro`、`gpt-5.3-codex-spark`、`gpt-5.4`，不含 `luna_worker` 或 `gpt-5.6-luna`；因此未生成 agent ID。后续 handoff 必须记录实际 agent ID/模型/范围，或记录执行前已公开的不可用证据。
 - Strengthening after Luna availability recovery: 当前工具已提供固定 `luna_worker` 角色，但首次同时传 `agent_type=luna_worker` 与 `fork_context=true` 被 API 拒绝且未生成 agent。固定角色今后使用独立完整 prompt 且省略 full-history fork；成功返回精确 agent ID 后才算委派成立。本轮已按该形式成功启动 formatter writer 与 Legacy read-only auditor。
-- Strengthening after formatter review interruption: 主 Agent 看到 worker 最后一次写入后迟迟未返回且无 `go` 进程，误用 `interrupt=true` 催收报告，恰好打断两个 helper 签名的同步修改，留下可复现编译错误。以后不得仅因报告延迟中断仍为 active 的 writer；先继续非重叠工作并正常等待，确需停止时先发非中断的收尾请求。任何中断/停止后的工作树一律视为未验证，立即运行最小编译并由主 Agent 修复、复审和重测。本轮两个签名错误已由 `go test ... -run '^$'` 捕获，formatter 全量定向测试随后恢复为 exit 0。
+- Strengthening after formatter interruption/compaction recovery: worker 未收尾或真实 compact 前最后写入都不是可编译证据；本轮恢复的 formatter 先被 `gofmt` 捕获缺失闭合括号，再被最小编译捕获两个未声明 observer 字段。不得因文件已落盘、writer 无 `go` 进程或摘要声称“已写入”而开始语义判断；先标记 unverified，按声明闭包修复并 gofmt/compile，再继续测试。已补齐唯一闭合括号与 bounded observer 声明，`go test ./cmd/crystal-server -run '^$'` exit 0。
 
 ### 2026-08-23 C31 — Goal rollover 是 durable checkpoint，不是 blocker
 

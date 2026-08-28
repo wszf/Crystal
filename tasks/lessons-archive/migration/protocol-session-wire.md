@@ -488,3 +488,21 @@
   defects. Binary import, JSON projection, main map loading and authenticated
   NoNames runtime tests lock the fourth seam finding; follow-up review returned
   `No findings`.
+
+### 2026-08-28 — NPC missing-page tests must distinguish parser placeholders from absent pages
+
+- Symptom: a Speech/Input test expected an authorized link to a missing page to
+  be silent, but the server blocked on an unread empty `NPCResponse` and the
+  keep-alive timed out.
+- Root cause: the test inferred runtime absence from a missing page header;
+  Legacy page construction creates placeholder pages for discovered links, so
+  the linked key still matches a page and queues an empty response.
+- Prevention: test parser placeholders and runtime no-match as separate cases.
+  To prove `NPCScript.Call`'s no-match silence and `NPCInputStr` cleanup through
+  production wiring, establish the dialogue, then replace the active NPC script
+  with an actually empty script before a MAIN input resume; do not use a
+  discovered link as an absent-page fixture.
+- Verification: the original focused run failed with a pipe timeout; the
+  corrected authenticated session receives no packet before keep-alive, then
+  restores the script and receives `NPCRequestInput`, proving the stale value
+  was consumed. Focused Speech/Input tests and package tests exit 0.
