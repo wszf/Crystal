@@ -939,3 +939,18 @@
   and `go test -race -count=1 ./...` exited 0. Luna reviews found five initial
   mismatches, then the newline edge, and revision 3 returned `No findings`.
   Go commit: `424978eabe5de76d84979f3fe108bf7968173aa0`.
+
+### 2026-08-28 — Shop scope must distinguish a local snapshot from source mutation
+
+- Symptom: frozen ledger N and the routed Active Leaf claimed repeated BUY
+  mutated shared/static `Goods` counts, but exact Legacy code constructs
+  `new List<UserItem>(Goods)` and appends `UsedGoods` only to that local list.
+- Root cause: discovery prose treated shallow member aliasing as list-membership
+  mutation and called an instance field static without tracing `GetOrAdd`.
+- Prevention: for collection quirks, separately record container identity,
+  member aliasing, source counts and persistence; reread the constructor and
+  exact mutation target before freezing an acceptance denominator.
+- Verification: main reread `NPCScript.cs:1-112,919-1045` and corrected matrix,
+  active index and handoff before any Shop Quirks code write. The finite contract
+  now requires stable `G/U` source counts, per-open `G+U` enabled snapshots,
+  BUYNEW=`G`, and disabled BUYBACK/BUYUSED panel absence.

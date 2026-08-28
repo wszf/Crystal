@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-28 22:17 (Asia/Singapore)
+Last updated: 2026-08-28 22:42 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -23,37 +23,38 @@ not evidence; do not startup-read historical handoff archives.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
-- Branch `master`; pre-handoff-commit HEAD
-  `577f7fb6d4742ac4352b532b21666c1ace88b07b`; upstream `origin/master`, ahead
-  504 and behind 0.
-- Unstaged owned paths before this snapshot are
-  `tasks/lessons-archive/verification/fixtures-and-transcripts-03.md`,
+- Branch `master`; HEAD `73a2ae248760c3a5f8fd58223eea5c6dd6d26698`;
+  upstream `origin/master`, ahead 505 and behind 0.
+- Unstaged owned paths before this snapshot are `tasks/lessons-archive/misc.md`,
   `tasks/migration-active.md`, and this handoff. There are no staged or
   untracked paths and no Legacy implementation changes.
-- The active index routes only Shop Quirks. The archive records the corrected
-  panel negative and authoritative-NPC map fixture failure/prevention.
+- The active index routes only corrected Shop Quirks. The archive records that
+  Legacy uses a local Goods snapshot rather than shared/static count mutation.
 - Run `tasks/check-migration-control.sh` after this replacement. Tracked, staged
   and untracked C# gates were empty at startup and must be rerun before commit.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `4cd9f16e34021f59c378c8010239ea6849fc2eb4`;
+- Branch `main`; HEAD `9218577032bcdfca73087aca72e7dd733714352e`;
   no upstream; index and worktree are clean.
 - Commit `4cd9f16 Complete P7 NPC panel routing` removes missing-page special
   fallback, dispatches matched panels
   with the executed object identity, centralizes exact active-NPC/page admission,
   and admits craft from any segment-installed active page.
-- Matrix row 191 and ledger M are Complete, row 192 is Active, and the P7 summary
-  is exactly 12+1+11. No Shop Quirks implementation or tests have started.
+- Matrix row 191 and ledger M are Complete, corrected row 192 is Active, and the
+  P7 summary is exactly 12+1+11. No Shop Quirks implementation or tests have
+  started. Commit `9218577 Correct P7 shop quirks scope` preserves the
+  source-authoritative no-growth contract.
 
 ## Active leaf and protected work
 
 - Active leaf: `NPC-P7-SHOP-QUIRKS-001`.
-- Outcome: shared static Goods count mutation across same/second-user reopens,
-  `GoodsOn=false` BuyBack/BuyUsed panel absence, persistence and race boundaries.
+- Outcome: stable per-open base-Goods snapshots without source-count mutation,
+  enabled-only UsedGoods merge for BUY/BUYSELL, BUYNEW separation and
+  `GoodsOn=false` BuyBack/BuyUsed panel absence with persistence/race bounds.
 - Write authority is bounded `cmd/crystal-server/shop_transactions.go`, minimum
-  world shop snapshot/mutation symbols, new `npc_shop_quirks_session_test.go`,
+  world shop snapshot/gating symbols, new `npc_shop_quirks_session_test.go`,
   minimum existing shop tests, matrix/index and handoff.
 - Complete Shop Core, Item Grid Mutation and Panel Routing are protected.
   Ordinary shop formulas, item-grid CAS semantics, conquest pricing, other
@@ -77,18 +78,19 @@ not evidence; do not startup-read historical handoff archives.
 - Independent terminal review revision 2 returns `No findings`. Residual
   session-level cross-NPC goods/rate routing would require callback-family scope;
   exact object forwarding is covered by dispatch and storage identity tests.
-- Final Legacy diff/status/C#/control checks and its documentation commit remain
-  to be executed after this handoff is read back.
+- Source correction: Legacy `NPCScript.Goods` is an instance list; BUY/BUYSELL
+  copy its membership and append UsedGoods only to the local response list.
+  BUYBACK first-open creates an owner key only when enabled; BUYUSED does not
+  mutate its list. Only UsedGoods persists; BuyBack is restart-transient.
+- Go matrix scope correction is committed; the matching Legacy control/archive/
+  handoff correction commit remains before code work.
 
 ## Exact recovery sequence
 
 1. Read this handoff and `tasks/migration-active.md`, then independently verify
-   both repository HEAD/status/C# gates. Go must be clean at the documented
-   commit; otherwise stop and reconstruct the snapshot.
-2. Run Legacy control/status/C# and `git diff --check` gates, then commit the
-   three owned Legacy documents and verify its clean post-commit HEAD.
-3. If recovery occurs after that expected Legacy documentation commit, accept
-   the one-commit delta from the pre-handoff HEAD above and continue.
-4. Resume only `NPC-P7-SHOP-QUIRKS-001`; read matrix row 192, ledger N row 214
-   and P7 summary row 966, search matching archive sections, then freeze exact
-   Legacy Goods count/GoodsOn behavior before code changes.
+   both repository HEAD/status/C# gates. Preserve the documented correction.
+2. Run Legacy control/C#/diff checks and commit its three owned correction
+   documents; verify the clean post-commit HEAD.
+3. Resume only `NPC-P7-SHOP-QUIRKS-001`; freeze tests for stable `G/U` counts,
+   enabled BUY=`G+U`, BUYNEW=`G`, first-open BuyBack owner-key behavior and
+   disabled BUYBACK/BUYUSED response-only ordering before production edits.
