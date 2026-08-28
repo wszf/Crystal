@@ -185,3 +185,10 @@
 - Root cause: the field was inserted next to a related Go setting without tracing that the INI helper materializes keys in read-call order.
 - Prevention: when migrating a legacy INI key, copy its relative read/write position as well as section, name, default, and parse behavior; assert ordering against adjacent migrated keys.
 - Verification: SafeZoneHealing now precedes GameMasterEffect in the loader and focused tests assert both fallback value and exact relative write-back order.
+
+### 2026-08-28 — NPC script export must project startup side effects and fixture dependencies
+
+- Symptom: the first Script Load settings test failed before its target assertion because a nil item catalog could not resolve the default guild-creation item; the first full legacyworld run then rejected the newly correct configured-default alias and startup-created empty Monster/Robot scripts because the old export fixture expected only the database NPC script.
+- Root cause: the focused fixture called a broad settings loader without satisfying its existing catalog contract, and the old export assertion encoded the pre-leaf flat file scan rather than Legacy `Settings.Load` creating all three special files before `StartEnvir` constructs their script objects.
+- Prevention: isolate loader tests or seed every direct dependency of the production loader; when startup mutates files but the Go exporter must remain read-only, project the resulting empty objects in memory and update the full export fixture rather than writing into Legacy.
+- Verification: the focused settings test now seeds `WoomaHorn`; missing special files export canonical empty `00Default`/`00Monster`/`00Robot` entries and a default object ID, custom filenames alias to those canonical runtime names, and focused count-10/race count-3 plus the fresh full test/vet/build gate pass.

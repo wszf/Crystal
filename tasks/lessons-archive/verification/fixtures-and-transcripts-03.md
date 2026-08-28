@@ -998,8 +998,10 @@ Verification: 将两次 `ObjectPushed` 与最终 `ObjectStruck` 断言统一为�
   `TestSessionHallucinationTranscript` after its 30-second pipe timeout. A clean
   `git archive` of the pre-leaf Go HEAD passed once but reproduced the same
   failure under `-count=20`; current exact rerun then passed. The failure is a
-  pre-existing time-sensitive fixture, not an access-gate stack. The next fresh
-  unexcluded full test and full race both passed.
+  pre-existing time-sensitive fixture, not an access-gate stack. Script Load's
+  first integration gate reproduced the same 30-second closed-pipe failure with
+  no loader stack; its exact rerun and the next fresh unexcluded full test both
+  passed. The prior Access fresh full race remains the current full-race gate.
 - Verification: owned minimum compile, focused production sessions, count-10
   repetitions and focused race count-3 pass. Fresh `go test -count=1 ./...`,
   `go vet ./...`, `go build ./...`, and fresh `go test -race -count=1 ./...`

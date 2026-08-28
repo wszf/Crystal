@@ -36,49 +36,51 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `NPC-P7-SCRIPT-LOAD-001`
+- Leaf ID: `NPC-P7-PAGE-GRAMMAR-001`
 - Status: `Active` dependency-ready functional leaf; its prerequisite
-  `CFG-P1-CONTRACT-001` is Complete.
-- Outcome: load configured default, monster and robot NPC script file graphs in
-  pure Go with Legacy `#INSERT`, `#INCLUDE` and parse-time `CALL` path, ordering
-  and failure behavior instead of the current flat hard-coded loader.
-- Go matrix anchors to read: active row 180, routing ledger B row 203 and P7
+  `NPC-P7-SCRIPT-LOAD-001` is Complete.
+- Outcome: preserve Legacy reachable-page construction, exact link discovery,
+  duplicate/prefix header matching, `%ARG` substitution, directive-tail error
+  behavior and culture-sensitive casing instead of parsing every bracketed page
+  as an independent exact header.
+- Go matrix anchors to read: active row 181, routing ledger C row 204 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: NPCScript construction/load, configured DefaultNPC/
-  MonsterNPC/RobotNPC filenames, `#INSERT`, `#INCLUDE`, parse-time `CALL` and
-  their direct file/error consumers only; C# is read-only.
-- Go read/write authority: `internal/legacyworld/{text.go,settings.go,export.go}`;
-  new `internal/legacyworld/npc_script_load_test.go`; new bounded
-  `cmd/crystal-server/npc_script_load_session_test.go`; matrix/index/handoff.
-- Forbidden scope: page grammar, runtime CALL/GOTO/control flow, actions,
-  conditions, callbacks, unrelated startup/import behavior and every C# write.
+- Legacy read authority: `NPCScript.ParseDefault/ParsePages/ParsePage/
+  ParseSegment`, `NPCPage.ArgumentParse`, direct link/button discovery and their
+  exact exception/casing consumers only; C# is read-only.
+- Go read/write authority: `internal/worlddata/npcscript.go`; new
+  `internal/worlddata/npcscript_grammar_test.go`; new bounded
+  `cmd/crystal-server/npc_page_grammar_session_test.go`; matrix/index/handoff.
+- Forbidden scope: script file loading, speech placeholder formatting, runtime
+  CALL/GOTO/control flow, actions, conditions, callbacks and every C# write.
 
 ### Protected Go ownership
 
-- Existing parser/runtime behavior and Complete P3-P6/P8 plus Access evidence
-  are protected inputs. This leaf owns only script source selection and load-time
-  graph expansion; Page Grammar and Control Flow consume its output later.
+- Complete script-graph loading, wire/access behavior and P3-P6/P8 evidence are
+  protected inputs. This leaf owns only page reachability and source grammar;
+  Speech/Input and Control Flow consume its parsed output later.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact configured filename defaults/overrides and load-time
-  `#INSERT`/`#INCLUDE`/`CALL` ordering, clearing and error continuation.
-- [ ] Cover nested and cyclic graphs, missing/quoted/case-sensitive paths,
-  ordered growing insertion, include-clears-script and custom production files.
-- [ ] Drive the real Go export/startup load path, not a helper-only parser.
+- [ ] Freeze exact Legacy root-page selection, recursive button discovery,
+  duplicate/prefix headers, missing targets and `%ARG` argument substitution.
+- [ ] Cover directive tails, malformed/unknown directives, segment boundaries,
+  comment/whitespace behavior and culture-sensitive casing with a finite corpus.
+- [ ] Drive authenticated ordinary/default reachability through production
+  parsing without implementing later speech or control-flow behavior.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, diff/status and both-
   repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Accepted frozen row/ledger B, Complete config contract, current Go flat script
-  loader/export path and exact Legacy load-time producers/consumers.
+- Accepted frozen row/ledger C, Complete Script Load and Access leaves, current
+  Go parser/session entry points and exact Legacy page constructors/consumers.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. The frozen 24-child denominator is now
-5 Complete + 1 Active + 18 Ready; the matrix owns exact routing evidence.
+6 Complete + 1 Active + 17 Ready; the matrix owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -87,8 +89,8 @@ accepted revision 2 with `No findings`. The frozen 24-child denominator is now
 | `TELEPORT-P7-STATIC-001` | Complete | — | existing main/world evidence | static/MOVE-coordinate/ENTERMAP |
 | `QUEST-P7-CORE-001` | Complete | — | existing quest protocol/runtime/session evidence | ordinary/unit-rate core |
 | `NPC-P7-ACCESS-GATE-001` | Complete | —; unblocks `STORAGE-P2-NPC-GATE-001` | ledger A | identity/dead/key/map/range/visibility/branch/quest |
-| `NPC-P7-SCRIPT-LOAD-001` | Active | `CFG-P1-CONTRACT-001` | ledger B | INSERT/INCLUDE/CALL/custom files |
-| `NPC-P7-PAGE-GRAMMAR-001` | Ready | `NPC-P7-SCRIPT-LOAD-001` | ledger C | reachable pages/directives/links/args/casing |
+| `NPC-P7-SCRIPT-LOAD-001` | Complete | `CFG-P1-CONTRACT-001` | ledger B | INSERT/INCLUDE/CALL/custom files |
+| `NPC-P7-PAGE-GRAMMAR-001` | Active | `NPC-P7-SCRIPT-LOAD-001` | ledger C | reachable pages/directives/links/args/casing |
 | `NPC-P7-SPEECH-INPUT-001` | Ready | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-WIRE-STATIC-001` + `ITEM-P6-WIRE-CATALOG-001` | ledger D | placeholders/info order/sticky input |
 | `NPC-P7-CONTROL-FLOW-001` | Ready | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger E | 7 keywords/order/state/delay/chain |
 | `NPC-P7-ACTION-STATE-001` | Ready | Control Flow + `CFG-P1-CONTRACT-001` + `EQUIP-P6-CORE-001` | ledger F | 14-key table/restart/RNG/UI |
