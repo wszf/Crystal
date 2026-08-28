@@ -36,51 +36,53 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `NPC-P7-PAGE-GRAMMAR-001`
-- Status: `Active` dependency-ready functional leaf; its prerequisite
-  `NPC-P7-SCRIPT-LOAD-001` is Complete.
-- Outcome: preserve Legacy reachable-page construction, exact link discovery,
-  duplicate/prefix header matching, `%ARG` substitution, directive-tail error
-  behavior and culture-sensitive casing instead of parsing every bracketed page
-  as an independent exact header.
-- Go matrix anchors to read: active row 181, routing ledger C row 204 and P7
+- Leaf ID: `NPC-P7-SPEECH-INPUT-001`
+- Status: `Active` dependency-ready functional leaf; Page Grammar, static NPC
+  wire and the item wire catalog are Complete prerequisites.
+- Outcome: preserve Legacy SAY response formatting, inline item-link metadata
+  and order, the finite variable/equipment/map/guild/roll placeholder catalog,
+  `%INPUTSTR` resolution and sticky ordinary/default input values.
+- Go matrix anchors to read: active row 182, routing ledger D row 205 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: `NPCScript.ParseDefault/ParsePages/ParsePage/
-  ParseSegment`, `NPCPage.ArgumentParse`, direct link/button discovery and their
-  exact exception/casing consumers only; C# is read-only.
-- Go read/write authority: `internal/worlddata/npcscript.go`; new
-  `internal/worlddata/npcscript_grammar_test.go`; new bounded
-  `cmd/crystal-server/npc_page_grammar_session_test.go`; matrix/index/handoff.
-- Forbidden scope: script file loading, speech placeholder formatting, runtime
-  CALL/GOTO/control flow, actions, conditions, callbacks and every C# write.
+- Legacy read authority: SAY/Response and input-resume constructors, formatter
+  and direct placeholder/item-info consumers, `NPCSpeech`/`NPCData` lifetime and
+  exact packet-order callers only; C# remains read-only.
+- Go read/write authority: bounded `internal/worlddata/npcscript.go` input data,
+  `cmd/crystal-server/{main.go,default_npc.go,npc_input_session_test.go,
+  default_npc_session_test.go}`; new `cmd/crystal-server/npc_script_format.go`,
+  `npc_script_format_test.go` and bounded `npc_speech_input_session_test.go`;
+  matrix/index/handoff.
+- Forbidden scope: page reachability/grammar, script loading, runtime CALL/GOTO
+  and other control flow, action/condition execution, callbacks, protocol layout
+  changes and every C# write.
 
 ### Protected Go ownership
 
-- Complete script-graph loading, wire/access behavior and P3-P6/P8 evidence are
-  protected inputs. This leaf owns only page reachability and source grammar;
-  Speech/Input and Control Flow consume its parsed output later.
+- Complete page grammar, script loading, static wire/access and item-catalog
+  evidence are protected inputs. This leaf owns response text/info formatting
+  and authorized input value lifetime only.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact Legacy root-page selection, recursive button discovery,
-  duplicate/prefix headers, missing targets and `%ARG` argument substitution.
-- [ ] Cover directive tails, malformed/unknown directives, segment boundaries,
-  comment/whitespace behavior and culture-sensitive casing with a finite corpus.
-- [ ] Drive authenticated ordinary/default reachability through production
-  parsing without implementing later speech or control-flow behavior.
+- [ ] Freeze the exact finite placeholder catalog, replacement order, casing,
+  malformed behavior and item-link metadata insertion order.
+- [ ] Preserve `%INPUTSTR` replacement plus sticky ordinary/default value reuse,
+  wrong identity/page silence and authorized resume packet order.
+- [ ] Drive authenticated ordinary/default SAY and input transcripts through the
+  production formatter without implementing later control flow or callbacks.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, diff/status and both-
   repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Accepted frozen row/ledger C, Complete Script Load and Access leaves, current
-  Go parser/session entry points and exact Legacy page constructors/consumers.
+- Accepted frozen row/ledger D, Complete Page Grammar/Wire/Item prerequisites,
+  current formatter/input session entries and exact Legacy direct consumers.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. The frozen 24-child denominator is now
-6 Complete + 1 Active + 17 Ready; the matrix owns exact routing evidence.
+7 Complete + 1 Active + 16 Ready; the matrix owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -90,8 +92,8 @@ accepted revision 2 with `No findings`. The frozen 24-child denominator is now
 | `QUEST-P7-CORE-001` | Complete | — | existing quest protocol/runtime/session evidence | ordinary/unit-rate core |
 | `NPC-P7-ACCESS-GATE-001` | Complete | —; unblocks `STORAGE-P2-NPC-GATE-001` | ledger A | identity/dead/key/map/range/visibility/branch/quest |
 | `NPC-P7-SCRIPT-LOAD-001` | Complete | `CFG-P1-CONTRACT-001` | ledger B | INSERT/INCLUDE/CALL/custom files |
-| `NPC-P7-PAGE-GRAMMAR-001` | Active | `NPC-P7-SCRIPT-LOAD-001` | ledger C | reachable pages/directives/links/args/casing |
-| `NPC-P7-SPEECH-INPUT-001` | Ready | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-WIRE-STATIC-001` + `ITEM-P6-WIRE-CATALOG-001` | ledger D | placeholders/info order/sticky input |
+| `NPC-P7-PAGE-GRAMMAR-001` | Complete | `NPC-P7-SCRIPT-LOAD-001` | ledger C | reachable pages/directives/links/args/casing |
+| `NPC-P7-SPEECH-INPUT-001` | Active | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-WIRE-STATIC-001` + `ITEM-P6-WIRE-CATALOG-001` | ledger D | placeholders/info order/sticky input |
 | `NPC-P7-CONTROL-FLOW-001` | Ready | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger E | 7 keywords/order/state/delay/chain |
 | `NPC-P7-ACTION-STATE-001` | Ready | Control Flow + `CFG-P1-CONTRACT-001` + `EQUIP-P6-CORE-001` | ledger F | 14-key table/restart/RNG/UI |
 | `NPC-P7-ACTION-SOCIAL-001` | Ready | Control Flow + `GUILD-P9-NPC-SCRIPT-001` + `MAIL-P10-NPC-SCRIPT-001` | ledger G | 12-key table/persistence/recipients |

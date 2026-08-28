@@ -740,3 +740,66 @@
 - Verification: the fixture now uses `GOTO @HIDDEN`; the exact two selected-
   button tests pass and prove the page grammar retains the flow target while
   the active access set excludes it.
+
+### 2026-08-28 — NPC-P7-PAGE-GRAMMAR signature closure compile recurrence
+
+- Symptom: two successive Page Grammar patches changed callers before changing
+  `parseLegacyNPCSegment` and `npcSelectedButtonAllows`; each immediate minimum
+  compile failed with a too-many-arguments error.
+- Root cause: the main agent knowingly split a signature closure across patch
+  transactions instead of enumerating and changing declaration plus consumers
+  together.
+- Prevention: before any signature patch, enumerate every consumer and include
+  the declaration and all callers in one patch/compile transaction; never use
+  an expected compiler failure as a patch sequencing device.
+- Verification: both declarations were brought into sync, `gofmt` ran, and the
+  exact package compile gates subsequently exited 0; active lesson C06 was
+  strengthened rather than duplicated.
+
+### 2026-08-28 — Turkish Page Grammar fixture must uppercase the root literally
+
+- Symptom: the first culture test queried `[@main]` and expected the Legacy
+  `[@MAIN]` page; under `tr-TR`, `i` uppercases to `İ`, so lookup correctly
+  failed.
+- Root cause: the test asserted invariant intent instead of applying the same
+  CurrentCulture mapping as the production lookup.
+- Prevention: derive culture-sensitive keys rune by rune; use literal
+  `[@MAIN]` to reach the fixed root and reserve dotless/dotted-I variants for
+  the target mismatch being tested.
+- Verification: the corrected root query plus Turkish dotless target and dotted
+  mismatch corpus passes the exact Page Grammar test command.
+
+### 2026-08-28 — Automatic-script root names must not accidentally invoke markers
+
+- Symptom: the first 00Monster/00Robot root-wiring corpus used `[@_SPAWN]` and
+  `[@_TIME]`, overlooking that those words invoke Legacy default-script marker
+  consumers before page registration.
+- Root cause: the fixture tested a generic `[@_]` root with names that also had
+  type-specific semantics in `ParseDefault`.
+- Prevention: use marker-neutral names for pure root-grammar tests; reserve
+  MAPCOORD/CUSTOMCOMMAND/SPAWN/DIE/TIME cases for their owning action/callback
+  leaf with required environment data and side-effect assertions.
+- Verification: the corpus now uses `[@_MOBHOOK]`/`[@_ROBOTHOOK]`, its repeated
+  production-root test passes, and marker behavior remains explicitly deferred.
+
+### 2026-08-28 — NPC-P7-PAGE-GRAMMAR terminal review and token-boundary repair
+
+- Symptom: terminal review found that joining substituted `%ARG` words and
+  reparsing them could split one argument containing spaces; action commands
+  still used invariant casing; tab-separated `GOTO` could execute despite not
+  being discovered. The first repair then broke quoted CHECKITEM fixtures.
+- Root cause: the candidate modeled Legacy's in-place token mutation as a
+  string round trip and reused a whitespace-wide/quote-aware splitter without
+  separating literal-space token boundaries from quote handling.
+- Prevention: carry `%ARG` replacements as a word slice into condition/action
+  parsers; split only on literal spaces while preserving quoted values; inject
+  CurrentCulture casing for command and page-key normalization; assert both
+  discovery and execution absence for tab-separated commands.
+- Verification: spaced ARG condition/action, Turkish dotted/dotless action,
+  tab GOTO, quoted CHECKITEM, full worlddata and compile tests pass. The review's
+  proposed nil-Args panic was rejected because `NPCPage.Args` is initialized at
+  declaration (`NPCPage.cs:9`), so Go `len(nil)==0` matches `Count==0`.
+- Routing: duplicate automatic roots are constructed exactly here, but Legacy's
+  execute-every-matching-root behavior remains owned by
+  `NPC-P7-DEFAULT-CALLBACK-001`/`NPC-P7-MONSTER-ROBOT-SCRIPT-001`; this leaf must
+  record that dependency rather than widening into callback execution.

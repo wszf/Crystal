@@ -81,8 +81,8 @@ duplicate.
 ### 2026-08-21 C06 — 行为判断前先通过 Go 语法、类型和 vet 门禁
 
 - Symptom: 未使用变量、自赋值、类型宽度、多返回值或复合字面量错误阻止行为测试。
-- Root cause: 一次写入过多逻辑，在编译失败时仍试图分析生产语义。
-- Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；签名与其消费者须同一编译事务；显式转换不同领域类型，再进入行为测试。
+- Root cause: 一次写入过多逻辑，或把已知签名闭包拆成先调用后声明；在编译失败时仍试图分析生产语义。
+- Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；改签名前先枚举消费者，声明与调用须同一补丁及编译事务；显式转换不同领域类型，再进入行为测试。
 - Verification: 最小编译、定向测试和 `go vet` 分层通过；hazard authority 测试曾用 `%v` 打印函数值并被测试期 vet 拦截，改为显式 nil/presence 字段后重跑通过。
 - Strengthening through Mine review: 既有 NET/MAP 批次曾漏改消费者/import；本批 group-quest 三个嵌套 literal 漏一层 `}`。均只作 compile finding，复读最小范围修正并在行为测试前通过 touched compile；接口或复合 literal 每个小 hunk 后必须立即 gofmt/compile。
 
