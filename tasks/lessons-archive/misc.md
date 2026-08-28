@@ -856,3 +856,37 @@
   fresh unexcluded `go test -count=1 ./...` passed with server 85.013 seconds,
   and full `go test -race -count=1 ./...` passed with server 97.385 seconds;
   `go vet ./...` and `go build ./...` also exited 0.
+
+### 2026-08-28 — NPC Action State parser/runtime returns and source-proven unsafe quirks
+
+- Symptom: the recovered candidate treated a missing-arity `ParseAct` return as
+  aborting the remaining ACT list, attached segment state to every parsed
+  action, mutated stale session equipment, used host time in the ordinary
+  runner, resolved state parameters twice and emitted generic logs without the
+  current queued page. The first full gate exposed the over-broad unexported
+  state through exact action equality tests.
+- Root cause: parser-line return and runtime `Act` return were conflated;
+  `NPCSegment.Param1/2/3` ownership was widened beyond PARAM plus its direct
+  MONGEN consumer; new state behavior bypassed the existing item revision,
+  world-clock and localized MessageQueue authorities.
+- Prevention: trace all fourteen branches and their direct helpers before
+  implementation. Skip only the malformed parser line, but stop the runtime
+  action tail on failed conversions; retain one resolved parameter snapshot;
+  share PARAM state only with its direct consumer; rebase UNEQUIPITEM through
+  `CommitCharacterItemMutation`; pass the current detached call page and world
+  clock into every ordinary/default action entry.
+- Source adjudication: safety review proposals to sanitize value/random paths,
+  suppress divide/empty-file/replacement/INI panics, repair `InIReader`'s
+  adjacent-section `b-1` insertion or persist timers were rejected. Exact
+  Legacy source proves these are reachable quirks; only directory creation is
+  outside the reader's swallowed-I/O blocks. Regressions preserve each ruling.
+- Workflow correction: one Legacy `Reporting.cs` read appended a Go path and a
+  later read guessed the wrong `PlayerObject.cs` directory. Both calls were
+  discarded wholesale; repository-separated reads and a prior `find` rerun
+  supplied the accepted evidence under the existing C01/C02 rules.
+- Verification: parser/protocol/runtime/ordinary/default tests cover all 14
+  keys, files across restart, RNG order, timer due/relogin/restart loss,
+  experience reset, UI wire order and latest-authority equipment restrictions.
+  Focused count-10 and race count-3, fresh full test/vet/build and fresh full
+  race passed; terminal Luna revision 3 returned `No findings`. Go commit:
+  `83a37867942edc42d780edacb1083db4bfebd13c`.

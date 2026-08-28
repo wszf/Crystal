@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-28 16:29 (Asia/Singapore)
+Last updated: 2026-08-28 18:26 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -10,101 +10,95 @@ not evidence; do not startup-read historical handoff archives.
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains Active; neither Complete
   nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
-- `NPC-P7-CONTROL-FLOW-001` is Complete in Go commit
-  `8b39791ae9e0a660c3cb77661df86a2e09c71a91`. The unique next Active leaf is
-  dependency-ready `NPC-P7-ACTION-STATE-001`.
-- Exact next matrix scope is row 184, routing ledger F row 207 and P7 summary
-  row 966 only. P7 remains frozen at 24 children: 9 Complete, 1 Active and 14
+- `NPC-P7-ACTION-STATE-001` is Complete in Go commit
+  `83a37867942edc42d780edacb1083db4bfebd13c`. The unique next Active leaf is
+  dependency-ready `NPC-P7-COND-LOCAL-001`.
+- Exact next matrix scope is row 187, routing ledger I/J row 210 and P7 summary
+  row 966 only. P7 remains frozen at 24 children: 10 Complete, 1 Active and 13
   Ready.
 - No subagent remains open. Terminal reviewer
-  `01a04744-35d7-7350-89b0-7d371aa18764` withdrew its only provisional BREAK
-  concurrency finding after tracing every production entry under the global
-  flow mutex; no unwrapped production runner exists.
+  `01a047ca-c519-77f2-a76a-6e537e9c7a87` found four integration/message issues
+  over two revisions; all were repaired or source-adjudicated, and final
+  revision returned `No findings`.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
 - Branch `master`; pre-documentation HEAD
-  `c8209d99109404aab2c7fa246d13ec16524fd3c9`; upstream `origin/master`, ahead
-  500 and behind 0.
-- Current owned unstaged documents are `tasks/lessons.md`,
-  `tasks/lessons-archive/misc.md`,
-  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
+  `8dba3bd82b7f413712d74ef35bd05374ef457fe0`; upstream `origin/master`, ahead
+  501 and behind 0 at startup.
+- Current owned unstaged documents are `tasks/lessons-archive/misc.md`,
   `tasks/migration-active.md`, and this handoff. There are no staged or
   untracked paths.
-- The active index routes Control Flow Complete to Action State Active. Lessons
-  preserve the flow/input/BREAK/roll/full-gate evidence and the repeated missing
-  `rg` first-probe workflow failure.
+- The active index routes Action State Complete to Local Conditions Active.
+  Historical evidence records parser/runtime return separation, source-proven
+  unsafe I/O/INI/arithmetic quirks, item authority, clock/message repairs and
+  final gates.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `8b39791ae9e0a660c3cb77661df86a2e09c71a91`;
+- Branch `main`; HEAD `83a37867942edc42d780edacb1083db4bfebd13c`;
   no upstream. The index and worktree are clean.
-- Commit `8b39791 Complete P7 NPC control flow` changes bounded `main.go`,
-  `default_npc.go`, parser/protocol files, required existing session fixtures
-  and `docs/migration-matrix.md`; it adds
-  `npc_script_flow.go`, `npc_script_flow_test.go`,
-  `npc_control_flow_session_test.go`, and
-  `internal/worlddata/npcscript_controlflow_test.go` (24 paths, 3,463 insertions,
-  878 deletions).
-- Matrix row 183 is Complete, row 184 is the sole Active row, ledger E contains
-  accepted evidence, and P7 summary is exactly 9+1+14.
+- Commit `83a3786 Complete P7 NPC action state` changes bounded
+  parser/protocol/world/flow/default/main wiring, adds Action State runtime and
+  parser/protocol/session tests, and updates the matrix (13 paths, 1,717
+  insertions, 41 deletions).
+- Matrix row 184 is Complete, row 187 is the sole Active row, ledger F contains
+  accepted evidence, and P7 summary is exactly 10+1+13.
 
-## Completed Control Flow behavior
+## Completed Action State behavior
 
-- Production ordinary/default runners share one delayed/immediate queue model,
-  route group calls by stored group order, preserve the Legacy forward-removal
-  scan quirks and have no artificial 128-page/job cap.
-- GOTO/CALL/BREAK, DELAYGOTO/GROUPGOTO and ROLLDIE/ROLLYUT preserve raw parameter
-  resolution, malformed-tail abort, RNG/state/wire order, fake-clock delay,
-  action-before-SAY/response/special ordering and cross-script/page state.
-- Every detached page call consumes `%INPUTSTR`; queued input pages request input
-  before page lookup. Parsed page copies share race-safe BREAK carry, while the
-  global flow mutex preserves Legacy's single work-loop interval across the
-  originating call and immediate scan.
-- `ServerRoll=273` and its .NET-shaped payload/parser are covered by fixed wire
-  vectors. Existing action-bearing NPC session fixtures now assert action
-  packets before the terminal `NPCResponse` instead of their old approximation.
+- All fourteen PARAM/MOV/CALC/value-file/random-text/timer/UI/experience/unequip
+  branches preserve exact parser minima, per-line skips, runtime tail abort,
+  one resolved snapshot and action-before-response order.
+- PARAM state is shared only with its direct future MONGEN consumer. Value and
+  random files preserve BOM/newlines, parser-time creation, restart and exact
+  replacement/INI/path/failure quirks; random draw/order and localized server
+  messages carry the current queued page.
+- Local/global timers preserve key, type, Int32 time arithmetic, packet
+  asymmetry, equality expiry, relogin lifetime and restart loss. CanGainExp is
+  runtime-only and resets on entry.
+- UNEQUIPITEM rebases latest auth item authority, applies the revision to world
+  and session, preserves slot/cursed/wedding/riding/full-bag restrictions,
+  reports accepted moves, sends full slot arrays before stat notifications and
+  is covered by a stale-session production transcript.
 
 ## Verification ledger
 
 - Owned gofmt and `git diff --check` passed.
-- Minimum compile:
-  `go test ./internal/worlddata ./internal/protocol ./cmd/crystal-server -run '^$' -count=1`
-  exit 0.
-- Focused final repeated gate over parser/protocol/unit/production Control Flow
-  tests with `-count=10` exited 0 for all three packages.
-- Focused race gate over the same corpus with `-race -count=3` exited 0 for all
+- Minimum touched-package compile passed; final focused parser/protocol/runtime/
+  ordinary/default/Control Flow corpus with `-count=10` exited 0 for all three
+  packages.
+- Final focused race over the same corpus with `-race -count=3` exited 0 for all
   three packages.
-- `go test ./cmd/crystal-server -count=1` exit 0; server 86.007s.
-- Fresh `go test -count=1 ./...` exit 0; server 85.013s.
-- Fresh `go vet ./...` and `go build ./...` both exit 0.
-- Fresh unexcluded `go test -race -count=1 ./...` exit 0; server 97.385s.
-- Earlier broad attempts failed only at archived
-  `TestSessionHallucinationTranscript`; isolated count-1/count-10 and both final
-  fresh unexcluded full runs passed. No unrelated production change was made.
-- Both repository tracked/staged/untracked `.cs` gates were empty before this
-  handoff refresh; rerun them immediately before each commit.
+- Fresh final `go test -count=1 ./...` exit 0; server 81.796s.
+- Fresh final `go vet ./...` and `go build ./...` both exit 0.
+- Fresh final unexcluded `go test -race -count=1 ./...` exit 0; server 100.225s.
+- The first full attempt failed at over-broad unexported segment-state equality
+  plus the archived OmaMage `[2 1]`/`[1]` fixture. Segment ownership was fixed;
+  OmaMage isolated `-count=10` passed, and every final unexcluded gate passed.
+- Both repository tracked/staged/untracked `.cs` gates were empty before the Go
+  commit and this handoff refresh; rerun them immediately before the Legacy
+  documentation commit.
 
 ## Active leaf and protected work
 
-- Active leaf: `NPC-P7-ACTION-STATE-001`.
-- Next Go authority is bounded parser fields in
-  `internal/worlddata/npcscript.go`, bounded runtime adapters in
-  `cmd/crystal-server/{main.go,default_npc.go}`, new
-  `npc_script_actions_state.go` and tests, narrowly required session fixtures,
-  matrix/index/handoff.
-- Complete Load, Grammar, Speech/Input and Control Flow are protected. Social,
-  world and teleport actions, conditions, callbacks, unrelated protocol layouts
-  and every `.cs` are forbidden.
+- Active leaf: `NPC-P7-COND-LOCAL-001`.
+- Next authority is bounded seven-key parsing/evaluation in
+  `internal/worlddata/npcscript.go`, bounded local context adapters in
+  `cmd/crystal-server/{main.go,default_npc.go}` and a new
+  `npc_script_context.go`, focused tests, matrix/index/handoff.
+- Complete loading, page grammar, Speech/Input, Control Flow and Action State
+  are protected. The 24 world conditions, actions, callbacks, scheduler,
+  unrelated context/protocol surfaces and every `.cs` are forbidden.
 
 ## Exact recovery sequence
 
 1. Rerun the Legacy control checker/status/`.cs` gates, then commit exactly the
-   five owned Legacy documentation paths. This handoff observes Legacy HEAD
-   `c8209d99109404aab2c7fa246d13ec16524fd3c9` immediately before that expected
+   three owned Legacy documentation paths. This handoff observes Legacy HEAD
+   `8dba3bd82b7f413712d74ef35bd05374ef457fe0` immediately before that expected
    documentation-only commit delta.
-2. Verify both worktrees clean. Read only matrix row 184, ledger F row 207 and
-   summary row 966; search the archive only for Action State and the 14 named
-   keywords, then freeze the exact Legacy checklist before implementation.
+2. Verify both worktrees clean. Read only matrix row 187, ledger I/J row 210 and
+   summary row 966; search the archive only for Local Conditions and the seven
+   named keywords, then freeze the exact Legacy checklist before implementation.
