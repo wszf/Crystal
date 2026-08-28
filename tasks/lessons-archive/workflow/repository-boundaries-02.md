@@ -723,3 +723,9 @@ The following active C01 evidence was archived verbatim before canonical compact
   Legacy/`git -C` startup summary and was again truncated. The whole result was
   discarded; lessons/control/status/C# evidence was re-established through
   complete, sequential repository-local calls before Shop Quirks resumed.
+- Latest recurrence: Teleport Actions recovery again combined both roots in the
+  first oversized control read before the active lesson had been read to EOF;
+  truncation made the result doubly unusable. The call was discarded wholesale,
+  `command -v rg` was probed separately, all control files were read in bounded
+  Legacy-only calls, and Legacy/Go status, diff and three-way C# gates were then
+  rerun in independent zero-exit calls before any behavior conclusion.

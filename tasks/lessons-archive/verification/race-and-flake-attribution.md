@@ -81,6 +81,13 @@
 - Strengthening after `CHAR-P3-BAN-DELETE-001`: 首次 fresh full race 再次命中同一 Kirin `monsterAIRollLocked`/测试回调竞争，栈未进入本 leaf 的 auth/protocol/import/main 分支；单测 race `-count=3` 随后通过。
 - Verification after ban/delete recurrence: 首次失败 run 未记为 full pass；第二次 fresh unexcluded `go test -race ./... -count=1 -timeout=30m` 全部通过，focused ban/delete race `-count=3`、普通全仓、vet 和 build 也均通过。
 - Strengthening after `REGEN-P5-SAFEZONE-001`: final fresh full race again hit only `TestSessionKirinIceThrustTranscript`; an exact `-run '^TestSessionKirinIceThrustTranscript$' -count=3` reproduced the test's direct `monsterAIRoll`/callback writes racing its session ticker. Stacks do not enter SafeZone config/field/regen/session files; focused SafeZone race count-5 passes, so the full run remains an attributed failure and is not reported as a pass.
+- Teleport Actions recurrence: the first fresh `go test -race -count=1 ./...`
+  failed only in `TestSessionKirinIceThrustTranscript`, with the established
+  test-side writes to `world.monsterAIRoll` and callback state racing the
+  session ticker in `monsterAIRollLocked`; no stack entered Teleport files.
+  Exact isolated race count-3 passed, as did the unchanged Teleport focused
+  race count-3 and a second fresh unexcluded full-race run. The failed first
+  run remains recorded and was not described as a pass.
 
 ### 2026-08-19 — AI=89 收尾仍需记录全包 race 的新增既有 fixture 栈
 

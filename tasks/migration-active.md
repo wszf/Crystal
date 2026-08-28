@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-29 00:49 (Asia/Singapore)
+Last verified: 2026-08-29 03:54 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -14,7 +14,8 @@ Keep this file at or below 300 lines and 32 KiB.
   not need to be calculated in one up-front pass.
 - `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
   are publishable only for a scope-frozen phase.
-- Current project-wide ETA/percentage remain `Unavailable`: P1-P6 are finite, but five other phases still have open inventories.
+- Current project-wide ETA/percentage remain `Unavailable`: P1-P7 are finite,
+  but P9-P12 still have open inventories.
 
 ## Phase routing summary
 
@@ -36,53 +37,52 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `NPC-P7-TELEPORT-ACTIONS-001`
-- Status: `Active` dependency-ready functional leaf; Control Flow,
-  `MOVE-P4-ACTION-001` and `RENTAL-P6-LIFECYCLE-001` are Complete prerequisites.
-- Outcome: preserve exact `MOVE`, `INSTANCEMOVE`, `TIMERECALL`,
-  `TIMERECALLGROUP`, `BREAKTIMERECALL`, `GROUPRECALL` and `GROUPTELEPORT`
-  parser/effect quirks, including coordinate-less MOVE's one walkable-cell RNG
-  draw even though its `200` attempts and distance arguments are ignored.
-- Go matrix anchors to read: active row 194, routing ledger P row 216 and P7
+- Leaf ID: `QUEST-P7-REWARD-RATES-001`
+- Status: `Active` dependency-ready functional leaf; `QUEST-P7-CORE-001` and
+  `CFG-P1-CONTRACT-001` are Complete prerequisites.
+- Outcome: preserve exact quest reward scaling: Gold by `DropRate`, Experience
+  by `ExpRate`, Credit and reward items unscaled, including Legacy integer
+  conversion/truncation/overflow and level-up/packet ordering.
+- Go matrix anchors to read: active row 195, routing ledger Q row 217 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: only `NPCSegment.ParseAct` and action execution for the
-  seven keys above, their exact PlayerObject/group/instance/time-recall/rental
-  consumers and transition serializers; C# remains read-only.
-- Go read/write authority: new bounded `cmd/crystal-server/npc_teleport_actions.go`
-  and tests, minimum shared Flow parser/execution wiring, world/group/rental
-  adapters, transition session tests and matrix/index/handoff.
-- Forbidden scope: generic movement/collision, ordinary rental lifecycle,
-  unrelated actions/conditions, conquest teleport, callback/monster/Robot
-  execution, protocol layouts and every C# write.
+- Legacy read authority: only reachable quest reward completion paths, their
+  Gold/Experience/Credit/item rate consumers, level-up effects and exact packet
+  order; C# remains read-only.
+- Go read/write authority: bounded `cmd/crystal-server/quests_runtime.go` and
+  existing quest/session tests plus new `quest_rewards_test.go` if needed,
+  minimum main-session reward wiring and matrix/index/handoff.
+- Forbidden scope: quest lifecycle timers, acceptance/progress quirks, generic
+  economy/item-grid behavior, unrelated NPC actions/conditions, protocol
+  layouts and every C# write.
 
 ### Protected Go ownership
 
-- Complete Control Flow, movement, rental and panel-routing authorities are
-  protected inputs. This leaf owns only the seven teleport action adapters and
-  their parser/effect boundaries, not generic movement or rental state.
+- Complete Quest Core, config-rate, level-up, item mutation and protocol
+  authorities are protected inputs. This leaf owns only reward-rate arithmetic
+  and its call/order boundary, not generic quest lifecycle or economy state.
 
 ### Remaining acceptance work
 
-- [ ] Freeze seven-key parse minima/defaults and exact malformed/unknown behavior.
-- [ ] Preserve instance `0`/`1` aliasing, group/time-recall equality,
-  cancellation and delayed Flow ordering, plus coordinate-less MOVE's exact
-  one-draw walkable-cell RNG/failure rules.
-- [ ] Prove recipient/transition packet order, persisted location/rental effects,
-  relogin and race behavior through authenticated production entries.
+- [ ] Freeze every reachable reward producer and the exact rate/arithmetic type
+  boundary, including non-unit, fractional, zero and overflow cases.
+- [ ] Preserve Gold/Experience scaling while proving Credit/items remain
+  unscaled and no reward-side effect is duplicated or reordered.
+- [ ] Prove level-up, quest completion, gold/credit/item/experience packet order,
+  persistence/relogin and race behavior through production entries.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Frozen row/ledger P, Complete Flow/movement/rental prerequisites and existing
-  world/group/transition session evidence.
+- Frozen row/ledger Q, Complete Quest Core/config prerequisites and existing
+  quest completion/reward session evidence.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. Control Flow terminal review withdrew its
 only provisional finding after tracing the serialized production call chain. The
-frozen 24-child denominator is now 13 Complete + 1 Active + 10 Ready; the matrix
+frozen 24-child denominator is now 14 Complete + 1 Active + 9 Ready; the matrix
 owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -106,8 +106,8 @@ owns exact routing evidence.
 | `NPC-P7-PANEL-ROUTING-001` | Complete | `NPC-P7-ACCESS-GATE-001` + `NPC-P7-PAGE-GRAMMAR-001` | committed/accepted panel routing evidence | missing-page/direct storage/GOTO/craft matrix |
 | `NPC-P7-SHOP-QUIRKS-001` | Complete | `SHOP-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | accepted shop/runtime-state evidence | snapshot no-growth + GoodsOn absence/race |
 | `NPC-P7-CONQUEST-ECONOMY-001` | Ready | `SHOP-P7-CORE-001` + `REPAIR-P6-NPC-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger O | owner/rates/storage/atomicity matrix |
-| `NPC-P7-TELEPORT-ACTIONS-001` | Active | `NPC-P7-CONTROL-FLOW-001` + `MOVE-P4-ACTION-001` + `RENTAL-P6-LIFECYCLE-001` | ledger P | instance/time/group/RNG/transitions |
-| `QUEST-P7-REWARD-RATES-001` | Ready | `QUEST-P7-CORE-001` + `CFG-P1-CONTRACT-001` | ledger Q | non-unit rates/truncation/order |
+| `NPC-P7-TELEPORT-ACTIONS-001` | Complete | `NPC-P7-CONTROL-FLOW-001` + `MOVE-P4-ACTION-001` + `RENTAL-P6-LIFECYCLE-001` | committed Go `2983b87ec6b4cd8aa6a8ef2352bea51de2cc0f74` | instance/time/group/RNG/transitions |
+| `QUEST-P7-REWARD-RATES-001` | Active | `QUEST-P7-CORE-001` + `CFG-P1-CONTRACT-001` | ledger Q | non-unit rates/truncation/order |
 | `QUEST-P7-LIFECYCLE-TIMER-001` | Ready | `QUEST-P7-CORE-001` + `PERSIST-P2-CHECKPOINT-RESTART-001` | ledger R | 24h/completion/zero-task/relogin/race |
 | `QUEST-P7-PROGRESS-QUIRKS-001` | Ready | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger S | class/name/flag boundaries |
 | `QUEST-P7-ACCEPT-CARRY-QUIRK-001` | Ready | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger T | sequential partial failure transcript |

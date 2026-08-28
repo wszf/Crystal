@@ -87,14 +87,14 @@ duplicate.
 - Root cause: 一次写入过多逻辑，或把已知签名闭包拆成先调用后声明；在编译失败时仍试图分析生产语义。
 - Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；改签名前先枚举消费者，声明与调用须同一补丁及编译事务；显式转换不同领域类型，再进入行为测试。
 - Verification: 最小编译、定向测试和 `go vet` 分层通过；hazard authority 测试曾用 `%v` 打印函数值并被测试期 vet 拦截，改为显式 nil/presence 字段后重跑通过。
-- Strengthening through Mine review: 既有 NET/MAP 批次曾漏改消费者/import；本批 group-quest 三个嵌套 literal 漏一层 `}`。均只作 compile finding，复读最小范围修正并在行为测试前通过 touched compile；接口或复合 literal 每个小 hunk 后必须立即 gofmt/compile。
+- Strengthening through Mine/Teleport: NET/MAP 曾漏消费者/import，group-quest 漏 `}`，Teleport queue 又先落声明而触发 unused compile failure；均只作 compile finding，补齐同一声明闭包后通过 touched compile。接口、声明闭包或 literal 必须同一事务 gofmt/compile。
 
 ### 2026-08-21 C07 — 全量、race 和环境失败必须按实际栈归因
 
 - Symptom: 新批次被既有 session/race 问题、缓存、磁盘或超时噪声误判为回归。
 - Root cause: 只看最终 `FAIL`，没有保留退出码、测试名、栈和定向复跑结果。
 - Prevention: 分开运行定向、普通全量和 race；保存退出码和失败摘要；环境错误先检查空间与可重建缓存。
-- Verification: 只以实际失败栈是否进入本批代码或测试为归因依据，已知排除项写入交接而不修改无关模块。
+- Verification: 按失败栈是否进入本批代码/测试归因；已知排除项先跑 exact case，再跑 fresh full gate，不改无关模块。
 - Strengthening through MAP light/Local Conditions: Go build cache twice failed before tests with `no space left on device`; the latter had 234 MiB free. `go clean -cache -testcache` restored 48 GiB and the exact three-command gate passed. Check `df`, clear only rebuildable Go caches, and rerun the original gate before attributing behavior.
 
 ### 2026-08-21 C08 — 测试夹具必须复用真实 bootstrap、helper 和认证约束
@@ -126,7 +126,7 @@ duplicate.
 - Root cause: 只按业务分支记录随机，没有展开嵌套 helper、构造、命中和防御抽样。
 - Prevention: 按调用栈列出每次随机调用、顺序、阶段和 bound，并使用记录型确定性源。
 - Verification: 分阶段断言随机序列，并重复普通/race 测试确认稳定；AI=77 HellPirate 的延迟命中还核对了固定范围 `Random.Next(1)`，确定性 hook 不再把合法的 unit-bound 消费误报为失败。
-- Strengthening through Mine: `.NET Random.Next(0)` 返回零但仍推进随机源，负数才拒绝；Go 对零/一 bound 必须归一成一次 unit draw，并在测试中锁定后续调用顺序，不能把退化区间当成“无 RNG”。
+- Strengthening through Mine/Teleport: `.NET Random.Next(0)` and `Next(1)` both advance RNG; Go zero/unit bounds require one unit draw. NPC MOVE first reused a helper that skipped `Next(1)`; a one-cell regression now locks the sequence.
 
 ### 2026-08-21 C12 — 人工时钟必须隔离所有后台 tick 和全局时间源
 
@@ -234,7 +234,7 @@ duplicate.
 - Root cause: 直接覆盖整快照，或在错误 authority/锁域内判定。
 - Prevention: 明确字段 authority；分离锁；按 revision 定向合并并主动唤醒目标会话。
 - Verification: 跨会话测试核对权威存储、在线状态与通知；测试只读切片也必须经锁内 deep snapshot，禁止复制外壳后读取共享 backing array。
-- Strengthening after Human regen full race: session callback 捕获 live `*worldPlayer` 并在无锁下整值复制；新增 ticker 字段写入后，关系传送测试稳定触发 race。异步 callback 不得解引用捕获的 live entity；调用时必须通过 world snapshot helper 在锁内复制所需状态。改用 `playerRuntimeSnapshot` 后精确 race `-count=10` 通过，fresh full race 仍须重跑。
+- Strengthening through Human/Teleport: 跨会话 callback 只用锁内 deep snapshot/authority API 与 immutable recipient ID，不碰目标 session-local；本地投影由目标 loop 合并。同步排队前先列已持有锁，Teleport 首案因共享 NPC-flow mutex 死锁而撤回；mounted-group race count-20 通过。
 - Strengthening after terminal Regen review: 锁内 `worldPlayer` 整值复制仍会让 Buffs、Flags 与 enemy-guild map 的 backing storage 逃逸；所有解锁后用于 ObjectPlayer 序列化的 runtime、map-transition 和 TownRevive 投影必须在锁内深拷贝这些可变集合。补齐普通/复活 transition 后，定向 count-20/race-count-5 与 fresh full race 均 exit 0。
 
 ### 2026-08-21 C25 — 导入导出和 round-trip 必须验证语义规范化
@@ -301,6 +301,6 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
-- Strengthening through compaction: handoff replacements repeatedly renamed required headings or omitted `- Active leaf: \``. Local Conditions again invented two heading variants. Before replacement, copy every fixed heading/field from `tasks/check-migration-control.sh`; exact-string readback precedes the checker, and only exit 0 is evidence.
+- Strengthening through compaction: handoff replacements repeatedly renamed required headings or omitted `- Active leaf: \``. Teleport recovery again drafted before reading the checker and failed its first control gate. Before replacement, copy every fixed heading/field from `tasks/check-migration-control.sh`; exact-string readback precedes the checker, and only exit 0 is evidence.
 - Strengthening after admin-item hard gate: 增补重复 C01 事故使 active lessons 超过 51200 bytes；合并同类复发、保留可执行规则并重跑 control gate，而非继续追加事故日志。
 - Strengthening through Human regen: 为两个 integration fixture 扩展 Active authority 时先增行后跑 checker，立即触发 301/300 行失败；补丁虽已落地但门禁结论作废，随后把同一清单物理行重排回 300 行并重跑通过。控制面扩权发送前必须按替换后物理行预算 schema 与行/字节上限，不能把 checker 当排版器。

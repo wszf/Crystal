@@ -1012,3 +1012,45 @@
   `MapObject.cs:803-813` were reread before any Teleport code write; matrix row
   194, ledger P, active index and current handoff now state the source-proven
   one-draw contract.
+- Implementation recurrence: the first adapter reused `combatRollLocked`, whose
+  intentional `bound <= 1` fast path silently skipped `Random.Next(1)`. The
+  teleport adapter now owns a unit-bound-consuming helper; a one-cell loaded map
+  records exactly `[1]`, while nil `Cells` and empty walkables record no draw.
+- Fixture findings: an empty-recall bypass test targeted an unreachable page,
+  which the accepted reachable-page parser correctly omitted; the repaired graph
+  reaches the secret page through an intermediate button while leaving it
+  unauthorized from the current page. A separate authenticated fixture also
+  exceeded the real character-name limit, and repeated delayed-flow runs showed
+  KeepAlive may occur on either side of the due NPC response. Fixtures now obey
+  the real name constraint and locate the exact barrier marker in the already
+  collected prefix before waiting for another frame. Focused count-50 and race
+  count-3, then fresh full test/race/vet/build, all exit 0.
+- Terminal review adjudication: the claimed extra self Revelation health packet
+  was withdrawn because `BroadcastHealthChange` uses `Map.Broadcast`, not
+  `MapObject.Broadcast`, while Revelation is active; `Map.Broadcast` includes
+  the moving player exactly as the Go transcript expects. The stale current-
+  session `gameCharacter` location finding was valid and direct NPC delivery now
+  updates its map/coordinates/direction alongside the active-map variables.
+- Cross-session finding and failed first repair: a remote group member's
+  `NPCTeleportTransition` callback refreshed a riding mount and wrote that
+  target session's HP/character locals from the leader's NPC-call goroutine.
+  Moving the entire callback onto the target loop with synchronous completion
+  then deadlocked: the leader held the global serialized NPC-flow mutex while
+  waiting, and the member loop was blocked acquiring that same mutex. The exact
+  group test timed out and a 3-second stack identified both wait sites.
+- Prevention and verification: cross-session delivery now refreshes only the
+  target's locked world mount authority and packets, then queues the existing
+  map transition; target session locals remain updated by its own pending-
+  transition loop. The authenticated group fixture mounts the remote member and
+  locks MountUpdate between self teleport and passive snapshot. Exact ordinary
+  and race count-20 pass; full leaf gates must be rerun after this review fix.
+- Review revision 2 found the remote callback still read mutable
+  `worldObjectID` across teardown. Callback installation now captures its
+  immutable recipient object ID and uses only that ID for snapshot, packets,
+  mount, rental/trade cancellation and passive delivery. Authenticated
+  `INSTANCEMOVE` second-instance and cross-map two-member `GROUPRECALL` entries
+  close the remaining production-entry risk. Revision 3 reports `No findings`.
+- Final post-review evidence: owned gofmt/compile, focused count-50/race count-3,
+  mounted group and instance/recall ordinary/race count-20, relevant Flow/rental
+  regressions, fresh `go test -count=1 ./...`, `go vet ./...`, `go build ./...`
+  and `go test -race -count=1 ./...` all exit 0.
