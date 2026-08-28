@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-29 03:54 (Asia/Singapore)
+Last verified: 2026-08-29 05:06 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -37,53 +37,52 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `QUEST-P7-REWARD-RATES-001`
+- Leaf ID: `QUEST-P7-LIFECYCLE-TIMER-001`
 - Status: `Active` dependency-ready functional leaf; `QUEST-P7-CORE-001` and
-  `CFG-P1-CONTRACT-001` are Complete prerequisites.
-- Outcome: preserve exact quest reward scaling: Gold by `DropRate`, Experience
-  by `ExpRate`, Credit and reward items unscaled, including Legacy integer
-  conversion/truncation/overflow and level-up/packet ordering.
-- Go matrix anchors to read: active row 195, routing ledger Q row 217 and P7
+  `PERSIST-P2-CHECKPOINT-RESTART-001` are Complete prerequisites.
+- Outcome: preserve exact quest lifecycle timing: dynamic 24-hour `New`, every
+  completion producer, zero-task completion, timer/state order on accept,
+  completion, abandon, finish and expiry, plus relogin/restart continuity.
+- Go matrix anchors to read: active row 196, routing ledger R row 218 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: `PlayerObject.FinishQuest` reward block and directly
-  called GainGold/GainExp/GainCredit/item/level-up helpers, `QuestInfo` reward
-  field types and `Settings` DropRate/ExpRate load/write-back only; C# remains
-  read-only.
-- Go read/write authority: new bounded `cmd/crystal-server/quest_rewards.go`
-  and tests, `internal/config/{config.go,config_test.go}`, minimum finish-quest
-  wiring in `main.go`, bounded `quests_session_test.go`, and matrix/index/handoff.
-- Forbidden scope: quest lifecycle timers, acceptance/progress quirks, generic
-  economy/item-grid behavior, unrelated NPC actions/conditions, protocol
-  layouts and every C# write.
+- Legacy read authority: quest accept/check/progress/abandon/finish and login
+  timer call chains, `QuestProgressInfo` New/start/end fields and directly
+  consumed DateTime/timer packet helpers only; C# remains read-only.
+- Go read/write authority: bounded `cmd/crystal-server/{quests_runtime.go,
+  quests_runtime_test.go,main.go}`, new bounded lifecycle session/restart tests,
+  and matrix/index/handoff.
+- Forbidden scope: reward-rate arithmetic, class/name/flag progress quirks,
+  partial carry admission, generic item/economy/NPC behavior, protocol layouts
+  and every C# write.
 
 ### Protected Go ownership
 
-- Complete Quest Core, config-rate, level-up, item mutation and protocol
-  authorities are protected inputs. This leaf owns only reward-rate arithmetic
-  and its call/order boundary, not generic quest lifecycle or economy state.
+- Complete Quest Core, checkpoint/restart, Reward Rates, protocol and item
+  authorities are protected inputs. This leaf owns only quest time/state
+  transitions and their production scheduling/order boundaries.
 
 ### Remaining acceptance work
 
-- [ ] Freeze every reachable reward producer, ExpRate config default/INI/env,
-  Single-precision multiplication and exact fractional/overflow conversion.
-- [ ] Preserve Gold/Experience scaling while proving Credit/items remain
-  unscaled and no reward-side effect is duplicated or reordered.
-- [ ] Prove level-up, quest completion, gold/credit/item/experience packet order,
-  persistence/relogin and race behavior through production entries.
+- [ ] Freeze the exact 24-hour/equality `New` boundary, DateTime binary fields,
+  timer packet shape and every reachable completion/expiry producer.
+- [ ] Preserve accept, completion, zero-task, abandon, finish and expiry
+  timer/state packet order without duplicating callbacks or persistence.
+- [ ] Prove logout/relogin, checkpoint/restart and ticker/manual-clock race
+  behavior through production entries.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Frozen row/ledger Q, Complete Quest Core/config prerequisites and existing
-  quest completion/reward session evidence.
+- Frozen row/ledger R, Complete Quest Core/checkpoint prerequisites and existing
+  quest lifecycle/session persistence evidence.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. Control Flow terminal review withdrew its
 only provisional finding after tracing the serialized production call chain. The
-frozen 24-child denominator is now 14 Complete + 1 Active + 9 Ready; the matrix
+frozen 24-child denominator is now 15 Complete + 1 Active + 8 Ready; the matrix
 owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -108,8 +107,8 @@ owns exact routing evidence.
 | `NPC-P7-SHOP-QUIRKS-001` | Complete | `SHOP-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | accepted shop/runtime-state evidence | snapshot no-growth + GoodsOn absence/race |
 | `NPC-P7-CONQUEST-ECONOMY-001` | Ready | `SHOP-P7-CORE-001` + `REPAIR-P6-NPC-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger O | owner/rates/storage/atomicity matrix |
 | `NPC-P7-TELEPORT-ACTIONS-001` | Complete | `NPC-P7-CONTROL-FLOW-001` + `MOVE-P4-ACTION-001` + `RENTAL-P6-LIFECYCLE-001` | committed Go `2983b87ec6b4cd8aa6a8ef2352bea51de2cc0f74` | instance/time/group/RNG/transitions |
-| `QUEST-P7-REWARD-RATES-001` | Active | `QUEST-P7-CORE-001` + `CFG-P1-CONTRACT-001` | ledger Q | non-unit rates/truncation/order |
-| `QUEST-P7-LIFECYCLE-TIMER-001` | Ready | `QUEST-P7-CORE-001` + `PERSIST-P2-CHECKPOINT-RESTART-001` | ledger R | 24h/completion/zero-task/relogin/race |
+| `QUEST-P7-REWARD-RATES-001` | Complete | `QUEST-P7-CORE-001` + `CFG-P1-CONTRACT-001` | committed Go `3bee34a358a0bed47ab0ff659429520f6731803b` | non-unit rates/truncation/order |
+| `QUEST-P7-LIFECYCLE-TIMER-001` | Active | `QUEST-P7-CORE-001` + `PERSIST-P2-CHECKPOINT-RESTART-001` | ledger R | 24h/completion/zero-task/relogin/race |
 | `QUEST-P7-PROGRESS-QUIRKS-001` | Ready | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger S | class/name/flag boundaries |
 | `QUEST-P7-ACCEPT-CARRY-QUIRK-001` | Ready | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger T | sequential partial failure transcript |
 

@@ -856,6 +856,10 @@
   fresh unexcluded `go test -count=1 ./...` passed with server 85.013 seconds,
   and full `go test -race -count=1 ./...` passed with server 97.385 seconds;
   `go vet ./...` and `go build ./...` also exited 0.
+- Reward Rates recurrence: the first fresh full test again failed only at the
+  same line 123 closed pipe. Its first isolated count-10 also flaked, while an
+  immediate exact count-1 and second count-10 passed; the next fresh unexcluded
+  full test passed with server 82.811 seconds. No Hallucination scope changed.
 
 ### 2026-08-28 — NPC Action State parser/runtime returns and source-proven unsafe quirks
 
@@ -1054,3 +1058,22 @@
   mounted group and instance/recall ordinary/race count-20, relevant Flow/rental
   regressions, fresh `go test -count=1 ./...`, `go vet ./...`, `go build ./...`
   and `go test -race -count=1 ./...` all exit 0.
+
+### 2026-08-29 — Quest reward level-up fixtures require a post-level threshold
+
+- Symptom: the first reward session test observed a correct level and remainder
+  but serialized `MaxExperience=0` instead of the hand-written expected 100.
+- Root cause: the two-entry synthetic experience table omitted the guard slot
+  required by `progression.MaxExperience` after reaching level two.
+- Prevention: derive every level-up fixture table from the production level
+  lookup and include the reached level's next threshold; do not infer slice
+  length from the number of transitions.
+- Verification: the fixture now uses `{5,100,100}` and locks
+  `LevelChanged(2,2,100)`; focused ordinary count-10 and race count-3 pass.
+- Main review finding: the first config patch parsed ExpRate but bypassed
+  `InIReader.ReadSingle`'s missing/invalid fallback and Setup.ini write-back;
+  reward items also used a character-local maximum while the existing auth
+  allocator explicitly owns Legacy reward IDs and intentional pre-admission
+  gaps. The final patch uses a Single-aware legacy reader for both rates and
+  `authService.AllocateItemID` before capacity admission; focused tests lock
+  rewritten defaults, distinct IDs, restart continuity and the next global ID.

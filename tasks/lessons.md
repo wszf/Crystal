@@ -95,7 +95,7 @@ duplicate.
 - Root cause: 只看最终 `FAIL`，没有保留退出码、测试名、栈和定向复跑结果。
 - Prevention: 分开运行定向、普通全量和 race；保存退出码和失败摘要；环境错误先检查空间与可重建缓存。
 - Verification: 按失败栈是否进入本批代码/测试归因；已知排除项先跑 exact case，再跑 fresh full gate，不改无关模块。
-- Strengthening through MAP light/Local Conditions: Go build cache twice failed before tests with `no space left on device`; the latter had 234 MiB free. `go clean -cache -testcache` restored 48 GiB and the exact three-command gate passed. Check `df`, clear only rebuildable Go caches, and rerun the original gate before attributing behavior.
+- Strengthening through Reward Rates: Go build/link cache again failed before tests with `no space left on device` at 250 MiB free. `go clean -cache -testcache` restored 15 GiB and the exact gate passed. Check `df`, clear only rebuildable Go caches, and rerun the original gate before attributing behavior.
 
 ### 2026-08-21 C08 — 测试夹具必须复用真实 bootstrap、helper 和认证约束
 
