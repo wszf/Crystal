@@ -1077,3 +1077,68 @@
   gaps. The final patch uses a Single-aware legacy reader for both rates and
   `authService.AllocateItemID` before capacity admission; focused tests lock
   rewritten defaults, distinct IDs, restart continuity and the next global ID.
+
+### 2026-08-29 — Lifecycle producer assertions need their new import in the same patch
+
+- Symptom: the first quest-lifecycle focused run failed at compile time because
+  a new `reflect.DeepEqual` assertion in `world_test.go` omitted `reflect`.
+- Root cause: the packet-order hunk and import closure were reviewed separately.
+- Prevention: every new test symbol must land with its import in one patch, then
+  run the package compile-only gate before the behavioral test.
+- Verification: the import was added, compile-only passed, and the exact default
+  NPC lifecycle transcript then passed.
+
+### 2026-08-29 — Lifecycle full-package gate hit an unrelated Hiding closed-pipe flake
+
+- Symptom: the first server-package gate failed only
+  `TestSessionHidingTranscriptPersistenceAndExpiry` at its 30-second closed-pipe
+  assertion; the stack did not enter the quest lifecycle files.
+- Root cause: package-wide scheduling exposed the existing net.Pipe fixture's
+  timing-sensitive shutdown path, not a quest timer packet or state mismatch.
+- Prevention: attribute by the first failing test/stack, rerun the exact case at
+  count 1 and 10, then require a fresh unexcluded package gate.
+- Verification: exact count 1 and count 10 both exit 0; the fresh server-package
+  rerun then passed in 82.897s.
+- Full-gate recurrence: the next `go test -count=1 ./...` failed only
+  `TestNPCP7TeleportActionsSessionTimedRecallCapturedOriginAndInclusiveDue`
+  because its flagged queue was still length one after the due scan. Exact
+  count 1 and count 10 both passed; no quest state or timer appeared in the
+  stack.
+- Closure reruns: two later fresh full attempts hit only the established
+  Hallucination closed-pipe path and
+  `TestSessionMapHazardSpawnDamageRemovalAndRestart` observing HP 9 rather than
+  8 after its restart bootstrap. The latter test stops the ticker only after
+  bootstrap, so package-load scheduling can admit one real regen tick; exact
+  Hallucination count 1 and map-hazard count 20 passed. The final fresh
+  unexcluded full run then passed in 82.937s.
+
+### 2026-08-29 — Preparation completion markers must be one-bootstrap state
+
+- Symptom: a quest completed by login preparation would retain its
+  `questBootstrapCompletions` marker after the first StartGame transcript, so a
+  same-connection logout and StartGame could replay the completion-only
+  `ExpireTimer` even though the quest was already complete.
+- Root cause: the session map was reset on SelectCharacter but read without
+  consumption during StartGame; logout-to-character-select does not require a
+  second SelectCharacter before restarting the same character.
+- Prevention: treat preparation-discovered completion as an edge-triggered
+  bootstrap event and consume its marker when building that quest's first Add
+  transcript; never retain transition markers as level state.
+- Verification: `TestQuestP7LifecycleTimerBootstrapCompletionIsConsumedOnce`
+  and the authenticated same-connection logout/StartGame transcript lock first-
+  bootstrap Expire/Set/Change and subsequent Set/Change only; focused count-20,
+  touched-package compile and final integration gates exit 0.
+
+### 2026-08-29 — A source write invalidates every overlapping test result
+
+- Symptom: the main thread added the production relogin transcript while an
+  earlier focused ordinary/race command was still running, so both apparent
+  passes had an unstable source snapshot and were discarded.
+- Root cause: test execution and the next review-driven patch were treated as
+  independent even though the Go tool can read files throughout compilation.
+- Prevention: once any gate starts, freeze all files in its package until the
+  process exits; after an overlap, never retain partial output and rerun the
+  complete command from a stable status.
+- Verification: after the relogin test and marker fix were finalized, the exact
+  focused count-10 plus race count-3 command was rerun without writes and both
+  invocations exited 0.

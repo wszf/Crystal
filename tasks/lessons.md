@@ -101,7 +101,7 @@ duplicate.
 
 - Symptom: 生产分支未执行，测试先因缺少 runtime 实体、派生属性、元数据或名称约束失败。
 - Root cause: 人工夹具只建立持久数据，未复现登录、world enter、summon 或 bootstrap 生命周期。
-- Prevention: 优先复用现有 helper；按 seed→load→enter→summon 顺序建立状态；满足真实账号、角色和配置约束。
+- Prevention: 优先复用现有 helper；按 seed→load→enter→summon 顺序建立状态；满足真实账号、角色名长度和配置约束。
 - Verification: 先确认夹具到达目标生产入口，再断言行为和 transcript。
 - Strengthening through Human regen: dead-target range test 在 `world.enter` 前写 `HP=0`，却被真实 enter bootstrap 规范成默认满血，导致预期 reject 的 focused test 实际 accepted。需要测试死亡/低血量等 post-bootstrap runtime 状态时，必须在 enter 后于 world lock 内覆盖并回读；修正后的精确测试 exit 0。
 - Strengthening after terminal Regen review: visibility-snapshot regression test 在 `world.enter` 前安装 `EnemyGuildIDs`，真实 enter authority 随即把该投影重建为 nil，后续 map mutation panic。任何由 enter 同步的 guild/runtime 投影必须在 bootstrap 后于 world lock 内安装；修正后的五项 focused rerun exit 0。
