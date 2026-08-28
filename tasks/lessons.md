@@ -62,6 +62,7 @@ duplicate.
 - Strengthening at compaction gates: full-file replacement twice used Delete/Add on the same path and was rejected. Before sending, mechanically reject duplicate path operations; replace one file in one standalone transaction, read it back, then run status/control/diff checks. Any failed compound call requires per-file partial-write inspection. Evidence: `tasks/lessons-archive/workflow/shell-tools-and-patching.md`.
 - Strengthening during Regen fixture closure: 两个测试补丁仍以非唯一 `world := newGameWorld()`/`world.loadItemInfos` 落入同文件更早用例；一个无声污染无关 NPC 测试，另一个把局部 helper 声明放错作用域并被 compile gate 拦截。两次均先移除错误落点，再用唯一 `func Test...` 锚点重写并回读 `rg` 行号；同文件重复 fixture 也必须按函数名锚定，不能把“测试文件已精确”误当成 hunk 唯一。
 - Strengthening during BaseFamily integration: 仅按待替换的 CanAttack 文本寻找，使补丁落入更早 generic processor；立即用 diff/函数范围发现并恢复，再以 `func` anchor 重跑。即使新增代码块内文本看似唯一，补丁也必须携带目标函数声明，修改后核验只有预期函数。
+- Strengthening during Local Conditions: 只按重复的 `ParseUint(condition.Params[1])` 补丁误改 `CHECKGOLD` 而未改目标 `CHECK`，定向 whitespace 测试随即失败。已按 `case "CHECK":` 等唯一分支锚点逐项修复；重复转换调用也必须带 switch/function 语义锚点并回读物理落点。
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -93,7 +94,7 @@ duplicate.
 - Root cause: 只看最终 `FAIL`，没有保留退出码、测试名、栈和定向复跑结果。
 - Prevention: 分开运行定向、普通全量和 race；保存退出码和失败摘要；环境错误先检查空间与可重建缓存。
 - Verification: 只以实际失败栈是否进入本批代码或测试为归因依据，已知排除项写入交接而不修改无关模块。
-- Strengthening through MAP light: focused race 在执行测试前因 Go build cache 写入 `no space left on device` 失败；`df` 仅余 257 MiB，`go clean -cache -testcache` 后恢复 76 GiB，compile 与原 race 命令均通过。环境失败先按真实栈检查磁盘/可重建缓存，不得归因于行为回归或省略原命令复跑。
+- Strengthening through MAP light/Local Conditions: Go build cache twice failed before tests with `no space left on device`; the latter had 234 MiB free. `go clean -cache -testcache` restored 48 GiB and the exact three-command gate passed. Check `df`, clear only rebuildable Go caches, and rerun the original gate before attributing behavior.
 
 ### 2026-08-21 C08 — 测试夹具必须复用真实 bootstrap、helper 和认证约束
 

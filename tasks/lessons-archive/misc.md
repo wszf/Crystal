@@ -890,3 +890,52 @@
   Focused count-10 and race count-3, fresh full test/vet/build and fresh full
   race passed; terminal Luna revision 3 returned `No findings`. Go commit:
   `83a37867942edc42d780edacb1083db4bfebd13c`.
+
+### 2026-08-28 — Local-condition session fixture must satisfy guild bootstrap
+
+- Symptom: the first production-entry red test stopped before NPC evaluation
+  with `GuildMutationLevelTooLow`; after fixing the level, an unconsumed
+  `ServerAddBuff` bootstrap packet was mistaken for `ServerNPCResponse`.
+- Root cause: the fixture assumed AdminAccount bypassed the guild level gate and
+  that the generic mail-session bootstrap consumed the guild newbie Buff packet.
+- Prevention: seed the real required level before `CreateGuild`, then enumerate
+  and consume every guild-specific post-bootstrap packet before issuing the NPC
+  request. A condition test is not valid until its first failure is the expected
+  success/ELSE branch rather than setup or packet-order noise.
+- Verification: after both fixture repairs, the same exact test reached the
+  intended unmigrated condition evaluator and failed only with
+  `Local conditions failed.` instead of the expected success response. Final
+  green/repeated/race evidence belongs to the leaf closure record.
+- Follow-up symptom: the retained-character-count adapter test tried to create
+  a fifth active character and failed with result `4` before reaching its
+  tombstone assertion.
+- Follow-up root cause: the fixture confused raw retained-record capacity with
+  the four-active-character creation gate.
+- Follow-up prevention: create four active records, tombstone one through the
+  production delete authority, and only then create the fifth retained record;
+  separately assert the four-row selection projection and five-row raw count.
+- Follow-up verification: the repaired auth/context-focused command exited 0
+  for both `internal/auth` and `cmd/crystal-server`.
+
+### 2026-08-28 — Local Conditions require parser, culture and authority parity together
+
+- Symptom: the recovered candidate passed its first focused tests but ordinal
+  string ordering, callback-delegated negative RANDOM, generic/quote-aware
+  condition parsing, projected character count, swallowed name-list read errors
+  and a trailing-newline phantom entry still differed from Legacy.
+- Root cause: shared helpers were generalized from existing Go behavior instead
+  of following each `NPCSegment.ParseCheck` and `Check(PlayerObject)` callsite;
+  selection projection was mistaken for raw `AccountInfo.Characters.Count`.
+- Prevention: freeze parser tokenization/minima separately from evaluation;
+  distinguish caught and uncaught comparison operators; inject CurrentCulture
+  collation while keeping ordinal equality; reject negative RANDOM before RNG;
+  preserve BOM-aware `File.ReadAllLines`, raw retained account count and exact
+  timer/flag quirks through ordinary/default production contexts.
+- Source correction: only quoted name-list paths receive the parser's regex
+  special case. Quoted CHECKITEM/CHECKCALC text remains literal space-split
+  tokens; prior handmade multiword CHECKITEM fixtures were not Legacy evidence.
+- Verification: auth/worlddata/server focused count-10 and race count-3 passed;
+  fresh unexcluded `go test -count=1 ./...`, `go vet ./...`, `go build ./...`
+  and `go test -race -count=1 ./...` exited 0. Luna reviews found five initial
+  mismatches, then the newline edge, and revision 3 returned `No findings`.
+  Go commit: `424978eabe5de76d84979f3fe108bf7968173aa0`.

@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-28 13:02 (Asia/Singapore)
+Last verified: 2026-08-28 20:55 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -36,56 +36,55 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `NPC-P7-COND-LOCAL-001`
-- Status: `Active` dependency-ready functional leaf; Page Grammar and Action
-  State are Complete prerequisites.
-- Outcome: preserve the exact seven-key local condition surface:
-  `CHECKNAMELIST`, `CHECKGUILDNAMELIST`, `ISADMIN`, `CHECKCALC`, `ISNEWHUMAN`,
-  `CHECKTIMER` and `HASGT`, including the shared parse/operator/error contract,
-  pass/fail/exception boundaries, `RANDOM 0`, flag bounds and timer quirks.
-- Go matrix anchors to read: active row 187, routing ledger I/J row 210 and P7
+- Leaf ID: `NPC-P7-PANEL-ROUTING-001`
+- Status: `Active` dependency-ready functional leaf; Access Gate and Page
+  Grammar are Complete prerequisites.
+- Outcome: preserve page-existence-only dispatch, silent missing pages, no
+  direct storage bypass, storage identity from the page actually executed,
+  craft from any active page, and all currently reachable special-panel
+  positive paths.
+- Go matrix anchors to read: active row 191, routing ledger M row 213 and P7
   summary row 966 only; never the full matrix or another child registry.
-- Legacy read authority: only the seven named `NPCSegment.Check`/parser
-  branches, shared comparison helpers and direct name-list/guild/admin/new-human/
-  timer/guild-territory consumers; C# remains read-only.
-- Go read/write authority: bounded condition parse/evaluation fields in
-  `internal/worlddata/npcscript.go`; bounded local context adapters in
-  `cmd/crystal-server/{main.go,default_npc.go}` and a new
-  `npc_script_context.go`; focused parser/context and ordinary/default session
-  tests; matrix/index/handoff.
-- Forbidden scope: all 24 world conditions, social/world/teleport actions,
-  callback-family execution, scheduler/protocol changes, unrelated context
-  catalog expansion and every C# write.
+- Legacy read authority: only `NPCScript.Call`/page lookup/`ProcessSpecial`,
+  direct storage-page checks, craft-page admission and the corresponding panel
+  packet producers; C# remains read-only.
+- Go read/write authority: new bounded
+  `cmd/crystal-server/npc_panel_routing.go`, page dispatch adapters in
+  `cmd/crystal-server/main.go`, focused `npc_panel_routing_session_test.go` and
+  only the minimum existing storage/craft/market/mail/guild/hero tests needed
+  to prove routing identity; matrix/index/handoff.
+- Forbidden scope: shop transaction quirks, conquest pricing, teleport actions,
+  quest rates/lifecycle, action/condition catalogs, callback-family execution,
+  protocol layout changes, unrelated panels and every C# write.
 
 ### Protected Go ownership
 
-- Complete loading, page grammar, Speech/Input, Control Flow and Action State
-  are protected inputs. This leaf owns only the seven named local conditions,
-  their shared condition contract and bounded adapters.
+- Complete Access Gate, loading, Page Grammar, Speech/Input, Control Flow,
+  Action State and Local Conditions are protected inputs. This leaf owns only
+  post-page-selection panel dispatch and bounded page-identity adapters.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact parser fields, defaults, comparison/operator dispatch and
-  malformed/exception behavior for all seven keys and shared helpers.
-- [ ] Preserve name-list/guild/admin/new-human/territory snapshots, exact
-  CHECKCALC `RANDOM 0`/flag boundaries and CHECKTIMER's global/local quirks.
-- [ ] Drive ordinary and default production entries through deterministic
-  pass/fail/malformed/exception cases, repeated execution and race.
+- [ ] Freeze exact Legacy page lookup, response/special ordering and the silent
+  missing-page boundary before changing dispatch.
+- [ ] Preserve GOTO-to-storage success, direct storage request rejection and
+  storage identity from the page actually executed.
+- [ ] Prove alternate active-page craft admission and all bounded special-panel
+  positive paths without widening their business logic.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Accepted frozen row/ledger I/J, Complete Page Grammar/Action State
-  prerequisites, existing partial condition evaluator and exact Legacy
-  consumers.
+- Accepted frozen row/ledger M, Complete Access/Page Grammar prerequisites and
+  existing direct panel branches in the production session loop.
 
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. Control Flow terminal review withdrew its
 only provisional finding after tracing the serialized production call chain. The
-frozen 24-child denominator is now 10 Complete + 1 Active + 13 Ready; the matrix
+frozen 24-child denominator is now 11 Complete + 1 Active + 12 Ready; the matrix
 owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -102,11 +101,11 @@ owns exact routing evidence.
 | `NPC-P7-ACTION-STATE-001` | Complete | Control Flow + `CFG-P1-CONTRACT-001` + `EQUIP-P6-CORE-001` | committed Go `83a37867942edc42d780edacb1083db4bfebd13c` | 14-key table/restart/RNG/UI |
 | `NPC-P7-ACTION-SOCIAL-001` | Ready | Control Flow + `GUILD-P9-NPC-SCRIPT-001` + `MAIL-P10-NPC-SCRIPT-001` | ledger G | 12-key table/persistence/recipients |
 | `NPC-P7-ACTION-WORLD-001` | Ready | Control Flow + `MONSTER-P5-BASE-FAMILY-001` + `ITEM-P6-GRID-MUTATION-001` + `GUILD-P9-NPC-SCRIPT-001` | ledger H | 11-key recipient/persistence/race matrix |
-| `NPC-P7-COND-LOCAL-001` | Active | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-ACTION-STATE-001` | ledger I | exact 7-key + shared malformed/operator quirks |
+| `NPC-P7-COND-LOCAL-001` | Complete | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-ACTION-STATE-001` | committed Go `424978eabe5de76d84979f3fe108bf7968173aa0` | exact 7-key + shared malformed/operator quirks |
 | `NPC-P7-COND-WORLD-001` | Ready | `NPC-P7-COND-LOCAL-001` + `GUILD-P9-NPC-SCRIPT-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger J | exact 24-key snapshot/no-side-effect/race matrix |
 | `NPC-P7-DEFAULT-CALLBACK-001` | Ready | `NPC-P7-CONTROL-FLOW-001` + `NPC-P7-SPEECH-INPUT-001` + all three Action and both Condition IDs in rows above | ledger K | all 12 production callbacks |
 | `NPC-P7-MONSTER-ROBOT-SCRIPT-001` | Ready | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-CONTROL-FLOW-001` + `NPC-P7-ACTION-WORLD-001` + both Condition IDs | ledger L | Spawn/Die execution + full TIME/restart/race |
-| `NPC-P7-PANEL-ROUTING-001` | Ready | `NPC-P7-ACCESS-GATE-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger M | missing-page/direct storage/GOTO/craft matrix |
+| `NPC-P7-PANEL-ROUTING-001` | Active | `NPC-P7-ACCESS-GATE-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger M | missing-page/direct storage/GOTO/craft matrix |
 | `NPC-P7-SHOP-QUIRKS-001` | Ready | `SHOP-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | ledger N | static count + GoodsOn absence/race |
 | `NPC-P7-CONQUEST-ECONOMY-001` | Ready | `SHOP-P7-CORE-001` + `REPAIR-P6-NPC-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger O | owner/rates/storage/atomicity matrix |
 | `NPC-P7-TELEPORT-ACTIONS-001` | Ready | `NPC-P7-CONTROL-FLOW-001` + `MOVE-P4-ACTION-001` + `RENTAL-P6-LIFECYCLE-001` | ledger P | instance/time/group/RNG/transitions |
