@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-29 08:35 (Asia/Singapore)
+Last verified: 2026-08-29 13:48 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -37,45 +37,44 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `ITEM-P6-GRID-CROSS-001`
-- Status: `Active` dependency-ready functional leaf; P8 Hero/mount and P11
-  fishing attachment owners plus the P6 inventory/refine grid inputs are Complete.
-- Outcome: close the exact cross-grid item matrix: Move over Storage/Trade/
-  Refine/HeroInventory with trade refresh; Split over Storage; Merge across the
-  supported Inventory/Storage/Equipment/Fishing/Hero grids while every Legacy
-  unsupported Quest/Mount/Socket/Trade/other combination fails identically.
-- Go matrix anchors to read: active row 3540 and P6 summary row 965 only; never
+- Leaf ID: `EQUIP-P6-CORE-001`
+- Status: `Active` dependency-ready functional leaf; P8 mount/Hero and P11
+  fishing/awakening owners plus P6 Grid Cross and admission inputs are Complete.
+- Outcome: close player EquipItem/RemoveItem over Inventory/Storage/Socket/
+  Mount/Fishing sources and destinations, including cursed/bind/wedding gates,
+  exact slot/type/class/gender/requirements/weight, stat/HP/appearance refresh,
+  set/special modes and temporary-skill add/remove packet order.
+- Go matrix anchors to read: active row 3543 and P6 summary row 965 only; never
   the full matrix or another child registry.
-- Legacy read authority: MoveItem/SplitItem/MergeItem request handlers and only
-  their directly called inventory/storage/trade/Refine/Hero/fishing/equipment
-  grid helpers; C# remains read-only.
-- Go read/write authority: bounded item transaction/session routing plus the
-  exact storage/trade/Hero/equipment/fishing adapters and focused tests needed
-  by the matrix; matrix/index/handoff evidence.
-- Forbidden scope: reopen completed Refine or owner business lifecycles, change
-  protocol layouts, invent unsupported grid behavior, or write any C# file.
+- Legacy read authority: EquipItem/RemoveItem request handlers, CanEquipItem/
+  CanRemoveItem, RefreshItem/RefreshStats and only directly reached equipment,
+  socket, storage, mount, fishing and temporary-skill helpers; C# is read-only.
+- Go read/write authority: bounded `equipment_transactions.go`, exact session/
+  storage routing and focused authenticated tests; matrix/index/handoff evidence.
+- Forbidden scope: reopen P8/P11 owner lifecycles, item-use/catalog behavior,
+  Cross-Grid semantics, protocol layouts, or write any C# file.
 
 ### Protected Go ownership
 
-- Complete inventory-only mutations, Refine, Storage, Trade, Hero/mount and P11
-  fishing/awakening authorities are protected inputs. This leaf owns only
-  cross-grid dispatch, transaction ordering and the exact allow/deny matrix.
+- Complete item mutation/Cross-Grid, Refine, Storage, Trade, P8 Hero/mount and
+  P11 fishing/awakening authorities are protected inputs. This leaf owns only
+  player equipment transaction gates, projections and exact observable order.
 
 ### Remaining acceptance work
 
-- [ ] Trace every Legacy Move/Split/Merge grid switch, helper call, gate and
-  packet side effect; register a finite positive/negative pair matrix first.
-- [ ] Prove Storage NPC/password, Trade unlock/refresh, Hero-spawn, fishing and
-  equipment refresh gates without changing their completed business owners.
-- [ ] Lock exact swap/stack/definition/RefreshStats/TradeUnlock packet order,
-  authoritative persistence, relogin and concurrent revision behavior.
+- [ ] Trace every Legacy Equip/Remove source/target switch, helper gate, mutation
+  and packet/stat/appearance/magic side effect; freeze a finite pair matrix.
+- [ ] Prove Inventory/Storage/Socket/Mount/Fishing, cursed/bind/wedding and all
+  slot/type/class/gender/requirement/weight boundaries without owner rewrites.
+- [ ] Lock RefreshItem/PlayerUpdate/health/magic ordering, normalized auth/world
+  revision, logout/relogin persistence and concurrent mutation behavior.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Frozen P6 row/summary and the Complete inventory-only, storage, trade, Refine,
-  Hero/mount and P11 attachment evidence.
+- Frozen P6 row/summary and Complete item mutation, Grid Cross, storage, Refine,
+  P8 mount/Hero and P11 fishing/awakening evidence.
 
 ### P7 frozen child registry
 
@@ -116,17 +115,17 @@ owns exact routing evidence.
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Thirteen are Complete, Grid
-Cross is Active and five are Ready.
+accepted all nineteen children with no finding. Fourteen are Complete, Equip
+Core is Active and four are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `ITEM-P6-WIRE-CATALOG-001` | Complete | — | existing committed evidence | layouts/nesting/grids/definitions |
 | `ITEM-P6-GRID-MUTATION-001` | Complete | logging/localization | committed/accepted grid mutation evidence | error/report/response order + normalized revision/CAS |
-| `ITEM-P6-GRID-CROSS-001` | Active | P8/P11 feature owners (Complete) | item/storage/trade/Hero/equipment | exact positive/negative grid matrix |
+| `ITEM-P6-GRID-CROSS-001` | Complete | P8/P11 feature owners (Complete) | committed/accepted cross-grid auth/world/session evidence | exact positive/negative grid matrix |
 | `CAPACITY-P6-GRIDS-001` | Ready | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
 | `ADMIN-P6-ITEM-COMMAND-001` | Complete | P3 authority + P5 creation | committed Go `9e7edac7aaf22f35677f90427ca79da4e998b096` | MAKE/CLEARBAG quirks |
-| `EQUIP-P6-CORE-001` | Ready | P8/P11 feature owners | equipment/session | slots/sockets/stats/order/race |
+| `EQUIP-P6-CORE-001` | Active | P8/P11 feature owners (Complete) | equipment/session | slots/sockets/stats/order/race |
 | `ITEM-P6-USE-ADMISSION-001` | Complete | P1 LOC + P5 stats | committed Go `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2` | all gates and localized order |
 | `ITEM-P6-USE-BASIC-001` | Complete | — | existing committed evidence | potion/delete success paths |
 | `ITEM-P6-USE-CATALOG-001` | Ready | P4/P5/P7/P9/P10 | item use/session | exact known/unknown shape partition |

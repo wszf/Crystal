@@ -233,6 +233,7 @@
 - Prevention: 保留无排除失败与精确隔离结果，再以仅排除该用例的服务端/全仓普通门禁验证其余测试；不得修改 OmaMage 掩盖当前 bootstrap 批次，也不得把带排除项的通过表述为无排除全仓通过。
 - Verification: `go test ./cmd/crystal-server -skip '^TestSessionOmaMageRangeSlowFrozenTranscript$'`、对应 `go test ./... -skip ...` 与 `go test -race ./... -skip ...` 均退出 0；本批 focused 普通/race 也退出 0。更早一次无排除完整 race 曾通过，但最终重跑退出 1，handoff 必须同时保留而以最终状态为准。
 - Strengthening after item-use admission: 本批 post-expansion 首次无排除 `go test -race ./...` 仍只命中相同 OmaMage `[2 1]`/`[1]` 边界且无 race detector 报告；隔离 race `-count=10` 随即 exit 0，第二次 fresh 无排除完整 race exit 0。必须在 handoff 同时保留首次 exit 1、隔离归因与最终 exit 0，不能删除失败证据或把首次运行表述为通过。
+- Strengthening after Cross-Grid terminal fixes: 首次 fresh unexcluded full race 同时命中同一 OmaMage `[2 1]`/`[1]` 随机边界和已归档的 timed-recall due-scan queue-length flake，均无 race-detector report 或 Cross-Grid stack；两用例隔离 race count-20 退出 0，第二次 fresh unexcluded full race 随后退出 0（server 100.188s）。失败、隔离归因和最终通过三项必须同时保留。
 
 ### 2026-08-26 — Human regen exposed a captured live-player callback race
 

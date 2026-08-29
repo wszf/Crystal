@@ -513,3 +513,10 @@
   corrected authenticated session receives no packet before keep-alive, then
   restores the script and receives `NPCRequestInput`, proving the stale value
   was consumed. Focused Speech/Input tests and package tests exit 0.
+
+### 2026-08-29 — Trade CheckItem必须包含 sealed-Hero 全局解析和连接级缓存
+
+- Symptom: `ITEM-P6-GRID-CROSS-001` 终审发现 MoveItem(Trade) 已向 partner 发定义和 pre-mutation `TradeItem` snapshot，却遗漏主物品引用 sealed Hero 时的 `NewHeroInfo`。
+- Root cause: 初版只递归复用了 ItemInfo helper，没有继续跟踪 Legacy `CheckItem -> CheckHeroInfo`；首轮修复又从 source character 的绑定 Hero 槽解析，忽略 sealed Hero 已可脱离角色槽而由全局 registry 持有。
+- Prevention: 对每个 Trade 主物品保持 definition（含 sockets）→主物品 HeroInfo→最终 snapshot；Hero ID 从 AddedStats[129] 读取，通过 recipient 的全局 resolver 获取，并以 recipient connection/item UniqueID cache 抑制重复。不得从 source.Character.Heroes 推断 sealed entity 存在。
+- Verification: focused production-helper transcript 以 source 无绑定 Hero、recipient auth resolver 成功的 fixture 锁定 NewItemInfo→NewHeroInfo(StorageIndex=-1)→pre-swap TradeItem，并证明第二次移动只发 snapshot；count-20/race focused gates 通过。

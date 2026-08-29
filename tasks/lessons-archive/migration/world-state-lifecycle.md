@@ -82,3 +82,12 @@
 - Root cause: the valid-data assumption in the shared Go regen consumer hid a newly reachable producer edge; separately, reviewing the inner spell method or startup branch in isolation omitted the strict outer `Envir` scheduler and the definition authority.
 - Prevention: for timer/startup findings, trace both the caller scheduler and data producer. Safe-zone fields execute only after `Time > OperateTime`; direct-map mode has no `MapInfo.SafeZones`, while exported-world startup owns the definitions.
 - Verification: removed HP/MaxHP admission/regen shortcuts, added live zero-MaxHP arm/drain/indicator coverage, retained the strict exact-time regression, and rejected the two isolated-call-chain findings with exact outer-scheduler/definition evidence.
+
+### 2026-08-29 — Latest-authority cross-grid callback必须显式放行 Rental 离开玩家三格
+
+- Symptom: `ITEM-P6-GRID-CROSS-001` 终审发现，受信任 callback 将 Rental 从 Inventory 移到 Storage/Hero 后，`MergeRentalAuthoritativeWithAllowed` 又把旧 Inventory 源恢复，形成双份；首个回归在仅把 `allowedMissingItemIDs` 传入调用点后仍稳定复现。
+- Root cause: Cross-Grid callback 已在 auth 锁内从 latest authority clone 开始，但调用仍按 stale full-snapshot 写回传 `nil`；共享 helper 又只在“incoming 新增 ID”分支检查 allowed map，保留 authoritative missing source 的第二循环完全忽略显式授权。
+- Prevention: trusted latest-authority transaction 若允许 Rental 离开 Inventory/Equipment/Quest，必须传递明确 removal authorization；共享 rental merge 在 incoming admission 和 authoritative-source preservation 两侧都必须尊重同一 allowed-ID contract。Storage/Hero/Refine 等目的格仍由 owning transaction 原子提交，普通 stale write-back继续传 `nil`。
+- Verification: helper 负控锁定显式 removal 不复活，Cross-Grid auth 回归分别把 Inventory Rental 源完整合并进 Storage 与 spawned HeroInventory 目标，并断言玩家源为空、目标计数只增加一次；修正后两包 focused 测试退出 0。
+- Follow-up symptom/root cause: main integration review又发现 rejected Cross-Grid callback 会把完整 auth admission snapshot 发布到 session/world；新增 authority-merge regression 首轮随即证明复用 `mergePlayerItemAuthority` 会直接别名赋值三个 item grids。前者重复 Refine no-op 覆盖 dirty runtime 风险，后者把“auth result 已 detached”误当成下游可以共享指针。
+- Follow-up prevention/verification: rejected callback 立即返回且不发布；accepted callback 只深拷贝 item/refine/Hero owned domains，保留 HP/quest/name 等 runtime authority。首轮 alias 回归失败后改为 `cloneWorldStoredGrid`，随后 exact count-20 与包含 admin dirty-world 的 focused/race gates 退出 0。

@@ -876,3 +876,10 @@
 - Root cause: probe 只验证能解析两种 packet 顺序，没有把 Legacy `SentMapInfo.Contains` 的 repeat suppression 当成必须失败的协议判据。
 - Prevention: probe 先消费一次 `WorldMapSetup -> NewMapInfo`，随后对同图搜索必须直接期望 `SearchMapResult`；任何重复 setup/map-info 都立即报错。
 - Verification: probe 改为严格 `expectID(ServerSearchMapResult)`，新增 suppression 正例与重复 `NewMapInfo` 负例，定向 count-20 通过。
+
+### 2026-08-29 — Split fresh item必须复用定义级 slot-shape constructor
+
+- Symptom: `ITEM-P6-GRID-CROSS-001` 终审发现 SplitItem 手工构造的新 item 固定为空 Slots，Shape 49/50 weapon、mount 或显式 Slots 定义会失去嵌套格形状。
+- Root cause: 迁移只复制了 ID/durability/count 等显式字段，没有继续跟踪 `CreateFreshItem -> UserItem(ItemInfo)` 的 definition-specific slot sizing。
+- Prevention: 任何“fresh/definition-only” item 入口都复用单一 `itemstate.Fresh` constructor，再覆盖该操作独有的 ID/count；禁止为 Split、drop、reward 分别手写看似等价的零值容器。
+- Verification: Split helper 现复用 fresh constructor；回归同时锁定普通物品零 slots 与 weapon Shape 49 的五 slots，focused count-20/race gate 通过。

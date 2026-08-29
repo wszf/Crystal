@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-29 11:03 (Asia/Singapore)
+Last updated: 2026-08-29 13:50 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -10,83 +10,92 @@ not evidence; do not startup-read historical handoff archives.
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains ongoing; it is neither
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
-- `REFINE-P6-WORKBENCH-001` is accepted Complete in Go commit
-  `6408c1163c3a597c260416f3df25832b1af18e28`. P6 is scope-frozen at nineteen
-  children: 13 Complete, one Active and five Ready.
-- The unique next Active leaf is dependency-ready `ITEM-P6-GRID-CROSS-001` at
-  matrix row 3540 and P6 summary row 965.
+- `ITEM-P6-GRID-CROSS-001` is accepted Complete in Go commit
+  `3d124e0a1029a08223238e81e02e20303e287fea`. P6 is scope-frozen at nineteen
+  children: 14 Complete, one Active and four Ready.
+- The unique next Active leaf is dependency-ready `EQUIP-P6-CORE-001`, matrix
+  row 3543 and P6 summary row 965. Matrix/index routing is synchronized.
 
 ## Legacy repository state
 
-- Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
+- Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch `master`; pre-control-commit HEAD
-  `3e3f52f002eb0b3664033fbf2038d52e54a3a9e5`; upstream `origin/master`, ahead
-  515 and behind 0.
-- Owned unstaged paths are:
-  - `tasks/lessons.md`
-  - `tasks/lessons-archive/migration/data-config-import-export.md`
-  - `tasks/lessons-archive/misc.md`
-  - `tasks/lessons-archive/verification/fixtures-and-transcripts-01.md`
-  - `tasks/migration-active.md`
-  - this handoff.
-- There are no staged/untracked paths or Legacy implementation changes.
-- `git diff --check` and all three Legacy C# queries are empty.
+  `986f08bfa91972359e5c9c92a79e29644e790aa7`; upstream `origin/master`, ahead
+  516 and behind 0.
+- Unstaged tracked paths are exactly:
+  `tasks/lessons.md`,
+  `tasks/lessons-archive/migration/protocol-session-wire.md`,
+  `tasks/lessons-archive/migration/world-state-lifecycle.md`,
+  `tasks/lessons-archive/verification/fixtures-and-transcripts-01.md`,
+  `tasks/lessons-archive/verification/race-and-flake-attribution.md`,
+  `tasks/migration-active.md`, and this handoff. There are no staged or
+  untracked paths and no Legacy implementation changes.
+- `git diff --check`, `git diff --cached --check`, control checker and all three
+  Legacy C# queries exit 0/empty. This handoff records the expected one Go leaf
+  commit followed by one Legacy control/lesson commit.
 
 ## Go repository state
 
-- Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `6408c1163c3a597c260416f3df25832b1af18e28`;
+- Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
+- Branch `main`; HEAD `3d124e0a1029a08223238e81e02e20303e287fea`;
   no upstream. Index and worktree are clean.
-- Commit `6408c11` contains exactly the accepted Refine production, tests,
-  matrix evidence and next-Leaf routing. All three Go C# queries are empty.
+- Commit `3d124e0` contains exactly the accepted Grid Cross production, tests,
+  matrix evidence and next-Leaf routing.
+- `git diff --check`, `git diff --cached --check`, and all three Go C# queries
+  exit 0/empty. No owned Go/server process is active. PID 44901 is an unrelated
+  Claude job under `.codex-box/.../droprate-candidate-v4`; do not stop it.
 
 ## Active leaf and protected work
 
-- Active leaf: `ITEM-P6-GRID-CROSS-001`.
-- The completed Refine batch preserves exact admission, localized names,
-  unchecked widths/formula/RNG/destruction, millisecond timing, packet order,
-  full-bag cancellation, same-process workbench residue, remaining-ms restart,
-  client clone fields, observer takeover cancellation and the Legacy rental
-  expiry-invisibility quirk.
-- Auth gold/inventory/refine mutation and world projection share the item
-  revision; rejected callbacks do not overwrite dirty runtime grids. Periodic
-  checkpoint semantics remain Legacy-authoritative rather than adding an
-  immediate per-request save failure gate.
-- The new Active leaf owns only the exact Move/Split/Merge cross-grid matrix and
-  transaction/packet ordering. Completed inventory-only, Refine, Storage, Trade,
-  Hero/mount and P11 attachment behavior are protected inputs.
+- Active leaf: `EQUIP-P6-CORE-001`.
+- Accepted Grid Cross production now provides latest-auth atomic Storage/player/
+  refine/Hero mutations, normalized Rental removal, shared item revision/world
+  CAS, owned-domain session projection, exact Move/Split/Merge matrix and order,
+  Split fresh slot shape, Trade sealed-Hero metadata, persistence/relogin and
+  unsupported-grid failure. It must remain a protected input.
+- Equip owns player EquipItem/RemoveItem transactions over Inventory/Storage/
+  Socket/Mount/Fishing, cursed/bind/wedding and slot/type/class/gender/
+  requirement/weight gates, stat/HP/appearance/set/special/temporary-skill
+  refresh order. P8 mount/Hero and P11 fishing/awakening business lifecycles,
+  Grid Cross, item-use admission/catalog and protocol layouts are protected.
+- Before any Equip write, trace the exact Legacy handlers and directly reached
+  CanEquip/CanRemove/RefreshItem/RefreshStats helpers into a finite pair/gate/
+  side-effect matrix. All `.cs` remains read-only.
 
 ## Verification ledger
 
-- Owned gofmt and touched compile
-  `go test ./internal/auth ./cmd/crystal-server -run '^$'` exited 0.
-- Focused Refine/auth/observer/revision tests passed count 20; focused auth race
-  passed count 5 and focused server race passed count 3. Protected observer,
-  item-grid, Rental and admin dirty-world regressions passed repeated runs.
-- The first fresh server package run failed only
-  `TestAdminLogoutPreservesDirtyWorldItemsAcrossNonClearAuthRevision`: a no-op
-  Refine admission snapshot incorrectly published an unrelated auth revision.
-  The helper now publishes only committed Refine mutations; the exact regression
-  passed count 20 and the subsequent fresh server package passed in 82.729s.
-- Fresh unexcluded `go test -count=1 ./...` exited 0 with server 87.283s.
-  Fresh unexcluded `go test -race -count=1 ./...` exited 0 with server 99.401s.
-  `go vet ./...`, `go build ./...` and final `git diff --check` exited 0.
-- Reviewer `01a04b3b-ef31-7332-a0bc-63f62d5c6772` was closed without evidence
-  after launching duplicate gates and stalling. Replacement reviewer
-  `01a04b60-f42d-7ae3-a8aa-839afc86ac69` raised two provisional findings;
-  exact Legacy periodic-save and rental-workbench rulings plus regressions
-  resolved both, and its terminal rereview returned `No findings`.
-- Both reviewers are closed. No migration subagent or owned `go`/
-  `crystal-server` process remains active.
+- Three terminal findings were corrected: Rental source resurrection during
+  Storage/Hero merges, Split loss of definition-specific nested slots, and
+  missing cached sealed-Hero Trade metadata. Integration also prevented rejected
+  callback publication and deep-copied only Cross-Grid-owned domains.
+- One new authority-merge alias regression initially failed because the helper
+  reused direct grid assignment. It now clones grids; exact count-20 passes.
+  The earlier Rental regression first failed after only passing the allowed map,
+  proving the shared source-preservation loop also needed the fix; it passes.
+- Final compile `go test ./internal/itemstate ./internal/auth
+  ./cmd/crystal-server -run '^$'` exits 0. Focused itemstate/auth/server tests
+  pass count 20; focused race passes itemstate/auth/server count 5, including
+  sessions, admin dirty-world, Trade cache and all terminal corrections.
+- Final touched packages `go test ./internal/itemstate ./internal/auth
+  ./cmd/crystal-server -count=1` exit 0; server 83.579s.
+- Final fresh `go test -count=1 ./... && go vet ./... && go build ./...` exits 0;
+  server 88.086s. Final fresh `go test -race -count=1 ./...` exits 0; server
+  101.322s.
+- An earlier full race exited 1 only at the archived timed-recall due-scan queue
+  flake and OmaMage `[2 1]`/`[1]` random-boundary fixture, with no detector or
+  Cross-Grid stack. Their combined isolated race count 20 exited 0; two later
+  fresh unexcluded full-race runs exited 0 (server 100.188s and final 101.322s).
+- Terminal reviewer `01a04bfb-9715-7ee3-8ee5-f1905cc5397a` reviewed the latest
+  candidate and returned `No findings`. All migration subagents are closed.
 
 ## Exact recovery sequence
 
-1. Rerun the Legacy control/C# gates, then commit only the six owned Legacy
-   control/lesson paths. This handoff records the expected pre-control-commit
-   Legacy HEAD and one documentation commit delta.
-2. Verify both repositories independently. Resume only
-   `ITEM-P6-GRID-CROSS-001`: read matrix row 3540 and P6 summary row 965, then
-   search targeted archived lessons for Move/Split/Merge, storage/trade/Refine/
-   Hero/fishing grid, revision and packet-order failures.
-3. Before any Go write, trace the exact Legacy grid switches and freeze a finite
-   positive/negative source-target matrix plus packet/persistence expectations.
+1. Rerun the Legacy control/C# gates, stage only the seven listed Legacy paths
+   and commit the accepted Grid Cross lessons/control routing.
+2. Verify both repositories independently. Resume only `EQUIP-P6-CORE-001`:
+   read matrix rows 965 and 3543, then search archived lessons for EquipItem,
+   RemoveItem, RefreshItem, sockets, storage, mount, fishing, stats, appearance,
+   temporary skills, packet order, revision and persistence.
+3. First Equip source command after recovery: locate exact Legacy EquipItem and
+   RemoveItem handlers plus direct helpers; freeze the finite matrix before Go
+   writes. Do not read the full matrix or reopen accepted Grid Cross behavior.
