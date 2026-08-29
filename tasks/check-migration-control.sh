@@ -49,6 +49,7 @@ check_limit tasks/goal-task.md 300 32768
 check_limit tasks/lessons.md 500 51200
 check_limit tasks/migration-active.md 300 32768
 check_limit tasks/migration-handoff.md 250 24576
+check_limit .claude/commands/goal.md 80 8192
 
 for heading in \
   '# Agent working rules' \
@@ -89,6 +90,7 @@ for heading in \
 do
   check_heading_once tasks/migration-active.md "$heading"
 done
+check_heading_once .claude/commands/goal.md '# Crystal migration Goal command'
 check_section_field_once tasks/migration-active.md '## Active batch' '- Leaf ID: `'
 check_section_field_once tasks/migration-active.md '## Active batch' '- Status: `Active`'
 check_section_field_once tasks/migration-active.md '## Active batch' '- Outcome:'
@@ -130,8 +132,11 @@ if ! awk '
   fail 'control documents contain trailing whitespace or could not be inspected'
 fi
 
-cmp -s AGENTS.md agents.md || fail 'AGENTS.md and agents.md content diverged'
+if [ -e AGENTS.md ]; then
+  cmp -s AGENTS.md agents.md || fail 'AGENTS.md and agents.md content diverged'
+fi
 git diff --check || fail 'git diff --check failed'
+git diff --cached --check || fail 'git diff --cached --check failed'
 git diff --quiet -- '*.cs' || fail 'tracked C# changes detected or tracked audit failed'
 git diff --cached --quiet -- '*.cs' || fail 'staged C# changes detected or staged audit failed'
 untracked_cs=$(git ls-files --others --exclude-standard '*.cs') || fail 'untracked C# audit failed'

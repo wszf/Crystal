@@ -68,10 +68,19 @@ that enumerates finite child leaves before the phase can be marked scope-frozen.
 Do not publish a completion percentage or ETA for an unfrozen phase. Stage
 statuses are routing summaries, not percentages.
 
-Only one main leaf batch may be `Active`. Independent sub-leaves may run in one
-bounded subagent wave when their write and authority scopes are disjoint. Update
-the active index when selection, ownership, status, or the next recovery point
-changes; do not append historical batch narratives to it.
+Only one primary/integration leaf batch may be `Active` as the main routing
+target. That leaf may contain multiple bounded workstreams running in parallel
+when their write and authority scopes are disjoint. A workstream must declare its
+ID, leaf, role, files, authority lock, dependencies, forbidden scope, and evidence;
+Agent identity and a fixed Agent count are not Goal fields. Coupled writes remain
+serialized or isolated. Update the active index when selection, ownership,
+status, workstream scope, or the next recovery point changes; do not append
+historical batch narratives to it.
+
+If a frozen phase has no dependency-ready implementation leaf because it is
+blocked on a separately owned phase discovery, a bounded read-only `DISC-Px-CLOSURE`
+workstream may run in parallel. It may enumerate finite child leaves only; it is
+not permission to implement an open residual.
 
 ## Authoritative evidence
 
@@ -90,31 +99,36 @@ similar modules.
 
 ## Agent responsibilities
 
-The main agent uses `gpt-5.6-sol` with `ultra` reasoning and owns:
+The main migration agent owns:
 
 - matrix and leaf selection;
 - Legacy behavior rulings and architecture decisions;
 - shared-state and cross-module integration;
-- subagent task boundaries and review;
+- workstream boundaries and review;
 - integration gates, documentation, handoff, commits, and Goal completion.
 
-Prefer the custom `luna_worker` agent, configured as `gpt-5.6-luna` with `max`
-reasoning, for bounded independently verifiable implementation, tests, Legacy/
-Go tracing, mechanical migration, focused verification, and review.
+Bounded workers may handle independently verifiable implementation, tests,
+Legacy/Go tracing, mechanical migration, focused verification, and review. The
+operational model preference and any explicit fallback belong in `agents.md`,
+not in this stable Goal contract. The Goal does not declare specific Agent
+identities or a fixed Agent count.
+Ultracode chooses the number and shape of bounded workstreams from dependency,
+resource, and conflict analysis, subject to platform limits. Run independent
+workstreams in parallel when their file and authority scopes are disjoint;
+serialize or isolate coupled writes. Do not spawn agents merely to reread
+control documents, repeat status, or produce a second copy of assigned work.
+Close each completed thread after collecting its concise evidence summary and
+patch.
 
-Use one subagent wave at a time. Start with one to three agents and at most two
-writing agents. Writing agents must have disjoint file and authority scopes;
-parallel writes to coupled packages require separate worktrees or serialization.
-Do not spawn agents merely to reread control documents, repeat status, or
-produce a second copy of work already assigned. Close each completed thread as
-soon as its concise evidence summary and patch are collected.
-
-Every delegation must define the leaf ID, repository, read/write scope,
-forbidden scope, evidence source, acceptance criteria, required checks, and
-return format. `luna_worker` must not redefine the Goal, architecture,
-priorities, or acceptance criteria; expand scope; modify unassigned files;
-perform destructive Git actions; or commit unless commit ownership is explicit.
-If it is unavailable, do not silently substitute another model.
+Every delegation must define the workstream ID, leaf ID, repository,
+read/write scope, authority lock, forbidden scope, evidence source, acceptance
+criteria, required checks, and return format. `luna_worker` must not redefine
+the Goal, architecture, priorities, or acceptance criteria; expand scope;
+modify unassigned files; perform destructive Git actions; or commit unless
+commit ownership is explicit. If the preferred worker is unavailable, an
+explicitly recorded equivalent may handle read-only, mechanical, or
+verification work; production writes, architecture, and final rulings require
+main-agent review and the handoff must record the actual model and extra checks.
 
 ## Work-cycle workflow
 
@@ -134,9 +148,10 @@ Before a cycle:
 
 During a cycle:
 
-1. Delegate bounded independent work once, with disjoint ownership.
+1. Register one bounded workstream wave with disjoint ownership; Ultracode may
+   fan out independent tracing, fixture, review, and verification workstreams.
 2. Keep architecture, shared-state decisions, integration, and final rulings in
-   the main agent.
+   the main agent; join workstream results before any coupled write.
 3. Drive tests through production entry points and verify domain state,
    persistence, recipients, wire order, relogin, and restart when applicable.
 4. Treat Go map-stored entities as values and preserve explicit writeback,
@@ -146,8 +161,9 @@ During a cycle:
    in subagent threads or bounded log files, with concise summaries returned.
 
 Before committing a leaf, run the leaf gate below, update the matrix and active
-index, refresh the current handoff, close completed agents, and commit only
-owned files. A completed leaf does not complete the overall Goal.
+index when their state or evidence changes, refresh the current handoff when
+its recovery point changes, close completed workstreams, and commit only owned
+files. A completed leaf does not complete the overall Goal.
 
 ## Tiered verification
 
@@ -170,9 +186,13 @@ Run `go test ./...`, `go vet ./...`, and `go build ./...`:
 - immediately when a leaf changes shared protocol, persistence, scheduler,
   locking, or startup/shutdown infrastructure.
 
-Run full `go test -race ./...` before phase closure, after at most eight leaf
-commits or 48 hours, and immediately for changes with broad concurrency impact.
-Focused race remains mandatory for every concurrency-relevant leaf.
+Independent integration commands may run in parallel when their tools, ports,
+ caches, and generated outputs are isolated; record each command and exit code
+separately. Serialize or isolate commands that share a test database, process,
+port, cache, or generated file. Run full `go test -race ./...` before phase
+closure, after at most eight leaf commits or 48 hours, and immediately for
+changes with broad concurrency impact. Focused race remains mandatory for every
+concurrency-relevant leaf.
 
 Record actual command, exit code, failing test, and stack attribution. Do not
 rerun known unrelated failures for every tiny leaf merely to reproduce the same

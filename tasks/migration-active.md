@@ -7,11 +7,17 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Progress semantics
 
-- One main implementation leaf may be `Active`.
+- One primary/integration leaf may be `Active` as the main routing target.
+  Multiple bounded workstreams may run inside it when file and authority scopes
+  are disjoint; the index records workstream scope and recovery state, not Agent
+  identity or a fixed Agent count.
 - A phase is scope-frozen only after its closure audit converts every vague
   residual into finite child leaves.
 - Scope is frozen phase by phase; the whole project's remaining inventory does
   not need to be calculated in one up-front pass.
+- If a frozen phase has no dependency-ready implementation leaf because it is
+  blocked on a separately owned phase discovery, a read-only bounded closure
+  workstream may enumerate finite children without implementing open scope.
 - `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
   are publishable only for a scope-frozen phase.
 - Current project-wide ETA/percentage remain `Unavailable`: P1-P7 are finite,
@@ -279,9 +285,10 @@ broad unnamed scope.
 ## Selection protocol
 
 1. Verify this index and the current handoff against each repository separately.
-2. Resume only the one `Active` leaf; do not inventory all remaining phases up
-   front.
-3. When an active leaf completes, select one dependency-ready child from the
-   current frozen phase before opening another phase discovery audit.
-4. Keep only current routing state here. Completed details belong in the matrix
-   and Git history, not as appended narratives.
+2. Resume the Primary `Active` leaf; register bounded workstreams with disjoint
+   scopes and do not inventory all remaining phases up front.
+3. When an active leaf completes, select a dependency-ready child from the
+   current frozen phase. If none is ready because a separately owned phase
+   discovery blocks progress, allow only a bounded read-only closure workstream.
+4. Keep only current routing state and workstream recovery data here. Completed
+   details belong in the matrix and Git history, not as appended narratives.

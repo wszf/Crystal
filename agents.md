@@ -40,11 +40,15 @@
 - Delegate only bounded, independent work. Give each writing subagent a disjoint
   file/authority scope; use read-only subagents for Legacy tracing and review;
   return concise evidence summaries instead of raw logs or broad source dumps.
-- Use one bounded subagent wave at a time: start with one to three agents and no
-  more than two writers. Do not delegate control-document rereads, duplicate an
-  assigned task, or parallelize coupled writes without separate worktrees.
-- Close completed subagent threads promptly so they do not consume concurrency
-  or keep stale migration context alive.
+- Use bounded workstream waves selected by Ultracode from dependency, resource,
+  and conflict analysis; there is no project-imposed Agent-count ceiling beyond
+  platform limits. Independent tracing, test preparation, review, and
+  verification may run in parallel. Writers must hold disjoint file and
+  authority scopes; serialize or isolate coupled writes. Do not delegate
+  control-document rereads or duplicate an assigned task.
+- Every workstream records its Leaf ID, role, files, authority lock, dependency,
+  forbidden scope, and evidence; Agent identity is not a Goal field. Close
+  completed workstream threads promptly so stale context is not reused.
 
 ## Context compaction and rollover
 
