@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-30 03:59 (Asia/Singapore)
+Last updated: 2026-08-30 04:05 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -35,12 +35,12 @@ not evidence; do not startup-read historical handoff archives.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; latest HEAD is
-  `485364e453b3c1683fb78df39ed6806c661cf02d` (feature commit
-  `d85b4305cee938b99a70c6fd8d716cc586d31bd2` immediately before it); upstream
-  `origin/migrate/drop-owner-p12`, ahead 3 and behind 0.
+  `19dd8ad13c7e507914552eafab798f989765c0d6`; feature commit
+  `d85b4305cee938b99a70c6fd8d716cc586d31bd2` and evidence commits follow it;
+  upstream `origin/migrate/drop-owner-p12`, ahead 4 and behind 0.
 - Index and worktree are clean at this snapshot. The latest commits contain the
-  nested SlotItem authority/session implementation and matrix evidence; they
-  have not been pushed.
+  nested SlotItem authority/session implementation, matrix evidence and comment
+  cleanup; they have not been pushed.
 - Before any new Go writer, independently verify this HEAD/status and the
   active matrix anchors; do not trust a stale handoff hash.
 
