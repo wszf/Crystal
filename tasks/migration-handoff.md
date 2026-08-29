@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-30 03:13 (Asia/Singapore)
+Last updated: 2026-08-30 03:59 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -23,25 +23,24 @@ not evidence; do not startup-read historical handoff archives.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
-- Branch `migration/goal-orchestration`; HEAD observed before the control-plane
-  commit: `4297dda58561c06456ed4b744c719c6e07927926`; upstream `origin/master`,
-  ahead 518 and behind 0.
+- Branch `migration/goal-orchestration`; control-plane HEAD is
+  `888bfa0e91e8cccb130f84237f94e9614c4a6616`; upstream `origin/master`, ahead
+  518 and behind 0.
 - Existing user/lesson work is the only pre-existing tracked modification:
   `tasks/lessons.md`. Do not reset, overwrite or include it accidentally.
-- The expected control-plane delta for this cycle is limited to the Goal/Agent
-  rules, active/handoff routing, control checker and `.claude/commands/goal.md`.
-  Verify actual status before and after that documentation commit.
-- No Legacy implementation change is authorized; every `.cs` file remains
-  read-only.
+- Current active-index/handoff routing is bounded documentation only; no Legacy
+  implementation change is authorized. Every `.cs` file remains read-only.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
-- Branch `migrate/drop-owner-p12`; HEAD `3c6d3c3824d6ad40ae89a5964bd81f2082cb4937`;
-  upstream `origin/migrate/drop-owner-p12`, ahead 1 and behind 0.
-- Index and worktree are clean at this snapshot. The latest commit contains the
-  ordinary player Inventory/Storage equipment authority, tests and matrix
-  evidence; it has not been pushed.
+- Branch `migrate/drop-owner-p12`; latest HEAD is
+  `485364e453b3c1683fb78df39ed6806c661cf02d` (feature commit
+  `d85b4305cee938b99a70c6fd8d716cc586d31bd2` immediately before it); upstream
+  `origin/migrate/drop-owner-p12`, ahead 3 and behind 0.
+- Index and worktree are clean at this snapshot. The latest commits contain the
+  nested SlotItem authority/session implementation and matrix evidence; they
+  have not been pushed.
 - Before any new Go writer, independently verify this HEAD/status and the
   active matrix anchors; do not trust a stale handoff hash.
 
@@ -51,45 +50,51 @@ not evidence; do not startup-read historical handoff archives.
 - Protected inputs: accepted Grid Cross, Storage, Refine, P8 Hero/Mount
   lifecycle and P11 Fishing/Awakening lifecycle authorities. Do not reopen or
   rewrite them from this leaf.
-- Next bounded workstream: `WS-EQUIP-SLOT-AUTH-001`, nested
-  `EquipSlotItem/RemoveSlotItem` authority migration over Inventory/Storage and
-  Mount, Fishing-rod and Socket nested Slots. Its writer scope is the existing
-  equipment transaction/session routing and focused tests; protocol layouts,
-  owner lifecycles and generic Move/Merge endpoints are forbidden.
-- Required source rulings before writing include `CanUseItem`, `CanRemoveItem`,
-  UnlockCurse, NeedIdentify-before-Shape ordering, BindOnEquip, ItemMoved
-  reporting and the Legacy occupied-target quirk. The Go authority must keep
-  Character and Storage/nested Slots atomic and must not lose state on failure.
-- At this handoff boundary no implementation writer is active. Read-only
-  discovery evidence is collected; the next recovery step is to freeze the
-  finite attachment gate/order matrix, then implement only the bounded slice.
+- Completed workstream: `WS-EQUIP-SLOT-AUTH-001` is accepted in Go commit
+  `d85b4305cee938b99a70c6fd8d716cc586d31bd2`. It migrated atomic
+  Inventory/Storage↔Mount/Fishing/Socket nested attachment moves through the
+  latest-auth CrossGrid authority, production session handlers, persistence and
+  forced observer refresh; protocol layouts and owner lifecycles were untouched.
+- The next bounded scope remains inside this leaf: Hero equipment and the
+  remaining Legacy edge rows. Do not reopen Grid Cross, P8/P11 owner lifecycles,
+  generic Move/Merge endpoints or protocol layouts.
+- Source rulings recorded for the completed slice include strict production
+  Fishing-rod validation, NeedIdentify-before-Shape RefreshItem ordering,
+  commented BindOnEquip behavior, no UnlockCurse consumption in EquipSlotItem,
+  safe failure atomicity, and the Legacy occupied-target loss quirk intentionally
+  not reproduced by the Go authority.
+- At this handoff boundary no implementation writer is active; resume with a
+  finite next workstream only after refreshing the matrix anchors and both
+  repository status/audits.
 
 ## Verification ledger
 
-- Go commit `3c6d3c3` was previously verified with the ordinary equipment
-  focused, repeated and focused-race tests plus fresh package/full test, vet and
-  build gates; the nested attachment slice has not been implemented.
-- The last accepted Grid Cross evidence remains separate and must not be reused
-  as proof for the nested SlotItem slice.
-- Control-plane checks for this cycle must include the new `/goal` command,
-  staged and unstaged diff checks, hard-link parity and both-repository C# gates.
+- Go feature commit `d85b4305cee938b99a70c6fd8d716cc586d31bd2` and evidence
+  commit `485364e453b3c1683fb78df39ed6806c661cf02d` passed focused, repeated,
+  focused-race, package/full test, full race, vet and build gates.
+- The nested slice evidence is separate from the accepted Grid Cross evidence;
+  the leaf remains Active because Hero equipment and remaining Legacy edge rows
+  are not closed.
+- Control-plane checks passed for `/goal`, staged/unstaged diff checks, hard-link
+  parity and both-repository C# gates; Legacy `tasks/lessons.md` remains the only
+  pre-existing tracked modification.
 
 ## Exact recovery sequence
 
-1. From the Legacy root, run `tasks/check-migration-control.sh`, inspect the
-   control diff and preserve `tasks/lessons.md`; commit only the expected
-   control-plane files on `migration/goal-orchestration`.
+1. From the Legacy root, run `tasks/check-migration-control.sh` and preserve
+   `tasks/lessons.md`; commit only intentional control-plane updates.
 2. Independently verify Legacy and Go branches, full status, HEADs and three
    `.cs` queries. Re-read this handoff and `tasks/migration-active.md`; read only
    matrix rows 965 and 3543.
-3. Search the lessons archive for `EQUIP-P6-CORE-001`, SlotItem, sockets,
-   storage, mount, fishing, stats, magic, packet order, revision and persistence.
-4. Main-reread the cited Legacy handlers and directly reached helpers. Freeze
-   `WS-EQUIP-SLOT-AUTH-001` as a finite gate/order/source-target matrix before
-   any Go write; keep read-only tracing, test preparation and review parallel.
-5. Implement through latest-auth CrossGrid authority, world CAS/projection and
-   production session handlers. Verify unit, authority, session transcript,
-   failure atomicity, persistence/relogin and focused race evidence.
-6. Before the feature commit, update the Go matrix, active index and this
-   handoff, run all applicable leaf/integration gates, audit both repositories
-   for C# changes, and commit only owned Go and Go-document files. Do not push.
+3. Search the lessons archive and cited Legacy handlers for the next finite
+   `EQUIP-P6-CORE-001` residual; do not reopen completed SlotItem or Grid Cross
+   evidence.
+4. Register the next bounded workstream with disjoint file/authority scope and
+   explicit forbidden scope before any Go write; keep read-only tracing and review
+   parallel where safe.
+5. Implement through the latest-auth authority, world CAS/projection and real
+   production session handlers. Verify unit, authority, transcript,
+   failure-atomicity, persistence/relogin and focused race evidence.
+6. Before the next feature commit, update the Go matrix, active index and this
+   handoff, run applicable leaf/integration gates, audit both repositories for
+   C# changes, and commit only owned Go and Go-document files. Do not push.

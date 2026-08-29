@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-29 13:48 (Asia/Singapore)
+Last verified: 2026-08-30 03:52 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -49,7 +49,11 @@ Keep this file at or below 300 lines and 32 KiB.
 - Outcome: close player EquipItem/RemoveItem over Inventory/Storage/Socket/
   Mount/Fishing sources and destinations, including cursed/bind/wedding gates,
   exact slot/type/class/gender/requirements/weight, stat/HP/appearance refresh,
-  set/special modes and temporary-skill add/remove packet order.
+  set/special modes and temporary-skill add/remove packet order. Ordinary
+  Inventory/Storage equipment and nested Inventory/Storage↔Mount/Fishing/Socket attachment moves are now committed; Hero equipment and remaining edge rows stay open.
+- Completed workstream: `WS-EQUIP-SLOT-AUTH-001` is Complete in Go commit
+  `d85b430`; it owns only nested attachment authority, session routing, forced
+  observer refresh and focused evidence.
 - Go matrix anchors to read: active row 3543 and P6 summary row 965 only; never
   the full matrix or another child registry.
 - Legacy read authority: EquipItem/RemoveItem request handlers, CanEquipItem/
@@ -68,14 +72,16 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Remaining acceptance work
 
-- [ ] Trace every Legacy Equip/Remove source/target switch, helper gate, mutation
-  and packet/stat/appearance/magic side effect; freeze a finite pair matrix.
-- [ ] Prove Inventory/Storage/Socket/Mount/Fishing, cursed/bind/wedding and all
-  slot/type/class/gender/requirement/weight boundaries without owner rewrites.
-- [ ] Lock RefreshItem/PlayerUpdate/health/magic ordering, normalized auth/world
-  revision, logout/relogin persistence and concurrent mutation behavior.
-- [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
-  diff/status and both-repository C# gates; obtain terminal review.
+- [x] Trace the bounded Legacy EquipSlotItem/RemoveSlotItem source/target
+  switches, helper gates, mutation and packet/stat/appearance side effects;
+  freeze `WS-EQUIP-SLOT-AUTH-001` as a finite pair matrix.
+- [x] Prove the bounded Inventory/Storage↔Mount/Fishing/Socket attachment paths,
+  owner/slot/type/shape/SoulBound/riding and occupied-target failure boundaries
+  without rewriting P8/P11 owners.
+- [x] Lock the bounded RefreshItem/PlayerUpdate/health/magic ordering, normalized
+  auth/world revision, logout/relogin persistence and concurrent mutation behavior.
+- [ ] Complete the remaining Hero equipment and Legacy edge rows, then rerun the
+  leaf-level full matrix and closure review before marking this leaf Complete.
 
 ### Discovery inputs
 
