@@ -16,7 +16,7 @@ duplicate.
 - Symptom: a tool call mixes Go and Legacy paths, yielding partial output, a late failure, or evidence from the wrong target.
 - Root cause: workdir, repository root and argv were reviewed separately, or a cross-repository recovery template was reused.
 - Prevention: one call belongs to one verified root. Reject the command before sending if it contains `git -C`, the opposite root, or an opposite-root relative path; never compose a combined two-root “summary” command, and finish and read back the first repository call before constructing the second. Read lessons before status, then mechanically split the two startup/recovery repository checks before drafting either command; headings do not justify merging. Read-only/status/C#/compaction work is not exempt.
-- Verification: only zero-exit, complete, single-root output is evidence; discard failed/truncated/mixed calls wholesale and rerun per repository. Compaction recovery mixed both status checks, then Cross-Grid recovery mixed Legacy startup reads with a Go matrix anchor; both outputs were discarded and rerun independently. History: `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
+- Verification: only zero-exit, complete, single-root output is evidence; discard failed/truncated/mixed calls wholesale and rerun per repository. This Equip compact recovery again mixed both status checks before lessons were fully read; that output was discarded and each repository was rerun separately. History: `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
 - Symptom: 猜测目录、空 glob、裸反引号、错误正则或未闭合字符串导致勘察失败。
