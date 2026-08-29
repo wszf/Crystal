@@ -804,3 +804,8 @@
   authoritative `date` still reported `07:56`. Control snapshots must copy the
   current timezone-aware `date` output rather than estimate elapsed time; the
   index was corrected before the Legacy control commit and checker rerun.
+- Storage-gate correction patch bundled valid timestamp/outcome edits with a
+  protected-work sentence that differed from the current file, so the compound
+  patch failed with zero writes. The exact ranges were reread and split into two
+  small updates before the checker passed; semantic similarity is not a patch
+  anchor even during control-only corrections.

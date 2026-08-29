@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-29 07:56 (Asia/Singapore)
+Last verified: 2026-08-29 08:35 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -23,7 +23,7 @@ Keep this file at or below 300 lines and 32 KiB.
 |---|---|---|---|
 | P0 | Complete | Frozen | — |
 | P1 | In progress | Frozen | `DISC-P1-CLOSURE` (Complete) |
-| P2 | In progress | Frozen | `DISC-P2-CLOSURE` (Complete) |
+| P2 | Complete | Frozen | `DISC-P2-CLOSURE` (Complete) |
 | P3 | Complete | Frozen | `DISC-P3-CLOSURE` (Complete) |
 | P4 | In progress | Frozen | `DISC-P4-CLOSURE` (Complete) |
 | P5 | Complete | Frozen | `DISC-P5-CLOSURE` (Complete) |
@@ -37,48 +37,45 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `STORAGE-P2-NPC-GATE-001`
-- Status: `Active` dependency-ready functional leaf; P7-owned
-  `NPC-P7-ACCESS-GATE-001` is Complete.
-- Outcome: require every storage-password handler to originate from the current
-  authorized, visible ordinary-NPC `[@STORAGE]` script transition, then preserve
-  exact wrong-stage and stale/no/wrong NPC rejection responses without closing
-  the authenticated connection.
-- Go matrix anchors to read: active row 139 and P2 summary row 912 only; never
+- Leaf ID: `REFINE-P6-WORKBENCH-001`
+- Status: `Active` dependency-ready functional leaf; P7 page authority and P6
+  item-grid prerequisites are Complete.
+- Outcome: close the complete delayed refine workbench lifecycle: deposit,
+  retrieve/cancel/start/check/collect, formulas/RNG/destruction, strict deadline,
+  first-free/full-bag behavior and logout/restart continuity, including the
+  Legacy start `RepairItem` packet quirk.
+- Go matrix anchors to read: active row 3554 and P6 summary row 965 only; never
   the full matrix or another child registry.
-- Legacy read authority: `PlayerObject.CallNPC`,
-  `MirConnection.CanAccessStorageNpc`, `NPCScript.StorageKey`,
-  `Globals.DataRange`, `Functions.InRange` and the three directly gated storage
-  password handlers only; C# remains read-only.
-- Go read/write authority: bounded storage branches in
-  `cmd/crystal-server/main.go`, existing storage-only session tests, one new
-  `cmd/crystal-server/p2_storage_npc_gate_test.go`, and matrix/index/handoff.
-- Forbidden scope: generic P7 CallNPC visibility/page grammar, account storage
-  capacity/economy, completed quest behavior, protocol layouts and every C#
-  write.
+- Legacy read authority: refine request handlers, PlayerObject workbench/current
+  refine state, formula/RNG/deadline processing and directly consumed save/load
+  fields only; C# remains read-only.
+- Go read/write authority: bounded `cmd/crystal-server/refine_transactions.go`,
+  refine-only production branches/session/tests, one bounded restart transcript,
+  and matrix/index/handoff.
+- Forbidden scope: generic P7 page access, repair/craft/equipment/item-grid
+  behavior, protocol layouts and every C# write.
 
 ### Protected Go ownership
 
-- Complete P7 NPC access/page authority, P2 storage-password service/protocol,
-  P6 account storage, protocol and persistence behavior are protected inputs.
-  This leaf owns only final ordinary-NPC authorization at the three handlers.
+- Complete P7 page authority, P6 item-grid/repair/craft and shared protocol/
+  persistence behavior are protected inputs. This leaf owns only refine
+  workbench lifecycle, formulas, timing, packets and persisted refine fields.
 
 ### Remaining acceptance work
 
-- [ ] Freeze wrong-stage response and keepalive behavior for all three storage
-  password handlers before any Go write.
-- [ ] Freeze no/wrong/stale key, unauthorized page jump, invisible/default
-  pseudo-NPC, stale object, wrong map, movement and exact inclusive 16/17 range
-  boundaries against the completed P7 authority.
-- [ ] Preserve each handler's exact response flags and storage lifetime while
-  rejecting every invalid authority state.
+- [ ] Freeze all refine request/state transitions, exact packet order, formula
+  truncation, RNG draws, destruction and the start `RepairItem` quirk.
+- [ ] Freeze nonzero RefineTime scheduling and strict equality/after deadline,
+  check/collect idempotency and first-free/full-bag cancel behavior.
+- [ ] Prove logout, JSON/117 authority and process restart continuity for
+  workbench/current-refine/deadline without widening generic persistence.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Frozen P2 row/summary, Complete P7 NPC access evidence and existing storage
-  service/protocol/session authority.
+- Frozen P6 row/summary, Complete P7 page and P6 grid inputs, plus existing
+  refine transaction/session evidence.
 
 ### P7 frozen child registry
 
@@ -119,7 +116,8 @@ owns exact routing evidence.
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Twelve are Complete and seven are Ready.
+accepted all nineteen children with no finding. Twelve are Complete, Refine is
+Active and six are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -139,7 +137,7 @@ accepted all nineteen children with no finding. Twelve are Complete and seven ar
 | `TRADE-P6-PLAYER-001` | Complete | P10 mail/economy | existing committed evidence | two-peer lifecycle/race |
 | `RENTAL-P6-LIFECYCLE-001` | Complete | P10 owner + P12 restart | existing committed evidence | expiry/death/return/idempotency |
 | `REPAIR-P6-NPC-001` | Complete | P7 page authority | existing committed evidence | formulas/order/persistence |
-| `REFINE-P6-WORKBENCH-001` | Ready | P7 page authority | refine/session | delayed production/restart/race |
+| `REFINE-P6-WORKBENCH-001` | Active | P7 page authority (Complete) | refine/session | delayed production/restart/race |
 | `CRAFT-P6-NPC-001` | Complete | P7/P10 | existing committed evidence | ingredients/RNG/order/persistence |
 | `MINE-P6-RUBBLE-001` | Complete | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
 
@@ -186,8 +184,8 @@ selected now.
 ### P2 frozen child registry
 
 Independent read-only reviewer `01a031c0-18ea-71e3-ba9f-b6cf96be57d4`
-accepted this exact eight-child denominator after two rounds. Seven are Complete
-and the now-unblocked storage NPC gate is Active. This is a P2
+accepted this exact eight-child denominator after two rounds. All eight are
+Complete; P2 is scope-frozen and Complete. This is a P2
 denominator only.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -196,7 +194,7 @@ denominator only.
 | `AUTH-P2-ACCOUNT-SESSION-001` | Complete | crypto/wire | `internal/auth/service.go` + tests; bounded `cmd/crystal-server/main.go`; new `p2_account_session_test.go`; optional one account-session helper | authenticated repeated/race + JSON/117 |
 | `AUTH-P2-CHAR-METADATA-001` | Complete | account session + P3 mutation authority (Complete) | verified auth/main metadata lifecycle candidate | login/logout projections + persistence/race |
 | `STORAGE-P2-PASSWORD-001` | Complete | — | none | existing service/protocol/valid-page sessions |
-| `STORAGE-P2-NPC-GATE-001` | Active | `NPC-P7-ACCESS-GATE-001` (Complete) | bounded storage handlers + new `p2_storage_npc_gate_test.go` | all-handler wrong-stage + NPC boundary/race |
+| `STORAGE-P2-NPC-GATE-001` | Complete | `NPC-P7-ACCESS-GATE-001` (Complete) | accepted production/session evidence | all-handler wrong-stage + NPC boundary/race |
 | `PERSIST-P2-ACCOUNT-BRIDGE-001` | Complete | — | none | existing JSON/117/global merge evidence |
 | `PERSIST-P2-CHECKPOINT-RESTART-001` | Complete | bridge | none | existing production checkpoint/restart smoke |
 | `PERSIST-P2-SOURCE-PRECEDENCE-001` | Complete | bridge | new `p2_account_precedence_test.go`; bounded startup if needed | conflicting-source startup/checkpoint/reload |

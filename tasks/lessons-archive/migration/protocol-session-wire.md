@@ -341,6 +341,13 @@
 - Prevention: phase closure 的每个 Complete 行必须映射到实际测试；未测 wrong-stage/connection lifetime 必须留在 Ready。门禁从客户端 packet 追到 page producer、visibility、对象/range 和最终 consumer；跨阶段字段明确一个 mutation owner 和一个 projection consumer。Import parse/merge、account-only writer、global re-export 与多 store recovery 分开登记，禁止用 round-trip 一词掩盖空 section writer。
 - Verification: final review `01a031c0-18ea-71e3-ba9f-b6cf96be57d4` 精确指出 storage visibility/page、StartGameBanned、delete projection、wrong-stage lifetime 和 global writer 五项；P2 candidate 已把普通 NPC authorization 路由到 `NPC-P7-ACCESS-GATE-001`，将 all-handler wrong-stage transcript 留在 Ready，明确 P3 ban/delete mutation 与 P2 Login/Logout projection，并把 global re-export/recovery留给 P12。Review 只读、未运行测试、两仓无 C# 变化。
 
+### 2026-08-29 — Storage 页建立门禁与末端 helper 重验必须分层裁决
+
+- Symptom: `STORAGE-P2-NPC-GATE-001` 的冻结草稿要求密码 handler 在调用时重新拒绝 visibility/death/unauthorized-page 变化；精确 Legacy trace 证明这些条件只约束 `CallNPC` 建立页状态，`CanAccessStorageNpc` 末端并不重验。
+- Root cause: 把 P7 的普通 NPC 可见性和按钮来源门禁复制到 P2 末端 helper，忽略被拒绝的后续 key 不会清除旧 `NPCPage`，以及 final helper 只看 Storage key、当前地图对象和 16 格范围的怪癖。
+- Prevention: 多阶段 capability 必须分别冻结“状态如何建立”和“消费者重新检查什么”；后阶段不得凭安全直觉重放前阶段全部门禁，matrix 文字必须保留 stale-page 可达行为。
+- Verification: matrix/Active 已改为 object/map/range final gate；新生产 session matrix 锁定 wrong-stage 三 handler、无页/成功非 Storage/default/stale object/wrong map、16→17 movement，以及 rejected page/visibility/death 后仍授权，focused count 20 与 race count 3 退出 0。
+
 ### 2026-08-24 — duplicate-account takeover 必须分别证明 production wiring 与 claim identity
 
 - Symptom: 初版 P2 双会话测试直接向两个 handler 注入共享 authority，并在旧会话 cleanup 后只用新连接 KeepAlive；它能证明物理连接存活，却不能证明 `serveListener` 为所有 accepted sessions 共享同一 authority，也不能发现旧 release 误删新 claim。
