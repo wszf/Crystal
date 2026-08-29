@@ -37,45 +37,45 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `REFINE-P6-WORKBENCH-001`
-- Status: `Active` dependency-ready functional leaf; P7 page authority and P6
-  item-grid prerequisites are Complete.
-- Outcome: close the complete delayed refine workbench lifecycle: deposit,
-  retrieve/cancel/start/check/collect, formulas/RNG/destruction, strict deadline,
-  first-free/full-bag behavior and logout/restart continuity, including the
-  Legacy start `RepairItem` packet quirk.
-- Go matrix anchors to read: active row 3554 and P6 summary row 965 only; never
+- Leaf ID: `ITEM-P6-GRID-CROSS-001`
+- Status: `Active` dependency-ready functional leaf; P8 Hero/mount and P11
+  fishing attachment owners plus the P6 inventory/refine grid inputs are Complete.
+- Outcome: close the exact cross-grid item matrix: Move over Storage/Trade/
+  Refine/HeroInventory with trade refresh; Split over Storage; Merge across the
+  supported Inventory/Storage/Equipment/Fishing/Hero grids while every Legacy
+  unsupported Quest/Mount/Socket/Trade/other combination fails identically.
+- Go matrix anchors to read: active row 3540 and P6 summary row 965 only; never
   the full matrix or another child registry.
-- Legacy read authority: refine request handlers, PlayerObject workbench/current
-  refine state, formula/RNG/deadline processing and directly consumed save/load
-  fields only; C# remains read-only.
-- Go read/write authority: bounded `cmd/crystal-server/refine_transactions.go`,
-  refine-only production branches/session/tests, one bounded restart transcript,
-  and matrix/index/handoff.
-- Forbidden scope: generic P7 page access, repair/craft/equipment/item-grid
-  behavior, protocol layouts and every C# write.
+- Legacy read authority: MoveItem/SplitItem/MergeItem request handlers and only
+  their directly called inventory/storage/trade/Refine/Hero/fishing/equipment
+  grid helpers; C# remains read-only.
+- Go read/write authority: bounded item transaction/session routing plus the
+  exact storage/trade/Hero/equipment/fishing adapters and focused tests needed
+  by the matrix; matrix/index/handoff evidence.
+- Forbidden scope: reopen completed Refine or owner business lifecycles, change
+  protocol layouts, invent unsupported grid behavior, or write any C# file.
 
 ### Protected Go ownership
 
-- Complete P7 page authority, P6 item-grid/repair/craft and shared protocol/
-  persistence behavior are protected inputs. This leaf owns only refine
-  workbench lifecycle, formulas, timing, packets and persisted refine fields.
+- Complete inventory-only mutations, Refine, Storage, Trade, Hero/mount and P11
+  fishing/awakening authorities are protected inputs. This leaf owns only
+  cross-grid dispatch, transaction ordering and the exact allow/deny matrix.
 
 ### Remaining acceptance work
 
-- [ ] Freeze all refine request/state transitions, exact packet order, formula
-  truncation, RNG draws, destruction and the start `RepairItem` quirk.
-- [ ] Freeze nonzero RefineTime scheduling and strict equality/after deadline,
-  check/collect idempotency and first-free/full-bag cancel behavior.
-- [ ] Prove logout, JSON/117 authority and process restart continuity for
-  workbench/current-refine/deadline without widening generic persistence.
+- [ ] Trace every Legacy Move/Split/Merge grid switch, helper call, gate and
+  packet side effect; register a finite positive/negative pair matrix first.
+- [ ] Prove Storage NPC/password, Trade unlock/refresh, Hero-spawn, fishing and
+  equipment refresh gates without changing their completed business owners.
+- [ ] Lock exact swap/stack/definition/RefreshStats/TradeUnlock packet order,
+  authoritative persistence, relogin and concurrent revision behavior.
 - [ ] Run owned gofmt/compile, focused/repeated/race gates, due integration gates,
   diff/status and both-repository C# gates; obtain terminal review.
 
 ### Discovery inputs
 
-- Frozen P6 row/summary, Complete P7 page and P6 grid inputs, plus existing
-  refine transaction/session evidence.
+- Frozen P6 row/summary and the Complete inventory-only, storage, trade, Refine,
+  Hero/mount and P11 attachment evidence.
 
 ### P7 frozen child registry
 
@@ -116,14 +116,14 @@ owns exact routing evidence.
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Twelve are Complete, Refine is
-Active and six are Ready.
+accepted all nineteen children with no finding. Thirteen are Complete, Grid
+Cross is Active and five are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `ITEM-P6-WIRE-CATALOG-001` | Complete | — | existing committed evidence | layouts/nesting/grids/definitions |
 | `ITEM-P6-GRID-MUTATION-001` | Complete | logging/localization | committed/accepted grid mutation evidence | error/report/response order + normalized revision/CAS |
-| `ITEM-P6-GRID-CROSS-001` | Ready | P8/P11 feature owners | item/storage/trade/Hero/equipment | exact positive/negative grid matrix |
+| `ITEM-P6-GRID-CROSS-001` | Active | P8/P11 feature owners (Complete) | item/storage/trade/Hero/equipment | exact positive/negative grid matrix |
 | `CAPACITY-P6-GRIDS-001` | Ready | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
 | `ADMIN-P6-ITEM-COMMAND-001` | Complete | P3 authority + P5 creation | committed Go `9e7edac7aaf22f35677f90427ca79da4e998b096` | MAKE/CLEARBAG quirks |
 | `EQUIP-P6-CORE-001` | Ready | P8/P11 feature owners | equipment/session | slots/sockets/stats/order/race |
@@ -137,7 +137,7 @@ Active and six are Ready.
 | `TRADE-P6-PLAYER-001` | Complete | P10 mail/economy | existing committed evidence | two-peer lifecycle/race |
 | `RENTAL-P6-LIFECYCLE-001` | Complete | P10 owner + P12 restart | existing committed evidence | expiry/death/return/idempotency |
 | `REPAIR-P6-NPC-001` | Complete | P7 page authority | existing committed evidence | formulas/order/persistence |
-| `REFINE-P6-WORKBENCH-001` | Active | P7 page authority (Complete) | refine/session | delayed production/restart/race |
+| `REFINE-P6-WORKBENCH-001` | Complete | P7 page authority (Complete) | committed/accepted refine/auth/world/session evidence | delayed production/restart/race |
 | `CRAFT-P6-NPC-001` | Complete | P7/P10 | existing committed evidence | ingredients/RNG/order/persistence |
 | `MINE-P6-RUBBLE-001` | Complete | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
 

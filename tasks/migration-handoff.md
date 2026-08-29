@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-29 08:36 (Asia/Singapore)
+Last updated: 2026-08-29 11:03 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -10,80 +10,83 @@ not evidence; do not startup-read historical handoff archives.
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains ongoing; it is neither
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
-- `STORAGE-P2-NPC-GATE-001` is accepted Complete in Go commit
-  `326fc4aeed5d6a12ef8021d08320f39d026f131c`. P2 is scope-frozen and Complete:
-  all eight children are Complete, with fresh phase-closure full gates.
-- The unique next Active leaf is dependency-ready `REFINE-P6-WORKBENCH-001` at
-  matrix row 3554 and P6 summary row 965. P6 is frozen at nineteen children:
-  12 Complete, 1 Active and 6 Ready.
+- `REFINE-P6-WORKBENCH-001` is accepted Complete in Go commit
+  `6408c1163c3a597c260416f3df25832b1af18e28`. P6 is scope-frozen at nineteen
+  children: 13 Complete, one Active and five Ready.
+- The unique next Active leaf is dependency-ready `ITEM-P6-GRID-CROSS-001` at
+  matrix row 3540 and P6 summary row 965.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`
 - Branch `master`; pre-control-commit HEAD
-  `6415aee1ef9b0c761589341cde6d3bca5ea8b83d`; upstream `origin/master`, ahead
-  514 and behind 0.
-- Owned unstaged paths are
-  `tasks/lessons-archive/migration/protocol-session-wire.md`,
-  `tasks/lessons-archive/workflow/shell-tools-and-patching.md`,
-  `tasks/migration-active.md` and this handoff. There are no staged/untracked
-  paths or Legacy implementation changes.
-- The protocol archive records the source ruling that Storage page establishment
-  and final helper revalidation are distinct; the workflow archive records the
-  failed compound control patch and exact split recovery.
+  `3e3f52f002eb0b3664033fbf2038d52e54a3a9e5`; upstream `origin/master`, ahead
+  515 and behind 0.
+- Owned unstaged paths are:
+  - `tasks/lessons.md`
+  - `tasks/lessons-archive/migration/data-config-import-export.md`
+  - `tasks/lessons-archive/misc.md`
+  - `tasks/lessons-archive/verification/fixtures-and-transcripts-01.md`
+  - `tasks/migration-active.md`
+  - this handoff.
+- There are no staged/untracked paths or Legacy implementation changes.
+- `git diff --check` and all three Legacy C# queries are empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`
-- Branch `main`; HEAD `326fc4aeed5d6a12ef8021d08320f39d026f131c`;
-  no upstream; index and worktree are clean.
-- Commit `326fc4a` contains exactly the new production-entry storage NPC gate
-  transcript and matrix routing. Exact Legacy review proved existing Go
-  production handlers already match, so no production code was changed.
-- Go tracked/staged/untracked C# queries, gofmt and `git diff --check` were empty
-  before commit.
+- Branch `main`; HEAD `6408c1163c3a597c260416f3df25832b1af18e28`;
+  no upstream. Index and worktree are clean.
+- Commit `6408c11` contains exactly the accepted Refine production, tests,
+  matrix evidence and next-Leaf routing. All three Go C# queries are empty.
 
 ## Active leaf and protected work
 
-- Active leaf: `REFINE-P6-WORKBENCH-001`.
-- The leaf owns delayed refine workbench lifecycle only: deposit, retrieve/
-  cancel/start/check/collect, formula/RNG/destruction, strict deadline,
-  first-free/full-bag behavior, exact packets and refine-field continuity.
-- Completed P7 page authority, P6 item-grid/repair/craft, storage/P2 closure,
-  protocol and generic persistence behavior are protected inputs.
-- Allowed Go writes are bounded `cmd/crystal-server/refine_transactions.go`,
-  refine-only production branches/session tests, one restart transcript, and
-  control/matrix evidence.
+- Active leaf: `ITEM-P6-GRID-CROSS-001`.
+- The completed Refine batch preserves exact admission, localized names,
+  unchecked widths/formula/RNG/destruction, millisecond timing, packet order,
+  full-bag cancellation, same-process workbench residue, remaining-ms restart,
+  client clone fields, observer takeover cancellation and the Legacy rental
+  expiry-invisibility quirk.
+- Auth gold/inventory/refine mutation and world projection share the item
+  revision; rejected callbacks do not overwrite dirty runtime grids. Periodic
+  checkpoint semantics remain Legacy-authoritative rather than adding an
+  immediate per-request save failure gate.
+- The new Active leaf owns only the exact Move/Split/Merge cross-grid matrix and
+  transaction/packet ordering. Completed inventory-only, Refine, Storage, Trade,
+  Hero/mount and P11 attachment behavior are protected inputs.
 
 ## Verification ledger
 
-- Storage gate touched-package compile, focused count 1 and count 20, protected
-  storage/NPC-access regression count 3, focused race count 3, gofmt and
-  `git diff --check` all exited 0.
-- Authenticated transcripts prove all three exact wrong-stage/unavailable flag
-  families and keepalive/no mutation; no page, later successful non-Storage,
-  default pseudo-NPC, stale object, wrong map and production movement 16->17;
-  rejected unauthorized page plus later visibility/death preserve Legacy stale
-  authorization while object/map/range pass.
-- Main reread the exact Legacy handler/page/helper ranges and corrected the
-  initial over-strict visibility/death matrix before implementation. Existing Go
-  production required no change. Terminal Luna review returned `No findings`.
-- Fresh `go test -count=1 ./cmd/crystal-server` passed in 82.499s. Fresh
-  unexcluded `go test -count=1 ./...` passed with server 84.430s; fresh
-  unexcluded `go test -race -count=1 ./...` passed with server 100.659s;
-  `go vet ./...` and `go build ./...` passed.
-- Legacy tracer `01a04ad1-07ce-7261-80a1-4f42190b97af` and terminal reviewer
-  `01a04ae2-3045-79e3-b2cf-e9da9929cce4` are closed. No migration subagent or
-  owned `go`/`crystal-server` process remains active.
+- Owned gofmt and touched compile
+  `go test ./internal/auth ./cmd/crystal-server -run '^$'` exited 0.
+- Focused Refine/auth/observer/revision tests passed count 20; focused auth race
+  passed count 5 and focused server race passed count 3. Protected observer,
+  item-grid, Rental and admin dirty-world regressions passed repeated runs.
+- The first fresh server package run failed only
+  `TestAdminLogoutPreservesDirtyWorldItemsAcrossNonClearAuthRevision`: a no-op
+  Refine admission snapshot incorrectly published an unrelated auth revision.
+  The helper now publishes only committed Refine mutations; the exact regression
+  passed count 20 and the subsequent fresh server package passed in 82.729s.
+- Fresh unexcluded `go test -count=1 ./...` exited 0 with server 87.283s.
+  Fresh unexcluded `go test -race -count=1 ./...` exited 0 with server 99.401s.
+  `go vet ./...`, `go build ./...` and final `git diff --check` exited 0.
+- Reviewer `01a04b3b-ef31-7332-a0bc-63f62d5c6772` was closed without evidence
+  after launching duplicate gates and stalling. Replacement reviewer
+  `01a04b60-f42d-7ae3-a8aa-839afc86ac69` raised two provisional findings;
+  exact Legacy periodic-save and rental-workbench rulings plus regressions
+  resolved both, and its terminal rereview returned `No findings`.
+- Both reviewers are closed. No migration subagent or owned `go`/
+  `crystal-server` process remains active.
 
 ## Exact recovery sequence
 
-1. Run `tasks/check-migration-control.sh`, Legacy diff/status and all three C#
-   gates; commit only the four owned archive/index/handoff paths, then verify
-   both repositories independently.
-2. Resume only `REFINE-P6-WORKBENCH-001`: read matrix row 3554 and P6 summary row
-   965, then search targeted archived lessons for refine/workbench/deadline/RNG/
-   restart failures.
-3. Trace Legacy deposit/retrieve/cancel/start/check/collect, formula/RNG,
-   nonzero RefineTime deadline and save/load call chains before any Go write;
-   freeze exact packet and restart transcripts first.
+1. Rerun the Legacy control/C# gates, then commit only the six owned Legacy
+   control/lesson paths. This handoff records the expected pre-control-commit
+   Legacy HEAD and one documentation commit delta.
+2. Verify both repositories independently. Resume only
+   `ITEM-P6-GRID-CROSS-001`: read matrix row 3540 and P6 summary row 965, then
+   search targeted archived lessons for Move/Split/Merge, storage/trade/Refine/
+   Hero/fishing grid, revision and packet-order failures.
+3. Before any Go write, trace the exact Legacy grid switches and freeze a finite
+   positive/negative source-target matrix plus packet/persistence expectations.

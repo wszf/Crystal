@@ -16,7 +16,7 @@ duplicate.
 - Symptom: a tool call mixes Go and Legacy paths, yielding partial output, a late failure, or evidence from the wrong target.
 - Root cause: workdir, repository root and argv were reviewed separately, or a cross-repository recovery template was reused.
 - Prevention: one call belongs to one verified root. Reject the command before sending if it contains `git -C`, the opposite root, or an opposite-root relative path; never compose a combined two-root “summary” command, and finish and read back the first repository call before constructing the second. Read lessons before status, then mechanically split the two startup/recovery repository checks before drafting either command; headings do not justify merging. Read-only/status/C#/compaction work is not exempt.
-- Verification: only zero-exit, complete, single-root output is evidence; discard failed/truncated/mixed calls wholesale and rerun per repository. P7 recovery again mixed startup roots and later appended Legacy files to a Go read; both outputs were discarded and independently rerun. History: `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
+- Verification: only zero-exit, complete, single-root output is evidence; discard failed/truncated/mixed calls wholesale and rerun per repository. Compaction recovery again mixed both repository status checks before reading this lesson; that output was discarded and each repository was independently rerun. History: `tasks/lessons-archive/workflow/repository-boundaries-02.md`.
 ### 2026-08-21 C02 — 路径、glob、正则和 shell 字符串必须先做最小验证
 
 - Symptom: 猜测目录、空 glob、裸反引号、错误正则或未闭合字符串导致勘察失败。
@@ -48,7 +48,7 @@ duplicate.
 - Strengthening during Revelation integration: 预期“零残余”的 post-patch `rg` 又裸跑并 exit 1；该调用作废后用显式 rc 0/1 分支重跑 exit 0。负向验收在发送前必须按 absence query 模板成形。
 - Strengthening during BaseFamily audit: 主线程三次在 Go 根追加 Legacy 路径，并另猜不存在的 `axe_skeleton.go`；相关调用即使前段有输出也全部作废并按仓独立零退出重跑。发送前必须检查每个显式路径属于 workdir 且来自本轮枚举，禁止采用失败调用的部分输出。
 - Strengthening during Control Flow closure: 新恢复已读到“首次调用非 POSIX 工具必须先裸 `command -v`”后，主线程仍直接调用缺失的 `rg` 并 exit 127。该输出已作废，随后以单独裸 `command -v rg` 确认 exit 1，再用 `find -print0 | xargs -0 grep` 零退出完成定向 archive 查询。读过 lesson 不等于执行了门禁；每次新 session/compact 后应把工具探针列为首个机械 argv 检查项。
-- Strengthening after Shop review: a resend copied a stale agent suffix and was rejected; rereading the latest resume output and copying its full ID succeeded. Agent targets must come from the latest tool result, never memory.
+- Strengthening during Refine review recovery: a filename filter containing generic `session` matched nearly every session test and produced a broad tree dump. That output was discarded and exact observer/refine files were queried separately; entity filters must exclude generic suffixes such as `session`, `test` and language extensions.
 ### 2026-08-21 C03 — 补丁必须使用精确、唯一、小范围上下文
 
 - Symptom: patch 被拒绝、落到相似函数、部分 hunk 成功或格式化后锚点失效。
@@ -63,7 +63,7 @@ duplicate.
 - Strengthening at compaction gates: full-file replacement twice used Delete/Add on the same path and was rejected. Before sending, mechanically reject duplicate path operations; replace one file in one standalone transaction, read it back, then run status/control/diff checks. Any failed compound call requires per-file partial-write inspection. Evidence: `tasks/lessons-archive/workflow/shell-tools-and-patching.md`.
 - Strengthening during Regen fixture closure: 两个测试补丁仍以非唯一 `world := newGameWorld()`/`world.loadItemInfos` 落入同文件更早用例；一个无声污染无关 NPC 测试，另一个把局部 helper 声明放错作用域并被 compile gate 拦截。两次均先移除错误落点，再用唯一 `func Test...` 锚点重写并回读 `rg` 行号；同文件重复 fixture 也必须按函数名锚定，不能把“测试文件已精确”误当成 hunk 唯一。
 - Strengthening during BaseFamily integration: 仅按待替换的 CanAttack 文本寻找，使补丁落入更早 generic processor；立即用 diff/函数范围发现并恢复，再以 `func` anchor 重跑。即使新增代码块内文本看似唯一，补丁也必须携带目标函数声明，修改后核验只有预期函数。
-- Strengthening during Local Conditions: 只按重复的 `ParseUint(condition.Params[1])` 补丁误改 `CHECKGOLD` 而未改目标 `CHECK`，定向 whitespace 测试随即失败。已按 `case "CHECK":` 等唯一分支锚点逐项修复；重复转换调用也必须带 switch/function 语义锚点并回读物理落点。
+- Strengthening during Refine revision integration: a non-unique `gameCharacter = committed.Character` patch landed in the generic item helper instead of the Refine helper. The diff was reverted and reapplied with both function anchors, then compiled and reran focused tests; even a one-line replacement requires its owning function anchor and physical readback.
 
 ### 2026-08-21 C04 — C# 基线只读，语言工具链严格隔离
 
@@ -79,7 +79,7 @@ duplicate.
 - Root cause: 依据相似模块、Legacy 名称或“应该对称”推断 Go API。
 - Prevention: 先读取声明、receiver、参数顺序、返回值、复合字段类型、领域类型和包级符号，再接线。
 - Verification: 新调用接入后立即运行包级只编译门禁；本轮先从跨行测试调用误判 `loadMonsters` arity，后又在 formatter 引入 `worlddata.NPCInfo` 时遗漏 import；两次均由最小编译拦截，复读声明/import 闭包后修正并零退出重跑。既往猜测符号、字段和返回值也都只在声明回读后修复。
-- Strengthening through P6: 编译门禁先后拦截猜测的 `RentalInformation`、错误 `ParseChatPayload` arity，以及不存在的 `ParseUserLocationPayload`/`ParseObjectAttackPayload`/`ServerQuestChanged`；均回读真实声明后修正并重测。测试 API 也必须先读完整类型、返回值和所有权。
+- Strengthening through P6: 编译门禁已拦截多次猜错字段、helper、arity；Refine 又把不受支持的 `int64` 交给 formatter，并把无返回值的 `UpdateCharacterAllowObserve` 当成 `bool`。参数领域类型与返回值都是签名，调用前必须完整回读。
 
 ### 2026-08-21 C06 — 行为判断前先通过 Go 语法、类型和 vet 门禁
 
@@ -87,7 +87,7 @@ duplicate.
 - Root cause: 一次写入过多逻辑，或把已知签名闭包拆成先调用后声明；在编译失败时仍试图分析生产语义。
 - Prevention: 小步运行 `gofmt` 和 `go test ... -run '^$'`；改签名前先枚举消费者，声明与调用须同一补丁及编译事务；显式转换不同领域类型，再进入行为测试。
 - Verification: 最小编译、定向测试和 `go vet` 分层通过；hazard authority 测试曾用 `%v` 打印函数值并被测试期 vet 拦截，改为显式 nil/presence 字段后重跑通过。
-- Strengthening through Mine/Teleport: NET/MAP 曾漏消费者/import，group-quest 漏 `}`，Teleport queue 又先落声明而触发 unused compile failure；均只作 compile finding，补齐同一声明闭包后通过 touched compile。接口、声明闭包或 literal 必须同一事务 gofmt/compile。
+- Strengthening through Mine/Teleport/Refine: 漏消费者/import/括号、先声明后接线和直接比较 `int16`/`byte` 均只作 compile finding；补齐声明闭包或显式提升领域类型后再做语义判断。
 
 ### 2026-08-21 C07 — 全量、race 和环境失败必须按实际栈归因
 
@@ -235,7 +235,7 @@ duplicate.
 - Prevention: 明确字段 authority；分离锁；按 revision 定向合并并主动唤醒目标会话。
 - Verification: 跨会话测试核对权威存储、在线状态与通知；测试只读切片也必须经锁内 deep snapshot，禁止复制外壳后读取共享 backing array。
 - Strengthening through Human/Teleport: 跨会话 callback 只用锁内 deep snapshot/authority API 与 immutable recipient ID，不碰目标 session-local；本地投影由目标 loop 合并。同步排队前先列已持有锁，Teleport 首案因共享 NPC-flow mutex 死锁而撤回；mounted-group race count-20 通过。
-- Strengthening after terminal Regen review: 锁内 `worldPlayer` 整值复制仍会让 Buffs、Flags 与 enemy-guild map 的 backing storage 逃逸；所有解锁后用于 ObjectPlayer 序列化的 runtime、map-transition 和 TownRevive 投影必须在锁内深拷贝这些可变集合。补齐普通/复活 transition 后，定向 count-20/race-count-5 与 fresh full race 均 exit 0。
+- Strengthening through Regen/Refine: 解锁后的 world 投影必须深拷贝可变集合；rejected/no-op admission snapshot 也不得把无关 auth revision 覆盖到 dirty world grids。只有 committed mutation 才能推进并发布 shared revision；Refine/admin regression、count-20 与 focused race 通过。
 
 ### 2026-08-21 C25 — 导入导出和 round-trip 必须验证语义规范化
 
@@ -301,6 +301,6 @@ duplicate.
 - Strengthening after `LOC-P1-CATALOG-001` closure: 主线程将 Active Index 从 LOC 路由到 LOG 并提交控制面，却遗漏把 Go matrix 的 LOG 行从 `Ready` 同步为 `Active`；下一循环按锚点回读时才发现 index/matrix 不一致。Leaf 状态转换必须作为跨仓事务检查：完成行、下一 Active 行、残余计数、Active Index 和 handoff 五项逐一回读后再开放实现；本次已先提交 matrix 状态修复，再刷新并提交 handoff，未在不一致期间写 LOG 代码。
 - Strengthening after `LOG-P1-CATEGORY-001` closure: 按旧 prose 机械把“九未完成”减为八后，逐行重数十二条 P1 child 才发现 LOC 完成时残余数从未同步；LOG 完成后的真实状态是五 Complete、七 unfinished。状态转换的残余数必须由当前 registry 行重新计数，禁止只对旧叙述做加减；本次已在提交前同步修正 matrix、Active Index 和 handoff。
 - Strengthening after NET route reread: LOG 与 Legacy 控制提交后首次读取命名 NET anchor，仍发现 Active Index=`Active`、matrix=`Ready`；说明“提交前同步”不能只靠叙述核对。以后路由事务在开放写权限前必须分别以 `rg` 回读旧 Leaf Complete、下一 Leaf Active、唯一 Active Index、registry 计数和 handoff Active 五个机器可见值；任一不一致先单独修复并提交。本次 NET 尚无代码写入，先补 matrix `Active`、刷新 handoff 后再勘察。
-- Strengthening through compaction: handoff replacements repeatedly renamed required headings or omitted `- Active leaf: \``. Teleport recovery again drafted before reading the checker and failed its first control gate. Before replacement, copy every fixed heading/field from `tasks/check-migration-control.sh`; exact-string readback precedes the checker, and only exit 0 is evidence.
+- Strengthening through Refine compaction: handoff replacement again renamed a required heading because drafting preceded checker inspection. Before replacement, first read `tasks/check-migration-control.sh`, copy every fixed heading and field exactly, then perform exact-string readback; only checker exit 0 is evidence.
 - Strengthening after admin-item hard gate: 增补重复 C01 事故使 active lessons 超过 51200 bytes；合并同类复发、保留可执行规则并重跑 control gate，而非继续追加事故日志。
 - Strengthening through Human regen: 为两个 integration fixture 扩展 Active authority 时先增行后跑 checker，立即触发 301/300 行失败；补丁虽已落地但门禁结论作废，随后把同一清单物理行重排回 300 行并重跑通过。控制面扩权发送前必须按替换后物理行预算 schema 与行/字节上限，不能把 checker 当排版器。

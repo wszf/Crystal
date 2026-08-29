@@ -60,6 +60,7 @@
 - Root cause: 只检查了 Go 侧的 JSON bridge 和 logout persistence，没有沿着原版数据库 → .NET exporter → Go JSON → Game stage 的完整链路核对字段与时间单位。
 - Prevention: 每个迁移功能都要同时检查原版持久化字段、导出器字段、Go bridge 字段和运行时恢复逻辑；单调计时器必须在导出时转换成跨进程的绝对时间，并验证零值语义。
 - Verification: `Crystal.LegacyAccountExport` 已补充 Refine workbench/current item/deadline 导出；当前环境没有 .NET SDK，需在具备 SDK 的环境补跑 exporter 编译，Go 验证继续执行全量 test/race/vet/build。
+- Correction during `REFINE-P6-WORKBENCH-001`: 上述“跨进程绝对时间”对 Refine 不成立。精确 `CharacterInfo.Save/Load` 证明 Legacy 保存 `max(CollectTime-Envir.Time,0)` 的剩余毫秒，并在新进程以 `Envir.Time+remaining` 重建，因此停机时间不消耗倒计时；`Refine[16]` 更完全不序列化，只在同一进程对象上跨登出残留。Go JSON checkpoint 现写 `refineTimeRemaining`、省略绝对 deadline 与工作台，Load 后重建 16 个空槽并重基 deadline；在线事务先原子同步 Inventory/Refine/CurrentRefine，避免周期 checkpoint 重复目标或复活材料。生产 restart transcript 已锁定 live checkpoint、JSON shape、重基区间、满包 runtime-only 残留和到期收取。
 
 ### 2026-08-11 — Go 配置解析不要在同一作用域重复声明 err
 

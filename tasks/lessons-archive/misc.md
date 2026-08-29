@@ -295,6 +295,7 @@
 - Root cause: 只根据 `RefineCancel` 中的邮寄注释和 `MailInfo.Send` 推断意图，没有把外层空槽循环与 `CanGainItem` 的实现合并做可达性分析；原版只在先找到空槽后调用 `CanGainItem`，而后者发现任意空槽就直接返回 true。
 - Prevention: 对看似存在的 legacy 分支同时核对调用条件、循环边界和被调函数，并构造状态表证明分支可达；不可达意图不能替代客户端实际可观察行为。
 - Verification: Go 现在只为找到空槽的 Refine 物品发送 `RetrieveRefineItem`，背包填满后的后续物品继续留在工作台；单元测试和交互取消→KeepAlive→登出持久化 transcript 均通过。
+- Correction during `REFINE-P6-WORKBENCH-001`: “登出持久化”仅指同一服务进程内的 `CharacterInfo.Refine[]` 对象仍在；Legacy `CharacterInfo.Save/Load` 从不写/读该数组。重启后满包残留材料会丢失并重建 16 个空槽，只有 `CurrentRefine` 与剩余毫秒保存。Go 现分别验收同进程 logout 后残留、JSON checkpoint 省略和 fresh Load 后丢失，不能再把内存 relogin 与 process restart 合并。
 
 ### 2026-08-12 — 启动包排序必须区分角色物品与功能定义阶段
 
