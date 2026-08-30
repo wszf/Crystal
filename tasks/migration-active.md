@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 04:44 (Asia/Singapore)
+Last verified: 2026-08-31 05:13 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -43,52 +43,42 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `EQUIP-P6-CORE-001`
-- Status: `Active` dependency-ready functional leaf; P8 mount/Hero and P11
-  fishing/awakening owners plus P6 Grid Cross and admission inputs are Complete.
-- Outcome: close player equipment transactions and exact observable gates.
-  Ordinary, nested, Hero, Fishing admission and report/broadcast behavior are
-  committed; only the bounded final edge review remains open.
-- Completed workstreams: Slot authority `d85b430`; Hero snapshot `7657f4c`; Hero
-  equipment/curse `f13cfcd`; Fishing gate `d5be202`; reports/broadcast `8bc1974`.
-- Active workstream: `WS-EQUIP-FINAL-EDGE-001`; revalidate only reachable
-  RemoveSlotItem Storage/free-space and real-item resolver residuals on current
-  HEAD before deciding whether the parent leaf can close.
-- Go matrix anchors to read: active row 3543 and P6 summary row 965 only.
-- Legacy read authority: RemoveSlotItem destination/free-space and item resolver
-  helpers only; C# is read-only.
-- Go read/write authority: bounded equipment decision/session code only if a
-  current-HEAD residual is confirmed; accepted item/report authority is protected.
-- Forbidden scope: P8/P11 lifecycle, protocols, unrelated item behavior/reports or C#.
+- Leaf ID: `DROP-P6-GROUND-LIFECYCLE-001`
+- Status: `Active` dependency-ready functional leaf; P5 is Complete and the P11
+  fishing/intelligent-creature ground-producer slices required here are committed.
+- Outcome: materialize ordinary/red player Inventory/Equipment death selections
+  as real ground items through the accepted ground/drop authority.
+- Completed parent transition: `EQUIP-P6-CORE-001` closed in Go `519f9f6`; its
+  negative-target, physical-Storage and duplicate-owner edge review found no remainder.
+- Active workstream: `WS-DROP-P6-DEATH-MATERIALIZE-001`; connect the existing
+  `playerDeathLocked` eligible-item selection to existing ground creation without
+  changing manual drop, rental return or P5/P11 producer behavior.
+- Go matrix anchors to read: active row 3548 and P6 summary row 965 only.
+- Legacy read authority: ordinary/red player death item selection and directly
+  reached ground materialization helpers only; C# is read-only.
+- Go read/write authority: bounded player-death/ground adapters and authenticated
+  death-session evidence; existing item/ground/rental authorities are protected.
+- Forbidden scope: P5/P11 lifecycle, capacity/use/expiry leaves, protocols or C#.
 
 ### Protected Go ownership
 
-- Complete item mutation/Cross-Grid, Refine, Storage, Trade, P8 Hero/mount and
-  P11 fishing/awakening authorities are protected inputs. This leaf owns only
-  player equipment transaction gates, projections and exact observable order.
+- Reuse committed manual ground drop, owner/group window, visibility, expiry,
+  stacking, item-definition projection and rental death candidate authorities.
+- Do not create a second ground object, item allocator or persistence model.
 
 ### Remaining acceptance work
 
-- [x] Trace the bounded Legacy EquipSlotItem/RemoveSlotItem source/target
-  switches, helper gates, mutation and packet/stat/appearance side effects;
-  freeze `WS-EQUIP-SLOT-AUTH-001` as a finite pair matrix.
-- [x] Prove the bounded Inventory/Storage↔Mount/Fishing/Socket attachment paths,
-  owner/slot/type/shape/SoulBound/riding and occupied-target failure boundaries
-  without rewriting P8/P11 owners.
-- [x] Lock the bounded RefreshItem/PlayerUpdate/health/magic ordering, normalized
-  auth/world revision, logout/relogin persistence and concurrent mutation behavior.
-- [x] Harden Hero/item snapshots, checkpoints and local rollback (`7657f4c`).
-- [x] Complete Hero EquipItem/RemoveItem, live actor/latest-authority convergence,
-  temporary NewMagic and shared cursed attachment removal (`f13cfcd`).
-- [x] Close active-Fishing ordinary EquipItem without changing Fishing runtime,
-  RemoveItem or nested attachments (`d5be202`).
-- [x] Close ItemMoved reports and ordinary RemoveItem observer parity (`8bc1974`).
-- [ ] Revalidate bounded final edges before deciding parent closure.
+- [ ] Trace exact normal/red death RNG, inventory/equipment eligibility and
+  bind/rental/wedding/NoThrow exclusions against current Go selection.
+- [ ] Freeze the smallest adapter from accepted death candidates to existing
+  ground objects, including owner/group window and recipient order.
+- [ ] Verify actual ground creation and pickup through authenticated death sessions,
+  repeated/race gates and applicable relogin/persistence evidence.
 
 ### Discovery inputs
 
-- Frozen P6 row/summary and Complete item mutation, Grid Cross, storage, Refine,
-  P8 mount/Hero and P11 fishing/awakening evidence.
+- Frozen P6 row/summary plus Complete ground/manual-drop, rental, P5 producer and
+  committed P11 producer evidence.
 
 ### P7 frozen child registry
 
@@ -129,8 +119,8 @@ owns exact routing evidence.
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Fourteen are Complete, Equip
-Core is Active and four are Ready.
+accepted all nineteen children with no finding. Fifteen are Complete, Ground Drop
+is Active and three are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
@@ -139,12 +129,12 @@ Core is Active and four are Ready.
 | `ITEM-P6-GRID-CROSS-001` | Complete | P8/P11 feature owners (Complete) | committed/accepted cross-grid auth/world/session evidence | exact positive/negative grid matrix |
 | `CAPACITY-P6-GRIDS-001` | Ready | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
 | `ADMIN-P6-ITEM-COMMAND-001` | Complete | P3 authority + P5 creation | committed Go `9e7edac7aaf22f35677f90427ca79da4e998b096` | MAKE/CLEARBAG quirks |
-| `EQUIP-P6-CORE-001` | Active | P8/P11 feature owners (Complete) | equipment/session | slots/sockets/stats/order/race |
+| `EQUIP-P6-CORE-001` | Complete | P8/P11 feature owners (Complete) | equipment/session | slots/sockets/stats/order/race |
 | `ITEM-P6-USE-ADMISSION-001` | Complete | P1 LOC + P5 stats | committed Go `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2` | all gates and localized order |
 | `ITEM-P6-USE-BASIC-001` | Complete | — | existing committed evidence | potion/delete success paths |
 | `ITEM-P6-USE-CATALOG-001` | Ready | P4/P5/P7/P9/P10 | item use/session | exact known/unknown shape partition |
 | `ITEM-P6-SHOUT-ARMING-001` | Complete | — | committed Go `1d399992a690614a122cc46b3e64b4cda8272c2f` | Hint/UseItem/state/repeated/race |
-| `DROP-P6-GROUND-LIFECYCLE-001` | Ready | P5/P11 producers | ground/drop/death/session | actual death ground drops |
+| `DROP-P6-GROUND-LIFECYCLE-001` | Active | P5/P11 producers | ground/drop/death/session | actual death ground drops |
 | `ITEM-P6-EXPIRY-001` | Ready | P10/P12 consumers | item lifecycle/ticker/session | strict times/no-refresh/restart |
 | `STORAGE-P6-ACCOUNT-001` | Complete | P2/P7 final access | existing committed evidence | default 80-slot boundary |
 | `TRADE-P6-PLAYER-001` | Complete | P10 mail/economy | existing committed evidence | two-peer lifecycle/race |
