@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-30 03:52 (Asia/Singapore)
+Last verified: 2026-08-31 01:15 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -51,9 +51,9 @@ Keep this file at or below 300 lines and 32 KiB.
   exact actor requirements, stat/appearance refresh and temporary skills.
   Ordinary and nested attachment moves are committed; Hero equipment and
   remaining edge rows stay open.
-- Completed workstream: `WS-EQUIP-SLOT-AUTH-001` in Go commit `d85b430`.
-- Active workstream: `WS-EQUIP-HERO-SNAPSHOT-HARDEN-001`; establish item-safe Hero
-  runtime persistence, item-only projection and terminal fences before Hero Equip/Remove.
+- Completed workstreams: Slot authority `d85b430`; Hero snapshot hardening `7657f4c`.
+- Active workstream: `WS-EQUIP-HERO-EQUIP-REMOVE-001`; migrate finite Hero
+  EquipItem/RemoveItem gates/order without reopening P8 Hero lifecycle behavior.
 - Go matrix anchors to read: active row 3543 and P6 summary row 965 only; never
   the full matrix or another child registry.
 - Legacy read authority: EquipItem/RemoveItem request handlers, CanEquipItem/
@@ -80,8 +80,8 @@ Keep this file at or below 300 lines and 32 KiB.
   without rewriting P8/P11 owners.
 - [x] Lock the bounded RefreshItem/PlayerUpdate/health/magic ordering, normalized
   auth/world revision, logout/relogin persistence and concurrent mutation behavior.
-- [ ] Harden Hero snapshot ownership, then complete Hero equipment and remaining
-  edge rows before the leaf-level full matrix and closure review.
+- [x] Harden Hero/item snapshots, checkpoints and local rollback (`7657f4c`).
+- [ ] Complete Hero EquipItem/RemoveItem and remaining edge rows before closure.
 
 ### Discovery inputs
 
