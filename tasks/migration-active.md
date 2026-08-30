@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 04:00 (Asia/Singapore)
+Last verified: 2026-08-31 04:44 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -47,19 +47,19 @@ Keep this file at or below 300 lines and 32 KiB.
 - Status: `Active` dependency-ready functional leaf; P8 mount/Hero and P11
   fishing/awakening owners plus P6 Grid Cross and admission inputs are Complete.
 - Outcome: close player equipment transactions and exact observable gates.
-  Ordinary, nested, Hero and Fishing admission behavior is committed; finite
-  report/broadcast parity and final edge review remain open.
+  Ordinary, nested, Hero, Fishing admission and report/broadcast behavior are
+  committed; only the bounded final edge review remains open.
 - Completed workstreams: Slot authority `d85b430`; Hero snapshot `7657f4c`; Hero
-  equipment/curse closure `f13cfcd`; Fishing EquipItem gate `d5be202`.
-- Active workstream: `WS-EQUIP-REPORT-BROADCAST-001`; migrate four successful
-  ItemMoved reports plus ordinary RemoveItem forced observer update without
-  changing accepted item authority or P8/P11 owner lifecycles.
+  equipment/curse `f13cfcd`; Fishing gate `d5be202`; reports/broadcast `8bc1974`.
+- Active workstream: `WS-EQUIP-FINAL-EDGE-001`; revalidate only reachable
+  RemoveSlotItem Storage/free-space and real-item resolver residuals on current
+  HEAD before deciding whether the parent leaf can close.
 - Go matrix anchors to read: active row 3543 and P6 summary row 965 only.
-- Legacy read authority: successful equipment tails, `Report.ItemMoved` and
-  `Broadcast(GetUpdateInfo())`; C# is read-only.
-- Go read/write authority: equipment handlers, report adapter, observer session
-  regression and matrix/index/handoff evidence; item authority is protected.
-- Forbidden scope: item authority, P8/P11 lifecycle, protocols, unrelated reports or C#.
+- Legacy read authority: RemoveSlotItem destination/free-space and item resolver
+  helpers only; C# is read-only.
+- Go read/write authority: bounded equipment decision/session code only if a
+  current-HEAD residual is confirmed; accepted item/report authority is protected.
+- Forbidden scope: P8/P11 lifecycle, protocols, unrelated item behavior/reports or C#.
 
 ### Protected Go ownership
 
@@ -82,8 +82,8 @@ Keep this file at or below 300 lines and 32 KiB.
   temporary NewMagic and shared cursed attachment removal (`f13cfcd`).
 - [x] Close active-Fishing ordinary EquipItem without changing Fishing runtime,
   RemoveItem or nested attachments (`d5be202`).
-- [ ] Close successful equipment ItemMoved reports and ordinary RemoveItem forced
-  observer update, then run the final edge review before parent closure.
+- [x] Close ItemMoved reports and ordinary RemoveItem observer parity (`8bc1974`).
+- [ ] Revalidate bounded final edges before deciding parent closure.
 
 ### Discovery inputs
 
