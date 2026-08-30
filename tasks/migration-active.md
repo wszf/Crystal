@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 05:13 (Asia/Singapore)
+Last verified: 2026-08-31 06:47 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -43,42 +43,42 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `DROP-P6-GROUND-LIFECYCLE-001`
-- Status: `Active` dependency-ready functional leaf; P5 is Complete and the P11
-  fishing/intelligent-creature ground-producer slices required here are committed.
-- Outcome: materialize ordinary/red player Inventory/Equipment death selections
-  as real ground items through the accepted ground/drop authority.
-- Completed parent transition: `EQUIP-P6-CORE-001` closed in Go `519f9f6`; its
-  negative-target, physical-Storage and duplicate-owner edge review found no remainder.
-- Active workstream: `WS-DROP-P6-DEATH-MATERIALIZE-001`; connect the existing
-  `playerDeathLocked` eligible-item selection to existing ground creation without
-  changing manual drop, rental return or P5/P11 producer behavior.
-- Go matrix anchors to read: active row 3548 and P6 summary row 965 only.
-- Legacy read authority: ordinary/red player death item selection and directly
-  reached ground materialization helpers only; C# is read-only.
-- Go read/write authority: bounded player-death/ground adapters and authenticated
-  death-session evidence; existing item/ground/rental authorities are protected.
-- Forbidden scope: P5/P11 lifecycle, capacity/use/expiry leaves, protocols or C#.
+- Leaf ID: `CAPACITY-P6-GRIDS-001`
+- Status: `Active` dependency-ready functional leaf; shared P10 gold mutation,
+  committed Inventory/Storage authorities and persisted size/deadline fields exist.
+- Outcome: migrate reachable Inventory and Storage capacity purchase/expiry behavior
+  without creating a parallel grid or economy authority.
+- Completed parent transition: `DROP-P6-GROUND-LIFECYCLE-001` closed in Go `4265f77`;
+  ordinary/red death items now use real ownerless ground objects and authenticated pickup.
+- Active workstream: `WS-CAPACITY-P6-INVENTORY-001`; migrate ordinary
+  `@ADDINVENTORY` growth from 46 to 54 then four-slot steps through 86, including
+  tiered gold costs and the capped repeated-charge quirk.
+- Go matrix anchors to read: active row 3541 and P6 summary row 965 only.
+- Legacy read authority: Inventory-capacity command parsing, cost/size mutation and
+  directly reached persistence/projection helpers only; C# is read-only.
+- Go read/write authority: bounded command/session, auth capacity and protocol
+  projection files plus authenticated capacity evidence.
+- Forbidden scope: `@ADDSTORAGE` until the next bounded workstream, item-use/expiry
+  leaves, unrelated P10 economy behavior, protocol layout changes or C#.
 
 ### Protected Go ownership
 
-- Reuse committed manual ground drop, owner/group window, visibility, expiry,
-  stacking, item-definition projection and rental death candidate authorities.
-- Do not create a second ground object, item allocator or persistence model.
+- Reuse committed gold, item-grid, login/bootstrap and checkpoint authorities.
+- Do not create a second balance, Inventory grid or persistence model.
 
 ### Remaining acceptance work
 
-- [ ] Trace exact normal/red death RNG, inventory/equipment eligibility and
-  bind/rental/wedding/NoThrow exclusions against current Go selection.
-- [ ] Freeze the smallest adapter from accepted death candidates to existing
-  ground objects, including owner/group window and recipient order.
-- [ ] Verify actual ground creation and pickup through authenticated death sessions,
-  repeated/race gates and applicable relogin/persistence evidence.
+- [ ] Freeze exact `@ADDINVENTORY` command admission, 46/54/58.../86 boundaries,
+  cost tiers, low-gold silence/text and capped repeated-charge behavior.
+- [ ] Implement the smallest production command/auth adapter and exact Resize/gold/
+  chat ordering without changing ordinary item-grid mutation.
+- [ ] Verify authenticated purchase, relogin/restart persistence, repeated/race and
+  failure atomicity; then bound the separate `@ADDSTORAGE` workstream.
 
 ### Discovery inputs
 
-- Frozen P6 row/summary plus Complete ground/manual-drop, rental, P5 producer and
-  committed P11 producer evidence.
+- Frozen P6 capacity row/summary plus Complete storage, item-grid, command, P10 gold
+  and P12 checkpoint evidence.
 
 ### P7 frozen child registry
 
@@ -119,22 +119,22 @@ owns exact routing evidence.
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Fifteen are Complete, Ground Drop
-is Active and three are Ready.
+accepted all nineteen children with no finding. Sixteen are Complete, Capacity is
+Active and two are Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `ITEM-P6-WIRE-CATALOG-001` | Complete | — | existing committed evidence | layouts/nesting/grids/definitions |
 | `ITEM-P6-GRID-MUTATION-001` | Complete | logging/localization | committed/accepted grid mutation evidence | error/report/response order + normalized revision/CAS |
 | `ITEM-P6-GRID-CROSS-001` | Complete | P8/P11 feature owners (Complete) | committed/accepted cross-grid auth/world/session evidence | exact positive/negative grid matrix |
-| `CAPACITY-P6-GRIDS-001` | Ready | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
+| `CAPACITY-P6-GRIDS-001` | Active | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
 | `ADMIN-P6-ITEM-COMMAND-001` | Complete | P3 authority + P5 creation | committed Go `9e7edac7aaf22f35677f90427ca79da4e998b096` | MAKE/CLEARBAG quirks |
 | `EQUIP-P6-CORE-001` | Complete | P8/P11 feature owners (Complete) | equipment/session | slots/sockets/stats/order/race |
 | `ITEM-P6-USE-ADMISSION-001` | Complete | P1 LOC + P5 stats | committed Go `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2` | all gates and localized order |
 | `ITEM-P6-USE-BASIC-001` | Complete | — | existing committed evidence | potion/delete success paths |
 | `ITEM-P6-USE-CATALOG-001` | Ready | P4/P5/P7/P9/P10 | item use/session | exact known/unknown shape partition |
 | `ITEM-P6-SHOUT-ARMING-001` | Complete | — | committed Go `1d399992a690614a122cc46b3e64b4cda8272c2f` | Hint/UseItem/state/repeated/race |
-| `DROP-P6-GROUND-LIFECYCLE-001` | Active | P5/P11 producers | ground/drop/death/session | actual death ground drops |
+| `DROP-P6-GROUND-LIFECYCLE-001` | Complete | P5/P11 producers | ground/drop/death/session | actual death ground drops |
 | `ITEM-P6-EXPIRY-001` | Ready | P10/P12 consumers | item lifecycle/ticker/session | strict times/no-refresh/restart |
 | `STORAGE-P6-ACCOUNT-001` | Complete | P2/P7 final access | existing committed evidence | default 80-slot boundary |
 | `TRADE-P6-PLAYER-001` | Complete | P10 mail/economy | existing committed evidence | two-peer lifecycle/race |
