@@ -48,12 +48,12 @@ Keep this file at or below 300 lines and 32 KiB.
   fishing/awakening owners plus P6 Grid Cross and admission inputs are Complete.
 - Outcome: close player EquipItem/RemoveItem over Inventory/Storage/Socket/
   Mount/Fishing sources and destinations, including cursed/bind/wedding gates,
-  exact slot/type/class/gender/requirements/weight, stat/HP/appearance refresh,
-  set/special modes and temporary-skill add/remove packet order. Ordinary
-  Inventory/Storage equipment and nested Inventory/Storage↔Mount/Fishing/Socket attachment moves are now committed; Hero equipment and remaining edge rows stay open.
-- Completed workstream: `WS-EQUIP-SLOT-AUTH-001` is Complete in Go commit
-  `d85b430`; it owns only nested attachment authority, session routing, forced
-  observer refresh and focused evidence.
+  exact actor requirements, stat/appearance refresh and temporary skills.
+  Ordinary and nested attachment moves are committed; Hero equipment and
+  remaining edge rows stay open.
+- Completed workstream: `WS-EQUIP-SLOT-AUTH-001` in Go commit `d85b430`.
+- Active workstream: `WS-EQUIP-HERO-SNAPSHOT-HARDEN-001`; establish item-safe Hero
+  runtime persistence, item-only projection and terminal fences before Hero Equip/Remove.
 - Go matrix anchors to read: active row 3543 and P6 summary row 965 only; never
   the full matrix or another child registry.
 - Legacy read authority: EquipItem/RemoveItem request handlers, CanEquipItem/
@@ -80,8 +80,8 @@ Keep this file at or below 300 lines and 32 KiB.
   without rewriting P8/P11 owners.
 - [x] Lock the bounded RefreshItem/PlayerUpdate/health/magic ordering, normalized
   auth/world revision, logout/relogin persistence and concurrent mutation behavior.
-- [ ] Complete the remaining Hero equipment and Legacy edge rows, then rerun the
-  leaf-level full matrix and closure review before marking this leaf Complete.
+- [ ] Harden Hero snapshot ownership, then complete Hero equipment and remaining
+  edge rows before the leaf-level full matrix and closure review.
 
 ### Discovery inputs
 

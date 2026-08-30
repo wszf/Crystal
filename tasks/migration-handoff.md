@@ -13,9 +13,8 @@ not evidence; do not startup-read historical handoff archives.
   scope-frozen at nineteen children: fourteen Complete, one Active and four
   Ready.
 - The Primary Active leaf is dependency-ready `EQUIP-P6-CORE-001`, matrix row
-  3543 and P6 summary row 965. Its ordinary Inventory/Storage EquipItem and
-  RemoveItem slice is Complete in Go commit `3c6d3c3`; nested slot attachments
-  remain open.
+  3543 and P6 summary row 965. Ordinary Inventory/Storage equipment is Complete
+  in `3c6d3c3`; nested SlotItem authority is Complete in `d85b430`.
 - The new policy permits bounded workstreams inside this Primary leaf. Agent
   identity and a fixed count are not Goal fields; each workstream must carry a
   scope, authority lock, dependency and evidence record.
@@ -52,13 +51,17 @@ not evidence; do not startup-read historical handoff archives.
   lifecycle and P11 Fishing/Awakening lifecycle authorities. Do not reopen or
   rewrite them from this leaf.
 - Completed workstream: `WS-EQUIP-SLOT-AUTH-001` is accepted in Go commit
-  `d85b4305cee938b99a70c6fd8d716cc586d31bd2`. It migrated atomic
-  Inventory/Storage↔Mount/Fishing/Socket nested attachment moves through the
-  latest-auth CrossGrid authority, production session handlers, persistence and
-  forced observer refresh; protocol layouts and owner lifecycles were untouched.
-- The next bounded scope remains inside this leaf: Hero equipment and the
-  remaining Legacy edge rows. Do not reopen Grid Cross, P8/P11 owner lifecycles,
-  generic Move/Merge endpoints or protocol layouts.
+  `d85b4305cee938b99a70c6fd8d716cc586d31bd2`; it migrated atomic nested
+  attachment moves without changing protocol layouts or owner lifecycles.
+- Active workstream: `WS-EQUIP-HERO-SNAPSHOT-HARDEN-001`. Role: production
+  authority prerequisite. Go read/write scope is bounded to Hero auth/runtime
+  persistence, CrossGrid Hero-item projection, terminal persistence fences,
+  detached profile clones and focused production-entry tests. Authority lock:
+  Hero runtime persistence plus CrossGrid Hero item publication. Dependencies:
+  accepted P6 CrossGrid and P8 Hero lifecycle. Forbidden scope: Hero Equip/Remove
+  business gates, protocol layouts, P8 lifecycle semantics, P11 owners and C#.
+  Acceptance requires latest-auth runtime-only commits, item-only projection,
+  no stale terminal overwrite, deep clone isolation, relogin/restart and race.
 - Source rulings recorded for the completed slice include strict production
   Fishing-rod validation, NeedIdentify-before-Shape RefreshItem ordering,
   commented BindOnEquip behavior, no UnlockCurse consumption in EquipSlotItem,
