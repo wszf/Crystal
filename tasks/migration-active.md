@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 01:15 (Asia/Singapore)
+Last verified: 2026-08-31 03:33 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,23 +46,20 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `EQUIP-P6-CORE-001`
 - Status: `Active` dependency-ready functional leaf; P8 mount/Hero and P11
   fishing/awakening owners plus P6 Grid Cross and admission inputs are Complete.
-- Outcome: close player EquipItem/RemoveItem over Inventory/Storage/Socket/
-  Mount/Fishing sources and destinations, including cursed/bind/wedding gates,
-  exact actor requirements, stat/appearance refresh and temporary skills.
-  Ordinary and nested attachment moves are committed; Hero equipment and
-  remaining edge rows stay open.
-- Completed workstreams: Slot authority `d85b430`; Hero snapshot hardening `7657f4c`.
-- Active workstream: `WS-EQUIP-HERO-EQUIP-REMOVE-001`; migrate finite Hero
-  EquipItem/RemoveItem gates/order without reopening P8 Hero lifecycle behavior.
-- Go matrix anchors to read: active row 3543 and P6 summary row 965 only; never
-  the full matrix or another child registry.
-- Legacy read authority: EquipItem/RemoveItem request handlers, CanEquipItem/
-  CanRemoveItem, RefreshItem/RefreshStats and only directly reached equipment,
-  socket, storage, mount, fishing and temporary-skill helpers; C# is read-only.
-- Go read/write authority: bounded `equipment_transactions.go`, exact session/
-  storage routing and focused authenticated tests; matrix/index/handoff evidence.
-- Forbidden scope: reopen P8/P11 owner lifecycles, item-use/catalog behavior,
-  Cross-Grid semantics, protocol layouts, or write any C# file.
+- Outcome: close player equipment transactions and their exact observable gates.
+  Ordinary, nested attachment and Hero moves are committed; a confirmed Fishing
+  admission edge plus finite report/broadcast residual remain open.
+- Completed workstreams: Slot authority `d85b430`; Hero snapshot hardening `7657f4c`;
+  Hero Equip/Remove plus MysteryWater/attachment curse closure `f13cfcd`.
+- Active workstream: `WS-EQUIP-P6-FISHING-EQUIP-GATE-001`; reject ordinary
+  Inventory/Storage EquipItem while Fishing is active, including Torch, through
+  the authenticated production entry without changing Fishing runtime ownership.
+- Go matrix anchors to read: active row 3543 and P6 summary row 965 only.
+- Legacy read authority: EquipItem Fishing pre-gate/response only; C# is read-only.
+- Go read/write authority: ordinary EquipItem admission, authenticated session
+  regression and matrix/index/handoff evidence; existing item authority is protected.
+- Forbidden scope: Fishing lifecycle/persistence, RemoveItem, nested attachment,
+  Hero, report/broadcast residual, protocol layouts, or any C# write.
 
 ### Protected Go ownership
 
@@ -81,7 +78,12 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Lock the bounded RefreshItem/PlayerUpdate/health/magic ordering, normalized
   auth/world revision, logout/relogin persistence and concurrent mutation behavior.
 - [x] Harden Hero/item snapshots, checkpoints and local rollback (`7657f4c`).
-- [ ] Complete Hero EquipItem/RemoveItem and remaining edge rows before closure.
+- [x] Complete Hero EquipItem/RemoveItem, live actor/latest-authority convergence,
+  temporary NewMagic and shared cursed attachment removal (`f13cfcd`).
+- [ ] Close the active-Fishing ordinary EquipItem failure gate without changing
+  Fishing runtime, RemoveItem or nested attachment behavior.
+- [ ] Close successful equipment ItemMoved reports and ordinary RemoveItem forced
+  observer update, then run the final edge review before parent closure.
 
 ### Discovery inputs
 
@@ -290,11 +292,9 @@ broad unnamed scope.
 
 ## Selection protocol
 
-1. Verify this index and the current handoff against each repository separately.
-2. Resume the Primary `Active` leaf; register bounded workstreams with disjoint
-   scopes and do not inventory all remaining phases up front.
-3. When an active leaf completes, select a dependency-ready child from the
-   current frozen phase. If none is ready because a separately owned phase
-   discovery blocks progress, allow only a bounded read-only closure workstream.
-4. Keep only current routing state and workstream recovery data here. Completed
-   details belong in the matrix and Git history, not as appended narratives.
+1. Verify this index and handoff against each repository separately.
+2. Resume the Primary `Active` leaf with disjoint bounded workstreams; do not
+   inventory all remaining phases up front.
+3. On leaf completion select a dependency-ready frozen child; if separate phase
+   discovery blocks progress, allow only bounded read-only closure discovery.
+4. Keep current routing/recovery here; completed detail belongs in matrix/history.
