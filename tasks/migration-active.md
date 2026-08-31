@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 02:08 (Asia/Singapore)
+Last verified: 2026-09-01 03:12 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -56,39 +56,42 @@ Keep this file at or below 300 lines and 32 KiB.
   authenticated Hero Shape 3-5 now consumes, projects and reaches runtime
   Exp/drop/attack-speed consumers with live-only Buff lifecycle parity.
 - Completed correction: `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001`, Go `732f8fe`; successful seal preserves live Buff/clock state through same-process reattach.
-- Active workstream: `WS-ITEM-P6-USE-BOOK-001`.
-- Outcome: migrate only Player Inventory Book use from item Shape to a new learned
-  `UserMagic`, then execute the existing successful consume tail.
+- Completed workstream: `WS-ITEM-P6-USE-BOOK-001`, Go `5779c89`; Player Inventory Book
+  now atomically learns known Shape→Spell records and consumes one Book through the
+  latest-auth item/Magics authority, with NewMagic/RefreshStats and reload evidence.
+- Active workstream: `WS-ITEM-P6-USE-SCROLL-001`.
+- Outcome: migrate only Player Inventory Scroll shapes 0-7 and 11-12, preserving the
+  existing admission gates, effect-specific owners and successful consume tail.
 - Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
-- Legacy read authority: Book admission at `Server/MirObjects/HumanObject.cs:1237-1242`,
-  use at `PlayerObject.cs:6077-6089` and common tail at `6329-6337`; C# is read-only.
-- Go read/write files: bounded item-use transaction/session dispatch plus existing Player
-  Magic projection/persistence helpers and focused authenticated Book evidence.
-- Authority lock/dependencies: existing latest-auth item revision/CAS and Player Magics
-  persistence/projection; spell definitions and P5 magic infrastructure are Complete.
-- Forbidden scope: Hero Books, Scroll/Food/Pets/Script/Transform/Deco/MonsterSpawn,
-  Hero/SealedHero behavior, protocol layouts or any C# write.
+- Legacy read authority: Scroll use at `Server/MirObjects/PlayerObject.cs:5895-6075`
+  and common tail at `PlayerObject.cs:6329-6337`; C# is read-only.
+- Go read/write files: bounded Scroll item-use production dispatch, existing teleport,
+  repair, credit, lottery and item authorities, plus focused authenticated evidence.
+- Authority lock/dependencies: existing latest-auth item revision/CAS, P4/P5 teleport
+  and visibility, P9 conquest/economy, P10 credit/gold, and P7 NPC infrastructure.
+- Forbidden scope: Book/food/pets/script/transform/deco/MonsterSpawn/SealedHero,
+  Scroll 8-10/13-15, protocol layouts or any C# write.
 
 ### Protected Go ownership
 
-- Preserve shared item-use admission/death/riding gates, Book duplicate rejection,
-  persistence-before-visible ordering and all completed Potion/SealedHero behavior.
-- Do not create a parallel Magic catalogue, item transaction, spell runtime or
-  persistence authority, and do not implement unrelated spell-casting behavior.
+- Preserve shared item-use admission/death/riding gates, completed Book/Potion/SealedHero
+  behavior, persistence-before-visible ordering and all existing item authorities.
+- Do not create a parallel item transaction, teleport/repair/economy authority or spell
+  runtime, and do not implement unrelated Scroll 8-10/13-15 or spell-casting behavior.
 
 ### Remaining acceptance work
 
-- [ ] Freeze Shape→Spell lookup, missing MagicInfo and duplicate-spell failure, default
-  UserMagic Level/Key/Experience/temp fields, packet order and consume/report tail.
-- [ ] Add the Book branch through latest-auth item + Player Magics authority and existing
-  NewMagic/RefreshStats projection without copying Hero skill-action transactions.
-- [ ] Verify known/unknown/duplicate Books, inventory mutation, JSON/relogin, Player stat
-  consumers, authenticated transcript, count-20 and focused race behavior.
+- [ ] Freeze Scroll 0-7 and 11-12 effect lookup, failure gates, RNG/economy/teleport
+  outcomes, packet order and successful consume/report tail.
+- [ ] Add each Scroll branch through its existing P4/P9/P10 owner and latest-auth item
+  authority without copying Book, Hero or unrelated item-family transactions.
+- [ ] Verify known/unknown/failure/stack/last-item Scrolls, JSON/relogin, observers,
+  authenticated transcripts, count-20, focused race and integration behavior.
 
 ### Discovery inputs
 
-- Frozen P6 Use Catalog row/summary, Legacy Book admission/use/UserMagic constructor,
-  plus current Go Player Magic, item-use and persistence authorities.
+- Frozen P6 Use Catalog row/summary, Legacy Scroll switch/common tail, plus current Go
+  teleport/repair/credit/lottery/item authorities and production-session evidence.
 
 ### P7 frozen child registry
 
@@ -291,10 +294,7 @@ broad unnamed scope.
   INI write-back and their inherited MonsterObject runtime consumers.
 
 ## Selection protocol
-
 1. Verify this index and handoff against each repository separately.
-2. Resume the Primary `Active` leaf with disjoint bounded workstreams; do not
-   inventory all remaining phases up front.
-3. On leaf completion select a dependency-ready frozen child; if separate phase
-   discovery blocks progress, allow only bounded read-only closure discovery.
+2. Resume the Primary `Active` leaf with disjoint bounded workstreams; do not inventory all remaining phases up front.
+3. On leaf completion select a dependency-ready frozen child; if separate phase discovery blocks progress, allow only bounded read-only closure discovery.
 4. Keep current routing/recovery here; completed detail belongs in matrix/history.
