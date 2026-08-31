@@ -44,54 +44,44 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `ITEM-P6-USE-CATALOG-001`
-- Status: `Active` dependency-ready functional leaf; common item-use admission,
-  revision/CAS, world Buff projection and persistence authorities are reusable.
-- Completed workstream: `WS-ITEM-P6-USE-NOOP-CONSUME-001`, Go `84adba5`; exact
-  no-effect Potion/Scroll/Pets/SiegeAmmo partitions now consume through production.
-- Completed workstream: `WS-ITEM-P6-USE-POTION-BUFF-003-001`, Go `c4f1e38`; Player
-  Potion Shape 3 now atomically consumes and installs ordered timed item-stat Buffs.
-- Completed workstream: `WS-ITEM-P6-USE-POTION-RATE-004-005-001`, Go `e7c5a10`;
-  Player Shape 4/5 reuse the durable Shape 3 item/Buff authority for rate Buffs.
-- Completed workstream: `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001`, Go `8596f22`;
-  authenticated Hero Shape 3-5 now consumes, projects and reaches runtime
-  Exp/drop/attack-speed consumers with live-only Buff lifecycle parity.
-- Completed correction: `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001`, Go `732f8fe`; successful seal preserves live Buff/clock state through same-process reattach.
-- Completed workstream: `WS-ITEM-P6-USE-BOOK-001`, Go `5779c89`; Player Inventory Book
-  now atomically learns known Shape→Spell records and consumes one Book through the
-  latest-auth item/Magics authority, with NewMagic/RefreshStats and reload evidence.
-- Completed workstream: `WS-ITEM-P6-USE-SCROLL-001`, Go `59b2914`; Player Inventory
-  Scroll shapes 0-7 and 11-12 use existing authorities with authenticated persistence,
-  observer and success/failure evidence.
-- Active workstream: `WS-ITEM-P6-USE-FOOD-NONZERO-001`.
-- Outcome: verify/close Player Inventory Food Shape != 0 repair semantics, including unknown
-  nonzero shapes, through the existing P8 mount authority without reopening mount lifecycle.
+- Status: `Active` scope-frozen leaf; no dependency-ready functional child remains, so this
+  batch is bounded read-only closure discovery.
+- Completed workstreams: `WS-ITEM-P6-USE-NOOP-CONSUME-001` (`84adba5`),
+  `WS-ITEM-P6-USE-POTION-BUFF-003-001` (`c4f1e38`), `WS-ITEM-P6-USE-POTION-RATE-004-005-001`
+  (`e7c5a10`), `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001` (`8596f22`), correction
+  `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` (`732f8fe`), `WS-ITEM-P6-USE-BOOK-001`
+  (`5779c89`), `WS-ITEM-P6-USE-SCROLL-001` (`59b2914`) and
+  `WS-ITEM-P6-USE-FOOD-NONZERO-001` (`c620075`).
+- Active workstream: `DISC-P6-USE-CATALOG-CLOSURE-001`.
+- Outcome: enumerate finite remaining Script/Transform/Deco/MonsterSpawn catalogue
+  branches and their exact owners; do not implement open scope while dependencies are blocked.
 - Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
-- Legacy: Food `PlayerObject.cs:6093-6117`, common tail `:6329-6337`, gates `:5799-5824`; C# read-only.
-- Go files: Food production dispatch/reporting in `main.go`, existing `mounts.go` authority
-  and focused authenticated evidence. Dependencies: latest-auth CAS, P8 mount/equipment
-  refresh, item report/persistence and common admission/death gates.
-- Forbidden: Book/Scroll/Pets/Script/Transform/Deco/MonsterSpawn/SealedHero, mount
-  lifecycle changes, protocol layouts or any C# write.
+- Legacy: Script `PlayerObject.cs:6090-6092`, Transform/Deco/MonsterSpawn `:6250-6314`;
+  common tail `:6330-6337`, entry/death gates `:5799-5824`; C# read-only.
+- Go files: read-only catalogue/owner tracing and dependency ledger. Blockers: Script needs
+  P7 callbacks/actions/conditions, Transform needs P5 effect authority, Deco/MonsterSpawn
+  need world object/spawn ownership and (for conquest) P9 state.
+- Forbidden: implementing blocked Script/Transform/Deco/MonsterSpawn, reopening completed
+  workstreams or mount lifecycle, protocol layouts or any C# write.
 
 ### Protected Go ownership
 
-- Preserve shared item-use admission/death/riding gates, completed Book/Potion/SealedHero
-  behavior, persistence-before-visible ordering and all existing item authorities.
-- No parallel transaction/teleport/repair/economy authority or spell runtime; no unrelated
-  Scroll 8-10/13-15 or spell-casting behavior.
+- Preserve shared item-use admission/death/riding gates, all completed item-use workstreams,
+  persistence-before-visible ordering and existing authorities.
+- No parallel transaction/teleport/repair/economy authority or spell runtime; no open-scope
+  catalogue implementation before its owner/dependencies are Complete.
 
 ### Remaining acceptance work
 
-- [ ] Freeze Food Shape != 0 repair lookup, failure gates, durability/cap behavior,
-  packet order and successful consume/report tail.
-- [ ] Close the missing Food item report through the existing P8 mount authority and
-  latest-auth item CAS without duplicating mount lifecycle or item transactions.
-- [ ] Verify Shape 1 and unknown nonzero shapes, full/empty/dead/failure/stack paths,
-  JSON/relogin, observers, authenticated transcripts, count-20, focused race and
-  integration behavior.
+- [ ] Trace each remaining family/shape partition, owner, dependency and exact packet/consume
+  contract into the finite closure ledger.
+- [ ] Confirm whether Deco can reuse existing visibility and whether MonsterSpawn can reuse
+  existing P5/P9 spawn state without creating a parallel authority.
+- [ ] Keep production implementation closed until a dependency-ready bounded workstream is
+  explicitly frozen; then select it as the next functional batch.
 
-- Discovery: frozen P6 Use Catalog row/summary, Legacy Food switch/common tail, current
-  Go mount/equipment authorities and completed Scroll production evidence.
+- Discovery: frozen P6 Use Catalog row/summary, Legacy remaining switch/common tail, current
+  Go owner/dependency authorities and completed Food/Scroll production evidence.
 
 ### P7 frozen child registry
 

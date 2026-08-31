@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-01 05:21 (Asia/Singapore)
+Last updated: 2026-09-01 05:50 (Asia/Singapore)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -21,8 +21,10 @@ are not migration evidence.
   evidence without reopening completed item-use leaves.
 - Primary dependency-ready leaf remains `ITEM-P6-USE-CATALOG-001`, matrix row 3546
   and P6 summary row 965.
-- Active workstream is `WS-ITEM-P6-USE-FOOD-NONZERO-001`: Player Inventory Food
-  Shape != 0 repair semantics, including unknown nonzero shapes.
+- `WS-ITEM-P6-USE-FOOD-NONZERO-001` is Complete in Go `c620075`; Player Inventory
+  Food Shape != 0 repair/report semantics, including unknown nonzero shapes, are closed.
+- Active workstream is `DISC-P6-USE-CATALOG-CLOSURE-001`: bounded read-only discovery of
+  the remaining Script/Transform/Deco/MonsterSpawn branches and their exact owners.
 
 ## Legacy repository state
 
@@ -39,8 +41,8 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `59b2914` (`Migrate Player Scroll item use`), not pushed.
-- The committed Scroll migration tree is clean and no generated binary remains in the repo.
+- HEAD: `c620075` (`Close nonzero Food item use`), not pushed.
+- The committed Scroll/Food migration tree is clean and no generated binary remains in the repo.
 
 ## Completed Hero seal Buff lifecycle evidence
 
@@ -64,7 +66,7 @@ are not migration evidence.
 
 ## Verification ledger
 
-Passed for Go `59b2914` after the Scroll commit (including prior Book and Hero seal evidence):
+Passed for Go `c620075` after the Scroll/Food commits (including prior Book and Hero seal evidence):
 
 - summoned and unsummoned SealHero plus DeleteHero transcript/sidecar matrix at count 20;
 - authenticated NPC seal→ClientUseItem→same-process reattach→AddBuff and relogin-loss
@@ -75,6 +77,10 @@ Passed for Go `59b2914` after the Scroll commit (including prior Book and Hero s
 - Player Scroll shapes 0-7 and 11-12 authenticated production-entry success/failure,
   transition, revival, balance saturation, observer and JSON persistence transcripts;
 - focused Scroll tests pass at count 10 and focused race passes;
+- Player Food Shape 1 and unknown positive/negative nonzero shapes through the authenticated
+  mount-feed production path, including stack consumption, cap/no-loss durability semantics,
+  localized `MountFed`, Item Lost reporting, JSON reload and failure gates;
+- focused Food-adjacent tests pass at count 20 and focused race passes;
 - complete `cmd/crystal-server` package with the registered Quest fixture skipped;
 - full `go test ./... -skip '^TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin$' -count=1`;
 - final full `go test -race ./... -skip '^TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin$' -count=1`;
@@ -99,12 +105,12 @@ want 206`).
   `WS-ITEM-P6-USE-POTION-RATE-004-005-001` at Go `e7c5a10`,
   `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001` at Go `8596f22`,
   `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` at Go `732f8fe`,
-  `WS-ITEM-P6-USE-BOOK-001` at Go `5779c89`, and
-  `WS-ITEM-P6-USE-SCROLL-001` at Go `59b2914`.
-- Active workstream: `WS-ITEM-P6-USE-FOOD-NONZERO-001`: Player Inventory Food
-  Shape != 0 repair semantics, including unknown nonzero shapes.
+  `WS-ITEM-P6-USE-BOOK-001` at Go `5779c89`, `WS-ITEM-P6-USE-SCROLL-001` at Go
+  `59b2914`, and `WS-ITEM-P6-USE-FOOD-NONZERO-001` at Go `c620075`.
+- Active workstream: `DISC-P6-USE-CATALOG-CLOSURE-001`: bounded read-only discovery of
+  remaining Script/Transform/Deco/MonsterSpawn catalogue branches and exact owners.
 - Preserve common item-use admission/death/riding gates, completed Book/Potion/
-  SealedHero/Scroll behavior, latest-auth item revision/CAS and persistence-before-visible
+  SealedHero/Scroll/Food behavior, latest-auth item revision/CAS and persistence-before-visible
   projection.
 - Do not implement Scroll 8-10/13-15, Food shape 0, Pets, Script, Transform, Deco,
   MonsterSpawn, spell casting/combat, protocol changes or another item authority.
@@ -114,15 +120,15 @@ want 206`).
 1. Verify both repositories independently; preserve `tasks/lessons.md` and rerun
    tracked/staged/untracked `.cs` audits.
 2. Read only matrix rows 965 and 3546 plus the active index and this handoff.
-3. Trace read-only Legacy Food switch at `PlayerObject.cs:6093-6117`, common tail at
-   `PlayerObject.cs:6329-6337`, and entry/death gates at `PlayerObject.cs:5799-5824`;
-   do not write C#.
-4. Trace Go `feedMountAfterAdmission`, the existing mount/equipment refresh owner and
-   item-use report path before freezing the bounded branch.
-5. Implement only Food Shape != 0 repair/report parity through the existing P8 mount
-   authority and latest-auth item mutation; preserve Shape 0 ownership and all common
-   admission/failure gates.
-6. Verify Shape 1 and unknown nonzero shapes, full/empty/dead/failure/stack paths,
-   JSON/relogin, observers, authenticated transcript, count-20, focused race and
-   integration gates; update evidence, create Go and Legacy commits, then continue the
-   persistent Goal without push or merge.
+3. Trace read-only Legacy Script at `PlayerObject.cs:6090-6092` and
+   Transform/Deco/MonsterSpawn at `PlayerObject.cs:6250-6314`, plus common tail
+   `PlayerObject.cs:6330-6337` and entry/death gates `:5799-5824`; do not write C#.
+4. For each remaining family/shape, record the Legacy call chain, packet/consume and
+   persistence contract, current Go owner, and the blocking phase/leaf; do not infer
+   dependency readiness from tests alone.
+5. Confirm finite closure: Script requires P7 default callback/action-world/condition
+   authorities; Transform requires P5 transform effect authority; Deco/MonsterSpawn require
+   world object/spawn ownership, with conquest MonsterSpawn additionally requiring P9 state.
+6. Keep production implementation closed during discovery. If a dependency-ready bounded
+   workstream is proven, freeze its owner/files/gates in active index before Go changes;
+   otherwise update the finite ledger and continue the persistent Goal without push or merge.
