@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-31 15:37 (Asia/Singapore)
+Last updated: 2026-08-31 20:02 (Asia/Singapore)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -11,18 +11,19 @@ are not migration evidence.
   Complete nor Blocked.
 - P6 remains scope-frozen at nineteen children: eighteen Complete and
   `ITEM-P6-USE-CATALOG-001` is the sole Active unfinished child.
-- `WS-ITEM-P6-USE-NOOP-CONSUME-001` is Complete in Go `84adba5`; this closes one
-  bounded workstream only, not the active leaf, P6 or the persistent Goal.
+- `WS-ITEM-P6-USE-POTION-BUFF-003-001` is Complete in Go `c4f1e38`; this closes
+  one bounded workstream only, not the active leaf, P6 or the persistent Goal.
 - Primary dependency-ready leaf remains `ITEM-P6-USE-CATALOG-001`, matrix row 3546
   and P6 summary row 965.
-- Active workstream is `WS-ITEM-P6-USE-POTION-BUFF-003-001`: only Legacy Potion
-  Shape 3's timed item-stat Buff branch plus the shared successful consume tail.
+- Active workstream is `WS-ITEM-P6-USE-POTION-RATE-004-005-001`: only Player
+  Inventory Potion Shape 4 Exp and Shape 5 Drop Buff branches plus the shared
+  successful consume tail.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD before this evidence update: `c4669e63` (`Record item expiry migration`).
+- HEAD before this evidence update: `ad21f9e0` (`Record no-effect item use migration`).
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -32,86 +33,89 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `84adba5` (`Migrate no-effect item use tail`), not pushed.
+- HEAD: `c4f1e38` (`Migrate Potion Shape 3 stat Buffs`), not pushed.
 - Worktree and index are clean after the feature/matrix commit.
 
-## Completed no-effect Item Use evidence
+## Completed Potion Shape 3 evidence
 
-- The production `ClientUseItem` dispatcher now owns exactly four Legacy successful
-  no-effect partitions: Potion shapes outside 0-5, Scroll shapes outside 0-15,
-  Pets shapes 29+ and every SiegeAmmo shape.
-- Shared `CanUseItem` admission, the non-Scroll/Potion riding gate and the dead-player
-  gate run before the no-effect tail. Mounted Pets/SiegeAmmo therefore fail without
-  consumption; they succeed after dismount. Potion/Scroll retain the riding exception.
-- The latest auth `CharacterItemMutation` decrements one stack unit or clears the
-  Inventory slot, advances the shared item revision, projects the result to world
-  and session state, persists before response, emits one Player `Item Lost` report
-  and returns `UseItem=true` without an effect packet.
-- No-effect and ordinary basic-Potion commits refresh only current bag weight. They
-  preserve `ItemExpiryStatsDeferred`, MaxHP/MP, combat stats and appearance until an
-  explicit Equipment/stat refresh, matching Legacy's `RefreshBagWeight` tail.
-- A JSON rename that committed account state but failed its later checkpoint remains
-  a successful item mutation: the server logs the checkpoint error, reports the item
-  loss and returns success rather than allowing a reconnect retry to consume twice.
-- Item Expiry unlock protection now releases only when current auth and the detached
-  world snapshot contain the same unlocked item in the same player grid/slot. Storage
-  absence retains protection; TakeBack convergence releases it; later ordinary
-  consumption no longer restores the item.
-- Economy commits merge incoming runtime item definitions into current auth metadata
-  instead of replacing protected rental/expiry definitions with a stale session list.
+- Authenticated Player Inventory Potion Shape 3 now maps base plus added item Stats
+  into Impact, Magic, Taoist, Storm, HealthAid, ManaAid, Defence, MagicDefence and
+  BagWeight in the exact Legacy order. Pair branches retain every nonzero member,
+  sparse zero keys stay absent, and duration preserves C# Int32 minute overflow.
+- One latest-auth transaction consumes the item and publishes the final durable Buff
+  set. Explicitly consumed Rental IDs may disappear without restoring the item while
+  unrelated Rental authority remains protected; the same correction covers adjacent
+  successful consume paths that shared the defect.
+- Every Buff type has its own runtime LastTime/NextTime phase. StackDuration retains
+  the first Stats and existing phase; a new positive Buff starts the next one-second
+  boundary from use time, while wrapped nonpositive finite durations remove on the
+  next eligible process.
+- Runtime Buff expiry and combat effects continue during slow JSON persistence. Only
+  Buff notifications are deferred, then drained behind the initial AddBuff barrier;
+  failed sessions execute persistence-only notifications and never expose RemoveBuff
+  before an AddBuff that was not sent.
+- Each private invisible AddBuff is followed by that step's RefreshStats effects;
+  nearby observers receive neither AddBuff nor RemoveBuff. Zero-stat Shape 3 still
+  consumes, reports one Item Lost, refreshes bag weight and returns UseItem=true.
+- Imported `MapInfo.NoDrug` now reaches world rules and rejects Player and Hero Potion
+  use with localized System Chat before UseItem=false, without item, Buff or recovery
+  mutation. Final independent review found and verified the HeroInventory correction.
+- JSON rename completion precedes visible success. A later checkpoint-hook failure is
+  logged but remains committed, Item Lost reporting occurs before socket projection,
+  and auth/world/JSON/relogin converge without duplicate consumption.
 
 ## Verification ledger
 
-Passed for Go `84adba5` before commit:
+Passed for Go `c4f1e38` before commit:
 
-- focused no-effect, Item Expiry, protected Inventory, economy catalogue, potion
-  refresh and player item-authority tests at count 20;
-- authenticated no-effect session repetition at count 5 and focused race at count 5;
-- adjacent UseItem/Potion/Market/Auction/GameShop/Rental/Storage/Expiry tests at
-  count 20;
+- focused Shape 3 domain/world/authenticated session, per-Buff clock, deferred
+  projection, allowed Rental consumption, NoDrug import and Player/Hero admission,
+  plus adjacent item-use/Buff paths at count 20;
+- focused race for the same production paths at count 5;
 - full `go test ./... -count=1` with only the known date-sensitive
   `TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin` fixture skipped;
 - full race with that Quest fixture plus the two unrelated isolated-green fixtures
   `TestProductionTickerInitializesLightFromUTCOnNonUTCHost` and
   `TestSessionHallucinationTranscript` skipped;
-- `go vet ./...`, `go build ./...`, formatting, `git diff --check`, commit diff check
-  and independent final review with no finding;
+- `go vet ./...`, `go build ./...`, formatting, `git diff --check`, staged diff check
+  and terminal bounded review with its sole Hero NoDrug finding fixed and closed;
 - tracked/staged/untracked `.cs` audits in both repositories returned no paths.
 
-The first full-race run exposed a real race introduced by the initial unconditional
-unlock acknowledgement: it copied mutable session `gameCharacter` while a world
-notification appended a runtime item definition. The final code acknowledges against
-the already-detached world snapshot captured under `world.mu`. The isolated death
-session race test then passed at count 5 and the complete race gate passed.
-
-The known Quest P7 fixture remains date-sensitive: its fixed 2026-08-29 ground-item
+The known Quest P7 fixture remains date-sensitive because its fixed 2026-08-29
 clock is older than the real 2026-08-31 process clock. It remains the only non-race
 full-suite skip and was not hidden.
 
 ## Active leaf and protected work
 
 - Active leaf: `ITEM-P6-USE-CATALOG-001`.
-- Completed workstream: `WS-ITEM-P6-USE-NOOP-CONSUME-001`, Go `84adba5`.
-- Active workstream: `WS-ITEM-P6-USE-POTION-BUFF-003-001`.
-- It owns only Potion Shape 3's timed item-stat Buff effect and common consume tail.
-  Freeze exact stat mapping, duration, replacement/stacking and packet order from
-  read-only Legacy evidence before implementation.
-- Remaining catalogue scope stays exactly matrix row 3546. Do not reopen accepted
-  Scroll 8/9, Scroll 10/13-15, Food 0/1, Pets 0-28, MonsterSpawn 1, SealedHero or
-  any completed feature lifecycle.
-- Reuse common admission, item revision/CAS, auth/world/session projection, Player
-  report logging and persistence. Do not create a parallel item authority.
+- Completed workstreams: `WS-ITEM-P6-USE-NOOP-CONSUME-001` at Go `84adba5` and
+  `WS-ITEM-P6-USE-POTION-BUFF-003-001` at Go `c4f1e38`.
+- Active workstream: `WS-ITEM-P6-USE-POTION-RATE-004-005-001`.
+- It owns only Player Inventory Potion Shape 4 Exp and Shape 5 Drop Buff effects and
+  the common consume tail. Reuse Shape 3's item/Buff transaction, per-Buff clock and
+  persistence-before-visible projection barrier.
+- Freeze exact Luck-to-ExpRatePercent/ItemDropRatePercent projection, Int32-wrapped
+  duration, StackDuration phase, AddBuff/RefreshStats order, private expiry and the
+  actual experience/drop consumers before implementation.
+- Do not intercept Shape 2/3, other Potion shapes, Scroll, Food, Pets, Book, Script,
+  Transform, Deco, MonsterSpawn, SealedHero or any completed feature lifecycle.
+- Legacy Hero Potion Shape 3-5 remains a separately bounded catalog follow-up: current
+  Go Hero potion production handles only Shape 0/1. Do not silently claim it in the
+  Player workstream or broaden it into a P8 lifecycle rewrite.
+- The independently verified nested Rental-metadata merge residual remains a separate
+  shared-authority correction candidate; it does not block top-level Potion consume
+  and must not be hidden or opportunistically mixed into the rate-Buff workstream.
 
 ## Exact recovery sequence
 
 1. Verify both repositories independently; preserve `tasks/lessons.md` and rerun
    tracked/staged/untracked `.cs` audits.
 2. Read only matrix rows 965 and 3546 plus the active index and this handoff.
-3. Freeze Potion Shape 3's exact stat-to-Buff mapping, duration, replacement/stacking
-   and observable packet order from read-only Legacy C# evidence.
-4. Reuse current world Buff lifecycle and latest-auth item mutation; do not introduce
-   another timer, player-state or persistence authority.
-5. Implement through authenticated `ClientUseItem`, verify effect/consume packet order,
-   admission, expiry, persistence/relogin, repeated and race behavior.
+3. Freeze PlayerObject Potion Shape 4/5, AddBuff metadata/stacking, Exp/drop consumer
+   evidence and the common tail from read-only Legacy C#.
+4. Reuse current Shape 3 world/auth/session authority; do not add another timer,
+   projection queue, player-state or persistence path.
+5. Implement through authenticated `ClientUseItem`; verify NoDrug/riding/death gates,
+   effect/consume order, private expiry, consumer behavior, JSON/relogin and race.
 6. Update matrix/index/handoff, create Go feature and Legacy evidence commits, then
    continue the persistent Goal without push or merge.

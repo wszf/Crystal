@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 15:37 (Asia/Singapore)
+Last verified: 2026-08-31 20:02 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -48,42 +48,47 @@ Keep this file at or below 300 lines and 32 KiB.
   revision/CAS, world Buff projection and persistence authorities are reusable.
 - Completed workstream: `WS-ITEM-P6-USE-NOOP-CONSUME-001`, Go `84adba5`; exact
   no-effect Potion/Scroll/Pets/SiegeAmmo partitions now consume through production.
-- Active workstream: `WS-ITEM-P6-USE-POTION-BUFF-003-001`.
-- Outcome: migrate only Legacy Potion Shape 3's timed item-stat Buff branch through
-  authenticated `ClientUseItem`, then execute the existing shared successful consume
-  tail. Exact stat mapping, duration, replacement/stacking and packet order must be
-  frozen from read-only Legacy evidence before implementation.
+- Completed workstream: `WS-ITEM-P6-USE-POTION-BUFF-003-001`, Go `c4f1e38`; Player
+  Potion Shape 3 now atomically consumes and installs ordered timed item-stat Buffs.
+- Active workstream: `WS-ITEM-P6-USE-POTION-RATE-004-005-001`.
+- Outcome: migrate only Player Inventory Potion Shape 4 Exp and Shape 5 Drop Buff
+  branches through authenticated `ClientUseItem`, then execute the existing shared
+  successful consume tail. Freeze exact Luck projection, duration, StackDuration
+  behavior, private packet order and Exp/drop-rate consumer effects before writing.
 - Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
-- Legacy read authority: `PlayerObject.UseItem` Potion Shape 3 branch and common tail
-  at `Server/MirObjects/PlayerObject.cs:5849-6337`; C# is read-only.
+- Legacy read authority: `PlayerObject.UseItem` Potion Shape 4/5 branches and common
+  tail at `Server/MirObjects/PlayerObject.cs:5881-6337`; C# is read-only.
 - Go read/write files: bounded item-use/Buff dispatcher helpers, world/session wiring
-  and focused production-entry evidence; reuse current Buff and item mutation owners.
+  and focused production-entry evidence; reuse Shape 3 Buff/item/projection owners.
 - Authority lock/dependencies: existing auth item revision/CAS plus world player Buff
   authority; P5 Buff infrastructure is Complete and dependency-ready.
-- Forbidden scope: Potion shapes other than 3, every Scroll/Food/Pets/Book/Script/
-  Transform/Deco/MonsterSpawn/SealedHero branch, new Buff infrastructure, protocol
-  layouts or any C# write.
-
+- Registered follow-up: Legacy Hero Potion Shape 3-5 remains separately bounded; the
+  existing Go Hero potion path handles only Shape 0/1 and must not be silently claimed
+  by this Player-only workstream or reopened as broad P8 scope.
+- Forbidden scope: Hero Potion effects, every Scroll/Food/Pets/Book/Script/Transform/
+  Deco/MonsterSpawn/SealedHero branch, new Buff infrastructure, protocol layouts or
+  any C# write.
 ### Protected Go ownership
 
-- Preserve shared admission, riding/death gates, latest-auth consumption, bag-weight
-  refresh, Player report logging and persistence ordering from Go `84adba5`.
-- Reuse the existing world Buff lifecycle and notification fan-out; do not create a
-  parallel timer, player-state or item authority.
+- Preserve generic and imported `NoDrug` admission, riding/death gates, latest-auth
+  consumption, bag-weight refresh, Player report logging and persistence ordering from
+  Go `c4f1e38`.
+- Reuse Shape 3's per-Buff clocks and persistence-before-visible projection barrier;
+  do not create a parallel timer, player-state, projection queue or item authority.
 
 ### Remaining acceptance work
 
-- [ ] Freeze Potion Shape 3's exact Legacy stat-to-Buff mapping, duration semantics,
-  replacement/stacking behavior and observable packet order.
-- [ ] Implement the smallest production dispatcher/domain adapter over current Buff
-  and item mutation authorities; no other Potion shape may be intercepted.
-- [ ] Verify admission/no-consume failures, effect-before-consume ordering, Buff expiry,
-  auth/world/JSON/relogin, repeated and focused race behavior.
+- [ ] Freeze Player Potion Shape 4/5's exact Exp/Drop Buff metadata, Luck total,
+  Int32-wrapped duration, stacking phase and observable packet order.
+- [ ] Implement the smallest production adapter over Shape 3's shared Buff/item
+  transaction without intercepting Shape 2/3 or any non-Potion family.
+- [ ] Verify NoDrug/riding/death/no-consume gates, Exp/drop consumer effect, private
+  Add/Remove, auth/world/JSON/relogin, repeated and focused race behavior.
 
 ### Discovery inputs
 
-- Frozen P6 Use Catalog row/summary, Legacy Potion Shape 3 branch/common tail, and
-  existing Go player Buff, admission, item mutation and authenticated session paths.
+- Frozen P6 Use Catalog row/summary, Legacy Player Potion Shape 4/5 and common tail,
+  plus Go Shape 3 Buff/item/session authority.
 
 ### P7 frozen child registry
 
@@ -137,7 +142,7 @@ Catalog is the sole Active unfinished child.
 | `EQUIP-P6-CORE-001` | Complete | P8/P11 feature owners (Complete) | equipment/session | slots/sockets/stats/order/race |
 | `ITEM-P6-USE-ADMISSION-001` | Complete | P1 LOC + P5 stats | committed Go `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2` | all gates and localized order |
 | `ITEM-P6-USE-BASIC-001` | Complete | — | existing committed evidence | potion/delete success paths |
-| `ITEM-P6-USE-CATALOG-001` | Active | P4/P5/P7/P9/P10; Potion Shape 3 dependency-ready | item use/Buff/session; `WS-ITEM-P6-USE-POTION-BUFF-003-001` | exact stat mapping/duration/order |
+| `ITEM-P6-USE-CATALOG-001` | Active | P4/P5/P7/P9/P10; Player Potion Shape 4/5 dependency-ready | item use/Buff/session; `WS-ITEM-P6-USE-POTION-RATE-004-005-001` | exact rate Stat/duration/consumer/order |
 | `ITEM-P6-SHOUT-ARMING-001` | Complete | — | committed Go `1d399992a690614a122cc46b3e64b4cda8272c2f` | Hint/UseItem/state/repeated/race |
 | `DROP-P6-GROUND-LIFECYCLE-001` | Complete | P5/P11 producers | ground/drop/death/session | actual death ground drops |
 | `ITEM-P6-EXPIRY-001` | Complete | P10/P12 consumers | committed Go `e7e3b4c` | strict times/no-refresh/restart |
