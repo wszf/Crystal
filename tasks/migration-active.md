@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 20:02 (Asia/Singapore)
+Last verified: 2026-08-31 21:11 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -50,45 +50,43 @@ Keep this file at or below 300 lines and 32 KiB.
   no-effect Potion/Scroll/Pets/SiegeAmmo partitions now consume through production.
 - Completed workstream: `WS-ITEM-P6-USE-POTION-BUFF-003-001`, Go `c4f1e38`; Player
   Potion Shape 3 now atomically consumes and installs ordered timed item-stat Buffs.
-- Active workstream: `WS-ITEM-P6-USE-POTION-RATE-004-005-001`.
-- Outcome: migrate only Player Inventory Potion Shape 4 Exp and Shape 5 Drop Buff
-  branches through authenticated `ClientUseItem`, then execute the existing shared
-  successful consume tail. Freeze exact Luck projection, duration, StackDuration
-  behavior, private packet order and Exp/drop-rate consumer effects before writing.
+- Completed workstream: `WS-ITEM-P6-USE-POTION-RATE-004-005-001`, Go `e7c5a10`;
+  Player Shape 4/5 reuse the durable Shape 3 item/Buff authority for rate Buffs.
+- Active workstream: `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001`.
+- Outcome: migrate only HeroInventory Potion Shape 3 item-stat Buff and Shape 4/5
+  Exp/Drop Buff branches through authenticated `ClientUseItem`, then execute the
+  existing Hero successful consume tail.
 - Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
-- Legacy read authority: `PlayerObject.UseItem` Potion Shape 4/5 branches and common
-  tail at `Server/MirObjects/PlayerObject.cs:5881-6337`; C# is read-only.
-- Go read/write files: bounded item-use/Buff dispatcher helpers, world/session wiring
-  and focused production-entry evidence; reuse Shape 3 Buff/item/projection owners.
-- Authority lock/dependencies: existing auth item revision/CAS plus world player Buff
-  authority; P5 Buff infrastructure is Complete and dependency-ready.
-- Registered follow-up: Legacy Hero Potion Shape 3-5 remains separately bounded; the
-  existing Go Hero potion path handles only Shape 0/1 and must not be silently claimed
-  by this Player-only workstream or reopened as broad P8 scope.
-- Forbidden scope: Hero Potion effects, every Scroll/Food/Pets/Book/Script/Transform/
-  Deco/MonsterSpawn/SealedHero branch, new Buff infrastructure, protocol layouts or
-  any C# write.
+- Legacy read authority: `HeroObject.UseItem` Potion Shape 3-5 and common tail at
+  `Server/MirObjects/HeroObject.cs:322-550`; C# is read-only.
+- Go read/write files: bounded Hero potion dispatcher, Hero Buff/runtime authority and
+  focused authenticated evidence; reuse Player Buff metadata/formulas where semantics
+  match, but preserve Hero Shape 3's max-only stat branches.
+- Authority lock/dependencies: existing latest-auth Hero item revision/CAS plus current
+  Hero runtime Buff authority; P5 Buff and P8 Hero infrastructure are Complete.
+- Forbidden scope: Player Potion behavior, Hero Shape 0-2, every Scroll/Food/Pets/Book/
+  Script/Transform/Deco/MonsterSpawn/SealedHero branch, protocol layouts or any C# write.
+
 ### Protected Go ownership
 
-- Preserve generic and imported `NoDrug` admission, riding/death gates, latest-auth
-  consumption, bag-weight refresh, Player report logging and persistence ordering from
-  Go `c4f1e38`.
-- Reuse Shape 3's per-Buff clocks and persistence-before-visible projection barrier;
-  do not create a parallel timer, player-state, projection queue or item authority.
+- Preserve Player Shape 3-5 behavior, imported `NoDrug`, death/admission gates,
+  persistence-before-visible projection and shared Player item authority.
+- Do not replace Hero HP/MP recovery or equipment state, and do not create a parallel
+  timer, projection queue, Hero persistence store or item revision authority.
 
 ### Remaining acceptance work
 
-- [ ] Freeze Player Potion Shape 4/5's exact Exp/Drop Buff metadata, Luck total,
-  Int32-wrapped duration, stacking phase and observable packet order.
-- [ ] Implement the smallest production adapter over Shape 3's shared Buff/item
-  transaction without intercepting Shape 2/3 or any non-Potion family.
-- [ ] Verify NoDrug/riding/death/no-consume gates, Exp/drop consumer effect, private
+- [ ] Freeze Hero Shape 3's max-only stat gates/order, Shape 4/5 Luck behavior,
+  StackDuration phase, visibility, PauseInSafeZone and consume packet order.
+- [ ] Adapt the existing HeroInventory production transaction without claiming Player
+  or non-Potion families and without copying the Player session transaction wholesale.
+- [ ] Verify NoDrug/dead-Hero/no-consume gates, Hero stat/Exp/drop consumers, private
   Add/Remove, auth/world/JSON/relogin, repeated and focused race behavior.
 
 ### Discovery inputs
 
-- Frozen P6 Use Catalog row/summary, Legacy Player Potion Shape 4/5 and common tail,
-  plus Go Shape 3 Buff/item/session authority.
+- Frozen P6 Use Catalog row/summary, Legacy Hero Potion Shape 3-5 and common tail,
+  plus current Go Hero potion and shared Player Buff/item authorities.
 
 ### P7 frozen child registry
 
