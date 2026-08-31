@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 21:11 (Asia/Singapore)
+Last verified: 2026-09-01 01:24 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -52,41 +52,42 @@ Keep this file at or below 300 lines and 32 KiB.
   Potion Shape 3 now atomically consumes and installs ordered timed item-stat Buffs.
 - Completed workstream: `WS-ITEM-P6-USE-POTION-RATE-004-005-001`, Go `e7c5a10`;
   Player Shape 4/5 reuse the durable Shape 3 item/Buff authority for rate Buffs.
-- Active workstream: `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001`.
-- Outcome: migrate only HeroInventory Potion Shape 3 item-stat Buff and Shape 4/5
-  Exp/Drop Buff branches through authenticated `ClientUseItem`, then execute the
-  existing Hero successful consume tail.
+- Completed workstream: `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001`, Go `8596f22`;
+  authenticated Hero Shape 3-5 now consumes, projects and reaches runtime
+  Exp/drop/attack-speed consumers with live-only Buff lifecycle parity.
+- Active workstream: `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001`.
+- Outcome: fix only the independently verified live Buff loss across Hero seal and
+  same-process SealedHero reattach; preserve the completed SealedHero item-use contract.
 - Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
-- Legacy read authority: `HeroObject.UseItem` Potion Shape 3-5 and common tail at
-  `Server/MirObjects/HeroObject.cs:322-550`; C# is read-only.
-- Go read/write files: bounded Hero potion dispatcher, Hero Buff/runtime authority and
-  focused authenticated evidence; reuse Player Buff metadata/formulas where semantics
-  match, but preserve Hero Shape 3's max-only stat branches.
-- Authority lock/dependencies: existing latest-auth Hero item revision/CAS plus current
-  Hero runtime Buff authority; P5 Buff and P8 Hero infrastructure are Complete.
-- Forbidden scope: Player Potion behavior, Hero Shape 0-2, every Scroll/Food/Pets/Book/
-  Script/Transform/Deco/MonsterSpawn/SealedHero branch, protocol layouts or any C# write.
+- Legacy read authority: `PlayerObject.SealHero`, SealedHero `UseItem`, `AddHero` and
+  `SpawnHero` at `Server/MirObjects/PlayerObject.cs:6318-6337,14528-14611`; C# read-only.
+- Go read/write files: bounded Hero detach/attach dormant-state handoff and focused
+  authenticated seal→reattach evidence; reuse the existing `DormantHeroBuffs` authority.
+- Authority lock/dependencies: completed Hero potion live Buff authority plus existing
+  Hero seal/SealedHero auth revision/CAS; P8 Hero infrastructure remains Complete.
+- Forbidden scope: any new Hero/SealedHero business behavior, Player Potion, Scroll/
+  Food/Pets/Book/Script/Transform/Deco/MonsterSpawn, protocol layouts or any C# write.
 
 ### Protected Go ownership
 
-- Preserve Player Shape 3-5 behavior, imported `NoDrug`, death/admission gates,
-  persistence-before-visible projection and shared Player item authority.
-- Do not replace Hero HP/MP recovery or equipment state, and do not create a parallel
-  timer, projection queue, Hero persistence store or item revision authority.
+- Preserve completed Hero Shape 3-5 behavior, imported `NoDrug`, death/admission gates,
+  projection barrier, live ordinary despawn/resummon and logout/relogin loss boundary.
+- Do not persist Hero Buffs to JSON, retain deleted Heroes, add a timer/projection queue/
+  item authority, or reopen general seal/create/delete behavior.
 
 ### Remaining acceptance work
 
-- [ ] Freeze Hero Shape 3's max-only stat gates/order, Shape 4/5 Luck behavior,
-  StackDuration phase, visibility, PauseInSafeZone and consume packet order.
-- [ ] Adapt the existing HeroInventory production transaction without claiming Player
-  or non-Potion families and without copying the Player session transaction wholesale.
-- [ ] Verify NoDrug/dead-Hero/no-consume gates, Hero stat/Exp/drop consumers, private
-  Add/Remove, auth/world/JSON/relogin, repeated and focused race behavior.
+- [ ] Freeze exact seal→global HeroInfo→SealedHero reattach live Buff ownership and
+  confirm logout/restart still drops Buffs because HeroInfo Save/Load omits them.
+- [ ] Transfer only the detached Hero's existing dormant Buff/clock sidecar through the
+  successful seal/reattach authority without reviving failed, deleted or stale Heroes.
+- [ ] Verify summoned/unsummoned seal, failed attach, same-process reattach, relogin,
+  authenticated persistence, repeated and focused race behavior.
 
 ### Discovery inputs
 
-- Frozen P6 Use Catalog row/summary, Legacy Hero Potion Shape 3-5 and common tail,
-  plus current Go Hero potion and shared Player Buff/item authorities.
+- Frozen P6 Use Catalog row/summary, Legacy seal/SealedHero global HeroInfo lifecycle,
+  plus current Go Hero detach/attach and dormant Buff sidecar authorities.
 
 ### P7 frozen child registry
 
