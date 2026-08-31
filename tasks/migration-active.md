@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 06:47 (Asia/Singapore)
+Last verified: 2026-08-31 08:22 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -48,8 +48,10 @@ Keep this file at or below 300 lines and 32 KiB.
   committed Inventory/Storage authorities and persisted size/deadline fields exist.
 - Outcome: migrate reachable Inventory and Storage capacity purchase/expiry behavior
   without creating a parallel grid or economy authority.
-- Completed parent transition: `DROP-P6-GROUND-LIFECYCLE-001` closed in Go `4265f77`;
-  ordinary/red death items now use real ownerless ground objects and authenticated pickup.
+- Completed parent transition: `DROP-P6-GROUND-LIFECYCLE-001` closed in Go `4265f77`
+  and its delayed-review correction `9bffc2d`; authoritative Rental removal, base
+  definitions, source/owner blocking, configurable expiry and authenticated pickup
+  now match the frozen Legacy contract.
 - Active workstream: `WS-CAPACITY-P6-INVENTORY-001`; migrate ordinary
   `@ADDINVENTORY` growth from 46 to 54 then four-slot steps through 86, including
   tiered gold costs and the capped repeated-charge quirk.

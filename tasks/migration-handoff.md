@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-31 06:47 (Asia/Singapore)
+Last updated: 2026-08-31 08:22 (Asia/Singapore)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -9,8 +9,8 @@ are not migration evidence.
 
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains ongoing; it is neither
   Complete nor Blocked.
-- `DROP-P6-GROUND-LIFECYCLE-001` is Complete in Go `4265f77`; this closes one P6
-  child only, not P6 or the persistent Goal.
+- `DROP-P6-GROUND-LIFECYCLE-001` is Complete in Go `4265f77` plus delayed-review
+  correction `9bffc2d`; this closes one P6 child only, not P6 or the persistent Goal.
 - Primary dependency-ready leaf is now `CAPACITY-P6-GRIDS-001`, matrix row 3541
   and P6 summary row 965. P6 remains frozen at nineteen children: sixteen Complete,
   one Active and two Ready.
@@ -21,7 +21,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD before this evidence update: `7661ec23` (`Close Equip migration leaf`).
+- HEAD before this evidence update: `d6c7d049` (`Close death ground migration leaf`).
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -31,45 +31,43 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `4265f77` (`Materialize player death ground drops`), not pushed.
-- Worktree and index are clean after the feature/matrix commit.
+- HEAD: `9bffc2d` (`Correct player death drop parity`), not pushed.
+- Worktree and index are clean after the correction/matrix commit.
 
 ## Completed Drop closure evidence
 
-- `playerDeathLocked` now executes Legacy normal/red Equipment and Inventory
-  selection once and stages every ordinary result through the accepted ground
-  authority before Death/ObjectDied.
-- Normal and red RNG, PK `> 200`, player/non-player killer branches, safe-zone and
-  `NoDropPlayer` boundaries, bind/wedding/sealed gates, BreakOnDeath and incomplete
-  Spirit no-continue quirks are preserved.
-- Whole drops preserve item identity. Partial stacks use the global item allocator
-  and fresh item defaults; ordinary Equipment also preserves the zero-count fresh
-  ground-object quirk. Meat durability is reduced only on the staged ground copy.
-- Death ground objects ignore `NoThrowItem`, have no owner/group pickup window and
-  expire after 120 minutes. Another authenticated live player can pick them up
-  immediately.
-- Ground objects are staged without visibility, the target auth item snapshot is
-  committed first, and rejected commits remove staged objects without leaking
-  `VisibleGround`, DeleteItem, chat or Player report output.
-- Rental returns remain one persisted batch. Renter DeleteItem/Hint packets are
-  split at their original slot positions relative to ordinary ground/delete events;
-  owner mail remains after nearby ObjectDied delivery.
-- Existing manual item/gold drop, monster/quest loot and P11 fishing/intelligent-
-  creature producer behavior remain unchanged.
-- Real authenticated `ClientMagic` FireBang death proves ground ObjectItem and
-  DeleteItem before Death/ObjectDied, target auth deletion, ownerless 120-minute
-  authority, walk/pickup removal, and final picker persistence after session close.
-- The feature also updates dead Craft/Shop transcript tests to admit exact ordered
-  ground/delete pairs and protects the dead Guild-scroll gate from random item loss.
+- Go `4265f77` materializes Legacy normal/red Equipment and Inventory death results
+  through the accepted ground authority before Death/ObjectDied; Go `9bffc2d` closes
+  every delayed-review correction without reopening the leaf.
+- Normal/red RNG, PK `> 200`, player/non-player branches, safe-zone/`NoDropPlayer`,
+  bind/wedding/sealed, BreakOnDeath and incomplete-Spirit no-continue quirks remain
+  intact. Hero and ordinary pet attackers normalize to their owning Player.
+- Whole drops preserve identity; partial stacks use global IDs and fresh defaults,
+  including ordinary Equipment's zero-count object. Death eligibility, BreakOnDeath,
+  global notification and projection use the base catalog definition.
+- Auth snapshot commits may omit only Rental IDs actually removed by death. Selected
+  Rental returns remain authoritative until the return transaction consumes them;
+  shatter/delete events retain their original slot order, and normal Inventory keeps
+  the duplicated Legacy return text.
+- Death ground objects ignore `NoThrowItem`, have no owner/group pickup window and use
+  configured `PlayerDiedItemTimeOut`. Setup.ini ordinary/death values preserve signed
+  minutes and Legacy Int32 millisecond-overflow behavior; defaults remain 30/120.
+- Ground placement keeps the dying Player blocking, ignores other dead players, blocks
+  living Heroes, and uses runtime visibility for NPCs and specialized monsters.
+  Monster item/gold producers separately pass dead-monster physical source and
+  EXPOwner pickup authority, so a co-located dead owner does not displace loot.
+- Staged objects remain invisible until auth commit; rejection rolls back objects and
+  output. Authenticated FireBang death proves ObjectItem/DeleteItem before
+  Death/ObjectDied, immediate ownerless pickup and final persisted picker state.
 
 ## Verification ledger
 
-Passed for Go `4265f77` before commit:
+Passed for Go `9bffc2d` before commit:
 
-- focused player-death, authenticated death, Rental and NPC-Rental tests at count 20;
+- config/auth Rental-removal and timeout regressions at count 20;
 - all server tests matching Death or Drop at count 20;
-- focused death/Rental race tests at count 5;
-- mixed earlier-Rental/later-ground slot-order regression at count 20;
+- focused Death/Drop race tests at count 5;
+- dead-monster/dead-EXPOwner item and gold source regressions at count 20;
 - full `go test ./... -count=1` with only the exact known Quest P7 fixture skipped;
 - full `go test -race ./... -count=1` with the same exact fixture skipped;
 - `go vet ./...`, `go build ./...`, formatting and `git diff --check`;
@@ -77,17 +75,14 @@ Passed for Go `4265f77` before commit:
 
 Integration attribution:
 
-- An earlier unfiltered full run exposed the standing Quest P7 packet-26 versus
-  packet-206 fixture and stale Craft dead-transcript expectations now legitimately
-  reached by death ground drops. A full-race run similarly exposed the Shop version.
-- Craft/Shop assertions now accept only zero or more ordered ObjectItem/DeleteItem
-  pairs followed by Death/Health; the dead Guild-scroll fixture is non-deathdrop so
-  it still tests the intended dead-use gate rather than random item loss.
-- Final exact-known-fixture-skipped full and full-race suites pass.
-- Independent review found one real mixed Rental/ordinary slot-order defect. The
-  implementation was corrected with ordered Rental markers and per-item delivery;
-  final review returned no correctness finding. A provisional delivery-tail concern
-  was withdrawn after tracing that ordinary send errors do not stop AfterSend.
+- The first final full-suite attempt returned exit 1 in `cmd/crystal-server`; its test
+  name was truncated from captured output. An immediate isolated package rerun and a
+  complete full-suite rerun both passed, followed by a passing full-race suite.
+- Delayed review identified authoritative Rental deletion, Hero/pet attribution,
+  base-definition, hidden blocker, monster physical-source and extreme timeout edges.
+  Each accepted finding has production code plus a focused regression.
+- Independent review of the final snapshot returned no remaining high-confidence
+  correctness finding.
 
 ## Active leaf and protected work
 
