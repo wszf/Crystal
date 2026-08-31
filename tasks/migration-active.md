@@ -52,15 +52,19 @@ Keep this file at or below 300 lines and 32 KiB.
   `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` (`732f8fe`), `WS-ITEM-P6-USE-BOOK-001`
   (`5779c89`), `WS-ITEM-P6-USE-SCROLL-001` (`59b2914`) and
   `WS-ITEM-P6-USE-FOOD-NONZERO-001` (`c620075`).
-- Active workstream: `DISC-P6-USE-CATALOG-CLOSURE-001`.
-- Outcome: enumerate finite remaining Script/Transform/Deco/MonsterSpawn catalogue
-  branches and their exact owners; do not implement open scope while dependencies are blocked.
+- Active workstream: `DISC-P6-USE-CATALOG-CLOSURE-001` (finite ledger complete; no
+  dependency-ready functional successor).
+- Outcome: Script, Transform, Deco and MonsterSpawn family/shape partitions, Legacy call
+  chains, packet/consume contracts, unique owners and blockers are recorded in matrix row
+  3546; open scope remains implementation-forbidden.
 - Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
 - Legacy: Script `PlayerObject.cs:6090-6092`, Transform/Deco/MonsterSpawn `:6250-6314`;
   common tail `:6330-6337`, entry/death gates `:5799-5824`; C# read-only.
-- Go files: read-only catalogue/owner tracing and dependency ledger. Blockers: Script needs
-  P7 callbacks/actions/conditions, Transform needs P5 effect authority, Deco/MonsterSpawn
-  need world object/spawn ownership and (for conquest) P9 state.
+- Go files: existing callback runner, dynamic monster constructor/admission, ordinary-pet
+  owner, conquest loader and startup decoration projection only; no item-use adapter exists.
+- Blockers: Script needs P7 callbacks/actions/conditions; Transform needs P5 effect authority;
+  Deco needs dynamic object/visibility ownership; MonsterSpawn needs world spawn/P5 base
+  authority and P9 conquest state for Shape 2.
 - Forbidden: implementing blocked Script/Transform/Deco/MonsterSpawn, reopening completed
   workstreams or mount lifecycle, protocol layouts or any C# write.
 
@@ -73,14 +77,14 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Remaining acceptance work
 
-- [ ] Trace each remaining family/shape partition, owner, dependency and exact packet/consume
-  contract into the finite closure ledger.
-- [ ] Confirm whether Deco can reuse existing visibility and whether MonsterSpawn can reuse
-  existing P5/P9 spawn state without creating a parallel authority.
-- [ ] Keep production implementation closed until a dependency-ready bounded workstream is
-  explicitly frozen; then select it as the next functional batch.
+- [x] Trace each remaining family/shape partition, owner, dependency and exact packet/consume
+  contract into the finite closure ledger in matrix row 3546.
+- [x] Confirm Deco is only covered by startup SafeZone projection and MonsterSpawn has no
+  item-use adapter; do not create parallel object/spawn authority.
+- [x] Keep production implementation closed: no dependency-ready bounded workstream remains
+  inside this leaf; wait for the registered P5/P7/P9 owners before selecting implementation.
 
-- Discovery: frozen P6 Use Catalog row/summary, Legacy remaining switch/common tail, current
+- Discovery: finite P6 Use Catalog closure ledger, Legacy remaining switch/common tail, current
   Go owner/dependency authorities and completed Food/Scroll production evidence.
 
 ### P7 frozen child registry

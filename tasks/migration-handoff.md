@@ -23,8 +23,9 @@ are not migration evidence.
   and P6 summary row 965.
 - `WS-ITEM-P6-USE-FOOD-NONZERO-001` is Complete in Go `c620075`; Player Inventory
   Food Shape != 0 repair/report semantics, including unknown nonzero shapes, are closed.
-- Active workstream is `DISC-P6-USE-CATALOG-CLOSURE-001`: bounded read-only discovery of
-  the remaining Script/Transform/Deco/MonsterSpawn branches and their exact owners.
+- `DISC-P6-USE-CATALOG-CLOSURE-001` is complete: the finite Script/Transform/Deco/
+  MonsterSpawn family/shape ledger, Legacy contracts, Go owners and blockers are recorded;
+  no dependency-ready functional successor remains inside this leaf.
 
 ## Legacy repository state
 
@@ -107,8 +108,8 @@ want 206`).
   `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` at Go `732f8fe`,
   `WS-ITEM-P6-USE-BOOK-001` at Go `5779c89`, `WS-ITEM-P6-USE-SCROLL-001` at Go
   `59b2914`, and `WS-ITEM-P6-USE-FOOD-NONZERO-001` at Go `c620075`.
-- Active workstream: `DISC-P6-USE-CATALOG-CLOSURE-001`: bounded read-only discovery of
-  remaining Script/Transform/Deco/MonsterSpawn catalogue branches and exact owners.
+- Closure workstream `DISC-P6-USE-CATALOG-CLOSURE-001` is complete; no dependency-ready
+  functional successor remains inside the active leaf. Its finite ledger is in matrix row 3546.
 - Preserve common item-use admission/death/riding gates, completed Book/Potion/
   SealedHero/Scroll/Food behavior, latest-auth item revision/CAS and persistence-before-visible
   projection.
