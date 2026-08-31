@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 09:04 (Asia/Singapore)
+Last verified: 2026-08-31 10:08 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -43,48 +43,45 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `CAPACITY-P6-GRIDS-001`
-- Status: `Active` dependency-ready functional leaf; shared P10 gold mutation,
-  committed Inventory/Storage authorities and persisted size/deadline fields exist.
-- Outcome: migrate reachable Inventory and Storage capacity purchase/expiry behavior
-  without creating a parallel grid or economy authority.
-- Completed parent transition: `DROP-P6-GROUND-LIFECYCLE-001` closed in Go `4265f77`
-  and its delayed-review correction `9bffc2d`; authoritative Rental removal, base
-  definitions, source/owner blocking, configurable expiry and authenticated pickup
-  now match the frozen Legacy contract.
-- Completed workstream: `WS-CAPACITY-P6-INVENTORY-001` in Go `e942217`; ordinary
-  `@ADDINVENTORY` now covers every 46/54/58.../86 cost boundary, capped repeated
-  charging, observer order, JSON/117 restart and authenticated failure paths.
-- Active workstream: `WS-CAPACITY-P6-STORAGE-001`; migrate ordinary `@ADDSTORAGE`
-  one-time 80-to-160 allocation, repeated ten-day extension and strict expiry.
-- Go matrix anchors to read: active row 3541 and P6 summary row 965 only.
-- Legacy read authority: Storage-capacity command parsing, account flags/deadline,
-  extra-slot access/expiry and directly reached persistence/projection helpers only;
+- Leaf ID: `ITEM-P6-EXPIRY-001`
+- Status: `Active` dependency-ready functional leaf; existing item revisions, rental
+  metadata, world ticker and JSON/117 checkpoint authorities are reusable.
+- Outcome: migrate strict periodic item and rental-lock expiry without creating a
+  parallel item lifecycle or refreshing equipment stats earlier than Legacy.
+- Completed parent transition: `CAPACITY-P6-GRIDS-001` closes with ordinary Inventory
+  and Storage capacity behavior; its Storage workstream adds 80-to-160 allocation,
+  fixed charging, ten-day extension/reset, strict expiry and observer projection.
+- Active workstream: `WS-ITEM-P6-EXPIRY-CORE-001`; freeze and implement periodic
+  `ExpireInfo` removal across Inventory/Equipment/Storage plus Inventory/Equipment
+  rental-lock expiry through the existing production ticker and item authority.
+- Go matrix anchors to read: active row 3549 and P6 summary row 965 only.
+- Legacy read authority: item process expiry loops, rental-lock deadline handling,
+  localized messages, DeleteItem output and directly reached persistence helpers only;
   C# is read-only.
-- Go read/write authority: bounded command/session, auth storage capacity/deadline and
-  existing storage protocol/bootstrap files plus authenticated capacity evidence.
-- Forbidden scope: reopening `@ADDINVENTORY`, item-use/expiry leaves, unrelated P10
-  economy behavior, unrelated protocol layout changes or C#.
+- Go read/write authority: bounded item-lifecycle auth/world/session adapter, existing
+  ticker and protocol/localization files plus authenticated expiry evidence.
+- Forbidden scope: reopening Capacity/Drop/Rental business flows, the broad item-use
+  catalogue, unrelated P10/P12 lifecycle work, protocol layout changes or C#.
 
 ### Protected Go ownership
 
-- Reuse committed gold, account Storage, login/bootstrap and checkpoint authorities.
-- Do not create a second balance, Storage grid, deadline clock or persistence model.
+- Reuse committed item revision/CAS, Storage access, rental metadata, world timing and
+  checkpoint authorities; do not create a second item collection or timer model.
+- Preserve Legacy's no-immediate-stat-refresh quirk for expired Equipment items.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact `@ADDSTORAGE` admission, first expansion cost/allocation, repeated
-  extension cost, ten-day deadline arithmetic and strict expiry equality.
-- [ ] Implement the smallest production auth/session adapter and exact gold/Resize/
-  chat ordering while preserving existing storage password/NPC/item gates.
-- [ ] Verify extra-slot access before/at/after expiry, authenticated relogin/restart,
-  repeated/race, observer delivery and persistence-failure behavior; then close the
-  parent Capacity leaf only if no registered residual remains.
+- [ ] Freeze before/equal/after deadline rules, grid scan/order, text/packet order and
+  the exact distinction between item removal and rental-lock release.
+- [ ] Implement the smallest production ticker/auth/session path with atomic item
+  authority, persistence-before-visibility and deterministic simultaneous expiry.
+- [ ] Verify three item-expiry grids, two rental-lock grids, unchanged live equipment
+  stats until later refresh, logout/restart, authenticated output, repeated and race.
 
 ### Discovery inputs
 
-- Frozen P6 capacity row/summary plus Complete storage, item-grid, command, P10 gold
-  and P12 checkpoint evidence.
+- Frozen P6 expiry row/summary plus Complete grid, Storage, Rental, localization and
+  P12 checkpoint evidence.
 
 ### P7 frozen child registry
 
@@ -125,15 +122,15 @@ owns exact routing evidence.
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
 `01a037ed-f35d-7d23-a532-803fdce5a5ff` required two correction rounds and then
-accepted all nineteen children with no finding. Sixteen are Complete, Capacity is
-Active and two are Ready.
+accepted all nineteen children with no finding. Seventeen are Complete, Item Expiry is
+Active and Item Use Catalog is Ready.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
 |---|---|---|---|---|
 | `ITEM-P6-WIRE-CATALOG-001` | Complete | — | existing committed evidence | layouts/nesting/grids/definitions |
 | `ITEM-P6-GRID-MUTATION-001` | Complete | logging/localization | committed/accepted grid mutation evidence | error/report/response order + normalized revision/CAS |
 | `ITEM-P6-GRID-CROSS-001` | Complete | P8/P11 feature owners (Complete) | committed/accepted cross-grid auth/world/session evidence | exact positive/negative grid matrix |
-| `CAPACITY-P6-GRIDS-001` | Active | P10 gold | command/protocol/auth storage | 46-86, 80-160, expiry/restart |
+| `CAPACITY-P6-GRIDS-001` | Complete | P10 gold | committed capacity command/protocol/auth/world evidence | 46-86, 80-160, expiry/restart |
 | `ADMIN-P6-ITEM-COMMAND-001` | Complete | P3 authority + P5 creation | committed Go `9e7edac7aaf22f35677f90427ca79da4e998b096` | MAKE/CLEARBAG quirks |
 | `EQUIP-P6-CORE-001` | Complete | P8/P11 feature owners (Complete) | equipment/session | slots/sockets/stats/order/race |
 | `ITEM-P6-USE-ADMISSION-001` | Complete | P1 LOC + P5 stats | committed Go `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2` | all gates and localized order |
@@ -141,7 +138,7 @@ Active and two are Ready.
 | `ITEM-P6-USE-CATALOG-001` | Ready | P4/P5/P7/P9/P10 | item use/session | exact known/unknown shape partition |
 | `ITEM-P6-SHOUT-ARMING-001` | Complete | — | committed Go `1d399992a690614a122cc46b3e64b4cda8272c2f` | Hint/UseItem/state/repeated/race |
 | `DROP-P6-GROUND-LIFECYCLE-001` | Complete | P5/P11 producers | ground/drop/death/session | actual death ground drops |
-| `ITEM-P6-EXPIRY-001` | Ready | P10/P12 consumers | item lifecycle/ticker/session | strict times/no-refresh/restart |
+| `ITEM-P6-EXPIRY-001` | Active | P10/P12 consumers | item lifecycle/ticker/session | strict times/no-refresh/restart |
 | `STORAGE-P6-ACCOUNT-001` | Complete | P2/P7 final access | existing committed evidence | default 80-slot boundary |
 | `TRADE-P6-PLAYER-001` | Complete | P10 mail/economy | existing committed evidence | two-peer lifecycle/race |
 | `RENTAL-P6-LIFECYCLE-001` | Complete | P10 owner + P12 restart | existing committed evidence | expiry/death/return/idempotency |
