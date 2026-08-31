@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 03:12 (Asia/Singapore)
+Last verified: 2026-09-01 05:21 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -59,39 +59,39 @@ Keep this file at or below 300 lines and 32 KiB.
 - Completed workstream: `WS-ITEM-P6-USE-BOOK-001`, Go `5779c89`; Player Inventory Book
   now atomically learns known Shape→Spell records and consumes one Book through the
   latest-auth item/Magics authority, with NewMagic/RefreshStats and reload evidence.
-- Active workstream: `WS-ITEM-P6-USE-SCROLL-001`.
-- Outcome: migrate only Player Inventory Scroll shapes 0-7 and 11-12, preserving the
-  existing admission gates, effect-specific owners and successful consume tail.
+- Completed workstream: `WS-ITEM-P6-USE-SCROLL-001`, Go `59b2914`; Player Inventory
+  Scroll shapes 0-7 and 11-12 use existing authorities with authenticated persistence,
+  observer and success/failure evidence.
+- Active workstream: `WS-ITEM-P6-USE-FOOD-NONZERO-001`.
+- Outcome: verify/close Player Inventory Food Shape != 0 repair semantics, including unknown
+  nonzero shapes, through the existing P8 mount authority without reopening mount lifecycle.
 - Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
-- Legacy read authority: Scroll use at `Server/MirObjects/PlayerObject.cs:5895-6075`
-  and common tail at `PlayerObject.cs:6329-6337`; C# is read-only.
-- Go read/write files: bounded Scroll item-use production dispatch, existing teleport,
-  repair, credit, lottery and item authorities, plus focused authenticated evidence.
-- Authority lock/dependencies: existing latest-auth item revision/CAS, P4/P5 teleport
-  and visibility, P9 conquest/economy, P10 credit/gold, and P7 NPC infrastructure.
-- Forbidden scope: Book/food/pets/script/transform/deco/MonsterSpawn/SealedHero,
-  Scroll 8-10/13-15, protocol layouts or any C# write.
+- Legacy: Food `PlayerObject.cs:6093-6117`, common tail `:6329-6337`, gates `:5799-5824`; C# read-only.
+- Go files: Food production dispatch/reporting in `main.go`, existing `mounts.go` authority
+  and focused authenticated evidence. Dependencies: latest-auth CAS, P8 mount/equipment
+  refresh, item report/persistence and common admission/death gates.
+- Forbidden: Book/Scroll/Pets/Script/Transform/Deco/MonsterSpawn/SealedHero, mount
+  lifecycle changes, protocol layouts or any C# write.
 
 ### Protected Go ownership
 
 - Preserve shared item-use admission/death/riding gates, completed Book/Potion/SealedHero
   behavior, persistence-before-visible ordering and all existing item authorities.
-- Do not create a parallel item transaction, teleport/repair/economy authority or spell
-  runtime, and do not implement unrelated Scroll 8-10/13-15 or spell-casting behavior.
+- No parallel transaction/teleport/repair/economy authority or spell runtime; no unrelated
+  Scroll 8-10/13-15 or spell-casting behavior.
 
 ### Remaining acceptance work
 
-- [ ] Freeze Scroll 0-7 and 11-12 effect lookup, failure gates, RNG/economy/teleport
-  outcomes, packet order and successful consume/report tail.
-- [ ] Add each Scroll branch through its existing P4/P9/P10 owner and latest-auth item
-  authority without copying Book, Hero or unrelated item-family transactions.
-- [ ] Verify known/unknown/failure/stack/last-item Scrolls, JSON/relogin, observers,
-  authenticated transcripts, count-20, focused race and integration behavior.
+- [ ] Freeze Food Shape != 0 repair lookup, failure gates, durability/cap behavior,
+  packet order and successful consume/report tail.
+- [ ] Close the missing Food item report through the existing P8 mount authority and
+  latest-auth item CAS without duplicating mount lifecycle or item transactions.
+- [ ] Verify Shape 1 and unknown nonzero shapes, full/empty/dead/failure/stack paths,
+  JSON/relogin, observers, authenticated transcripts, count-20, focused race and
+  integration behavior.
 
-### Discovery inputs
-
-- Frozen P6 Use Catalog row/summary, Legacy Scroll switch/common tail, plus current Go
-  teleport/repair/credit/lottery/item authorities and production-session evidence.
+- Discovery: frozen P6 Use Catalog row/summary, Legacy Food switch/common tail, current
+  Go mount/equipment authorities and completed Scroll production evidence.
 
 ### P7 frozen child registry
 
