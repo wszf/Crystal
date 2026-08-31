@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-08-31 08:22 (Asia/Singapore)
+Last verified: 2026-08-31 09:04 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -52,30 +52,34 @@ Keep this file at or below 300 lines and 32 KiB.
   and its delayed-review correction `9bffc2d`; authoritative Rental removal, base
   definitions, source/owner blocking, configurable expiry and authenticated pickup
   now match the frozen Legacy contract.
-- Active workstream: `WS-CAPACITY-P6-INVENTORY-001`; migrate ordinary
-  `@ADDINVENTORY` growth from 46 to 54 then four-slot steps through 86, including
-  tiered gold costs and the capped repeated-charge quirk.
+- Completed workstream: `WS-CAPACITY-P6-INVENTORY-001` in Go `e942217`; ordinary
+  `@ADDINVENTORY` now covers every 46/54/58.../86 cost boundary, capped repeated
+  charging, observer order, JSON/117 restart and authenticated failure paths.
+- Active workstream: `WS-CAPACITY-P6-STORAGE-001`; migrate ordinary `@ADDSTORAGE`
+  one-time 80-to-160 allocation, repeated ten-day extension and strict expiry.
 - Go matrix anchors to read: active row 3541 and P6 summary row 965 only.
-- Legacy read authority: Inventory-capacity command parsing, cost/size mutation and
-  directly reached persistence/projection helpers only; C# is read-only.
-- Go read/write authority: bounded command/session, auth capacity and protocol
-  projection files plus authenticated capacity evidence.
-- Forbidden scope: `@ADDSTORAGE` until the next bounded workstream, item-use/expiry
-  leaves, unrelated P10 economy behavior, protocol layout changes or C#.
+- Legacy read authority: Storage-capacity command parsing, account flags/deadline,
+  extra-slot access/expiry and directly reached persistence/projection helpers only;
+  C# is read-only.
+- Go read/write authority: bounded command/session, auth storage capacity/deadline and
+  existing storage protocol/bootstrap files plus authenticated capacity evidence.
+- Forbidden scope: reopening `@ADDINVENTORY`, item-use/expiry leaves, unrelated P10
+  economy behavior, unrelated protocol layout changes or C#.
 
 ### Protected Go ownership
 
-- Reuse committed gold, item-grid, login/bootstrap and checkpoint authorities.
-- Do not create a second balance, Inventory grid or persistence model.
+- Reuse committed gold, account Storage, login/bootstrap and checkpoint authorities.
+- Do not create a second balance, Storage grid, deadline clock or persistence model.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact `@ADDINVENTORY` command admission, 46/54/58.../86 boundaries,
-  cost tiers, low-gold silence/text and capped repeated-charge behavior.
-- [ ] Implement the smallest production command/auth adapter and exact Resize/gold/
-  chat ordering without changing ordinary item-grid mutation.
-- [ ] Verify authenticated purchase, relogin/restart persistence, repeated/race and
-  failure atomicity; then bound the separate `@ADDSTORAGE` workstream.
+- [ ] Freeze exact `@ADDSTORAGE` admission, first expansion cost/allocation, repeated
+  extension cost, ten-day deadline arithmetic and strict expiry equality.
+- [ ] Implement the smallest production auth/session adapter and exact gold/Resize/
+  chat ordering while preserving existing storage password/NPC/item gates.
+- [ ] Verify extra-slot access before/at/after expiry, authenticated relogin/restart,
+  repeated/race, observer delivery and persistence-failure behavior; then close the
+  parent Capacity leaf only if no registered residual remains.
 
 ### Discovery inputs
 
