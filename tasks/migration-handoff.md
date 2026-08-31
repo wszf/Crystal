@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-08-31 14:11 (Asia/Singapore)
+Last updated: 2026-08-31 15:37 (Asia/Singapore)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -11,19 +11,18 @@ are not migration evidence.
   Complete nor Blocked.
 - P6 remains scope-frozen at nineteen children: eighteen Complete and
   `ITEM-P6-USE-CATALOG-001` is the sole Active unfinished child.
-- `ITEM-P6-EXPIRY-001` is Complete in Go `e7e3b4c`; this closes one P6 leaf only,
-  not P6 or the persistent Goal.
-- Primary dependency-ready leaf is `ITEM-P6-USE-CATALOG-001`, matrix row 3546 and
-  P6 summary row 965.
-- Active workstream is `WS-ITEM-P6-USE-NOOP-CONSUME-001`: Legacy successful
-  no-effect consumption for otherwise-unmatched Potion/Scroll/Pets shapes and
-  every SiegeAmmo shape.
+- `WS-ITEM-P6-USE-NOOP-CONSUME-001` is Complete in Go `84adba5`; this closes one
+  bounded workstream only, not the active leaf, P6 or the persistent Goal.
+- Primary dependency-ready leaf remains `ITEM-P6-USE-CATALOG-001`, matrix row 3546
+  and P6 summary row 965.
+- Active workstream is `WS-ITEM-P6-USE-POTION-BUFF-003-001`: only Legacy Potion
+  Shape 3's timed item-stat Buff branch plus the shared successful consume tail.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD before this evidence update: `d597ed36` (`Record storage capacity migration`).
+- HEAD before this evidence update: `c4669e63` (`Record item expiry migration`).
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -33,85 +32,86 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `e7e3b4c` (`Migrate item expiry lifecycle`), not pushed.
+- HEAD: `84adba5` (`Migrate no-effect item use tail`), not pushed.
 - Worktree and index are clean after the feature/matrix commit.
 
-## Completed Item Expiry evidence
+## Completed no-effect Item Use evidence
 
-- A strict per-player one-minute schedule runs only when world time is later than
-  the previous schedule point; item and rental-lock deadlines themselves are
-  inclusive.
-- Auth applies one atomic Inventory→Equipment→Storage scan. Inventory and
-  Equipment remove expired items and release expired rental locks; Storage only
-  removes expired items. `ExpireInfo` wins over rental unlock on the same item.
-- Localized Hint and `DeleteItem` packets preserve Legacy order and Observer
-  parity. Login enables the ticker only after the complete bootstrap transcript.
-- Expired top-level and nested UniqueIDs retain process-local deletion tombstones.
-  Unlock acknowledgement releases temporary protection only after an explicit
-  unlocked player-grid snapshot and cannot erase a later deletion tombstone.
-- Market/GameShop stale Inventory projections preserve the current protected
-  container location and reject an impossible full-grid rebase rather than
-  overwrite an ordinary item. Storage Store/TakeBack now share CrossGrid CAS.
-- Item changes advance the shared revision and converge auth, world and session
-  projections without immediately refreshing Equipment-derived live stats.
-- JSON mode and checkpoint-only version-117 mode persist before the first visible
-  packet, retry once, log and close the affected session on final failure.
-- Target/Observer transcript, JSON reload, version-117 checkpoint/reload and
-  relogin prove committed removal and rental-lock release survive restart.
+- The production `ClientUseItem` dispatcher now owns exactly four Legacy successful
+  no-effect partitions: Potion shapes outside 0-5, Scroll shapes outside 0-15,
+  Pets shapes 29+ and every SiegeAmmo shape.
+- Shared `CanUseItem` admission, the non-Scroll/Potion riding gate and the dead-player
+  gate run before the no-effect tail. Mounted Pets/SiegeAmmo therefore fail without
+  consumption; they succeed after dismount. Potion/Scroll retain the riding exception.
+- The latest auth `CharacterItemMutation` decrements one stack unit or clears the
+  Inventory slot, advances the shared item revision, projects the result to world
+  and session state, persists before response, emits one Player `Item Lost` report
+  and returns `UseItem=true` without an effect packet.
+- No-effect and ordinary basic-Potion commits refresh only current bag weight. They
+  preserve `ItemExpiryStatsDeferred`, MaxHP/MP, combat stats and appearance until an
+  explicit Equipment/stat refresh, matching Legacy's `RefreshBagWeight` tail.
+- A JSON rename that committed account state but failed its later checkpoint remains
+  a successful item mutation: the server logs the checkpoint error, reports the item
+  loss and returns success rather than allowing a reconnect retry to consume twice.
+- Item Expiry unlock protection now releases only when current auth and the detached
+  world snapshot contain the same unlocked item in the same player grid/slot. Storage
+  absence retains protection; TakeBack convergence releases it; later ordinary
+  consumption no longer restores the item.
+- Economy commits merge incoming runtime item definitions into current auth metadata
+  instead of replacing protected rental/expiry definitions with a stale session list.
 
 ## Verification ledger
 
-Passed for Go `e7e3b4c` before commit:
+Passed for Go `84adba5` before commit:
 
-- focused Item Expiry, protected Inventory, persistence helper, Rental authority
-  and Storage CrossGrid tests at count 20;
-- focused Item Expiry/Market/GameShop/Rental/Storage race tests at count 5;
-- adjacent economy/session tests at count 20 with only the exact known Quest P7
-  fixture skipped;
-- full `go test ./... -count=1` with only
-  `TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin` skipped;
+- focused no-effect, Item Expiry, protected Inventory, economy catalogue, potion
+  refresh and player item-authority tests at count 20;
+- authenticated no-effect session repetition at count 5 and focused race at count 5;
+- adjacent UseItem/Potion/Market/Auction/GameShop/Rental/Storage/Expiry tests at
+  count 20;
+- full `go test ./... -count=1` with only the known date-sensitive
+  `TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin` fixture skipped;
 - full race with that Quest fixture plus the two unrelated isolated-green fixtures
   `TestProductionTickerInitializesLightFromUTCOnNonUTCHost` and
   `TestSessionHallucinationTranscript` skipped;
-- `go vet ./...`, `go build ./...`, formatting and `git diff --check`;
-- tracked/staged/untracked `.cs` audits in both repositories returned no paths;
-- final independent diff/contract reviews found no remaining high-confidence Item
-  Expiry, nested tombstone or full-grid stale-writeback defect.
+- `go vet ./...`, `go build ./...`, formatting, `git diff --check`, commit diff check
+  and independent final review with no finding;
+- tracked/staged/untracked `.cs` audits in both repositories returned no paths.
 
-The first adjacent count-20 command included the known Quest P7 fixture and failed
-at `quest_progress_session_test.go:80`: its fixed 2026-08-29 ground-item clock is
-now older than the real 2026-08-31 process clock, so `ObjectRemove` precedes the
-expected quest-item packet. The exact same adjacent gate passes when only that
-pre-existing date-sensitive fixture is skipped; the failure was not hidden.
+The first full-race run exposed a real race introduced by the initial unconditional
+unlock acknowledgement: it copied mutable session `gameCharacter` while a world
+notification appended a runtime item definition. The final code acknowledges against
+the already-detached world snapshot captured under `world.mu`. The isolated death
+session race test then passed at count 5 and the complete race gate passed.
+
+The known Quest P7 fixture remains date-sensitive: its fixed 2026-08-29 ground-item
+clock is older than the real 2026-08-31 process clock. It remains the only non-race
+full-suite skip and was not hidden.
 
 ## Active leaf and protected work
 
 - Active leaf: `ITEM-P6-USE-CATALOG-001`.
-- Active workstream: `WS-ITEM-P6-USE-NOOP-CONSUME-001`.
-- Legacy authority is read-only `PlayerObject.UseItem` dispatch/tail at
-  `Server/MirObjects/PlayerObject.cs:5826-6337`:
-  - Potion shapes outside 0-5 reach the common successful tail with no effect;
-  - Scroll shapes outside 0-15 do the same;
-  - Pets shapes 29+ do the same, while every shape below 29 remains feature-owned;
-  - SiegeAmmo every shape reaches the TODO branch and then the successful tail.
-- The common tail decrements `Count` or clears the Inventory slot, refreshes bag
-  weight, records `ItemChanged`, sets `UseItem.Success=true` and sends the response.
-- Reuse common item-use admission, `commitPlayerItemMutation`, shared item revision,
-  world projection and persistence. Do not create a parallel item authority.
-- Do not implement Potion 0-5, Scroll 0-15, Pets below 29, Food, Book, Script,
-  Transform, Deco, MonsterSpawn or SealedHero effects in this workstream.
+- Completed workstream: `WS-ITEM-P6-USE-NOOP-CONSUME-001`, Go `84adba5`.
+- Active workstream: `WS-ITEM-P6-USE-POTION-BUFF-003-001`.
+- It owns only Potion Shape 3's timed item-stat Buff effect and common consume tail.
+  Freeze exact stat mapping, duration, replacement/stacking and packet order from
+  read-only Legacy evidence before implementation.
+- Remaining catalogue scope stays exactly matrix row 3546. Do not reopen accepted
+  Scroll 8/9, Scroll 10/13-15, Food 0/1, Pets 0-28, MonsterSpawn 1, SealedHero or
+  any completed feature lifecycle.
+- Reuse common admission, item revision/CAS, auth/world/session projection, Player
+  report logging and persistence. Do not create a parallel item authority.
 
 ## Exact recovery sequence
 
 1. Verify both repositories independently; preserve `tasks/lessons.md` and rerun
    tracked/staged/untracked `.cs` audits.
 2. Read only matrix rows 965 and 3546 plus the active index and this handoff.
-3. Reconfirm the four Legacy no-op partitions and common tail; every `.cs` remains
-   read-only.
-4. Add the smallest Go classifier/consume helper and invoke it in the authenticated
-   `ClientUseItem` route after shared admission and before generic unhandled failure.
-5. Verify negative/boundary/unknown shapes, stack decrement versus slot removal,
-   successful response with zero effect packets, persistence/relogin, repeated and
-   race behavior; non-owned shapes must remain unchanged.
+3. Freeze Potion Shape 3's exact stat-to-Buff mapping, duration, replacement/stacking
+   and observable packet order from read-only Legacy C# evidence.
+4. Reuse current world Buff lifecycle and latest-auth item mutation; do not introduce
+   another timer, player-state or persistence authority.
+5. Implement through authenticated `ClientUseItem`, verify effect/consume packet order,
+   admission, expiry, persistence/relogin, repeated and race behavior.
 6. Update matrix/index/handoff, create Go feature and Legacy evidence commits, then
    continue the persistent Goal without push or merge.
