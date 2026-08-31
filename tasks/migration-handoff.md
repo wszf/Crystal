@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-01 01:24 (Asia/Singapore)
+Last updated: 2026-09-01 02:08 (Asia/Singapore)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -11,20 +11,19 @@ are not migration evidence.
   Complete nor Blocked.
 - P6 remains scope-frozen at nineteen children: eighteen Complete and
   `ITEM-P6-USE-CATALOG-001` is the sole Active unfinished child.
-- `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001` is Complete in Go `8596f22`;
-  this closes one bounded workstream only, not the active leaf, P6 or the Goal.
+- `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
+  this closes one bounded correction only, not the active leaf, P6 or the Goal.
 - Primary dependency-ready leaf remains `ITEM-P6-USE-CATALOG-001`, matrix row 3546
   and P6 summary row 965.
-- Active correction is `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001`: preserve
-  only live Hero Buff/clock state across successful seal and same-process
-  SealedHero reattach without reopening the completed SealedHero contract.
+- Active workstream is `WS-ITEM-P6-USE-BOOK-001`: only Player Inventory Book use,
+  Shape→Spell learning and the existing successful consume tail.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD before this evidence update: `7c0caf13`
-  (`Record Potion Shape 4 and 5 migration`).
+- HEAD before this evidence update: `984963f8`
+  (`Record Hero Potion Buff migration`).
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -34,94 +33,82 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `8596f22` (`Migrate Hero Potion stat Buffs`), not pushed.
-- The committed feature tree is clean and no generated binary remains in the repo.
+- HEAD: `732f8fe` (`Preserve Hero Buffs across seal reattach`), not pushed.
+- The committed correction tree is clean and no generated binary remains in the repo.
 
-## Completed Hero Potion Shape 3-5 evidence
+## Completed Hero seal Buff lifecycle evidence
 
-- Authenticated HeroInventory Potion Shape 3 maps base plus added item Stats into
-  the fixed max-only Impact/Magic/Taoist/Storm/HealthAid/ManaAid/Defence/
-  MagicDefence/BagWeight order. Each total must be positive; zero-stat items still
-  consume successfully.
-- Shape 4/5 always create private invisible Exp/Drop Buffs from base plus added Luck.
-  Zero produces sparse empty Stats, negative values remain, and duration preserves
-  Legacy Int32 `durability * 60000` overflow.
-- The production path reuses the existing Hero latest-auth item revision/CAS,
-  Hero persistence callback, Buff runtime and Player Potion projection barrier.
-  It does not add a timer, queue, Hero persistence store or item authority.
-- Auth commit and runtime install are atomic. JSON is saved before Item Lost/AddBuff;
-  deferred PauseBuff/RemoveBuff/health projection drains after AddBuff and before
-  `UseItem=true`, including zero/nonpositive-duration immediate expiry.
-- StackDuration keeps the first Stats and existing per-Buff LastTime/NextTime phase;
-  each new Buff has an independent clock. Finite paused nonpositive Buffs still expire,
-  Infinite Buffs remain, and simultaneous removals project in Legacy reverse order.
-- Hero stat refresh now advances HeroRevision, feeds real Exp/drop/attack-speed
-  consumers, and projects HP/MP clamps after HealthAid/ManaAid expiry.
-- Safe-zone pause follows real boundary changes across walking, owner-follow teleport,
-  AssassinBird/Oma-family push, Shoulder Dash, HornedMage and TurtleKing teleport.
-  A paused dormant Buff respawned outside remains paused until a real enter/exit edge,
-  matching Legacy `InSafeZone` setter behavior.
-- Ordinary live despawn/resummon preserves Buffs and clocks, resets LastTime while
-  retaining NextTime, replays AddBuff, and restores hiding before ObjectHero projection
-  plus monster-target cleanup. Logout/relogin intentionally drops Buffs because Legacy
-  HeroInfo Save/Load does not serialize them.
-- Strict review findings for ObjectHero hidden projection and Shoulder Dash safe-zone
-  reconciliation were fixed. The proposed outside-resummon unpause change was rejected
-  after direct Legacy tracing and retained as an explicit regression test.
+- Legacy `SealHero` removes the Hero from character slots but leaves the same global
+  live HeroInfo, whose Buff list is reused by `AddHero`/`SummonHero` in the same process.
+  HeroInfo Save/Load still omits Buffs, so logout/relogin and restart remain loss edges.
+- Go now clones a summoned Hero's Buffs and per-type clocks before successful seal
+  removes its runtime. An already-unsummoned Hero keeps its existing dormant sidecar.
+- DeleteHero removes only the released Hero's sidecar. Other sealed Hero sidecars owned
+  by the same live session are no longer erased by broad slot-array cleanup.
+- Same-owner SealedHero attach reuses the dormant state. If a sealed item is transferred
+  between two online sessions, world attach atomically moves that Hero's sidecar from
+  the source player to the authenticated target before summon.
+- Failed/stale attach does not move the sidecar because ownership transfer runs only
+  after the runtime identity guard accepts the authoritative attach result.
+- Summon clones the transferred state, deletes its dormant entry, resets LastTime,
+  retains NextTime, restores hidden/paused state and replays AddBuff through the existing
+  ObjectHero/health/colour/AddBuff/spawn-state/UseItem ordering.
+- No Buff enters Character, auth or JSON persistence; no timer, queue, global durable
+  Hero store, item authority or SealedHero business branch was added.
 
 ## Verification ledger
 
-Passed for Go `8596f22` before commit, with final post-review reruns where noted:
+Passed for Go `732f8fe` before commit:
 
-- focused Hero Shape 3-5 domain/auth/session, projection, phase, safe-zone, dormant,
-  Exp/drop/attack-speed and expiry tests at count 20;
-- post-review hiding/ObjectHero, generic forced movement and Shoulder Dash boundary
-  tests at count 20, plus focused race at count 5;
-- adjacent Player Potion and AssassinBird/HornedMage/TurtleKing production tests;
+- summoned and unsummoned SealHero plus DeleteHero transcript/sidecar matrix at count 20;
+- authenticated NPC seal→ClientUseItem→same-process reattach→AddBuff and relogin-loss
+  transcript, valid cross-owner handoff, full-slot and missing-Hero failures at count 20;
+- focused race for the same production paths at count 5;
+- complete `cmd/crystal-server` package with the registered Quest fixture skipped;
 - full `go test ./... -skip '^TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin$' -count=1`;
-- full `go test -race ./...` with the Quest fixture plus registered isolated-green
+- final full `go test -race ./...` with the Quest fixture plus registered isolated-green
   `TestProductionTickerInitializesLightFromUTCOnNonUTCHost` and
   `TestSessionHallucinationTranscript` skips;
-- `go vet ./...`, `go build ./...`, formatting, `git diff --check`, control-plane
-  checker, staged diff check and final independent read-only review with no finding;
-- tracked/staged/untracked `.cs` audits in both repositories returned no paths.
+- `go vet ./...`, `go build ./...`, formatting, `git diff --check`, staged diff check,
+  C# audits and an independent read-only correction review with no finding.
 
-The Quest P7 fixture still fails on the unchanged `e7c5a10` baseline with
-`mail packet id = 26, want 206`, so it remains a registered pre-existing blocker.
-One earlier full-suite OmaMage transcript produced attack-roll bounds `[2 1]` instead
-of `[1]`; it passed in isolation at count 20 and the final full non-race rerun passed,
-so it was recorded as a one-off full-suite flake rather than skipped.
+The first full-race invocation returned exit 1 in `cmd/crystal-server`, but its displayed
+output was truncated before the failing test name. An immediate isolated server-race
+rerun passed, followed by a complete full-race rerun that also passed. The Quest P7
+fixture remains the unchanged registered baseline blocker (`mail packet id = 26,
+want 206`).
 
 ## Active leaf and protected work
 
 - Active leaf: `ITEM-P6-USE-CATALOG-001`.
 - Completed workstreams: `WS-ITEM-P6-USE-NOOP-CONSUME-001` at Go `84adba5`,
   `WS-ITEM-P6-USE-POTION-BUFF-003-001` at Go `c4f1e38`,
-  `WS-ITEM-P6-USE-POTION-RATE-004-005-001` at Go `e7c5a10`, and
-  `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001` at Go `8596f22`.
-- Active correction: `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001`.
-- Verified regression: Legacy seal removes the Hero from the character slots but keeps
-  the same global live HeroInfo, whose Buff list is reused by same-process SealedHero
-  attach. Go `commitDetachedHero` currently deletes `DormantHeroBuffs[heroID]` when the
-  Hero leaves the slot array, so the reattached Hero loses live Buffs.
-- Preserve the completed seal/SealedHero item transaction, admission, persistence,
-  Hero revision/CAS, consume/report and spawn behavior. Do not persist Buffs to JSON,
-  retain deleted Heroes, or change failed/stale attach outcomes.
-- Do not intercept Player Potion, Hero Potion Shape 0-5, Scroll, Food, Pets, Book,
-  Script, Transform, Deco, MonsterSpawn or any other SealedHero business behavior.
+  `WS-ITEM-P6-USE-POTION-RATE-004-005-001` at Go `e7c5a10`,
+  `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001` at Go `8596f22`, and
+  `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` at Go `732f8fe`.
+- Active workstream: `WS-ITEM-P6-USE-BOOK-001`.
+- It owns only Player Inventory Book admission/effect, Player Magics mutation,
+  NewMagic/RefreshStats projection and the existing consume/report tail.
+- Preserve common item-use admission/death/riding gates, duplicate Book rejection,
+  latest-auth item revision/CAS, persistence-before-visible projection and current
+  Potion/Hero/SealedHero behavior.
+- Do not implement Hero Books, Scroll, Food, Pets, Script, Transform, Deco,
+  MonsterSpawn, spell casting/combat, protocol changes or another Magic catalogue,
+  transaction or persistence authority.
 
 ## Exact recovery sequence
 
 1. Verify both repositories independently; preserve `tasks/lessons.md` and rerun
    tracked/staged/untracked `.cs` audits.
 2. Read only matrix rows 965 and 3546 plus the active index and this handoff.
-3. Trace read-only Legacy SealedHero use at `PlayerObject.cs:6318-6337` and
-   `SealHero`/`AddHero`/`SpawnHero` around `PlayerObject.cs:14528-14611`; do not write C#.
-4. Trace Go `stageHeroDetach`, `commitDetachedHero`, SealedHero item attach and current
-   `DormantHeroBuffs` ownership. Freeze summoned/unsummoned seal, failed attach,
-   same-process reattach and relogin boundaries before editing.
-5. Reuse the existing live dormant sidecar and authenticated Hero item authority;
-   transfer only the successfully sealed Hero's Buff/clock state and never serialize it.
-6. Verify authenticated seal→reattach, failure/no-consume, logout/relogin, count-20,
-   focused race and integration gates; update evidence, create Go and Legacy commits,
-   then continue the persistent Goal without push or merge.
+3. Trace read-only Legacy Book admission at `HumanObject.cs:1237-1242`, Book use at
+   `PlayerObject.cs:6077-6089`, common tail at `6329-6337`, and UserMagic defaults at
+   `Server/MirDatabase/MagicInfo.cs:88-119`; do not write C#.
+4. Trace Go `characterItemUseAdmissionFor`, existing Player `StoredMagic`/NewMagic/
+   stat-refresh projection and latest-auth item mutation before freezing the branch.
+5. Implement only known Spell learning: missing MagicInfo and duplicate Spell fail
+   without consume; success adds default Level/Key/Experience/temp fields, persists
+   before projection, sends NewMagic/stat effects, reports Item Lost and consumes once.
+6. Verify known/unknown/duplicate Book, JSON/relogin, stat consumers, authenticated
+   transcript, count-20, focused race and integration gates; update evidence, create Go
+   and Legacy commits, then continue the persistent Goal without push or merge.

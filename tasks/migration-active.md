@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 01:24 (Asia/Singapore)
+Last verified: 2026-09-01 02:08 (Asia/Singapore)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -55,39 +55,40 @@ Keep this file at or below 300 lines and 32 KiB.
 - Completed workstream: `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001`, Go `8596f22`;
   authenticated Hero Shape 3-5 now consumes, projects and reaches runtime
   Exp/drop/attack-speed consumers with live-only Buff lifecycle parity.
-- Active workstream: `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001`.
-- Outcome: fix only the independently verified live Buff loss across Hero seal and
-  same-process SealedHero reattach; preserve the completed SealedHero item-use contract.
+- Completed correction: `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001`, Go `732f8fe`; successful seal preserves live Buff/clock state through same-process reattach.
+- Active workstream: `WS-ITEM-P6-USE-BOOK-001`.
+- Outcome: migrate only Player Inventory Book use from item Shape to a new learned
+  `UserMagic`, then execute the existing successful consume tail.
 - Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
-- Legacy read authority: `PlayerObject.SealHero`, SealedHero `UseItem`, `AddHero` and
-  `SpawnHero` at `Server/MirObjects/PlayerObject.cs:6318-6337,14528-14611`; C# read-only.
-- Go read/write files: bounded Hero detach/attach dormant-state handoff and focused
-  authenticated seal→reattach evidence; reuse the existing `DormantHeroBuffs` authority.
-- Authority lock/dependencies: completed Hero potion live Buff authority plus existing
-  Hero seal/SealedHero auth revision/CAS; P8 Hero infrastructure remains Complete.
-- Forbidden scope: any new Hero/SealedHero business behavior, Player Potion, Scroll/
-  Food/Pets/Book/Script/Transform/Deco/MonsterSpawn, protocol layouts or any C# write.
+- Legacy read authority: Book admission at `Server/MirObjects/HumanObject.cs:1237-1242`,
+  use at `PlayerObject.cs:6077-6089` and common tail at `6329-6337`; C# is read-only.
+- Go read/write files: bounded item-use transaction/session dispatch plus existing Player
+  Magic projection/persistence helpers and focused authenticated Book evidence.
+- Authority lock/dependencies: existing latest-auth item revision/CAS and Player Magics
+  persistence/projection; spell definitions and P5 magic infrastructure are Complete.
+- Forbidden scope: Hero Books, Scroll/Food/Pets/Script/Transform/Deco/MonsterSpawn,
+  Hero/SealedHero behavior, protocol layouts or any C# write.
 
 ### Protected Go ownership
 
-- Preserve completed Hero Shape 3-5 behavior, imported `NoDrug`, death/admission gates,
-  projection barrier, live ordinary despawn/resummon and logout/relogin loss boundary.
-- Do not persist Hero Buffs to JSON, retain deleted Heroes, add a timer/projection queue/
-  item authority, or reopen general seal/create/delete behavior.
+- Preserve shared item-use admission/death/riding gates, Book duplicate rejection,
+  persistence-before-visible ordering and all completed Potion/SealedHero behavior.
+- Do not create a parallel Magic catalogue, item transaction, spell runtime or
+  persistence authority, and do not implement unrelated spell-casting behavior.
 
 ### Remaining acceptance work
 
-- [ ] Freeze exact seal→global HeroInfo→SealedHero reattach live Buff ownership and
-  confirm logout/restart still drops Buffs because HeroInfo Save/Load omits them.
-- [ ] Transfer only the detached Hero's existing dormant Buff/clock sidecar through the
-  successful seal/reattach authority without reviving failed, deleted or stale Heroes.
-- [ ] Verify summoned/unsummoned seal, failed attach, same-process reattach, relogin,
-  authenticated persistence, repeated and focused race behavior.
+- [ ] Freeze Shape→Spell lookup, missing MagicInfo and duplicate-spell failure, default
+  UserMagic Level/Key/Experience/temp fields, packet order and consume/report tail.
+- [ ] Add the Book branch through latest-auth item + Player Magics authority and existing
+  NewMagic/RefreshStats projection without copying Hero skill-action transactions.
+- [ ] Verify known/unknown/duplicate Books, inventory mutation, JSON/relogin, Player stat
+  consumers, authenticated transcript, count-20 and focused race behavior.
 
 ### Discovery inputs
 
-- Frozen P6 Use Catalog row/summary, Legacy seal/SealedHero global HeroInfo lifecycle,
-  plus current Go Hero detach/attach and dormant Buff sidecar authorities.
+- Frozen P6 Use Catalog row/summary, Legacy Book admission/use/UserMagic constructor,
+  plus current Go Player Magic, item-use and persistence authorities.
 
 ### P7 frozen child registry
 
