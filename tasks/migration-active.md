@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 (Go `5550f6a`; P10 closure routing)
+Last verified: 2026-09-01 (Go `7a0fb1b`; P10 closure routing)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.

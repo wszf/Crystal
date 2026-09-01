@@ -27,7 +27,7 @@ are not migration evidence.
   evidence without reopening completed item-use leaves.
 - P9 closure is finite and reviewed: no P9 production child met the evidence gate; P9 is
   Frozen but remains In progress. Current routing leaf is `DISC-P10-CLOSURE`, with the P10
-  summary at matrix row 1004 and its finite ledger to be added below.
+  summary and finite ledger in the Go matrix.
 - `WS-ITEM-P6-USE-FOOD-NONZERO-001` is Complete in Go `c620075`; Player Inventory
   Food Shape != 0 repair/report semantics, including unknown nonzero shapes, are closed.
 - `DISC-P6-USE-CATALOG-CLOSURE-001` is complete: the finite Script/Transform/Deco/
@@ -48,7 +48,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `5550f6a` (`docs: close P9 readiness review`), not pushed; Book production code is
+- HEAD: `7a0fb1b` (`docs: record P10 closure ledger`), not pushed; Book production code is
   in `349d5a0`.
 - The committed Book/Scroll/Food migration tree is clean and no generated binary remains in the repo.
 
