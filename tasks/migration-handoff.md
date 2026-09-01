@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-01 (P10 closure routing)
+Last updated: 2026-09-01 (P12 closure routing)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -11,8 +11,11 @@ are not migration evidence.
   Complete nor Blocked.
 - P6 remains scope-frozen at nineteen children: eighteen Complete and
   `ITEM-P6-USE-CATALOG-001` is complete for its registered scope with no dependency-ready
-  successor; P9 closure is now finite and reviewed with no production-ready child.
-  The current routing batch is P10 closure discovery.
+  successor; P9 closure is finite and reviewed with no production-ready child.
+  P10 closure is also finite and reviewed with no production-ready child. P11 closure is
+  now finite and reviewed: all residual dispatch families are routed to accepted P6-P10
+  owners or explicitly excluded, with no unassigned P11-owned behavior. The current
+  routing batch is P12 closure discovery.
 - `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
   this closes one bounded correction only, not the active leaf, P6 or the Goal.
 - `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
@@ -25,9 +28,11 @@ are not migration evidence.
 - `WS-ITEM-P6-USE-SCROLL-001` is Complete in Go `59b2914`; Player Inventory Scroll
   shapes 0-7 and 11-12 now have production-entry, persistence, observer and failure
   evidence without reopening completed item-use leaves.
-- P9 closure is finite and reviewed: no P9 production child met the evidence gate; P9 is
-  Frozen but remains In progress. Current routing leaf is `DISC-P10-CLOSURE`, with the P10
-  summary and finite ledger in the Go matrix.
+- P9 and P10 closures are finite and reviewed without a production-ready child; both phases
+  remain In progress/Frozen. P11 closure is finite and reviewed as scope-frozen Complete:
+  its residual dispatch families route to existing phase owners or explicit exclusions.
+  Current routing leaf is `DISC-P12-CLOSURE`, with the P12 summary and finite ledger to be
+  added in the Go matrix.
 - `WS-ITEM-P6-USE-FOOD-NONZERO-001` is Complete in Go `c620075`; Player Inventory
   Food Shape != 0 repair/report semantics, including unknown nonzero shapes, are closed.
 - `DISC-P6-USE-CATALOG-CLOSURE-001` is complete: the finite Script/Transform/Deco/
@@ -38,7 +43,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD: `20222440` (`docs: route P9 closure discovery`).
+- HEAD: `6f8c961` (`docs: record P10 closure routing`).
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -48,7 +53,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `7a0fb1b` (`docs: record P10 closure ledger`), not pushed; Book production code is
+- HEAD: `c1e73b5` (`docs: close P11 residual routing`), not pushed; Book production code is
   in `349d5a0`.
 - The committed Book/Scroll/Food migration tree is clean and no generated binary remains in the repo.
 
@@ -74,7 +79,7 @@ are not migration evidence.
 
 ## Verification ledger
 
-Passed for Go `f7c95dd` (Book production correction `349d5a0`) after the authority evidence update, including prior Scroll/Food and Hero seal evidence:
+Passed for Go `c1e73b5` (Book production correction `349d5a0`) after the P9-P11 closure evidence updates, including prior Scroll/Food and Hero seal evidence:
 
 - summoned and unsummoned SealHero plus DeleteHero transcript/sidecar matrix at count 20;
 - authenticated NPC seal→ClientUseItem→same-process reattach→AddBuff and relogin-loss
@@ -112,29 +117,31 @@ want 206`).
 
 ## Active leaf and protected work
 
-- Active leaf: `DISC-P10-CLOSURE` (bounded discovery; P10 remains Open).
-- Previous `DISC-P9-CLOSURE` is finite and reviewed; P9 is Frozen but remains In progress
-  because no child met the production evidence gate.
+- Active leaf: `DISC-P12-CLOSURE` (bounded discovery; P12 remains Open).
+- Previous `DISC-P9-CLOSURE` and `DISC-P10-CLOSURE` are finite and reviewed; P9/P10 are
+  Frozen but remain In progress because no child met the production evidence gate. `DISC-P11-CLOSURE`
+  is also complete: P11 is scope-frozen Complete after every residual dispatch family was routed
+  to an accepted phase owner or explicit no-op exclusion.
 - Completed workstreams include `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` at Go `349d5a0`,
   `WS-ITEM-P6-USE-SCROLL-001` at Go `59b2914` and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
   at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
-- Active discovery will record finite P10 mail, market/auction, rental, GameShop and
-  economy children in the Go matrix below P10 row 1004.
-- Preserve existing P10 authorities, completed P6-P9 workstreams, latest-auth revision/CAS
-  and persistence-before-visible projection.
-- Do not implement P10/P11/P12 broad scope, reopen completed leaves, assign unverified owners,
-  change protocols or modify any C#.
+- Active discovery will enumerate finite P12 persistence, backup, restart, recovery and deployment
+  children below the P12 summary in the Go matrix.
+- Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
+  projection; do not infer an owner for an unassessed P12 boundary.
+- Do not implement P12 broad scope, reopen completed leaves, assign unverified owners, change
+  protocols or modify any C#.
 
 ## Exact recovery sequence
 
 1. Verify both repositories independently; preserve `tasks/lessons.md` and rerun
    tracked/staged/untracked `.cs` audits.
-2. Read only matrix row 1004 and the finite P10 ledger below it, plus the active index and handoff.
-3. Trace read-only Legacy mail/market/auction/rental/GameShop owners and their MirConnection/
-   PlayerObject/Envir dispatch; do not write C#.
-4. For each finite child, record the Legacy call chain, wire/consume/persistence contract,
-   unique Go owner, dependencies and focused/repeated/race/restart evidence.
-5. Keep P7 script/economy inputs and P12 restart consumers separate from P10 implementation
-   leaves; retain P6 item/grid boundaries and all cross-phase blockers.
+2. Read only the P12 summary and finite ledger in the Go matrix, plus the active index and handoff.
+3. Trace read-only Legacy checkpoint, backup, restart and deployment call chains for each
+   P12 residual; do not write C#.
+4. For each finite child, record wire/store format, unique Go owner, dependencies and
+   focused/repeated/race/restart/backup evidence.
+5. Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership;
+   no residual is ready until its own owner is verified.
 6. Keep production implementation closed during discovery. Only after the registry and
    dependencies are reviewed may a dependency-ready child be frozen before Go changes.

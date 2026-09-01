@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 (Go `7a0fb1b`; P10 closure routing)
+Last verified: 2026-09-01 (Go `c1e73b5`; P12 closure routing)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -37,49 +37,48 @@ Keep this file at or below 300 lines and 32 KiB.
 | P7 | In progress | Frozen | `DISC-P7-CLOSURE` (Complete) |
 | P8 | Complete | Frozen | — |
 | P9 | In progress | Frozen | `DISC-P9-CLOSURE` (Complete) |
-| P10 | In progress | Open | `DISC-P10-CLOSURE` |
-| P11 | In progress | Open | `DISC-P11-CLOSURE` |
+| P10 | In progress | Frozen | `DISC-P10-CLOSURE` (Complete) |
+| P11 | Complete | Frozen | `DISC-P11-CLOSURE` (Complete) |
 | P12 | In progress | Open | `DISC-P12-CLOSURE` |
 
 ## Active batch
 
-- Leaf ID: `DISC-P10-CLOSURE`
-- Status: `Active` bounded read-only closure discovery; P10 remains Open and no production
+- Leaf ID: `DISC-P12-CLOSURE`
+- Status: `Active` bounded read-only closure discovery; P12 remains Open and no production
   child is authorized until the finite registry is reviewed.
-- Previous routing: `DISC-P9-CLOSURE` is Complete as a finite registry review; P9 is Frozen
-  but remains In progress because no child met the production evidence gate.
-- Active workstream: `DISC-P10-CLOSURE` — enumerate finite mail, market/auction, rental,
-  GameShop and economy persistence children.
-- Outcome: P10 owner/dependency/contract ledger is the current bounded output; no production
-  child is marked dependency-ready until registry review.
-- Go matrix anchors to read: P10 summary row 1004 and the finite ledger immediately below it.
-- Legacy: `Server/MirNetwork/MirConnection.cs`, `Server/MirObjects/PlayerObject.cs`,
-  `Server/MirEnvir/Envir.cs`, `Server/MirDatabase/{AccountInfo,AuctionInfo,MailInfo}.cs`;
-  C# read-only.
-- Go: `cmd/crystal-server/{mail_session.go,mail_transactions.go,market_session.go,
-  economy_bridge.go,gameshop_catalog.go,rental*.go}`, `internal/auth/{economy.go,rental.go}`;
-  existing code is evidence, not automatic owner closure.
-- Dependencies: keep P6 item/grid and P7 script boundaries explicit; P10 Gold/Credit/mail
-  authority and P12 restart/backup consumers must be classified per child.
-- Forbidden: broad economy/restart implementation, reopening completed P6/P8 workstreams,
+- Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
+  scope-frozen and Complete because no unassigned P11-owned behavior remains.
+- Active workstream: `DISC-P12-CLOSURE` — enumerate finite persistence, backup, restart,
+  recovery and deployment children without implementing broad P12 scope.
+- Outcome: P11 residual dispatch families are now routed in the Go matrix; P12 is the current
+  bounded discovery output and has no dependency-ready production child yet.
+- Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
+- Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
+  checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
+- Go: `internal/auth/{checkpoint.go,service.go}`, `internal/legacyaccount/*`,
+  `internal/legacyworld/*`, and bounded `cmd/crystal-server` lifecycle/startup owners; existing
+  code is evidence, not automatic P12 closure.
+- Dependencies: preserve completed P2-P11 authorities and keep P10 economy/mail, P6 item,
+  P7/P9 cross-phase inputs separate; P12 owns shared persistence/recovery boundaries only.
+- Forbidden: broad restart/backup/deployment implementation, reopening completed leaves,
   assigning unverified owners, protocol changes or any C# write.
 
 ### Protected Go ownership
 
-- Preserve existing mail, market, rental and economy authorities, P6/P7 cross-phase boundaries,
-  persistence-before-visible ordering and all completed workstreams.
-- No parallel economy/mail authority or child implementation before the registry and dependencies
-  are frozen.
+- Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
+  projection while auditing P12 checkpoint and recovery boundaries.
+- No parallel persistence authority or production child implementation before the finite registry
+  and dependencies are reviewed.
 
 ### Remaining acceptance work
 
-- [ ] For each child record Legacy chain, wire/consume/persistence, unique Go owner, dependencies
-  and focused/repeated/race/restart evidence.
-- [ ] Classify P7 script/economy inputs and P12 restart consumers separately from P10 children.
-- [ ] Review the finite ledger and select only a dependency-ready child after P10 scope freeze.
+- [ ] For each P12 residual record Legacy chain, wire/store format, unique Go owner, dependencies
+  and focused/repeated/race/restart/backup evidence.
+- [ ] Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership.
+- [ ] Review the finite ledger and select only a dependency-ready child after P12 scope freeze.
 
-- Discovery: finite P10 mail, market/auction, rental, GameShop and economy owner ledger; no Go
-  production implementation in this discovery batch.
+- Discovery: finite P12 persistence/backup/restart/deployment owner ledger; no Go production
+  implementation in this discovery batch until a child passes the production evidence gate.
 
 ### P7 frozen child registry
 
