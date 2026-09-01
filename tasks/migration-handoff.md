@@ -44,7 +44,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD: `07ad2cfb` (`docs: route P12 closure discovery`).
+- HEAD: `a3ecb7d5` (`docs: record P12 account counter closure`).
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -171,10 +171,13 @@ want 206`).
   above; neither workstream enlarges P3 ownership or authorizes broad P12 recovery. Corrupt-index
   continuity remains open because its duplicate/zero-index normalization contract and production
   recovery evidence are incomplete.
-- `PERSIST-P12-CANSTART-DBCHECKS-001` is blocked by P5/P6 catalog and P1 deployment inputs.
-  `PERSIST-P12-RESTART-EQUIV-001` remains the shared-owner gap: JSON, 117, world export and
-  runtime sidecar lack a unified generation/manifest, backup/restore selector and crash
-  recovery contract. P10 economy mutation and P1 general deployment remain separate owners.
+- `PERSIST-P12-CANSTART-DBCHECKS-001` is blocked by P6 `ITEM-P6-USE-CATALOG-001` still
+  being Active and by P1 deployment/localization/logging inputs. Go has no `EnforceDBChecks`
+  owner and the current world-export/catalog path lacks the complete configured monster/item
+  name set, so first-missing diagnostics, disabled bypass and fresh-package/listener evidence
+  are not ready. `PERSIST-P12-RESTART-EQUIV-001` remains the shared-owner gap: JSON, 117, world
+  export and runtime sidecar lack a unified generation/manifest, backup/restore selector and
+  crash recovery contract. P10 economy mutation and P1 general deployment remain separate owners.
 - The finite persistence sub-slices (atomic SaveJSON/checkpoint outcome, counter continuity,
   global re-export, runtime sidecar, backup, periodic save, failure injection and writable
   paths) are evidence partitions under the existing IDs, not additional children.
