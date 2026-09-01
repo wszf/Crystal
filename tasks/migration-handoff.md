@@ -46,7 +46,8 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `349d5a0` (`fix: preserve Book magic authority`), not pushed.
+- HEAD: `f7c95dd` (`docs: record Book authority correction`), not pushed; production code is
+  in `349d5a0`.
 - The committed Book/Scroll/Food migration tree is clean and no generated binary remains in the repo.
 
 ## Completed Hero seal Buff lifecycle evidence
@@ -71,7 +72,7 @@ are not migration evidence.
 
 ## Verification ledger
 
-Passed for Go `349d5a0` after the Book authority correction (including prior Scroll/Food and Hero seal evidence):
+Passed for Go `f7c95dd` (Book production correction `349d5a0`) after the authority evidence update, including prior Scroll/Food and Hero seal evidence:
 
 - summoned and unsummoned SealHero plus DeleteHero transcript/sidecar matrix at count 20;
 - authenticated NPC seal→ClientUseItem→same-process reattach→AddBuff and relogin-loss
