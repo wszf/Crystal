@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 05:21 (Asia/Singapore)
+Last verified: 2026-09-01 (Go `349d5a0` verification)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -50,10 +50,14 @@ Keep this file at or below 300 lines and 32 KiB.
   `WS-ITEM-P6-USE-POTION-BUFF-003-001` (`c4f1e38`), `WS-ITEM-P6-USE-POTION-RATE-004-005-001`
   (`e7c5a10`), `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001` (`8596f22`), correction
   `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` (`732f8fe`), `WS-ITEM-P6-USE-BOOK-001`
-  (`5779c89`), `WS-ITEM-P6-USE-SCROLL-001` (`59b2914`) and
-  `WS-ITEM-P6-USE-FOOD-NONZERO-001` (`c620075`).
+  (`5779c89`), correction `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` (`349d5a0`),
+  `WS-ITEM-P6-USE-SCROLL-001` (`59b2914`) and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
+  (`c620075`).
 - Active workstream: `DISC-P6-USE-CATALOG-CLOSURE-001` (finite ledger complete; no
   dependency-ready functional successor).
+- Verified correction `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` (`349d5a0`) preserves current
+  world durable Magic progress, filters stale temporary records from Book commits and
+  rejects active temporary equipment Magics through the runtime snapshot.
 - Outcome: Script, Transform, Deco and MonsterSpawn family/shape partitions, Legacy call
   chains, packet/consume contracts, unique owners and blockers are recorded in matrix row
   3546; open scope remains implementation-forbidden.

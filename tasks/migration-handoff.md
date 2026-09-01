@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-01 05:50 (Asia/Singapore)
+Last updated: 2026-09-01 (after Go `349d5a0` verification)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -16,6 +16,10 @@ are not migration evidence.
 - `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
   learning, atomic item/Magics commit and authenticated persistence/projection evidence
   are closed without reopening the catalog leaf.
+- Verified correction `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` is Complete in Go `349d5a0`;
+  Book admission ignores only temporary Magic records, world runtime Magic authority is
+  rebased before commit, stale temporary records are not persisted and active temporary
+  equipment Magics still reject duplicate learning.
 - `WS-ITEM-P6-USE-SCROLL-001` is Complete in Go `59b2914`; Player Inventory Scroll
   shapes 0-7 and 11-12 now have production-entry, persistence, observer and failure
   evidence without reopening completed item-use leaves.
@@ -42,8 +46,8 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `c620075` (`Close nonzero Food item use`), not pushed.
-- The committed Scroll/Food migration tree is clean and no generated binary remains in the repo.
+- HEAD: `349d5a0` (`fix: preserve Book magic authority`), not pushed.
+- The committed Book/Scroll/Food migration tree is clean and no generated binary remains in the repo.
 
 ## Completed Hero seal Buff lifecycle evidence
 
@@ -67,14 +71,16 @@ are not migration evidence.
 
 ## Verification ledger
 
-Passed for Go `c620075` after the Scroll/Food commits (including prior Book and Hero seal evidence):
+Passed for Go `349d5a0` after the Book authority correction (including prior Scroll/Food and Hero seal evidence):
 
 - summoned and unsummoned SealHero plus DeleteHero transcript/sidecar matrix at count 20;
 - authenticated NPC seal→ClientUseItem→same-process reattach→AddBuff and relogin-loss
   transcript, valid cross-owner handoff, full-slot and missing-Hero failures at count 20;
 - focused race for the same production paths at count 5;
 - Player Book known/unknown/duplicate/count/reload authenticated session, atomic concurrent
-  auth mutation, Player stat-refresh and existing cooldown-preservation tests at count 20;
+  auth mutation, current-world Magic progress rebase, stale/active temporary Magic gates,
+  Player stat-refresh and existing cooldown-preservation tests at count 20; the Book
+  authority correction runs through the same production session/auth/world path.
 - Player Scroll shapes 0-7 and 11-12 authenticated production-entry success/failure,
   transition, revival, balance saturation, observer and JSON persistence transcripts;
 - focused Scroll tests pass at count 10 and focused race passes;
@@ -87,6 +93,9 @@ Passed for Go `c620075` after the Scroll/Food commits (including prior Book and 
 - final full `go test -race ./... -skip '^TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin$' -count=1`;
 - `go vet ./...`, `go build ./...`, formatting, `git diff --check`, staged diff check,
   C# audits and an independent read-only correction review with no finding.
+- The Book correction was triggered by a reproduced `ServerUseItem(false)` common-gate
+  regression: stale `IsTempSpell` records in the session/auth snapshot no longer block
+  admission, while the world runtime snapshot remains the duplicate-learning authority.
 
 The unskipped full `go test ./... -count=1` currently retains only the registered Quest
 fixture baseline: `TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin` fails
@@ -106,8 +115,9 @@ want 206`).
   `WS-ITEM-P6-USE-POTION-RATE-004-005-001` at Go `e7c5a10`,
   `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001` at Go `8596f22`,
   `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` at Go `732f8fe`,
-  `WS-ITEM-P6-USE-BOOK-001` at Go `5779c89`, `WS-ITEM-P6-USE-SCROLL-001` at Go
-  `59b2914`, and `WS-ITEM-P6-USE-FOOD-NONZERO-001` at Go `c620075`.
+  `WS-ITEM-P6-USE-BOOK-001` at Go `5779c89`, correction
+  `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` at Go `349d5a0`, `WS-ITEM-P6-USE-SCROLL-001`
+  at Go `59b2914`, and `WS-ITEM-P6-USE-FOOD-NONZERO-001` at Go `c620075`.
 - Closure workstream `DISC-P6-USE-CATALOG-CLOSURE-001` is complete; no dependency-ready
   functional successor remains inside the active leaf. Its finite ledger is in matrix row 3546.
 - Preserve common item-use admission/death/riding gates, completed Book/Potion/
