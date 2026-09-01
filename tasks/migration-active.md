@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 (Go `c1e73b5`; P12 closure routing)
+Last verified: 2026-09-01 (Go `c1e73b5`; P12 finite closure ledger)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -44,14 +44,15 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `DISC-P12-CLOSURE`
-- Status: `Active` bounded read-only closure discovery; P12 remains Open and no production
-  child is authorized until the finite registry is reviewed.
+- Status: `Active` bounded read-only closure discovery; P12 remains Open because the finite
+  candidate registry still has unresolved owner, dependency and recovery contracts.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
   scope-frozen and Complete because no unassigned P11-owned behavior remains.
-- Active workstream: `DISC-P12-CLOSURE` — enumerate finite persistence, backup, restart,
-  recovery and deployment children without implementing broad P12 scope.
-- Outcome: P11 residual dispatch families are now routed in the Go matrix; P12 is the current
-  bounded discovery output and has no dependency-ready production child yet.
+- Active workstream: `DISC-P12-CLOSURE` — review the finite five-ID registry and close only
+  evidence/owner gaps; do not implement broad P12 scope or invent child IDs.
+- Outcome: the finite candidate registry and its persistence sub-slices are recorded in the Go
+  matrix; no P12 production child is dependency-ready, and the remaining block is evidence/
+  ownership/recovery, not permission to broaden implementation.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
   checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
@@ -72,13 +73,14 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Remaining acceptance work
 
-- [ ] For each P12 residual record Legacy chain, wire/store format, unique Go owner, dependencies
-  and focused/repeated/race/restart/backup evidence.
-- [ ] Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership.
-- [ ] Review the finite ledger and select only a dependency-ready child after P12 scope freeze.
+- [x] Record the finite P12 candidate registry with Legacy chains, wire/store formats, current
+  owners, dependencies and focused/repeated/race/restart/backup evidence gaps.
+- [x] Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership.
+- [ ] Resolve the recorded owner/recovery gaps and select only a dependency-ready child; no
+  current P12 candidate passes the production evidence gate.
 
-- Discovery: finite P12 persistence/backup/restart/deployment owner ledger; no Go production
-  implementation in this discovery batch until a child passes the production evidence gate.
+- Discovery: the five-ID P12 candidate registry is recorded; bounded owner/evidence discovery
+  continues, with no Go production implementation until a child passes the production gate.
 
 ### P7 frozen child registry
 
@@ -239,7 +241,7 @@ broad unnamed scope.
 | `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |
 | `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system children |
 | `DISC-P11-CLOSURE` | P11 | Discovery | finite miscellaneous-system children |
-| `DISC-P12-CLOSURE` | P12 | Discovery | finite persistence/backup/deployment children |
+| `DISC-P12-CLOSURE` | P12 | Discovery | finite five-ID persistence/recovery candidate registry; owner/evidence review remains open |
 
 ### Registered cross-phase finding
 
@@ -250,32 +252,33 @@ broad unnamed scope.
   conquest owner/rate/GoldStorage authority; P7 owns NPC price/repair adapters.
 - `MAIL-P10-NPC-SCRIPT-001` (`Ready` input to `DISC-P10-CLOSURE`): expose finite
   mail persistence/delivery authority; P7 owns script action parsing/execution.
-- `PERSIST-P12-ACCOUNT-ID-001` (`Ready` input to `DISC-P12-CLOSURE`): preserve
+- `PERSIST-P12-ACCOUNT-ID-001` (partial input to `DISC-P12-CLOSURE`): preserve
   the version-117 `Server.MirADB` header `NextAccountID` through Go import,
   retained-record gaps, checkpoint write, restart, and the next account create.
-  Live/JSON HTTP counters are complete; this finite importer/checkpoint gap is
-  P12-owned and does not reopen P1 HTTP transport behavior.
-- `PERSIST-P12-CANSTART-DBCHECKS-001` (`Ready` input to
-  `DISC-P12-CLOSURE`, dependent on P5/P6 catalogs): preserve
+  Live/JSON HTTP counters are complete; the production high-header/re-export/race
+  evidence remains open and does not reopen P1 HTTP transport behavior.
+- `PERSIST-P12-CANSTART-DBCHECKS-001` (blocked-external input to
+  `DISC-P12-CLOSURE`, dependent on P5/P6 catalogs and P1 deployment): preserve
   `EnforceDBChecks`, first-missing monster/item source order, configured-name
   suffixes, and the disabled-check bypass after imported catalogs are complete.
-- `PERSIST-P12-CHARACTER-ID-001` (`Ready` input to `DISC-P12-CLOSURE`):
-  preserve a version-117 `NextCharacterID` header above every retained
-  character through import, checkpoint/re-export, restart, and the next create.
-  P3 owns allocation after an authoritative counter is installed; retained-gap
-  importer/writer authority remains P12.
-- `PERSIST-P12-CORRUPT-CHAR-INDEX-001` (`Ready` input to
-  `DISC-P12-CLOSURE`): preserve duplicate and nonpositive retained
-  `CharacterInfo.Index` values through version-117 checkpoint/re-export and
-  restart. P3 owns current-process first-match client lookup/mutation outcomes;
-  P12 owns writer normalization/rejection and recovery continuity.
+- `PERSIST-P12-CHARACTER-ID-001` (open input to `DISC-P12-CLOSURE`): preserve a
+  version-117 `NextCharacterID` header above every retained character through
+  import, checkpoint/re-export, restart, and the next create. P3 owns allocation
+  after an authoritative counter is installed; retained-gap importer/writer
+  authority remains P12.
+- `PERSIST-P12-CORRUPT-CHAR-INDEX-001` (open input to `DISC-P12-CLOSURE`):
+  preserve duplicate and nonpositive retained `CharacterInfo.Index` values
+  through version-117 checkpoint/re-export and restart. P3 owns current-process
+  first-match client lookup/mutation outcomes; P12 owns writer
+  normalization/rejection and recovery continuity after the contract is frozen.
 - `NPC-P7-ACCESS-GATE-001` is Complete and unblocks
   `STORAGE-P2-NPC-GATE-001`; P2 retains storage response/lifetime ownership.
 - `NPC-P7-SCRIPT-CLOSURE-001` is Complete as a discovery input: accepted
   `DISC-P7-CLOSURE` partitions it into the named script/action/condition leaves.
-- `PERSIST-P12-RESTART-EQUIV-001` (`Ready` input to `DISC-P12-CLOSURE`,
-  dependent on P3-P11 authorities): preserve periodic save, atomic replacement,
-  backup, global re-export, and complete multi-store restart/recovery.
+- `PERSIST-P12-RESTART-EQUIV-001` (open shared-owner input to
+  `DISC-P12-CLOSURE`, dependent on P3-P11 authorities): preserve periodic save,
+  atomic replacement, backup, global re-export, and complete multi-store
+  restart/recovery; no unified generation/manifest/restore contract exists yet.
 - `CFG-P1-MONSTER-AI-RUNTIME-001` (`Ready`, dependent on P5 lifecycle):
   preserve `MonsterProcessWhenAlone`, recall enabled/range/cooldown defaults,
   INI write-back and their inherited MonsterObject runtime consumers.

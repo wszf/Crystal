@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-01 (P12 closure routing)
+Last updated: 2026-09-01 (P12 finite closure candidate ledger)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -14,8 +14,9 @@ are not migration evidence.
   successor; P9 closure is finite and reviewed with no production-ready child.
   P10 closure is also finite and reviewed with no production-ready child. P11 closure is
   now finite and reviewed: all residual dispatch families are routed to accepted P6-P10
-  owners or explicitly excluded, with no unassigned P11-owned behavior. The current
-  routing batch is P12 closure discovery.
+  owners or explicitly excluded, with no unassigned P11-owned behavior. P12 now has a finite
+  five-ID candidate registry, but its closure discovery remains open on owner, dependency
+  and recovery evidence gaps.
 - `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
   this closes one bounded correction only, not the active leaf, P6 or the Goal.
 - `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
@@ -31,8 +32,8 @@ are not migration evidence.
 - P9 and P10 closures are finite and reviewed without a production-ready child; both phases
   remain In progress/Frozen. P11 closure is finite and reviewed as scope-frozen Complete:
   its residual dispatch families route to existing phase owners or explicit exclusions.
-  Current routing leaf is `DISC-P12-CLOSURE`, with the P12 summary and finite ledger to be
-  added in the Go matrix.
+  Current routing leaf is `DISC-P12-CLOSURE`; the finite P12 candidate ledger is now recorded
+  in the Go matrix and remains open for bounded owner/evidence discovery.
 - `WS-ITEM-P6-USE-FOOD-NONZERO-001` is Complete in Go `c620075`; Player Inventory
   Food Shape != 0 repair/report semantics, including unknown nonzero shapes, are closed.
 - `DISC-P6-USE-CATALOG-CLOSURE-001` is complete: the finite Script/Transform/Deco/
@@ -43,7 +44,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD: `6f8c961` (`docs: record P10 closure routing`).
+- HEAD: `07ad2cfb` (`docs: route P12 closure discovery`).
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -115,6 +116,24 @@ rerun passed, followed by a complete full-race rerun that also passed. The Quest
 fixture remains the unchanged registered baseline blocker (`mail packet id = 26,
 want 206`).
 
+## P12 finite candidate review
+
+- Existing IDs in scope: `PERSIST-P12-ACCOUNT-ID-001`, `PERSIST-P12-CHARACTER-ID-001`,
+  `PERSIST-P12-CORRUPT-CHAR-INDEX-001`, `PERSIST-P12-CANSTART-DBCHECKS-001` and
+  `PERSIST-P12-RESTART-EQUIV-001`. No new child ID was created.
+- `PERSIST-P12-ACCOUNT-ID-001` is partial: direct bridge and low-counter evidence exists,
+  but the production high-header TCP, re-export and create/checkpoint race chain is open.
+  Character-ID and corrupt-index continuity remain open because the 117 header/duplicate
+  normalization contract and production recovery evidence are incomplete.
+- `PERSIST-P12-CANSTART-DBCHECKS-001` is blocked by P5/P6 catalog and P1 deployment inputs.
+  `PERSIST-P12-RESTART-EQUIV-001` remains the shared-owner gap: JSON, 117, world export and
+  runtime sidecar lack a unified generation/manifest, backup/restore selector and crash
+  recovery contract. P10 economy mutation and P1 general deployment remain separate owners.
+- The finite persistence sub-slices (atomic SaveJSON/checkpoint outcome, counter continuity,
+  global re-export, runtime sidecar, backup, periodic save, failure injection and writable
+  paths) are evidence partitions under the existing IDs, not additional children. No P12
+  candidate is dependency-ready for production implementation.
+
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE` (bounded discovery; P12 remains Open).
@@ -125,8 +144,9 @@ want 206`).
 - Completed workstreams include `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` at Go `349d5a0`,
   `WS-ITEM-P6-USE-SCROLL-001` at Go `59b2914` and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
   at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
-- Active discovery will enumerate finite P12 persistence, backup, restart, recovery and deployment
-  children below the P12 summary in the Go matrix.
+- The finite P12 candidate registry is recorded below the P12 summary in the Go matrix. The
+  next bounded recovery point is resolving its owner, dependency and evidence gaps; no broad
+  persistence, backup or deployment implementation is authorized.
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
   projection; do not infer an owner for an unassessed P12 boundary.
 - Do not implement P12 broad scope, reopen completed leaves, assign unverified owners, change
@@ -139,8 +159,8 @@ want 206`).
 2. Read only the P12 summary and finite ledger in the Go matrix, plus the active index and handoff.
 3. Trace read-only Legacy checkpoint, backup, restart and deployment call chains for each
    P12 residual; do not write C#.
-4. For each finite child, record wire/store format, unique Go owner, dependencies and
-   focused/repeated/race/restart/backup evidence.
+4. Reconcile each finite child’s wire/store format, unique Go owner, dependencies and
+   focused/repeated/race/restart/backup evidence; keep unresolved gaps explicit.
 5. Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership;
    no residual is ready until its own owner is verified.
 6. Keep production implementation closed during discovery. Only after the registry and
