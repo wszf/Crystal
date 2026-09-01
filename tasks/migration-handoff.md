@@ -54,10 +54,10 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `1356da1` (`migrate P12 account counter continuity`), not pushed. This commit contains
-  the bounded Account-ID production fencing, bridge/restart/interleave evidence and matrix
-  update. The production Character-ID fix is `ed71f29`, with earlier counter conversion in
-  `0156b3d` and wrap arithmetic in `1c45002`.
+- HEAD: `b3d6e68` (`docs: record P12 remaining blockers`), not pushed. Account-ID production
+  fencing, bridge/restart/interleave evidence and the initial matrix update are in `1356da1`;
+  this latest commit records the remaining CanStart blocker details. The production Character-ID
+  fix is `ed71f29`, with earlier counter conversion in `0156b3d` and wrap arithmetic in `1c45002`.
 - The Go worktree is clean and no generated binary remains in the repo. The Legacy
   `tasks/lessons.md` change is unrelated and remains uncommitted.
 
