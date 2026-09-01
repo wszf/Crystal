@@ -44,7 +44,8 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD: `a3ecb7d5` (`docs: record P12 account counter closure`).
+- Evidence snapshot base: `a3ecb7d5` (`docs: record P12 account counter closure`); subsequent
+  Legacy commits in this handoff are control-document-only updates.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
