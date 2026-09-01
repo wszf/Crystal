@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-01 (P12 finite closure candidate ledger)
+Last updated: 2026-09-01 (P12 Character-ID bounded closure)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -54,9 +54,11 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `c1e73b5` (`docs: close P11 residual routing`), not pushed; Book production code is
-  in `349d5a0`.
-- The committed Book/Scroll/Food migration tree is clean and no generated binary remains in the repo.
+- HEAD: `dde96a3` (`docs: record P12 character counter closure`), not pushed; the production
+  Character-ID fix is `ed71f29`, with earlier counter conversion in `0156b3d` and wrap arithmetic
+  in `1c45002`.
+- The Go worktree is clean and no generated binary remains in the repo. The Legacy
+  `tasks/lessons.md` change is unrelated and remains uncommitted.
 
 ## Completed Hero seal Buff lifecycle evidence
 
@@ -116,6 +118,26 @@ rerun passed, followed by a complete full-race rerun that also passed. The Quest
 fixture remains the unchanged registered baseline blocker (`mail packet id = 26,
 want 206`).
 
+## P12 Character-ID bounded closure evidence
+
+- `PERSIST-P12-CHARACTER-ID-001` is Complete for its bounded contract. Legacy 117 offset 12
+  is the used-character high-watermark; Go auth and JSON store the next-available counter.
+  Import/export, bridge checkpoint and restart preserve ordinary retained gaps plus int32
+  negative/zero wrap IDs. `TestP12CharacterIDSerializesCreateWithJSONCheckpoint` also holds
+  `CreateCharacter`/`CreateCharacterWithMetadata` behind the SaveJSON-to-117 checkpoint window,
+  so the role counter cannot be captured in different generations by that production path.
+- Production TCP `TestProductionStartupLegacyCharacterCounterCheckpointRestart` authenticates
+  through `ServerConnected`, `ClientVersion`, `ClientLogin` and `ClientNewCharacter`, creates
+  indexes 101/102 after raw header 100, checkpoints on graceful shutdown, restarts, and verifies
+  the next allocation. Bridge tests cover JSON/117 conversion, concurrent checkpoint/create,
+  negative wrap record retention and zero-wrap restart continuity.
+- Focused repeated and focused race tests pass. Full `go test ./...` and full `go test -race ./...`
+  pass with the registered Quest baseline skipped; the unskipped suite retains only
+  `TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin` (`mail packet id = 26, want
+  206`). `go vet ./...`, `go build ./...`, formatting, `git diff --check` and C# audits pass.
+  Production changes are committed in Go `ed71f29` (with `0156b3d` and `1c45002` as earlier
+  counter/wrap commits); matrix documentation is committed in Go `dde96a3`.
+
 ## P12 finite candidate review
 
 - Existing IDs in scope: `PERSIST-P12-ACCOUNT-ID-001`, `PERSIST-P12-CHARACTER-ID-001`,
@@ -123,20 +145,19 @@ want 206`).
   `PERSIST-P12-RESTART-EQUIV-001`. No new child ID was created.
 - `PERSIST-P12-ACCOUNT-ID-001` is partial: direct bridge and low-counter evidence exists,
   but the production high-header TCP, re-export and create/checkpoint race chain is open.
-  Character-ID continuity is selected as the only dependency-ready bounded implementation: the
-  117 header must be retained and installed without regressing the retained maximum, then
-  proven through production import/checkpoint/restart/re-export and the next character create.
-  Corrupt-index continuity remains open because its duplicate normalization contract and
-  production recovery evidence are incomplete.
+  `PERSIST-P12-CHARACTER-ID-001` is complete for the bounded implementation above; it does not
+  enlarge P3 ownership or authorize broad P12 recovery. Corrupt-index continuity remains open
+  because its duplicate/zero-index normalization contract and production recovery evidence are
+  incomplete.
 - `PERSIST-P12-CANSTART-DBCHECKS-001` is blocked by P5/P6 catalog and P1 deployment inputs.
   `PERSIST-P12-RESTART-EQUIV-001` remains the shared-owner gap: JSON, 117, world export and
   runtime sidecar lack a unified generation/manifest, backup/restore selector and crash
   recovery contract. P10 economy mutation and P1 general deployment remain separate owners.
 - The finite persistence sub-slices (atomic SaveJSON/checkpoint outcome, counter continuity,
   global re-export, runtime sidecar, backup, periodic save, failure injection and writable
-  paths) are evidence partitions under the existing IDs, not additional children. Only
-  `PERSIST-P12-CHARACTER-ID-001` is selected for bounded production implementation; all
-  other P12 candidates remain unselected discovery inputs.
+  paths) are evidence partitions under the existing IDs, not additional children.
+  `PERSIST-P12-CHARACTER-ID-001` is complete; all other P12 candidates remain unselected
+  discovery inputs, and no dependency-ready successor is currently authorized.
 
 ## Active leaf and protected work
 
@@ -148,10 +169,10 @@ want 206`).
 - Completed workstreams include `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` at Go `349d5a0`,
   `WS-ITEM-P6-USE-SCROLL-001` at Go `59b2914` and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
   at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
-- The finite P12 candidate registry is recorded below the P12 summary in the Go matrix. The
-  current bounded implementation is `PERSIST-P12-CHARACTER-ID-001`; its next recovery point
-  is production import/checkpoint/restart/re-export evidence. No broad persistence, backup or
-  deployment implementation is authorized.
+- The finite P12 candidate registry is recorded below the P12 summary in the Go matrix.
+  `PERSIST-P12-CHARACTER-ID-001` is complete for its production import/checkpoint/restart/
+  re-export evidence. The next recovery point is dependency discovery for the remaining IDs;
+  no broad persistence, backup or deployment implementation is authorized.
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
   projection; do not infer an owner for an unassessed P12 boundary.
 - Do not implement P12 broad scope, reopen completed leaves, assign unverified owners, change

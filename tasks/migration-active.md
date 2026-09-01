@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 (Go `c1e73b5`; P12 finite closure ledger)
+Last verified: 2026-09-01 (Go `dde96a3`; P12 character-counter closure)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -44,16 +44,19 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `DISC-P12-CLOSURE`
-- Status: `Active` bounded P12 closure routing with one selected production workstream; P12
-  remains Open because the other persistence/recovery contracts are unresolved.
+- Status: `Active` bounded P12 closure routing; the selected Character-ID production
+  workstream is Complete, while P12 remains Open because the other persistence/recovery
+  contracts are unresolved.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
   scope-frozen and Complete because no unassigned P11-owned behavior remains.
-- Active workstream: `PERSIST-P12-CHARACTER-ID-001` — retain the Legacy 117 NextCharacterID
-  header through import/checkpoint/restart/re-export and the next character create; no broad
-  P12 recovery implementation or new child ID.
-- Outcome: the finite candidate registry is recorded in the Go matrix; Character-ID is selected
-  because its auth, bridge and P3 allocation dependencies are identified, while other P12
-  inputs remain evidence/ownership blocked.
+- Active workstream: `PERSIST-P12-CHARACTER-ID-001` — Complete. It retains the Legacy 117
+  NextCharacterID header and wrapped character IDs through import/checkpoint/restart/re-export,
+  including the production TCP path and JSON-triggered checkpoint serialization; no broad P12
+  recovery implementation or new child ID was added.
+- Outcome: the finite candidate registry is recorded in the Go matrix; Character-ID is complete
+  for its bounded contract, while account-ID, corrupt-index, CanStart, and restart-equivalence
+  inputs remain evidence/ownership blocked. No dependency-ready P12 successor is currently
+  authorized.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
   checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
@@ -79,11 +82,13 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership.
 - [x] Review the finite registry and select `PERSIST-P12-CHARACTER-ID-001` as the only
   dependency-ready bounded production workstream.
-- [ ] Complete its import/checkpoint/restart/re-export/create and focused-race evidence, then
-  re-review the remaining P12 owner/recovery gaps before selecting another child.
+- [x] Complete its import/checkpoint/restart/re-export/create and focused-race evidence, including
+  int32 negative/zero wrap and JSON-triggered checkpoint serialization.
+- [ ] Re-review the remaining P12 owner/recovery gaps and select another child only after a
+  dependency-ready production owner and evidence contract exists; none is currently ready.
 
-- Active implementation: Character-ID header continuity only; all other P12 candidates remain
-  discovery inputs and broad persistence/backup/recovery implementation is forbidden.
+- Active implementation: Character-ID header/ID continuity is complete; all other P12 candidates
+  remain discovery inputs and broad persistence/backup/recovery implementation is forbidden.
 
 ### P7 frozen child registry
 
