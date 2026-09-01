@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 (Go `dde96a3`; P12 character-counter closure)
+Last verified: 2026-09-02 (Go `1356da1`; P12 bounded Account-ID closure)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -44,27 +44,24 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `DISC-P12-CLOSURE`
-- Status: `Active` bounded P12 closure routing; the selected Character-ID production
-  workstream is Complete, while P12 remains Open because the other persistence/recovery
-  contracts are unresolved.
+- Status: `Active` bounded P12 closure routing; Character-ID and bounded positive-int32 Account-ID
+  workstreams are Complete, while P12 remains Open for other persistence/recovery contracts.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
   scope-frozen and Complete because no unassigned P11-owned behavior remains.
-- Active workstream: `PERSIST-P12-CHARACTER-ID-001` — Complete. It retains the Legacy 117
-  NextCharacterID header and wrapped character IDs through import/checkpoint/restart/re-export,
-  including the production TCP path and JSON-triggered checkpoint serialization; no broad P12
-  recovery implementation or new child ID was added.
-- Outcome: the finite candidate registry is recorded in the Go matrix; Character-ID is complete
-  for its bounded contract, while account-ID, corrupt-index, CanStart, and restart-equivalence
-  inputs remain evidence/ownership blocked. No dependency-ready P12 successor is currently
-  authorized.
+- Active workstream: `PERSIST-P12-ACCOUNT-ID-001` — Complete for the bounded positive-int32
+  contract. It retains the Legacy 117 NextAccountID high-watermark through import, production
+  TCP creation, checkpoint, restart and re-export; `saveMu → s.mu` fencing prevents generation
+  splits. Character-ID is separately Complete; no broad P12 recovery implementation was added.
+- Outcome: the finite candidate registry is recorded in the Go matrix; Account-ID and Character-ID
+  are complete for their bounded contracts, while corrupt-index, CanStart and restart-equivalence
+  inputs remain open or externally blocked. The next recovery point is bounded discovery.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
   checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
-- Go: `internal/auth/{checkpoint.go,service.go}`, `internal/legacyaccount/*`,
-  `internal/legacyworld/*`, and bounded `cmd/crystal-server` lifecycle/startup owners; existing
-  code is evidence, not automatic P12 closure.
-- Dependencies: preserve completed P2-P11 authorities and keep P10 economy/mail, P6 item,
-  P7/P9 cross-phase inputs separate; P12 owns shared persistence/recovery boundaries only.
+- Go: `internal/auth/{checkpoint.go,service.go}`, `internal/legacyaccount/*`, `internal/legacyworld/*`,
+  and bounded `cmd/crystal-server` lifecycle/startup owners; existing code is evidence, not closure.
+- Dependencies: preserve completed P2-P11 authorities; keep P10 economy/mail, P6 item and P7/P9
+  cross-phase inputs separate; P12 owns shared persistence/recovery boundaries only.
 - Forbidden: broad restart/backup/deployment implementation, reopening completed leaves,
   assigning unverified owners, protocol changes or any C# write.
 
@@ -72,23 +69,28 @@ Keep this file at or below 300 lines and 32 KiB.
 
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
   projection while auditing P12 checkpoint and recovery boundaries.
-- No parallel persistence authority or unreviewed production child; the selected Character-ID
-  workstream is limited to its 117 header/import/checkpoint/restart contract.
+- No parallel persistence authority or unreviewed production child; the completed Character-ID
+  and Account-ID workstreams are limited to their explicit 117 header/import/checkpoint/restart
+  contracts.
 
 ### Remaining acceptance work
 
 - [x] Record the finite P12 candidate registry with Legacy chains, wire/store formats, current
   owners, dependencies and focused/repeated/race/restart/backup evidence gaps.
 - [x] Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership.
-- [x] Review the finite registry and select `PERSIST-P12-CHARACTER-ID-001` as the only
+- [x] Review the finite registry and select `PERSIST-P12-CHARACTER-ID-001` as a
   dependency-ready bounded production workstream.
-- [x] Complete its import/checkpoint/restart/re-export/create and focused-race evidence, including
-  int32 negative/zero wrap and JSON-triggered checkpoint serialization.
+- [x] Complete Character-ID import/checkpoint/restart/re-export/create and focused-race evidence,
+  including int32 negative/zero wrap and JSON-triggered checkpoint serialization.
+- [x] Select and complete `PERSIST-P12-ACCOUNT-ID-001` for ordinary positive int32 headers:
+  production TCP high-header create/restart, retained-gap re-export, and deterministic JSON/117
+  checkpoint interleave evidence.
 - [ ] Re-review the remaining P12 owner/recovery gaps and select another child only after a
-  dependency-ready production owner and evidence contract exists; none is currently ready.
+  dependency-ready production owner and evidence contract exists; no successor is authorized yet.
 
-- Active implementation: Character-ID header/ID continuity is complete; all other P12 candidates
-  remain discovery inputs and broad persistence/backup/recovery implementation is forbidden.
+- Active implementation: bounded Character-ID and Account-ID header/ID continuity are complete;
+  all other P12 candidates remain discovery inputs and broad persistence/backup/recovery
+  implementation is forbidden.
 
 ### P7 frozen child registry
 
