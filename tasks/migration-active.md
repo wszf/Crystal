@@ -44,15 +44,16 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `DISC-P12-CLOSURE`
-- Status: `Active` bounded read-only closure discovery; P12 remains Open because the finite
-  candidate registry still has unresolved owner, dependency and recovery contracts.
+- Status: `Active` bounded P12 closure routing with one selected production workstream; P12
+  remains Open because the other persistence/recovery contracts are unresolved.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
   scope-frozen and Complete because no unassigned P11-owned behavior remains.
-- Active workstream: `DISC-P12-CLOSURE` — review the finite five-ID registry and close only
-  evidence/owner gaps; do not implement broad P12 scope or invent child IDs.
-- Outcome: the finite candidate registry and its persistence sub-slices are recorded in the Go
-  matrix; no P12 production child is dependency-ready, and the remaining block is evidence/
-  ownership/recovery, not permission to broaden implementation.
+- Active workstream: `PERSIST-P12-CHARACTER-ID-001` — retain the Legacy 117 NextCharacterID
+  header through import/checkpoint/restart/re-export and the next character create; no broad
+  P12 recovery implementation or new child ID.
+- Outcome: the finite candidate registry is recorded in the Go matrix; Character-ID is selected
+  because its auth, bridge and P3 allocation dependencies are identified, while other P12
+  inputs remain evidence/ownership blocked.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
   checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
@@ -68,19 +69,21 @@ Keep this file at or below 300 lines and 32 KiB.
 
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
   projection while auditing P12 checkpoint and recovery boundaries.
-- No parallel persistence authority or production child implementation before the finite registry
-  and dependencies are reviewed.
+- No parallel persistence authority or unreviewed production child; the selected Character-ID
+  workstream is limited to its 117 header/import/checkpoint/restart contract.
 
 ### Remaining acceptance work
 
 - [x] Record the finite P12 candidate registry with Legacy chains, wire/store formats, current
   owners, dependencies and focused/repeated/race/restart/backup evidence gaps.
 - [x] Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership.
-- [ ] Resolve the recorded owner/recovery gaps and select only a dependency-ready child; no
-  current P12 candidate passes the production evidence gate.
+- [x] Review the finite registry and select `PERSIST-P12-CHARACTER-ID-001` as the only
+  dependency-ready bounded production workstream.
+- [ ] Complete its import/checkpoint/restart/re-export/create and focused-race evidence, then
+  re-review the remaining P12 owner/recovery gaps before selecting another child.
 
-- Discovery: the five-ID P12 candidate registry is recorded; bounded owner/evidence discovery
-  continues, with no Go production implementation until a child passes the production gate.
+- Active implementation: Character-ID header continuity only; all other P12 candidates remain
+  discovery inputs and broad persistence/backup/recovery implementation is forbidden.
 
 ### P7 frozen child registry
 

@@ -123,16 +123,20 @@ want 206`).
   `PERSIST-P12-RESTART-EQUIV-001`. No new child ID was created.
 - `PERSIST-P12-ACCOUNT-ID-001` is partial: direct bridge and low-counter evidence exists,
   but the production high-header TCP, re-export and create/checkpoint race chain is open.
-  Character-ID and corrupt-index continuity remain open because the 117 header/duplicate
-  normalization contract and production recovery evidence are incomplete.
+  Character-ID continuity is selected as the only dependency-ready bounded implementation: the
+  117 header must be retained and installed without regressing the retained maximum, then
+  proven through production import/checkpoint/restart/re-export and the next character create.
+  Corrupt-index continuity remains open because its duplicate normalization contract and
+  production recovery evidence are incomplete.
 - `PERSIST-P12-CANSTART-DBCHECKS-001` is blocked by P5/P6 catalog and P1 deployment inputs.
   `PERSIST-P12-RESTART-EQUIV-001` remains the shared-owner gap: JSON, 117, world export and
   runtime sidecar lack a unified generation/manifest, backup/restore selector and crash
   recovery contract. P10 economy mutation and P1 general deployment remain separate owners.
 - The finite persistence sub-slices (atomic SaveJSON/checkpoint outcome, counter continuity,
   global re-export, runtime sidecar, backup, periodic save, failure injection and writable
-  paths) are evidence partitions under the existing IDs, not additional children. No P12
-  candidate is dependency-ready for production implementation.
+  paths) are evidence partitions under the existing IDs, not additional children. Only
+  `PERSIST-P12-CHARACTER-ID-001` is selected for bounded production implementation; all
+  other P12 candidates remain unselected discovery inputs.
 
 ## Active leaf and protected work
 
@@ -145,8 +149,9 @@ want 206`).
   `WS-ITEM-P6-USE-SCROLL-001` at Go `59b2914` and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
   at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
 - The finite P12 candidate registry is recorded below the P12 summary in the Go matrix. The
-  next bounded recovery point is resolving its owner, dependency and evidence gaps; no broad
-  persistence, backup or deployment implementation is authorized.
+  current bounded implementation is `PERSIST-P12-CHARACTER-ID-001`; its next recovery point
+  is production import/checkpoint/restart/re-export evidence. No broad persistence, backup or
+  deployment implementation is authorized.
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
   projection; do not infer an owner for an unassessed P12 boundary.
 - Do not implement P12 broad scope, reopen completed leaves, assign unverified owners, change
