@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-01 (Go `349d5a0` verification)
+Last verified: 2026-09-01 (Go `f7c95dd`; P9 closure routing)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -43,53 +43,44 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `ITEM-P6-USE-CATALOG-001`
-- Status: `Active` scope-frozen leaf; no dependency-ready functional child remains, so this
-  batch is bounded read-only closure discovery.
-- Completed workstreams: `WS-ITEM-P6-USE-NOOP-CONSUME-001` (`84adba5`),
-  `WS-ITEM-P6-USE-POTION-BUFF-003-001` (`c4f1e38`), `WS-ITEM-P6-USE-POTION-RATE-004-005-001`
-  (`e7c5a10`), `WS-ITEM-P6-USE-HERO-POTION-BUFF-003-005-001` (`8596f22`), correction
-  `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` (`732f8fe`), `WS-ITEM-P6-USE-BOOK-001`
-  (`5779c89`), correction `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` (`349d5a0`),
-  `WS-ITEM-P6-USE-SCROLL-001` (`59b2914`) and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
-  (`c620075`).
-- Active workstream: `DISC-P6-USE-CATALOG-CLOSURE-001` (finite ledger complete; no
-  dependency-ready functional successor).
-- Verified correction `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` (`349d5a0`) preserves current
-  world durable Magic progress, filters stale temporary records from Book commits and
-  rejects active temporary equipment Magics through the runtime snapshot.
-- Outcome: Script, Transform, Deco and MonsterSpawn family/shape partitions, Legacy call
-  chains, packet/consume contracts, unique owners and blockers are recorded in matrix row
-  3546; open scope remains implementation-forbidden.
-- Go matrix anchors to read: active row 3546 and P6 summary row 965 only.
-- Legacy: Script `PlayerObject.cs:6090-6092`, Transform/Deco/MonsterSpawn `:6250-6314`;
-  common tail `:6330-6337`, entry/death gates `:5799-5824`; C# read-only.
-- Go files: existing callback runner, dynamic monster constructor/admission, ordinary-pet
-  owner, conquest loader and startup decoration projection only; no item-use adapter exists.
-- Blockers: Script needs P7 callbacks/actions/conditions; Transform needs P5 effect authority;
-  Deco needs dynamic object/visibility ownership; MonsterSpawn needs world spawn/P5 base
-  authority and P9 conquest state for Shape 2.
-- Forbidden: implementing blocked Script/Transform/Deco/MonsterSpawn, reopening completed
-  workstreams or mount lifecycle, protocol layouts or any C# write.
+- Leaf ID: `DISC-P9-CLOSURE`
+- Status: `Active` bounded read-only closure discovery; P9 remains Open and no production
+  child is authorized until the finite registry is reviewed.
+- Previous primary: `ITEM-P6-USE-CATALOG-001` is scope-frozen; its Book authority correction
+  is complete in Go `349d5a0` and no dependency-ready P6 successor remains.
+- Active workstream: `DISC-P9-CLOSURE` — enumerate finite Guild, war, territory, relationship
+  and Conquest cross-phase children.
+- Outcome: finite P9 owner/dependency/contract ledger is recorded immediately below matrix row
+  968; no production child is marked dependency-ready until registry review.
+- Go matrix anchors to read: P9 summary row 968 and the finite ledger immediately below it.
+- Legacy: `Server/MirDatabase/{GuildInfo,ConquestInfo,ConquestGuildInfo}.cs`,
+  `Server/MirObjects/{GuildObject,ConquestObject}.cs`, `Server/MirEnvir/{Envir,Map}.cs`,
+  `Server/MirNetwork/MirConnection.cs`; C# read-only.
+- Go: `internal/auth/{guild.go,guild_authority.go,guild_war.go,guild_territory.go,conquest.go}`,
+  `internal/legacyworld/{guild.go,conquest.go}`, `cmd/crystal-server/{guilds.go,
+  guild_war_territory.go,conquest*.go}`; existing code is evidence, not automatic owner closure.
+- Dependencies: classify P9 Guild/Conquest state and P10 economy/P7 callback inputs per child;
+  P5 monster/world-object dependencies remain blocked where applicable.
+- Forbidden: broad P9-P12 implementation, reopening completed P6/P8 workstreams, assigning
+  unverified misc owners, protocol changes or any C# write.
 
 ### Protected Go ownership
 
-- Preserve shared item-use admission/death/riding gates, all completed item-use workstreams,
-  persistence-before-visible ordering and existing authorities.
-- No parallel transaction/teleport/repair/economy authority or spell runtime; no open-scope
-  catalogue implementation before its owner/dependencies are Complete.
+- Preserve existing Guild/Conquest authorities, item-use and P10/P7 cross-phase boundaries,
+  persistence-before-visible ordering and all completed workstreams.
+- No parallel guild/conquest/economy authority or child implementation before the registry and
+  dependencies are frozen.
 
 ### Remaining acceptance work
 
-- [x] Trace each remaining family/shape partition, owner, dependency and exact packet/consume
-  contract into the finite closure ledger in matrix row 3546.
-- [x] Confirm Deco is only covered by startup SafeZone projection and MonsterSpawn has no
-  item-use adapter; do not create parallel object/spawn authority.
-- [x] Keep production implementation closed: no dependency-ready bounded workstream remains
-  inside this leaf; wait for the registered P5/P7/P9 owners before selecting implementation.
+- [ ] For each child record Legacy chain, wire/consume/persistence, unique Go owner, dependencies
+  and focused/repeated/race/restart evidence.
+- [ ] Classify `GUILD-P9-NPC-SCRIPT-001` and `CONQUEST-P9-NPC-ECONOMY-001` as cross-phase inputs,
+  not P9 implementation leaves.
+- [ ] Review the finite ledger and select only a dependency-ready child after P9 scope freeze.
 
-- Discovery: finite P6 Use Catalog closure ledger, Legacy remaining switch/common tail, current
-  Go owner/dependency authorities and completed Food/Scroll production evidence.
+- Discovery: finite P9 Guild, war, territory, relationship and Conquest owner ledger; no Go
+  production implementation in this discovery batch.
 
 ### P7 frozen child registry
 
