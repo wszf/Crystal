@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-01 (P9 closure routing)
+Last updated: 2026-09-01 (P10 closure routing)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -11,7 +11,8 @@ are not migration evidence.
   Complete nor Blocked.
 - P6 remains scope-frozen at nineteen children: eighteen Complete and
   `ITEM-P6-USE-CATALOG-001` is complete for its registered scope with no dependency-ready
-  successor; the current routing batch is P9 closure discovery.
+  successor; P9 closure is now finite and reviewed with no production-ready child.
+  The current routing batch is P10 closure discovery.
 - `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
   this closes one bounded correction only, not the active leaf, P6 or the Goal.
 - `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
@@ -24,8 +25,9 @@ are not migration evidence.
 - `WS-ITEM-P6-USE-SCROLL-001` is Complete in Go `59b2914`; Player Inventory Scroll
   shapes 0-7 and 11-12 now have production-entry, persistence, observer and failure
   evidence without reopening completed item-use leaves.
-- Current routing leaf is `DISC-P9-CLOSURE`, with the P9 summary at matrix row 968 and
-  its finite ledger immediately below; no P9 production child is authorized yet.
+- P9 closure is finite and reviewed: no P9 production child met the evidence gate; P9 is
+  Frozen but remains In progress. Current routing leaf is `DISC-P10-CLOSURE`, with the P10
+  summary at matrix row 1004 and its finite ledger to be added below.
 - `WS-ITEM-P6-USE-FOOD-NONZERO-001` is Complete in Go `c620075`; Player Inventory
   Food Shape != 0 repair/report semantics, including unknown nonzero shapes, are closed.
 - `DISC-P6-USE-CATALOG-CLOSURE-001` is complete: the finite Script/Transform/Deco/
@@ -36,7 +38,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- HEAD: `033155f1` (`docs: align Go handoff head`).
+- HEAD: `20222440` (`docs: route P9 closure discovery`).
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -46,7 +48,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `f7c95dd` (`docs: record Book authority correction`), not pushed; production code is
+- HEAD: `5550f6a` (`docs: close P9 readiness review`), not pushed; Book production code is
   in `349d5a0`.
 - The committed Book/Scroll/Food migration tree is clean and no generated binary remains in the repo.
 
@@ -110,29 +112,29 @@ want 206`).
 
 ## Active leaf and protected work
 
-- Active leaf: `DISC-P9-CLOSURE` (bounded discovery; P9 remains Open).
-- Previous primary `ITEM-P6-USE-CATALOG-001` is scope-frozen with no dependency-ready
-  successor; its Book authority correction is complete in Go `349d5a0`.
+- Active leaf: `DISC-P10-CLOSURE` (bounded discovery; P10 remains Open).
+- Previous `DISC-P9-CLOSURE` is finite and reviewed; P9 is Frozen but remains In progress
+  because no child met the production evidence gate.
 - Completed workstreams include `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` at Go `349d5a0`,
   `WS-ITEM-P6-USE-SCROLL-001` at Go `59b2914` and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
   at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
-- Active discovery records finite Guild, guild storage, war, territory, relationship and
-  Conquest children; its ledger is in the Go matrix immediately below P9 row 968.
-- Preserve existing Guild/Conquest authorities, completed P6/P8 workstreams, latest-auth
-  revision/CAS and persistence-before-visible projection.
-- Do not implement P9/P10/P11/P12 broad scope, reopen completed leaves, assign unverified
-  owners, change protocols or modify any C#.
+- Active discovery will record finite P10 mail, market/auction, rental, GameShop and
+  economy children in the Go matrix below P10 row 1004.
+- Preserve existing P10 authorities, completed P6-P9 workstreams, latest-auth revision/CAS
+  and persistence-before-visible projection.
+- Do not implement P10/P11/P12 broad scope, reopen completed leaves, assign unverified owners,
+  change protocols or modify any C#.
 
 ## Exact recovery sequence
 
 1. Verify both repositories independently; preserve `tasks/lessons.md` and rerun
    tracked/staged/untracked `.cs` audits.
-2. Read only matrix row 968 and the finite P9 ledger below it, plus the active index and handoff.
-3. Trace read-only Legacy Guild/Conquest/war/territory owners and their MirConnection/Envir
-   dispatch; do not write C#.
+2. Read only matrix row 1004 and the finite P10 ledger below it, plus the active index and handoff.
+3. Trace read-only Legacy mail/market/auction/rental/GameShop owners and their MirConnection/
+   PlayerObject/Envir dispatch; do not write C#.
 4. For each finite child, record the Legacy call chain, wire/consume/persistence contract,
    unique Go owner, dependencies and focused/repeated/race/restart evidence.
-5. Keep `GUILD-P9-NPC-SCRIPT-001` and `CONQUEST-P9-NPC-ECONOMY-001` as cross-phase inputs,
-   not P9 implementation leaves; retain P5/P7/P10 blockers where applicable.
+5. Keep P7 script/economy inputs and P12 restart consumers separate from P10 implementation
+   leaves; retain P6 item/grid boundaries and all cross-phase blockers.
 6. Keep production implementation closed during discovery. Only after the registry and
    dependencies are reviewed may a dependency-ready child be frozen before Go changes.
