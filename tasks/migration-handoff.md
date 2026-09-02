@@ -46,7 +46,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `f3625e5a` (`docs: record P12 residual owner review`). This handoff update is
+- Observed HEAD: `e2c0f6c4` (`docs: close P12 CanStart DB-check workstream`). This handoff update is
   another Legacy control-document-only change; every Legacy `.cs` file remains untouched.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
