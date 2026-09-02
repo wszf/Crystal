@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 07:06 (Asia/Singapore)
+Last updated: 2026-09-03 07:26 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -11,16 +11,15 @@ not evidence; do not startup-read historical handoff archives.
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
-  restart-equivalence. MirDB MonsterInfo write is Complete in Go
-  `befa4a9645f60080df2dc0978a55cf1b45246b00`. NPC/quest rewrite is still
-  unselected. Unstaged NeedSave-transient edits exist in parallel and were
-  preserved, not committed by this leaf.
+  restart-equivalence. MirDB NPCInfo write is Complete in Go
+  `b08a22942bd5d2e11f31a8bfd1de431fd113a187`. QuestInfo rewrite is still
+  unselected.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch `migration/goal-orchestration`; pre-control-commit HEAD
-  `94ed6caf80aceb81f473427cebb72fd5ce0d9eef`.
+  `115a1fe6a9c81e016adbada0feb00ab445092373`.
 - Before this control refresh the index and worktree were clean except the
   expected unstaged `tasks/migration-active.md` and this handoff.
 - This snapshot records the expected one control-document commit delta.
@@ -29,31 +28,27 @@ not evidence; do not startup-read historical handoff archives.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `befa4a9645f60080df2dc0978a55cf1b45246b00`.
-- Unrelated pre-existing unstaged files (not this leaf): `docs/migration-matrix.md`,
-  `cmd/crystal-server/conquest_save_test.go`, `internal/auth/conquest.go`,
-  `internal/auth/guild.go`, `internal/auth/guild_progression_buffs.go`,
-  `internal/protocol/guild.go`, and untracked `internal/auth/p12_needsave_test.go`.
-  Preserve them.
+  `b08a22942bd5d2e11f31a8bfd1de431fd113a187`.
+- Unrelated unstaged file (not this leaf): `docs/migration-matrix.md`. Preserve it.
 - `git diff --check` and all three Go C# queries exit 0/empty. No owned
   Go/server process is active.
 
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE`.
-- WriteWorldDatabaseCatalog now emits current-layout MonsterInfo records. Loaded
-  CanRecall stays false. NPC/quest sections remain empty.
-- Do not claim NPC/quest MirDB rewrite. All `.cs` remains read-only.
+- WriteWorldDatabaseCatalogWithNPCs now emits current-layout NPCInfo.Save
+  fields. Runtime ObjectID, script and shop goods remain outside this writer.
+- Do not claim QuestInfo MirDB rewrite. All `.cs` remains read-only.
 
 ## Verification ledger
 
-- Monster, item and map round-trip tests pass count 20 and race count 5.
+- NPC/monster/item/map round-trip tests pass count 20 and race count 5.
 - `go test ./internal/legacyworld -count=1`, `go vet ./internal/legacyworld` and
   `go build ./...` exit 0.
 
 ## Exact recovery sequence
 
-1. Verify both repositories independently. Preserve the unrelated Go unstaged
-   files. Resume only `DISC-P12-CLOSURE`.
-2. Treat MonsterInfo MirDB write as a completed input, not NPC rewrite.
+1. Verify both repositories independently. Preserve the unstaged matrix edits.
+   Resume only `DISC-P12-CLOSURE`.
+2. Treat NPCInfo MirDB write as a completed input, not QuestInfo rewrite.
 3. Continue owner tracing for remaining catalog sections. Do not write C#.

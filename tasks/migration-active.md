@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (NeedSave transient + MirDB monster writer; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (MirDB NPC writer Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,21 +46,22 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001` — Active bounded correction
-  for SaveGuilds/SaveGoods/SaveConquests dirty-state parity.
-- Recovery review: world catalog and MirDB map/item/monster writes are completed
-  inputs; NPC/quest rewrite stays unselected.
-- Outcome: NeedSave is transient JSON-excluded state; only Legacy-explicit guild-buff
-  and conquest-owner transitions mark dirty, while periodic writers keep their existing filters.
-- Authority/files: Go `internal/auth/{conquest.go,guild.go,guild_progression_buffs.go}`,
-  `internal/protocol/guild.go`, focused tests and bounded matrix evidence.
-- Evidence: auth transient/restart and dirty-boundary tests pass count 20/race 5;
-  cmd guild/conquest production-entry tests pass count 20/race 5.
+- Active workstream: `WS-PERSIST-P12-MIRDB-NPC-001` — Complete for current-layout
+  NPCInfo writer for Server.MirDB; NeedSave transient correction is complete.
+- Recovery review: world catalog and MirDB map/item/monster/NPC writes are completed
+  inputs; QuestInfo rewrite remains unselected.
+- Outcome: write Legacy NPCInfo.Save fields in physical catalog order through n/o staging;
+  runtime ObjectID, script, shop goods and quest-sidecar text remain outside this writer.
+- Authority/files: Go `internal/legacyworld/world_database_write.go` and
+  `internal/legacyworld/world_database_write_test.go`, plus bounded matrix evidence.
+- Evidence: NPC writer round-trip passes count 20 and focused race count 5; full integration
+  remains gated by the registered startup-validator failures recorded in the handoff.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Legacy: `Envir.SaveGuilds/SaveGoods/SaveConquests` and GuildObject/ConquestObject dirty call chains; C# read-only.
-- Dependencies: SaveDelay/global periodic save still require P1 lifecycle/config, P10 economy and world owners.
-- Forbidden: cross-store manifest/all-or-nothing, backup/recovery implementation, reopening leaves,
-  assigning unverified owners, protocol changes or any C# write.
+- Legacy: `Envir.SaveDB`, `NPCInfo.Save`/constructor and NPC script/quest binding; C# read-only.
+- Dependencies: current 117 parser/layout and existing worlddata NPC projection are complete inputs;
+  QuestInfo text/sidecar and unified restart recovery remain separate owners.
+- Forbidden: QuestInfo rewrite, runtime ObjectID persistence, cross-store manifest/all-or-nothing,
+  backup/recovery implementation, reopening leaves, protocol changes or any C# write.
 
 ### Protected Go ownership
 
@@ -85,10 +86,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI, 117 n/o, backups, sidecar, file stores, order, NeedSave,
-  guild refresh, world JSON rewrite, missing-catalog create, empty MirDB, maps, items and monsters.
-  Remaining restart-equivalence stays discovery; NPC MirDB rewrite remains open.
-- [ ] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
+- [x] Complete SaveDelay INI through MirDB maps/items/monsters; QuestInfo rewrite remains open.
+- [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
+- [x] Complete `WS-PERSIST-P12-MIRDB-NPC-001`: NPCInfo.Save fields; ObjectID/script/shop/QuestInfo remain outside.
 
 ### P7 frozen child registry
 
