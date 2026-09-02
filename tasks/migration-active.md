@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (Go periodic account backup; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (Go world-export backup; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,17 +46,16 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-ACCOUNT-PERIODIC-BACKUP-001` — Complete for
-  SaveDelay-cadence dated `Back Up/Accounts` Move plus JSON/117 rewrite.
-- Recovery review: SaveDelay INI, 117 n/o staging and periodic account backups
-  are complete. Unified WorkLoop save and other stores stay unselected.
-- Outcome: after SaveDelay minutes, live `Server.MirADB` is moved to
-  `Back Up/Accounts/Accounts YYYY-MM-DD HH-MM-SS.bak` then rewritten; mutations
-  still use n/o only. Loaders read only the final path.
-- Authority/files: `internal/legacyaccount/binary_write*.go`,
-  `cmd/crystal-server/{account_periodic_save.go,main.go}` and tests.
-- Evidence: backup helper count 20/race 5; persist/interval tests count 20/race 5;
-  production account checkpoint/restart still passes. No guild/DB save.
+- Active workstream: `WS-PERSIST-P12-WORLD-DB-BACKUP-001` — Complete for
+  SaveDelay-cadence dated `Back Up/Database` copies of the world export.
+- Recovery review: SaveDelay INI, 117 n/o, account backups and world-export
+  copies are complete. Unified WorkLoop save still unselected.
+- Outcome: the same timer copies live world JSON to
+  `Back Up/Database/Database YYYY-MM-DD HH-MM-SS.bak` without moving it.
+- Authority/files: `internal/legacyworld/export.go`, world backup tests,
+  `cmd/crystal-server/account_periodic_save.go` and main ticker.
+- Evidence: world-copy tests count 20/race 5; persist tests include world copy;
+  production account restart still passes. No guild/goods/conquest save.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
 - Dependencies: SaveDelay/global periodic save require P1 lifecycle/config, P10 economy and world owners.
@@ -86,7 +85,7 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI, 117 n/o staging and periodic dated account backups.
+- [x] Complete SaveDelay INI, 117 n/o, account backups and world-export copies.
   Remaining restart-equivalence stays discovery; unified WorkLoop save is forbidden.
 
 ### P7 frozen child registry
