@@ -46,21 +46,22 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-CONQUESTINFO-001` — Complete for current-layout
-  ConquestInfo.Save records; magics, editor counters and quest `.txt` stay unselected.
-- Recovery review: MirDB map/item/monster/NPC/quest-header/GameShop/ConquestInfo
-  serializers are completed inputs; magics and quest sidecars stay unselected.
+- Active workstream: `WS-PERSIST-P12-MIRDB-CONQUESTINFO-001` — Complete only for the
+  bounded current-layout ConquestInfo.Save serializer; no production SaveDelay caller.
+  Magics, editor counters and quest `.txt` remain unselected.
+- Recovery review: MirDB map/item/monster/NPC/quest-header/GameShop/ConquestInfo serializers
+  are bounded completed inputs, not a complete production MirDB rewrite; magics and quest sidecars stay unselected.
 - Outcome: WriteWorldDatabaseCatalogWithConquests emits guards, gates, walls, sieges,
-  flags, schedule and control points through n/o staging.
-- Authority/files: Go `internal/legacyworld/world_database_write.go` and tests.
-- Evidence: ConquestInfo round-trip plus prior catalog writer tests pass count 20/race 5.
-  Full skipped-baseline integration remains the registered Quest fixture exclusion.
+  flags, schedule and control points through n/o staging; no production world-save path invokes it.
+- Authority/files: Go `internal/legacyworld/world_database_write.go` and tests; production integration requires a shared catalog/counter owner.
+- Evidence: ConquestInfo plus prior catalog writer tests pass count 20/race 5; full
+  skipped-baseline integration remains the registered Quest fixture exclusion.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Dependencies: current 117 parser and ConquestInfo projection are complete inputs;
-  MagicInfo skip-only reader remains a later catalog slice.
-- Forbidden: quest sidecar rewrite, runtime ObjectID persistence, partial-writer
-  SaveDelay wiring that clears unowned sections, cross-store manifest/all-or-nothing,
-  backup/recovery implementation, reopening leaves, protocol changes or any C# write.
+  static snapshot composition, editor-counter continuity and MagicInfo remain later slices.
+- Forbidden: quest sidecar rewrite, runtime ObjectID persistence, partial-writer SaveDelay
+  wiring that clears unowned sections, cross-store manifest/all-or-nothing, backup/recovery,
+  reopening leaves, protocol changes or any C# write.
 
 ### Protected Go ownership
 

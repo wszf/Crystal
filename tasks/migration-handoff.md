@@ -11,9 +11,10 @@ not evidence; do not startup-read historical handoff archives.
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
-  restart-equivalence. MirDB ConquestInfo write is Complete in Go
-  `bfadacb0d9d97432fbf4a8510daa5f73e86b3af4`. Magics and quest `.txt` sidecars
-  are still unselected.
+  restart-equivalence. MirDB ConquestInfo write is Complete only as a bounded
+  serializer in Go `bfadacb0d9d97432fbf4a8510daa5f73e86b3af4`; no production
+  SaveDelay caller exists. Editor counters, static snapshot composition, Magics
+  and quest `.txt` sidecars are still unselected.
 
 ## Legacy repository state
 
@@ -37,8 +38,11 @@ not evidence; do not startup-read historical handoff archives.
 
 - Active leaf: `DISC-P12-CLOSURE`.
 - WriteWorldDatabaseCatalogWithConquests now emits ConquestInfo.Save records
-  including guards, gates, walls, sieges, flags, schedule and control points.
-- Do not claim MagicInfo or quest sidecar rewrite. All `.cs` remains read-only.
+  including guards, gates, walls, sieges, flags, schedule and control points as a
+  bounded n/o-staged serializer; it is not called by the production SaveDelay path.
+- Do not claim editor-counter continuity, a complete MirDB rewrite, static
+  snapshot/sidecar composition, MagicInfo or quest sidecar rewrite. All `.cs`
+  remains read-only.
 
 ## Verification ledger
 
@@ -50,5 +54,6 @@ not evidence; do not startup-read historical handoff archives.
 
 1. Verify both repositories independently. Preserve unstaged matrix edits.
    Resume only `DISC-P12-CLOSURE`.
-2. Treat ConquestInfo MirDB write as a completed input, not magics.
+2. Treat ConquestInfo MirDB write as a bounded completed input, not production
+   SaveDelay wiring or a complete catalog rewrite; do not select magics yet.
 3. Continue owner tracing for remaining catalog sections. Do not write C#.
