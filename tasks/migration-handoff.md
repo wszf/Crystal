@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-02 (P12 dirty-shutdown checkpoint correction complete)
+Last updated: 2026-09-02 (P12 residual owner review complete)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -46,8 +46,8 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `a5f4c80` (`docs: refresh P12 handoff head`). The Go correction is committed
-  separately; this handoff update is the next Legacy control-document-only change.
+- Observed HEAD: `5d26b5b6` (`docs: record P12 shutdown checkpoint correction`). This handoff
+  update is another Legacy control-document-only change; every Legacy `.cs` file remains untouched.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -193,19 +193,21 @@ want 206`).
   above; `PERSIST-P12-CORRUPT-CHAR-INDEX-001` is also complete for its source-equivalent physical
   order, first-match, checkpoint/restart and next-create contract. Neither workstream enlarges P3
   ownership or authorizes broad P12 recovery.
-- `PERSIST-P12-CANSTART-DBCHECKS-001` is blocked by P6 `ITEM-P6-USE-CATALOG-001` still
-  being Active and by P1 deployment/localization/logging inputs. Go has no `EnforceDBChecks`
-  owner and the current world-export/catalog path lacks the complete configured monster/item
-  name set, so first-missing diagnostics, disabled bypass and fresh-package/listener evidence
-  are not ready. `PERSIST-P12-RESTART-EQUIV-001` remains the shared-owner gap: JSON, 117, world
-  export and runtime sidecar lack a unified generation/manifest, backup/restore selector and
-  crash recovery contract. P10 economy mutation and P1 general deployment remain separate owners.
-- The finite persistence sub-slices (atomic SaveJSON/checkpoint outcome, counter continuity,
-  global re-export, runtime sidecar, backup, periodic save, failure injection and writable
-  paths) are evidence partitions under the existing IDs, not additional children.
-  `PERSIST-P12-CHARACTER-ID-001`, bounded `PERSIST-P12-ACCOUNT-ID-001` and
-  `PERSIST-P12-CORRUPT-CHAR-INDEX-001` are complete; CanStart and restart-equivalence remain
-  unselected discovery inputs, and no dependency-ready successor is currently authorized.
+- `DISC-P12-CLOSURE-REVIEW-002` rechecked both residuals against current sources. Legacy
+  `Envir.CanStartEnvir` checks StartPoints, 40 configured monster names, RefineOreName and
+  WorldMap in that order (`Server/MirEnvir/Envir.cs:1925-1994`); `Settings.cs` owns
+  EnforceDBChecks and the names, while Go `Config`/`validateLegacyWorldStartup` has no matching
+  owner or complete catalog projection. Therefore `PERSIST-P12-CANSTART-DBCHECKS-001` remains
+  Blocked-external on P6 catalog and P1 config/localization/deployment inputs.
+- Legacy periodic save spans DB/accounts/guilds/goods/conquests, with account/DB backups and
+  account `.n/.o` rotation (`Server/MirEnvir/Envir.cs:2147-2155,2439-2507,2550-2819`). Go
+  `SaveJSON`, 117 bridge, world export and respawn sidecar are separate stores without a
+  generation/manifest, backup selector/fallback or crash contract. Thus
+  `PERSIST-P12-RESTART-EQUIV-001` remains Open/shared-owner, dependent on P10 economy and P1
+  lifecycle/deployment; no dependency-ready successor is authorized.
+- The finite persistence sub-slices are evidence partitions under the existing IDs, not new
+  children. The audit found no unique closed production owner for either residual; keep production
+  implementation closed during discovery.
 
 ## Active leaf and protected work
 

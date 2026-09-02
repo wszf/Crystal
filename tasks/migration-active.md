@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-02 (Go `26a037c`; P12 dirty-shutdown correction)
+Last verified: 2026-09-02 (Go `26a037c`; P12 residual owner review)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -48,13 +48,12 @@ Keep this file at or below 300 lines and 32 KiB.
   workstreams are Complete, while P12 remains Open for other persistence/recovery contracts.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
   scope-frozen and Complete because no unassigned P11-owned behavior remains.
-- Active workstream: `WS-PERSIST-P12-DIRTY-CHECKPOINT-001` — Complete; owned Go files were
-  the shutdown caller, bridge decorator seam and real HTTP production tests. Dirty JSON+117
-  shutdown now performs one 117 hook after successful `SaveJSON`; any error still retries.
-  Runtime SaveJSON→117, JSON precedence and fencing remain unchanged; P2/P6 are not reopened.
-- Outcome: Account-ID, Character-ID, bounded corrupt-index behavior and this shutdown correction
-  are complete; CanStart and broad restart-equivalence remain open or externally blocked. No broad
-  P12 recovery implementation is added.
+- Active workstream: `DISC-P12-CLOSURE-REVIEW-002` — Complete read-only owner review. Legacy
+  `CanStartEnvir` and periodic/full save chains were rechecked against Go owners; CanStart remains
+  Blocked-external and restart-equivalence remains Open/shared-owner. No successor is authorized.
+- Outcome: Account-ID, Character-ID, bounded corrupt-index behavior and dirty-shutdown correction
+  are complete; P12 retains only the two explicitly registered residual contracts. No broad P12
+  recovery implementation is added.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
   checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
