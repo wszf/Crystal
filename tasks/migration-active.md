@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (Go MirDB item writer; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (NeedSave transient + MirDB monster writer; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,17 +46,19 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-ITEM-WRITE-001` — Complete for writing
-  current-layout ItemInfo records into Server.MirDB.
-- Recovery review: map and item binary writes are complete. Monster/NPC rewrite
-  stays unselected.
-- Outcome: WriteWorldDatabaseCatalog emits ItemInfo with stats/tooltip flags;
-  monster/NPC/quest sections stay empty.
-- Authority/files: `internal/legacyworld/{world_database_write.go,writer.go}` and tests.
-- Evidence: item and map round-trip tests pass count 20/race 5.
+- Active workstream: `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001` — Active bounded correction
+  for SaveGuilds/SaveGoods/SaveConquests dirty-state parity.
+- Recovery review: world catalog and MirDB map/item/monster writes are completed
+  inputs; NPC/quest rewrite stays unselected.
+- Outcome: NeedSave is transient JSON-excluded state; only Legacy-explicit guild-buff
+  and conquest-owner transitions mark dirty, while periodic writers keep their existing filters.
+- Authority/files: Go `internal/auth/{conquest.go,guild.go,guild_progression_buffs.go}`,
+  `internal/protocol/guild.go`, focused tests and bounded matrix evidence.
+- Evidence: auth transient/restart and dirty-boundary tests pass count 20/race 5;
+  cmd guild/conquest production-entry tests pass count 20/race 5.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
-- Dependencies: SaveDelay/global periodic save require P1 lifecycle/config, P10 economy and world owners.
+- Legacy: `Envir.SaveGuilds/SaveGoods/SaveConquests` and GuildObject/ConquestObject dirty call chains; C# read-only.
+- Dependencies: SaveDelay/global periodic save still require P1 lifecycle/config, P10 economy and world owners.
 - Forbidden: cross-store manifest/all-or-nothing, backup/recovery implementation, reopening leaves,
   assigning unverified owners, protocol changes or any C# write.
 
@@ -84,8 +86,9 @@ Keep this file at or below 300 lines and 32 KiB.
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
 - [x] Complete SaveDelay INI, 117 n/o, backups, sidecar, file stores, order, NeedSave,
-  guild refresh, world JSON rewrite, missing-catalog create, empty MirDB, maps and items.
-  Remaining restart-equivalence stays discovery; monster/NPC MirDB rewrite remains open.
+  guild refresh, world JSON rewrite, missing-catalog create, empty MirDB, maps, items and monsters.
+  Remaining restart-equivalence stays discovery; NPC MirDB rewrite remains open.
+- [ ] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
 
 ### P7 frozen child registry
 
