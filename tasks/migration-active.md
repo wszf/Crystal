@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (Go missing world JSON create; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (Go empty MirDB writer; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,14 +46,14 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-WORLD-CREATE-MISSING-001` — Complete for
-  creating a missing world JSON catalog before load.
-- Recovery review: LoadDB missing-file create is complete. Binary Server.MirDB
-  stays unselected.
-- Outcome: a missing WorldExportPath is created as empty JSON then loaded;
-  existing files are left unchanged.
-- Authority/files: `cmd/crystal-server/{world_catalog_save.go,main.go}` and tests.
-- Evidence: create-missing and leave-existing tests pass count 20/race 5.
+- Active workstream: `WS-PERSIST-P12-MIRDB-EMPTY-WRITE-001` — Complete for writing
+  an empty current-layout Server.MirDB.
+- Recovery review: empty binary MirDB write is complete. Populated catalog
+  rewrite stays unselected.
+- Outcome: WriteWorldDatabase emits 117/0 with zero catalogs and default
+  Dragon/respawn fields using n/o staging.
+- Authority/files: `internal/legacyworld/{world_database_write.go,writer.go}` and tests.
+- Evidence: empty round-trip and staged-failure tests pass count 20/race 5.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
 - Dependencies: SaveDelay/global periodic save require P1 lifecycle/config, P10 economy and world owners.
@@ -84,8 +84,8 @@ Keep this file at or below 300 lines and 32 KiB.
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
 - [x] Complete SaveDelay INI, 117 n/o, backups, sidecar, file stores, order, NeedSave,
-  guild refresh, world JSON rewrite and missing-catalog create. Remaining restart-equivalence
-  stays discovery; binary MirDB rewrite remains open.
+  guild refresh, world JSON rewrite, missing-catalog create and empty MirDB write.
+  Remaining restart-equivalence stays discovery; populated MirDB rewrite remains open.
 
 ### P7 frozen child registry
 
