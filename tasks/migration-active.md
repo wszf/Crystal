@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (MirDB QuestInfo header writer complete; P12 next implementation blocked by shared-owner gap)
+Last verified: 2026-09-03 (MirDB GameShop writer Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,22 +46,20 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-RESTART-OWNER-TRACE-001` (Blocked-external); QuestInfo header writer is complete.
-- Recovery review: MirDB map/item/monster/NPC/quest-header writers are completed
-  inputs; quest text sidecars and remaining catalog sections stay unselected.
-- Outcome: enumerate the smallest next owner contract without implementing open sidecar
-  or shared restart scope; P12 remains Open/shared-owner and the Goal remains ongoing.
-- Authority/files: read-only Legacy `Envir.SaveDB/LoadDB`, QuestInfo `Save`/`LoadInfo`,
-  and Go `database.go`, `export.go`, `text.go`; no production write is selected while blocked.
-- Evidence: Quest commit `00f9d40` and matrix `d196bae`; quest-header plus prior catalog
-  tests pass count 20/race 5. Full skipped-baseline integration remains blocked by the
-  registered startup-validator failures.
+- Active workstream: `WS-PERSIST-P12-MIRDB-GAMESHOP-001` — Complete for current-layout
+  GameShopItem.Save records; magics/conquest-info and quest `.txt` stay unselected.
+- Recovery review: MirDB map/item/monster/NPC/quest-header/GameShop writers are
+  completed inputs; magics, ConquestInfo and quest sidecars stay unselected.
+- Outcome: WriteWorldDatabaseCatalogWithGameShop emits shop rows with gold/credit
+  prices and buy flags through n/o staging.
+- Authority/files: Go `internal/legacyworld/world_database_write.go` and tests.
+- Evidence: GameShop round-trip plus prior catalog writer tests pass count 20/race 5.
+  Full skipped-baseline integration remains the registered Quest fixture exclusion.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: QuestPath `.txt` sidecar source ownership and unified periodic/recovery
-  owner across P1/P10/world/auth; no dependency-ready child is currently safe to select.
-- Forbidden: quest sidecar rewrite before its source contract, runtime ObjectID persistence,
-  cross-store manifest/all-or-nothing, backup/recovery implementation, reopening leaves,
-  protocol changes or any C# write.
+- Dependencies: current 117 parser and GameShopItem projection are complete inputs;
+  MagicInfo skip-only reader and ConquestInfo remain later catalog slices.
+- Forbidden: quest sidecar rewrite, runtime ObjectID persistence, cross-store
+  manifest/all-or-nothing, backup/recovery implementation, reopening leaves, protocol changes or any C# write.
 
 ### Protected Go ownership
 
@@ -86,9 +84,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs; quest `.txt` sidecars remain open.
+- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs/GameShop; magics remain open.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
-- [x] Complete `WS-PERSIST-P12-MIRDB-QUEST-001`: QuestInfo.Save header plus FileName; `.txt` sidecars remain outside.
+- [x] Complete `WS-PERSIST-P12-MIRDB-GAMESHOP-001`: GameShopItem.Save rows; magics/ConquestInfo remain outside.
 
 ### P7 frozen child registry
 
