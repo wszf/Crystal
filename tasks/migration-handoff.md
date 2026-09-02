@@ -46,8 +46,8 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `5d26b5b6` (`docs: record P12 shutdown checkpoint correction`). This handoff
-  update is another Legacy control-document-only change; every Legacy `.cs` file remains untouched.
+- Observed HEAD: `f3625e5a` (`docs: record P12 residual owner review`). This handoff update is
+  another Legacy control-document-only change; every Legacy `.cs` file remains untouched.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
