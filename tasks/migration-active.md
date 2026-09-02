@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-02 (Go `f3820d6`; P12 JSON staging cleanup complete)
+Last verified: 2026-09-02 (Go `96849c2`; P12 JSON staging cleanup complete)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.

@@ -57,9 +57,9 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `f3820d6` (`fix: clean SaveJSON staging failures`), not pushed. This commit adds
-  bounded cleanup for WriteFile/Rename staging failures, outcome-preserving regression tests and
-  matrix evidence; earlier CanStart, shutdown, Account-ID, Character-ID and corrupt-index commits remain in history.
+- HEAD: `96849c2` (`test: preserve target after SaveJSON staging failure`), not pushed; it follows
+  `f3820d6` and strengthens the bounded SaveJSON staging-failure target-preservation evidence.
+  Earlier CanStart, shutdown, Account-ID, Character-ID and corrupt-index commits remain in history.
 - The Go worktree is clean and no generated binary remains in the repo. The Legacy
   `tasks/lessons.md` change remains unrelated and uncommitted.
 
