@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 07:38 (Asia/Singapore)
+Last updated: 2026-09-03 07:45 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -11,44 +11,57 @@ not evidence; do not startup-read historical handoff archives.
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
-  restart-equivalence. MirDB QuestInfo header write is Complete in Go
-  `00f9d40f4f43fdf1e6bf47d026dc28d2c81b85e2`. Quest `.txt` sidecars and remaining
-  catalog sections are still unselected.
+  restart-equivalence. MirDB NPCInfo writer is complete in Go `b08a229` with
+  documentation commits `384e6d8`/`dbabaeb`; QuestInfo header writer is complete
+  in Go `00f9d40` with matrix commit `d196bae`.
+- QuestPath `.txt` sidecar ownership, editor counters, unified WorkLoop and complete
+  multi-store restart/recovery remain outside these bounded writer slices.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
-- Branch `migration/goal-orchestration`; pre-control-commit HEAD
-  `a94a9790fb3a9218868e823326284653df19e60f`.
-- Before this control refresh the index and worktree were clean except the
-  expected unstaged `tasks/migration-active.md` and this handoff.
-- This snapshot records the expected one control-document commit delta.
+- Branch `migration/goal-orchestration`; HEAD `a94a9790fb3a9218868e823326284653df19e60f`.
+- Worktree has only the expected unstaged `tasks/migration-active.md` and this handoff.
+  No staged or untracked files. Tracked, staged and untracked `.cs` queries are empty.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
-- Branch `migrate/drop-owner-p12`; HEAD
-  `00f9d40f4f43fdf1e6bf47d026dc28d2c81b85e2`.
-- Index and worktree are clean.
-- `git diff --check` and all three Go C# queries exit 0/empty. No owned
+- Branch `migrate/drop-owner-p12`; HEAD `d196bae5ae2e0b301a849bd6bb15aac1ceb10fed`,
+  pushed to `origin/migrate/drop-owner-p12`.
+- Worktree is clean. Tracked, staged and untracked `.cs` queries are empty; no owned
   Go/server process is active.
 
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE`.
-- WriteWorldDatabaseCatalogWithQuests now emits QuestInfo.Save headers plus
-  FileName. QuestPath `.txt` task/reward files remain outside this writer.
-- Do not claim quest sidecar rewrite or remaining Magics/GameShop/ConquestInfo
-  catalog sections. All `.cs` remains read-only.
+- Current bounded routing is `WS-PERSIST-P12-RESTART-OWNER-TRACE-001`, blocked-external:
+  no dependency-ready P12 implementation child is safe to select.
+- The owner trace confirms QuestInfo binary metadata needs explicit FileName input and
+  separate QuestPath sidecar ownership. The header writer deliberately does not claim
+  sidecar/text migration, runtime ObjectID bindings or editor-counter restoration.
+- Do not claim P12 restart-equivalence or overall Goal completion. All `.cs` remains
+  permanently read-only.
 
 ## Verification ledger
 
-- Quest-header plus prior catalog writer tests pass count 20 and race count 5.
-- `go test ./internal/legacyworld -count=1`, `go vet ./internal/legacyworld` and
-  `go build ./...` exit 0.
+- `go test ./internal/legacyworld -run '^(TestWriteWorldDatabase|TestWorldDatabase)' -count=20` → 0.
+- `go test -race ./internal/legacyworld -run '^(TestWriteWorldDatabase|TestWorldDatabase)' -count=5` → 0.
+- `go vet ./internal/legacyworld` and `go build ./...` after the Quest writer → 0.
+- `go test ./... -skip '^TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin$' -count=1` → 1.
+  Latest run failed at `TestProductionStartupReturnsBootstrapError` and
+  `TestProductionRuntimeBootstrapPrecedesGameBind`: missing world JSON is now created
+  and loaded as an empty export, so the observed error is `Cannot start server without
+  atleast 1 Map and StartPoint.` instead of the tests' expected world-export error.
+  This is the external world-create/startup-owner change, not the MirDB writer slices.
+  The registered Quest baseline remains excluded; no full-pass claim is made.
 
 ## Exact recovery sequence
 
-1. Verify both repositories independently. Resume only `DISC-P12-CLOSURE`.
-2. Treat QuestInfo header write as a completed input, not quest `.txt` sidecars.
-3. Continue owner tracing for remaining catalog sections. Do not write C#.
+1. Verify both repositories independently and preserve the active-index edit; do not
+   reset, stash, clean or overwrite parallel work.
+2. Read `tasks/migration-active.md` and P12 matrix anchors only; keep
+   `DISC-P12-CLOSURE` active and the owner-trace blocker explicit.
+3. Do not implement QuestPath sidecars, editor-counter restoration, MirDB production
+   path wiring, unified WorkLoop, manifest/backup/restore or crash recovery until a
+   shared owner and dependency contract are assigned. Never write `.cs`.

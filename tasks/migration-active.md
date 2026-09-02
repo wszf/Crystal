@@ -46,20 +46,22 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-QUEST-001` — Complete for current-layout
-  QuestInfo.Save header plus FileName; quest `.txt` sidecars stay unselected.
+- Active workstream: `WS-PERSIST-P12-RESTART-OWNER-TRACE-001` (Blocked-external); QuestInfo header writer is complete.
 - Recovery review: MirDB map/item/monster/NPC/quest-header writers are completed
   inputs; quest text sidecars and remaining catalog sections stay unselected.
-- Outcome: WriteWorldDatabaseCatalogWithQuests emits Index/Name/Group/FileName and
-  requirement/message/time-limit fields through n/o staging.
-- Authority/files: Go `internal/legacyworld/world_database_write.go` and tests.
-- Evidence: quest-header round-trip plus prior catalog writer tests pass count 20/race 5.
-  Full skipped-baseline integration remains the registered Quest fixture exclusion.
+- Outcome: enumerate the smallest next owner contract without implementing open sidecar
+  or shared restart scope; P12 remains Open/shared-owner and the Goal remains ongoing.
+- Authority/files: read-only Legacy `Envir.SaveDB/LoadDB`, QuestInfo `Save`/`LoadInfo`,
+  and Go `database.go`, `export.go`, `text.go`; no production write is selected while blocked.
+- Evidence: Quest commit `00f9d40` and matrix `d196bae`; quest-header plus prior catalog
+  tests pass count 20/race 5. Full skipped-baseline integration remains blocked by the
+  registered startup-validator failures.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: current 117 parser and questRecord.fileName are complete inputs;
-  QuestPath `.txt` LoadInfo remains a separate sidecar owner.
-- Forbidden: quest text/sidecar rewrite, runtime ObjectID persistence, cross-store
-  manifest/all-or-nothing, backup/recovery implementation, reopening leaves, protocol changes or any C# write.
+- Dependencies: QuestPath `.txt` sidecar source ownership and unified periodic/recovery
+  owner across P1/P10/world/auth; no dependency-ready child is currently safe to select.
+- Forbidden: quest sidecar rewrite before its source contract, runtime ObjectID persistence,
+  cross-store manifest/all-or-nothing, backup/recovery implementation, reopening leaves,
+  protocol changes or any C# write.
 
 ### Protected Go ownership
 
