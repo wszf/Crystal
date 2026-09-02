@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-02 (Go `fb60853`; P12 CanStart projection complete)
+Last verified: 2026-09-02 (Go `f3820d6`; P12 JSON staging cleanup complete)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -44,26 +44,19 @@ Keep this file at or below 300 lines and 32 KiB.
 ## Active batch
 
 - Leaf ID: `DISC-P12-CLOSURE`
-- Status: `Active` bounded P12 closure routing; Character-ID and bounded positive-int32 Account-ID
-  workstreams are Complete, while P12 remains Open for other persistence/recovery contracts.
-- Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
-  scope-frozen and Complete because no unassigned P11-owned behavior remains.
-- Active workstream: `WS-PERSIST-P12-CANSTART-DBCHECKS-001` — Complete for the bounded
-  P12 `LegacyStartupChecks` projection/validator (`internal/worlddata`, `internal/legacyworld`,
-  `cmd/crystal-server`). It consumes existing raw P5/P6 catalogs, preserves P4 StartPoint/WorldMap
-  and P1 general Config/deployment ownership, and carries exact 50-name order, source-specific
-  settings, strict/normalized lookup, disabled bypass and malformed-projection guards.
-- Outcome: Account-ID, Character-ID, bounded corrupt-index behavior, dirty-shutdown correction and
-  CanStart DB checks are complete without reopening P1/P6. Old exports lacking the projection leave
-  this gate disabled until re-export; broad P12 recovery and restart-equivalence remain shared-owner.
+- Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
+- Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
+- Active workstream: `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` — Complete for Go
+  `auth.Service.SaveJSON` staging cleanup after WriteFile/Rename failure.
+- Outcome: Account-ID, Character-ID, bounded corrupt-index behavior, dirty-shutdown correction,
+  CanStart DB checks and this JSON cleanup are complete for bounded contracts; restart-equivalence
+  remains Open/shared-owner and no full P12 closure is claimed.
+- Authority/files: `Service.saveMu` plus `internal/auth/{service.go,save_json_outcome_test.go}`;
+  JSONSaveError/JSONCommitted, checkpoint ordering and JSON precedence remain unchanged.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
-  checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
-- Go: `internal/auth/{checkpoint.go,service.go}`, `internal/legacyaccount/*`, `internal/legacyworld/*`,
-  and bounded `cmd/crystal-server` lifecycle/startup owners; existing code is evidence, not closure.
-- Dependencies: preserve completed P2-P11 authorities; consume the existing P5/P6 raw item/monster
-  catalog export without reopening feature leaves; keep P10 economy/mail and P7/P9 inputs separate.
-  P1 general Config/deployment remains separate; P12 owns this startup projection boundary only.
+- Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
+- Go: `internal/auth`, `internal/legacyaccountbridge` and bounded `cmd/crystal-server` owners.
+- Dependencies: preserve completed P2-P11 authorities; keep P10 economy and P1 deployment separate.
 - Forbidden: broad restart/backup/deployment implementation, reopening completed leaves,
   assigning unverified owners, protocol changes or any C# write.
 
@@ -85,11 +78,11 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Select and complete `PERSIST-P12-CORRUPT-CHAR-INDEX-001` for the source-equivalent
   duplicate/zero/negative character-index contract: physical-order re-export, first-match delete,
   graceful checkpoint, restart selection and unchecked next-create through the real TCP path.
-- [x] Complete `WS-PERSIST-P12-CANSTART-DBCHECKS-001` with source projection, exact diagnostics, disabled bypass, listener gates, export/reload and production repeated/race evidence; remaining recovery waits for a dependency-ready owner and evidence contract.
+- [x] Complete `WS-PERSIST-P12-CANSTART-DBCHECKS-001` with source projection, exact diagnostics, disabled bypass, listener gates, export/reload and production repeated/race evidence.
+- [x] Complete `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` with SaveJSON WriteFile/Rename failure cleanup, old-target preservation, JSONSaveError outcome and production-path evidence.
 
-- Active implementation: bounded Character-ID, Account-ID and corrupt-character-index continuity
-  are complete; all other P12 candidates remain discovery inputs and broad persistence/backup/
-  recovery implementation is forbidden.
+- Active implementation: the bounded P12 workstreams above are complete; remaining restart-equivalence
+  candidates stay discovery inputs and broad persistence/backup/recovery implementation is forbidden.
 
 ### P7 frozen child registry
 

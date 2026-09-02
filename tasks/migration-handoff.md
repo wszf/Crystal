@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-02 (P12 CanStart DB-check projection complete)
+Last updated: 2026-09-02 (P12 JSON staging cleanup bounded closure complete)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -16,8 +16,8 @@ are not migration evidence.
   now finite and reviewed: all residual dispatch families are routed to accepted P6-P10
   owners or explicitly excluded, with no unassigned P11-owned behavior. P12 now has a finite
   five-ID candidate registry; Account-ID, Character-ID, bounded corrupt-index continuity,
-  dirty-shutdown checkpoint correction and CanStart DB-check projection are complete for their
-  bounded contracts. Restart-equivalence retains its shared-owner and recovery evidence gaps.
+  dirty-shutdown checkpoint correction, CanStart DB-check projection and JSON staging cleanup are
+  complete for their bounded contracts. Restart-equivalence retains shared-owner/recovery gaps.
 - `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
   this closes one bounded correction only, not the active leaf, P6 or the Goal.
 - `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
@@ -46,7 +46,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `e2c0f6c4` (`docs: close P12 CanStart DB-check workstream`). This handoff update is
+- Observed HEAD: `cc8ac36b` (`docs: refresh P12 CanStart handoff`). This handoff update is
   another Legacy control-document-only change; every Legacy `.cs` file remains untouched.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
@@ -57,10 +57,9 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `fb60853` (`feat: migrate P12 startup database checks`), not pushed. This commit adds
-  the P12 `LegacyStartupChecks` export/projection, production startup validator, source-specific
-  settings and real startup-entry tests; the matrix evidence is included in the same commit.
-  Earlier shutdown, Account-ID, Character-ID and corrupt-index commits remain in history.
+- HEAD: `f3820d6` (`fix: clean SaveJSON staging failures`), not pushed. This commit adds
+  bounded cleanup for WriteFile/Rename staging failures, outcome-preserving regression tests and
+  matrix evidence; earlier CanStart, shutdown, Account-ID, Character-ID and corrupt-index commits remain in history.
 - The Go worktree is clean and no generated binary remains in the repo. The Legacy
   `tasks/lessons.md` change remains unrelated and uncommitted.
 
@@ -188,31 +187,29 @@ want 206`).
 - `TestP12CanStart*` exercises the real startup entry with listener-not-called failures and successful game/status listener opening; export/reload, source fallback and full 50-position first-missing tests pass at repeated count 20 and focused race count 5. `go test ./...` and `go test -race ./...` pass with the registered Quest fixture skipped; vet/build pass.
 - Legacy default `WhiteSerpent` is retained from `Settings.cs`; old world JSON without `legacyStartupChecks` leaves the P12 gate disabled because Enforce/Fishing/Refine values are unavailable, so re-export is required for an equivalent gate.
 
+## P12 JSON staging cleanup bounded closure
+
+- `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` is Complete in Go `f3820d6`, owned solely by `auth.Service.SaveJSON`; failed WriteFile/Rename paths now best-effort clean `path + ".tmp"` without changing `JSONCommitted`, checkpoint order, `saveMu` or JSON precedence.
+- Real production `SaveJSON` tests cover deterministic write/rename failures, old target/sentinel preservation, no staging residue, committed checkpoint error and `LoadJSON` restart read; existing HTTP shutdown/retry, P2 precedence and 117 bridge tests were rerun.
+- Focused repeated, focused race, auth package, full skipped-Quest suite, full race, vet and build all pass; the unskipped Quest fixture still fails at `mail packet id = 26, want 206` as the known baseline.
+- This is Go-owned single-file staging hygiene only: no `Sync`, `.n/.o` parity, generation/manifest, backup/restore, cross-store atomicity or complete crash/restart equivalence is claimed.
+
 ## P12 finite candidate review
 
 - Existing IDs in scope: `PERSIST-P12-ACCOUNT-ID-001`, `PERSIST-P12-CHARACTER-ID-001`,
   `PERSIST-P12-CORRUPT-CHAR-INDEX-001`, `PERSIST-P12-CANSTART-DBCHECKS-001` and
-  `PERSIST-P12-RESTART-EQUIV-001`. No new child ID was created.
-- `PERSIST-P12-ACCOUNT-ID-001` is complete for the ordinary positive-int32 contract:
-  production high-header TCP, re-export/restart, retained-gap and create/checkpoint race
-  evidence are closed. `PERSIST-P12-CHARACTER-ID-001` is complete for the bounded implementation
-  above; `PERSIST-P12-CORRUPT-CHAR-INDEX-001` is also complete for its source-equivalent physical
-  order, first-match, checkpoint/restart and next-create contract. Neither workstream enlarges P3
-  ownership or authorizes broad P12 recovery.
+  `PERSIST-P12-RESTART-EQUIV-001`; no new child ID was created.
+- Account-ID, Character-ID and corrupt-index workstreams remain complete for their bounded
+  production contracts; neither enlarges P3 ownership or authorizes broad P12 recovery.
 - `DISC-P12-CLOSURE-REVIEW-002` traced Legacy `Envir.CanStartEnvir` at
-  `Server/MirEnvir/Envir.cs:1925-1994`: StartPoints, 50 configured monster names,
-  RefineOreName and WorldMap are checked in that order; `Settings.cs` supplies the defaults and
-  auxiliary INI values. The raw P5/P6 catalogs were already complete, so P12 implemented the
-  finite `LegacyStartupChecks` projection/validator without reopening P1/P5/P6.
-- Legacy periodic save spans DB/accounts/guilds/goods/conquests, with account/DB backups and
-  account `.n/.o` rotation (`Server/MirEnvir/Envir.cs:2147-2155,2439-2507,2550-2819`). Go
-  `SaveJSON`, 117 bridge, world export and respawn sidecar are separate stores without a
-  generation/manifest, backup selector/fallback or crash contract. Thus
-  `PERSIST-P12-RESTART-EQUIV-001` remains Open/shared-owner, dependent on P10 economy and P1
-  lifecycle/deployment; no dependency-ready successor is authorized.
-- The finite persistence sub-slices are evidence partitions under the existing IDs, not new
-  children. The audit found no unique closed production owner for either residual; keep production
-  implementation closed during discovery.
+  `Server/MirEnvir/Envir.cs:1925-1994`: StartPoints, 50 configured monster names, RefineOreName
+  and WorldMap are checked in that order; P12 projected these inputs without reopening P1/P5/P6.
+- Legacy periodic save spans DB/accounts/guilds/goods/conquests with backups and account `.n/.o`
+  rotation; Go JSON, 117 bridge, world export and respawn stores lack unified generation/manifest,
+  backup selector/fallback and crash contract. `PERSIST-P12-RESTART-EQUIV-001` remains
+  Open/shared-owner, dependent on P10 economy and P1 lifecycle/deployment.
+- The finite persistence sub-slices are evidence partitions under existing IDs, not new children;
+  remaining shared-owner recovery work is not dependency-ready.
 
 ## Active leaf and protected work
 
@@ -226,10 +223,10 @@ want 206`).
   at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
 - The finite P12 candidate registry is recorded below the P12 summary in the Go matrix.
   `PERSIST-P12-CHARACTER-ID-001`, bounded `PERSIST-P12-ACCOUNT-ID-001`,
-  `PERSIST-P12-CORRUPT-CHAR-INDEX-001` and `WS-PERSIST-P12-DIRTY-CHECKPOINT-001` are complete
-  for their bounded production evidence. The next recovery point is dependency discovery for
-  CanStart and restart-equivalence; no broad persistence, backup or deployment implementation
-  is authorized.
+  `PERSIST-P12-CORRUPT-CHAR-INDEX-001`, `WS-PERSIST-P12-DIRTY-CHECKPOINT-001` and
+  `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` are complete for bounded production evidence.
+  The next recovery point is shared-owner restart/recovery discovery; no broad persistence,
+  backup or deployment implementation is authorized.
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
   projection; do not infer an owner for an unassessed P12 boundary.
 - Do not implement P12 broad scope, reopen completed leaves, assign unverified owners, change
@@ -246,5 +243,5 @@ want 206`).
    focused/repeated/race/restart/backup evidence; keep unresolved gaps explicit.
 5. Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership;
    no residual is ready until its own owner is verified.
-6. Keep production implementation closed during discovery. Only after the registry and
-   dependencies are reviewed may a dependency-ready child be frozen before Go changes.
+6. Keep remaining shared-owner recovery work in discovery; do not infer a new owner or widen
+   the completed JSON staging slice into broad persistence, backup or deployment behavior.
