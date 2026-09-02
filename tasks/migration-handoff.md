@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-02 (P12 corrupt-character-index bounded closure)
+Last updated: 2026-09-02 (P12 dirty-shutdown checkpoint correction complete)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -15,9 +15,9 @@ are not migration evidence.
   P10 closure is also finite and reviewed with no production-ready child. P11 closure is
   now finite and reviewed: all residual dispatch families are routed to accepted P6-P10
   owners or explicitly excluded, with no unassigned P11-owned behavior. P12 now has a finite
-  five-ID candidate registry; Account-ID, Character-ID and bounded corrupt-index continuity
-  are complete, while CanStart and restart-equivalence retain owner, dependency and recovery
-  evidence gaps.
+  five-ID candidate registry; Account-ID, Character-ID, bounded corrupt-index continuity and
+  the dirty-shutdown checkpoint correction are complete, while CanStart and restart-equivalence
+  retain owner, dependency and recovery evidence gaps.
 - `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
   this closes one bounded correction only, not the active leaf, P6 or the Goal.
 - `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
@@ -46,9 +46,8 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `f0cbb595` (`docs: close P12 corrupt character index`). Evidence snapshot base:
-  `a3ecb7d5` (`docs: record P12 account counter closure`); subsequent Legacy commits in this
-  handoff are control-document-only updates.
+- Observed HEAD: `a5f4c80` (`docs: refresh P12 handoff head`). The Go correction is committed
+  separately; this handoff update is the next Legacy control-document-only change.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -58,14 +57,12 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `3bdb427` (`migrate P12 corrupt character indexes`), not pushed. Account-ID production
-  fencing, bridge/restart/interleave evidence and the initial matrix update are in `1356da1`;
-  `b3d6e68` records the remaining CanStart blocker details. The production Character-ID fix is
-  `ed71f29`, with earlier counter conversion in `0156b3d` and wrap arithmetic in `1c45002`.
-  The corrupt-index writer, compatibility regression, bridge/production tests and matrix update
-  are committed in `3bdb427`.
+- HEAD: `26a037c` (`fix duplicate legacy checkpoint on shutdown`), not pushed. This commit adds
+  the shutdown-caller correction, the real-hook decorator seam and two HTTP production-entry
+  regressions; the P12 matrix evidence is included in the same commit. Earlier Account-ID,
+  Character-ID and corrupt-index continuity commits remain `1356da1`, `ed71f29` and `3bdb427`.
 - The Go worktree is clean and no generated binary remains in the repo. The Legacy
-  `tasks/lessons.md` change is unrelated and remains uncommitted.
+  `tasks/lessons.md` change remains unrelated and uncommitted.
 
 ## Completed Hero seal Buff lifecycle evidence
 
@@ -173,20 +170,17 @@ want 206`).
 ## P12 corrupt-character-index bounded closure evidence
 
 - `PERSIST-P12-CORRUPT-CHAR-INDEX-001` is Complete for the source-equivalent bounded contract.
-  The Go counter-aware 117 writer no longer rejects duplicate `CharacterInfo.Index` values and
-  preserves duplicate, zero and negative indexes in their Legacy physical order. The older
-  compatibility marshal path's unrelated zero-normalization behavior remains outside this
-  bounded bridge scope.
-- `TestP12CorruptCharacterIndexReexportsInPhysicalOrder` proves 117 round-trip preservation of
-  indexes `7, 7, 0, -1`, names and physical order through the production bridge. The real TCP
-  `TestProductionStartupLegacyCorruptCharacterIndexCheckpointRestart` proves load/login selection,
-  first-match delete, graceful checkpoint, restart selection, next-create index 100 and final
-  physical-order re-export.
-- Legacy's duplicate/nonpositive index behavior is recorded as a post-migration review item, not
-  a migration blocker: no normalization or rejection is introduced where the observed Legacy
-  writer preserves the records, and new-character allocation continues with unchecked increment.
-  Broad corrupt-data recovery, backup/restore and manifest work remain excluded from this child.
-  The Go implementation and evidence are committed in `3bdb427`.
+  The Go counter-aware 117 writer preserves duplicate, zero and negative indexes in Legacy order;
+  compatibility marshal zero-normalization remains outside this bridge scope.
+- `TestP12CorruptCharacterIndexReexportsInPhysicalOrder` proves indexes `7, 7, 0, -1` round-trip;
+  real TCP `TestProductionStartupLegacyCorruptCharacterIndexCheckpointRestart` proves selection,
+  first-match delete, graceful checkpoint/restart, next-create 100 and physical-order re-export.
+- `WS-PERSIST-P12-DIRTY-CHECKPOINT-001` is complete in `26a037c`: real HTTP dirty shutdown
+  hook count is 1 after successful SaveJSON, and 2 when the committed JSON/hook failure requires
+  explicit retry; both JSON and 117 retain the created account metadata. This correction remains
+  outside broad corrupt-data recovery, backup/restore and manifest work.
+- Legacy's duplicate/nonpositive index behavior is a post-migration review item, not a blocker;
+  new-character allocation remains unchecked.
 
 ## P12 finite candidate review
 
@@ -224,10 +218,10 @@ want 206`).
   `WS-ITEM-P6-USE-SCROLL-001` at Go `59b2914` and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
   at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
 - The finite P12 candidate registry is recorded below the P12 summary in the Go matrix.
-  `PERSIST-P12-CHARACTER-ID-001`, bounded `PERSIST-P12-ACCOUNT-ID-001` and
-  `PERSIST-P12-CORRUPT-CHAR-INDEX-001` are complete for their production
-  import/checkpoint/restart/re-export evidence. The next recovery point is dependency discovery
-  for CanStart and restart-equivalence; no broad persistence, backup or deployment implementation
+  `PERSIST-P12-CHARACTER-ID-001`, bounded `PERSIST-P12-ACCOUNT-ID-001`,
+  `PERSIST-P12-CORRUPT-CHAR-INDEX-001` and `WS-PERSIST-P12-DIRTY-CHECKPOINT-001` are complete
+  for their bounded production evidence. The next recovery point is dependency discovery for
+  CanStart and restart-equivalence; no broad persistence, backup or deployment implementation
   is authorized.
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
   projection; do not infer an owner for an unassessed P12 boundary.
