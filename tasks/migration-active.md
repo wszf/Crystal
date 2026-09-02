@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-02 (Go `26a037c`; P12 residual owner review)
+Last verified: 2026-09-02 (Go `fb60853`; P12 CanStart projection complete)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -48,19 +48,22 @@ Keep this file at or below 300 lines and 32 KiB.
   workstreams are Complete, while P12 remains Open for other persistence/recovery contracts.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
   scope-frozen and Complete because no unassigned P11-owned behavior remains.
-- Active workstream: `DISC-P12-CLOSURE-REVIEW-002` — Complete read-only owner review. Legacy
-  `CanStartEnvir` and periodic/full save chains were rechecked against Go owners; CanStart remains
-  Blocked-external and restart-equivalence remains Open/shared-owner. No successor is authorized.
-- Outcome: Account-ID, Character-ID, bounded corrupt-index behavior and dirty-shutdown correction
-  are complete; P12 retains only the two explicitly registered residual contracts. No broad P12
-  recovery implementation is added.
+- Active workstream: `WS-PERSIST-P12-CANSTART-DBCHECKS-001` — Complete for the bounded
+  P12 `LegacyStartupChecks` projection/validator (`internal/worlddata`, `internal/legacyworld`,
+  `cmd/crystal-server`). It consumes existing raw P5/P6 catalogs, preserves P4 StartPoint/WorldMap
+  and P1 general Config/deployment ownership, and carries exact 50-name order, source-specific
+  settings, strict/normalized lookup, disabled bypass and malformed-projection guards.
+- Outcome: Account-ID, Character-ID, bounded corrupt-index behavior, dirty-shutdown correction and
+  CanStart DB checks are complete without reopening P1/P6. Old exports lacking the projection leave
+  this gate disabled until re-export; broad P12 recovery and restart-equivalence remain shared-owner.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
   checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
 - Go: `internal/auth/{checkpoint.go,service.go}`, `internal/legacyaccount/*`, `internal/legacyworld/*`,
   and bounded `cmd/crystal-server` lifecycle/startup owners; existing code is evidence, not closure.
-- Dependencies: preserve completed P2-P11 authorities; keep P10 economy/mail, P6 item and P7/P9
-  cross-phase inputs separate; P12 owns shared persistence/recovery boundaries only.
+- Dependencies: preserve completed P2-P11 authorities; consume the existing P5/P6 raw item/monster
+  catalog export without reopening feature leaves; keep P10 economy/mail and P7/P9 inputs separate.
+  P1 general Config/deployment remains separate; P12 owns this startup projection boundary only.
 - Forbidden: broad restart/backup/deployment implementation, reopening completed leaves,
   assigning unverified owners, protocol changes or any C# write.
 
@@ -82,8 +85,7 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Select and complete `PERSIST-P12-CORRUPT-CHAR-INDEX-001` for the source-equivalent
   duplicate/zero/negative character-index contract: physical-order re-export, first-match delete,
   graceful checkpoint, restart selection and unchecked next-create through the real TCP path.
-- [ ] Re-review the remaining P12 owner/recovery gaps and select another child only after a
-  dependency-ready production owner and evidence contract exists; no successor is authorized yet.
+- [x] Complete `WS-PERSIST-P12-CANSTART-DBCHECKS-001` with source projection, exact diagnostics, disabled bypass, listener gates, export/reload and production repeated/race evidence; remaining recovery waits for a dependency-ready owner and evidence contract.
 
 - Active implementation: bounded Character-ID, Account-ID and corrupt-character-index continuity
   are complete; all other P12 candidates remain discovery inputs and broad persistence/backup/

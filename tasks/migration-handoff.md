@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-02 (P12 residual owner review complete)
+Last updated: 2026-09-02 (P12 CanStart DB-check projection complete)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -15,9 +15,9 @@ are not migration evidence.
   P10 closure is also finite and reviewed with no production-ready child. P11 closure is
   now finite and reviewed: all residual dispatch families are routed to accepted P6-P10
   owners or explicitly excluded, with no unassigned P11-owned behavior. P12 now has a finite
-  five-ID candidate registry; Account-ID, Character-ID, bounded corrupt-index continuity and
-  the dirty-shutdown checkpoint correction are complete, while CanStart and restart-equivalence
-  retain owner, dependency and recovery evidence gaps.
+  five-ID candidate registry; Account-ID, Character-ID, bounded corrupt-index continuity,
+  dirty-shutdown checkpoint correction and CanStart DB-check projection are complete for their
+  bounded contracts. Restart-equivalence retains its shared-owner and recovery evidence gaps.
 - `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
   this closes one bounded correction only, not the active leaf, P6 or the Goal.
 - `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
@@ -34,8 +34,8 @@ are not migration evidence.
   remain In progress/Frozen. P11 closure is finite and reviewed as scope-frozen Complete:
   its residual dispatch families route to existing phase owners or explicit exclusions.
   Current routing leaf is `DISC-P12-CLOSURE`; the finite P12 candidate ledger is now recorded
-  in the Go matrix. Account-ID, Character-ID and bounded corrupt-index continuity are complete;
-  remaining discovery is limited to CanStart and restart-equivalence.
+  in the Go matrix. Account-ID, Character-ID, bounded corrupt-index continuity and CanStart
+  DB checks are complete; remaining discovery is limited to restart-equivalence.
 - `WS-ITEM-P6-USE-FOOD-NONZERO-001` is Complete in Go `c620075`; Player Inventory
   Food Shape != 0 repair/report semantics, including unknown nonzero shapes, are closed.
 - `DISC-P6-USE-CATALOG-CLOSURE-001` is complete: the finite Script/Transform/Deco/
@@ -57,10 +57,10 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `26a037c` (`fix duplicate legacy checkpoint on shutdown`), not pushed. This commit adds
-  the shutdown-caller correction, the real-hook decorator seam and two HTTP production-entry
-  regressions; the P12 matrix evidence is included in the same commit. Earlier Account-ID,
-  Character-ID and corrupt-index continuity commits remain `1356da1`, `ed71f29` and `3bdb427`.
+- HEAD: `fb60853` (`feat: migrate P12 startup database checks`), not pushed. This commit adds
+  the P12 `LegacyStartupChecks` export/projection, production startup validator, source-specific
+  settings and real startup-entry tests; the matrix evidence is included in the same commit.
+  Earlier shutdown, Account-ID, Character-ID and corrupt-index commits remain in history.
 - The Go worktree is clean and no generated binary remains in the repo. The Legacy
   `tasks/lessons.md` change remains unrelated and uncommitted.
 
@@ -182,6 +182,12 @@ want 206`).
 - Legacy's duplicate/nonpositive index behavior is a post-migration review item, not a blocker;
   new-character allocation remains unchecked.
 
+## P12 CanStart DB-check bounded closure
+
+- `PERSIST-P12-CANSTART-DBCHECKS-001` is Complete for the bounded projection in Go `fb60853`: Legacy Setup/FishingSystem/RefineSystem values, exact 50-name order, strict monster lookup, normalized item lookup, first-missing/item suffixes, disabled bypass, malformed projection rejection and WorldMap-after-DB ordering are implemented.
+- `TestP12CanStart*` exercises the real startup entry with listener-not-called failures and successful game/status listener opening; export/reload, source fallback and full 50-position first-missing tests pass at repeated count 20 and focused race count 5. `go test ./...` and `go test -race ./...` pass with the registered Quest fixture skipped; vet/build pass.
+- Legacy default `WhiteSerpent` is retained from `Settings.cs`; old world JSON without `legacyStartupChecks` leaves the P12 gate disabled because Enforce/Fishing/Refine values are unavailable, so re-export is required for an equivalent gate.
+
 ## P12 finite candidate review
 
 - Existing IDs in scope: `PERSIST-P12-ACCOUNT-ID-001`, `PERSIST-P12-CHARACTER-ID-001`,
@@ -193,12 +199,11 @@ want 206`).
   above; `PERSIST-P12-CORRUPT-CHAR-INDEX-001` is also complete for its source-equivalent physical
   order, first-match, checkpoint/restart and next-create contract. Neither workstream enlarges P3
   ownership or authorizes broad P12 recovery.
-- `DISC-P12-CLOSURE-REVIEW-002` rechecked both residuals against current sources. Legacy
-  `Envir.CanStartEnvir` checks StartPoints, 40 configured monster names, RefineOreName and
-  WorldMap in that order (`Server/MirEnvir/Envir.cs:1925-1994`); `Settings.cs` owns
-  EnforceDBChecks and the names, while Go `Config`/`validateLegacyWorldStartup` has no matching
-  owner or complete catalog projection. Therefore `PERSIST-P12-CANSTART-DBCHECKS-001` remains
-  Blocked-external on P6 catalog and P1 config/localization/deployment inputs.
+- `DISC-P12-CLOSURE-REVIEW-002` traced Legacy `Envir.CanStartEnvir` at
+  `Server/MirEnvir/Envir.cs:1925-1994`: StartPoints, 50 configured monster names,
+  RefineOreName and WorldMap are checked in that order; `Settings.cs` supplies the defaults and
+  auxiliary INI values. The raw P5/P6 catalogs were already complete, so P12 implemented the
+  finite `LegacyStartupChecks` projection/validator without reopening P1/P5/P6.
 - Legacy periodic save spans DB/accounts/guilds/goods/conquests, with account/DB backups and
   account `.n/.o` rotation (`Server/MirEnvir/Envir.cs:2147-2155,2439-2507,2550-2819`). Go
   `SaveJSON`, 117 bridge, world export and respawn sidecar are separate stores without a
