@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (MirDB NPC writer Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (MirDB QuestInfo header writer complete; P12 next implementation blocked by shared-owner gap)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,22 +46,20 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-NPC-001` — Complete for current-layout
-  NPCInfo writer for Server.MirDB; NeedSave transient correction is complete.
-- Recovery review: world catalog and MirDB map/item/monster/NPC writes are completed
-  inputs; QuestInfo rewrite remains unselected.
-- Outcome: write Legacy NPCInfo.Save fields in physical catalog order through n/o staging;
-  runtime ObjectID, script, shop goods and quest-sidecar text remain outside this writer.
-- Authority/files: Go `internal/legacyworld/world_database_write.go` and
-  `internal/legacyworld/world_database_write_test.go`, plus bounded matrix evidence.
-- Evidence: NPC writer round-trip passes count 20 and focused race count 5; full integration
-  remains gated by the registered startup-validator failures recorded in the handoff.
+- Active workstream: `WS-PERSIST-P12-MIRDB-QUEST-001` — Complete for current-layout
+  QuestInfo.Save header plus FileName; quest `.txt` sidecars stay unselected.
+- Recovery review: MirDB map/item/monster/NPC/quest-header writers are completed
+  inputs; quest text sidecars and remaining catalog sections stay unselected.
+- Outcome: WriteWorldDatabaseCatalogWithQuests emits Index/Name/Group/FileName and
+  requirement/message/time-limit fields through n/o staging.
+- Authority/files: Go `internal/legacyworld/world_database_write.go` and tests.
+- Evidence: quest-header round-trip plus prior catalog writer tests pass count 20/race 5.
+  Full skipped-baseline integration remains the registered Quest fixture exclusion.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Legacy: `Envir.SaveDB`, `NPCInfo.Save`/constructor and NPC script/quest binding; C# read-only.
-- Dependencies: current 117 parser/layout and existing worlddata NPC projection are complete inputs;
-  QuestInfo text/sidecar and unified restart recovery remain separate owners.
-- Forbidden: QuestInfo rewrite, runtime ObjectID persistence, cross-store manifest/all-or-nothing,
-  backup/recovery implementation, reopening leaves, protocol changes or any C# write.
+- Dependencies: current 117 parser and questRecord.fileName are complete inputs;
+  QuestPath `.txt` LoadInfo remains a separate sidecar owner.
+- Forbidden: quest text/sidecar rewrite, runtime ObjectID persistence, cross-store
+  manifest/all-or-nothing, backup/recovery implementation, reopening leaves, protocol changes or any C# write.
 
 ### Protected Go ownership
 
@@ -86,9 +84,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI through MirDB maps/items/monsters; QuestInfo rewrite remains open.
+- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs; quest `.txt` sidecars remain open.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
-- [x] Complete `WS-PERSIST-P12-MIRDB-NPC-001`: NPCInfo.Save fields; ObjectID/script/shop/QuestInfo remain outside.
+- [x] Complete `WS-PERSIST-P12-MIRDB-QUEST-001`: QuestInfo.Save header plus FileName; `.txt` sidecars remain outside.
 
 ### P7 frozen child registry
 
