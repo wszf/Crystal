@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (MirDB GameShop writer Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (MirDB ConquestInfo writer Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,20 +46,21 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-GAMESHOP-001` — Complete for current-layout
-  GameShopItem.Save records; magics/conquest-info and quest `.txt` stay unselected.
-- Recovery review: MirDB map/item/monster/NPC/quest-header/GameShop writers are
-  completed inputs; magics, ConquestInfo and quest sidecars stay unselected.
-- Outcome: WriteWorldDatabaseCatalogWithGameShop emits shop rows with gold/credit
-  prices and buy flags through n/o staging.
+- Active workstream: `WS-PERSIST-P12-MIRDB-CONQUESTINFO-001` — Complete for current-layout
+  ConquestInfo.Save records; magics, editor counters and quest `.txt` stay unselected.
+- Recovery review: MirDB map/item/monster/NPC/quest-header/GameShop/ConquestInfo
+  serializers are completed inputs; magics and quest sidecars stay unselected.
+- Outcome: WriteWorldDatabaseCatalogWithConquests emits guards, gates, walls, sieges,
+  flags, schedule and control points through n/o staging.
 - Authority/files: Go `internal/legacyworld/world_database_write.go` and tests.
-- Evidence: GameShop round-trip plus prior catalog writer tests pass count 20/race 5.
+- Evidence: ConquestInfo round-trip plus prior catalog writer tests pass count 20/race 5.
   Full skipped-baseline integration remains the registered Quest fixture exclusion.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: current 117 parser and GameShopItem projection are complete inputs;
-  MagicInfo skip-only reader and ConquestInfo remain later catalog slices.
-- Forbidden: quest sidecar rewrite, runtime ObjectID persistence, cross-store
-  manifest/all-or-nothing, backup/recovery implementation, reopening leaves, protocol changes or any C# write.
+- Dependencies: current 117 parser and ConquestInfo projection are complete inputs;
+  MagicInfo skip-only reader remains a later catalog slice.
+- Forbidden: quest sidecar rewrite, runtime ObjectID persistence, partial-writer
+  SaveDelay wiring that clears unowned sections, cross-store manifest/all-or-nothing,
+  backup/recovery implementation, reopening leaves, protocol changes or any C# write.
 
 ### Protected Go ownership
 
@@ -84,9 +85,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs/GameShop; magics remain open.
+- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs/GameShop/ConquestInfo; magics remain open.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
-- [x] Complete `WS-PERSIST-P12-MIRDB-GAMESHOP-001`: GameShopItem.Save rows; magics/ConquestInfo remain outside.
+- [x] Complete `WS-PERSIST-P12-MIRDB-CONQUESTINFO-001`: ConquestInfo.Save records; magics remain outside.
 
 ### P7 frozen child registry
 
