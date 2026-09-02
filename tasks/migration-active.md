@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-02 (Go `96849c2`; P12 JSON staging cleanup complete)
+Last verified: 2026-09-03 (Go `05c07ac`; matrix `660adcf`; snapshot workstream complete)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,18 +46,18 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` — Complete for Go
-  `auth.Service.SaveJSON` staging cleanup after WriteFile/Rename failure.
-- Outcome: Account-ID, Character-ID, bounded corrupt-index behavior, dirty-shutdown correction,
-  CanStart DB checks and this JSON cleanup are complete for bounded contracts; restart-equivalence
-  remains Open/shared-owner and no full P12 closure is claimed.
-- Authority/files: `Service.saveMu` plus `internal/auth/{service.go,save_json_outcome_test.go}`;
-  JSONSaveError/JSONCommitted, checkpoint ordering and JSON precedence remain unchanged.
+- Active workstream: `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` — Complete for the
+  auth-owned account/character/counter same-generation snapshot contract.
+- Outcome: `auth.Service` captures one detached `CheckpointSnapshot` (including `CapturedAt`);
+  JSON and the 117 bridge consume that generation, while restart-equivalence remains Open/shared-owner.
+- Authority/files: `saveMu → s.mu`; `internal/auth/{service.go,checkpoint.go}`,
+  `internal/legacyaccountbridge/{bridge.go,bridge_test.go}`, and production HTTP/TCP tests.
+- Evidence: focused/repeated/race bridge/auth tests, real production HTTP+TCP/operator interleave,
+  restart-load parity, full skipped-Quest test/race, vet and build all pass.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
-- Go: `internal/auth`, `internal/legacyaccountbridge` and bounded `cmd/crystal-server` owners.
 - Dependencies: preserve completed P2-P11 authorities; keep P10 economy and P1 deployment separate.
-- Forbidden: broad restart/backup/deployment implementation, reopening completed leaves,
+- Forbidden: cross-store manifest/all-or-nothing, backup/recovery implementation, reopening leaves,
   assigning unverified owners, protocol changes or any C# write.
 
 ### Protected Go ownership
@@ -80,6 +80,8 @@ Keep this file at or below 300 lines and 32 KiB.
   graceful checkpoint, restart selection and unchecked next-create through the real TCP path.
 - [x] Complete `WS-PERSIST-P12-CANSTART-DBCHECKS-001` with source projection, exact diagnostics, disabled bypass, listener gates, export/reload and production repeated/race evidence.
 - [x] Complete `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` with SaveJSON WriteFile/Rename failure cleanup, old-target preservation, JSONSaveError outcome and production-path evidence.
+- [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
+  shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
 - Active implementation: the bounded P12 workstreams above are complete; remaining restart-equivalence
   candidates stay discovery inputs and broad persistence/backup/recovery implementation is forbidden.
@@ -280,7 +282,9 @@ broad unnamed scope.
 - `PERSIST-P12-RESTART-EQUIV-001` (open shared-owner input to
   `DISC-P12-CLOSURE`, dependent on P3-P11 authorities): preserve periodic save,
   atomic replacement, backup, global re-export, and complete multi-store
-  restart/recovery; no unified generation/manifest/restore contract exists yet.
+  restart/recovery. `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` closes only
+  auth account/character/counter same-generation JSON/117 evidence; no unified
+  generation/manifest/restore contract exists yet.
 - `CFG-P1-MONSTER-AI-RUNTIME-001` (`Ready`, dependent on P5 lifecycle):
   preserve `MonsterProcessWhenAlone`, recall enabled/range/cooldown defaults,
   INI write-back and their inherited MonsterObject runtime consumers.

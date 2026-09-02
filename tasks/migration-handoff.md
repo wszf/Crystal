@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-02 (P12 JSON staging cleanup bounded closure complete)
+Last updated: 2026-09-03 (P12 auth/117 same-generation snapshot bounded closure complete)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -16,8 +16,9 @@ are not migration evidence.
   now finite and reviewed: all residual dispatch families are routed to accepted P6-P10
   owners or explicitly excluded, with no unassigned P11-owned behavior. P12 now has a finite
   five-ID candidate registry; Account-ID, Character-ID, bounded corrupt-index continuity,
-  dirty-shutdown checkpoint correction, CanStart DB-check projection and JSON staging cleanup are
-  complete for their bounded contracts. Restart-equivalence retains shared-owner/recovery gaps.
+  dirty-shutdown checkpoint correction, CanStart DB-check projection, JSON staging cleanup and
+  auth/117 same-generation snapshot are complete for their bounded contracts. Restart-equivalence
+  retains shared-owner/recovery gaps.
 - `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
   this closes one bounded correction only, not the active leaf, P6 or the Goal.
 - `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
@@ -46,8 +47,8 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `cc8ac36b` (`docs: refresh P12 CanStart handoff`). This handoff update is
-  another Legacy control-document-only change; every Legacy `.cs` file remains untouched.
+- Observed HEAD: `84abefd0` (`docs: refresh P12 staging cleanup handoff`); this update is
+  another Legacy control-document-only change. Every Legacy `.cs` file remains untouched.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
 - This evidence update owns only `tasks/migration-active.md` and this handoff.
@@ -57,11 +58,10 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `96849c2` (`test: preserve target after SaveJSON staging failure`), not pushed; it follows
-  `f3820d6` and strengthens the bounded SaveJSON staging-failure target-preservation evidence.
-  Earlier CanStart, shutdown, Account-ID, Character-ID and corrupt-index commits remain in history.
-- The Go worktree is clean and no generated binary remains in the repo. The Legacy
-  `tasks/lessons.md` change remains unrelated and uncommitted.
+- HEAD: `660adcf` (`docs: record P12 auth snapshot evidence`), not pushed; Go implementation is
+  `05c07ac` and preserves the earlier CanStart, shutdown, counter and staging-cleanup commits.
+- The Go worktree is clean and no generated binary remains in the repo. Legacy `tasks/lessons.md`
+  remains the user's unrelated pre-existing modification and is uncommitted.
 
 ## Completed Hero seal Buff lifecycle evidence
 
@@ -187,12 +187,12 @@ want 206`).
 - `TestP12CanStart*` exercises the real startup entry with listener-not-called failures and successful game/status listener opening; export/reload, source fallback and full 50-position first-missing tests pass at repeated count 20 and focused race count 5. `go test ./...` and `go test -race ./...` pass with the registered Quest fixture skipped; vet/build pass.
 - Legacy default `WhiteSerpent` is retained from `Settings.cs`; old world JSON without `legacyStartupChecks` leaves the P12 gate disabled because Enforce/Fishing/Refine values are unavailable, so re-export is required for an equivalent gate.
 
-## P12 JSON staging cleanup bounded closure
+## P12 JSON/auth same-generation bounded closure
 
-- `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` is Complete in Go `f3820d6`, owned solely by `auth.Service.SaveJSON`; failed WriteFile/Rename paths now best-effort clean `path + ".tmp"` without changing `JSONCommitted`, checkpoint order, `saveMu` or JSON precedence.
-- Real production `SaveJSON` tests cover deterministic write/rename failures, old target/sentinel preservation, no staging residue, committed checkpoint error and `LoadJSON` restart read; existing HTTP shutdown/retry, P2 precedence and 117 bridge tests were rerun.
-- Focused repeated, focused race, auth package, full skipped-Quest suite, full race, vet and build all pass; the unskipped Quest fixture still fails at `mail packet id = 26, want 206` as the known baseline.
-- This is Go-owned single-file staging hygiene only: no `Sync`, `.n/.o` parity, generation/manifest, backup/restore, cross-store atomicity or complete crash/restart equivalence is claimed.
+- `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` remains Complete in Go `f3820d6`; `auth.Service.SaveJSON` cleans failed `path + ".tmp"` staging without changing `JSONCommitted`, checkpoint order, `saveMu` or JSON precedence.
+- `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` is Complete in Go `05c07ac`; one detached `CheckpointSnapshot` carries accounts, characters, counters and `CapturedAt` to JSON plus the stateless 117 bridge.
+- Real production HTTP/TCP/operator interleave proves the post-snapshot account mutation is absent from both stores; JSON/117 metadata, reload parity and counter tests pass. Focused repeated/race, full skipped-Quest test/race, vet and build pass.
+- The unskipped Quest fixture remains the known baseline (`mail packet id = 26, want 206`). These bounded slices do not claim `Sync`, `.n/.o`, manifest, backup/restore, cross-store atomicity or complete crash/restart equivalence.
 
 ## P12 finite candidate review
 
@@ -223,8 +223,9 @@ want 206`).
   at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
 - The finite P12 candidate registry is recorded below the P12 summary in the Go matrix.
   `PERSIST-P12-CHARACTER-ID-001`, bounded `PERSIST-P12-ACCOUNT-ID-001`,
-  `PERSIST-P12-CORRUPT-CHAR-INDEX-001`, `WS-PERSIST-P12-DIRTY-CHECKPOINT-001` and
-  `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` are complete for bounded production evidence.
+  `PERSIST-P12-CORRUPT-CHAR-INDEX-001`, `WS-PERSIST-P12-DIRTY-CHECKPOINT-001`,
+  `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` and `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001`
+  are complete for bounded production evidence.
   The next recovery point is shared-owner restart/recovery discovery; no broad persistence,
   backup or deployment implementation is authorized.
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
@@ -244,4 +245,4 @@ want 206`).
 5. Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership;
    no residual is ready until its own owner is verified.
 6. Keep remaining shared-owner recovery work in discovery; do not infer a new owner or widen
-   the completed JSON staging slice into broad persistence, backup or deployment behavior.
+   the completed bounded JSON/auth slices into broad persistence, backup or deployment behavior.
