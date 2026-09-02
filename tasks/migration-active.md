@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (Go guild .mgd writer; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (Go conquest .mcd writer; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,14 +46,15 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-GUILD-MGD-001` — Complete for current-layout
-  `Guilds/{i}.mgd` n/o writes from auth guild snapshots.
-- Recovery review: SaveDelay INI, 117 n/o, backups, sidecar, `.msd` and `.mgd`
-  writes are complete. Conquest `.mcd` stays unselected.
-- Outcome: SaveDelay writes CWD-relative `Guilds/{listIndex}.mgd` using the
-  MaxInt32/version/custom header and skips empty ranks.
-- Authority/files: `internal/legacyworld/{guild_write.go,writer.go}` and main ticker.
-- Evidence: guild round-trip/index tests count 20/race 5. No conquest files.
+- Active workstream: `WS-PERSIST-P12-CONQUEST-MCD-001` — Complete for current-layout
+  `Conquests/{index}.mcd` n/o writes from auth conquest snapshots.
+- Recovery review: SaveDelay INI, 117 n/o, backups, sidecar, `.msd`, `.mgd` and
+  `.mcd` writes are complete. Unified WorkLoop save stays unselected.
+- Outcome: SaveDelay writes CWD-relative `Conquests/{Info.Index}.mcd` with
+  owner/archer/gate/wall/siege/gold/rate/attacker state.
+- Authority/files: `internal/legacyworld/conquest_write.go`,
+  `cmd/crystal-server/{conquest_save.go,main.go}` and tests.
+- Evidence: conquest round-trip tests count 20/race 5; index-name tests count 20/race 5.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
 - Dependencies: SaveDelay/global periodic save require P1 lifecycle/config, P10 economy and world owners.
@@ -83,8 +84,8 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI, 117 n/o, backups, sidecar, `.msd` and `.mgd` writes.
-  Remaining restart-equivalence stays discovery; `.mcd` remains open.
+- [x] Complete SaveDelay INI, 117 n/o, backups, sidecar, `.msd`, `.mgd` and `.mcd` writes.
+  Remaining restart-equivalence stays discovery; unified WorkLoop save remains open.
 
 ### P7 frozen child registry
 

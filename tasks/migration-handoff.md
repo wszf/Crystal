@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 05:35 (Asia/Singapore)
+Last updated: 2026-09-03 05:44 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -11,15 +11,15 @@ not evidence; do not startup-read historical handoff archives.
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
-  restart-equivalence. Guild `.mgd` writes are Complete in Go
-  `bb8d06358b833645d62399e5e37953ccdeb76c69`. Conquest `.mcd` files are still
+  restart-equivalence. Conquest `.mcd` writes are Complete in Go
+  `48cdac63e6573a2559904ca42bae4cc9de74e463`. Unified WorkLoop save is still
   unselected.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch `migration/goal-orchestration`; pre-control-commit HEAD
-  `693734e0c7bb52e920545fa52196c7b710f69131`.
+  `f3aa70cc954bb007d2a1641ec1329a5fe9cfdddb`.
 - Before this control refresh the index and worktree were clean except the
   expected unstaged `tasks/migration-active.md` and this handoff.
 - This snapshot records the expected one control-document commit delta.
@@ -28,7 +28,7 @@ not evidence; do not startup-read historical handoff archives.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `bb8d06358b833645d62399e5e37953ccdeb76c69`.
+  `48cdac63e6573a2559904ca42bae4cc9de74e463`.
 - Index and worktree are clean.
 - `git diff --check` and all three Go C# queries exit 0/empty. No owned
   Go/server process is active.
@@ -36,20 +36,21 @@ not evidence; do not startup-read historical handoff archives.
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE`.
-- SaveDelay now writes CWD-relative `Guilds/{listIndex}.mgd` from
-  `auth.Service.GuildsSnapshot()` using the MaxInt32/117/0 header and n/o
-  staging. Empty ranks are skipped.
-- Do not add conquest `.mcd` writers. All `.cs` remains read-only.
+- SaveDelay now writes CWD-relative `Conquests/{Info.Index}.mcd` from
+  `auth.Service.ConquestsSnapshot()` with n/o staging.
+- Do not claim a single-threaded WorkLoop or MirDB rewrite. All `.cs` remains
+  read-only.
 
 ## Verification ledger
 
-- Guild round-trip and index tests pass count 20 and race count 5.
-- `go test ./cmd/crystal-server -run '^$'`, `go vet` of touched packages and
-  `go build ./...` exit 0.
+- Conquest round-trip tests pass count 20 and race count 5.
+- Index-name tests pass count 20 and race count 5.
+- `go vet` of touched packages and `go build ./...` exit 0.
 
 ## Exact recovery sequence
 
 1. Verify both repositories independently. Resume only `DISC-P12-CLOSURE`.
-2. Treat SaveDelay INI, 117 n/o, backups, sidecar, `.msd` and `.mgd` writes as
-   completed inputs, not conquest files.
-3. Continue owner tracing for `.mcd` and unified WorkLoop save. Do not write C#.
+2. Treat SaveDelay INI, 117 n/o, backups, sidecar, `.msd`, `.mgd` and `.mcd`
+   writes as completed inputs, not unified WorkLoop save.
+3. Continue owner tracing for single-threaded save ordering, NeedSave, and
+   MirDB rewrite. Do not write C#.
