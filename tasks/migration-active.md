@@ -48,6 +48,8 @@ Keep this file at or below 300 lines and 32 KiB.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
 - Active workstream: `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` — Complete for the
   auth-owned account/character/counter same-generation snapshot contract.
+- Recovery review: 2026-09-03 read-only tracing found no dependency-ready P12 successor; no new
+  child ID or implementation workstream is selected.
 - Outcome: `auth.Service` captures one detached `CheckpointSnapshot` (including `CapturedAt`);
   JSON and the 117 bridge consume that generation, while restart-equivalence remains Open/shared-owner.
 - Authority/files: `saveMu → s.mu`; `internal/auth/{service.go,checkpoint.go}`,
@@ -56,7 +58,7 @@ Keep this file at or below 300 lines and 32 KiB.
   restart-load parity, full skipped-Quest test/race, vet and build all pass.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
-- Dependencies: preserve completed P2-P11 authorities; keep P10 economy and P1 deployment separate.
+- Dependencies: SaveDelay/global periodic save require P1 lifecycle/config, P10 economy and world owners.
 - Forbidden: cross-store manifest/all-or-nothing, backup/recovery implementation, reopening leaves,
   assigning unverified owners, protocol changes or any C# write.
 

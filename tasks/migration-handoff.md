@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 (P12 auth/117 same-generation snapshot bounded closure complete)
+Last updated: 2026-09-03 (P12 owner/recovery review; no dependency-ready successor)
 
 This replace-in-place file is the current evidence snapshot; historical summaries
 are not migration evidence.
@@ -47,7 +47,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `1dd1865f` (`docs: record P12 auth snapshot handoff`); this update is
+- Observed HEAD: `3083b40c` (`docs: refresh P12 auth snapshot handoff`); this update is
   another Legacy control-document-only change. Every Legacy `.cs` file remains untouched.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
@@ -58,7 +58,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch: `migrate/drop-owner-p12`.
-- HEAD: `660adcf` (`docs: record P12 auth snapshot evidence`), not pushed; Go implementation is
+- HEAD: `ec7c913` (`docs: record P12 owner recovery review`), not pushed; Go implementation is
   `05c07ac` and preserves the earlier CanStart, shutdown, counter and staging-cleanup commits.
 - The Go worktree is clean and no generated binary remains in the repo. Legacy `tasks/lessons.md`
   remains the user's unrelated pre-existing modification and is uncommitted.
@@ -204,12 +204,14 @@ want 206`).
 - `DISC-P12-CLOSURE-REVIEW-002` traced Legacy `Envir.CanStartEnvir` at
   `Server/MirEnvir/Envir.cs:1925-1994`: StartPoints, 50 configured monster names, RefineOreName
   and WorldMap are checked in that order; P12 projected these inputs without reopening P1/P5/P6.
-- Legacy periodic save spans DB/accounts/guilds/goods/conquests with backups and account `.n/.o`
-  rotation; Go JSON, 117 bridge, world export and respawn stores lack unified generation/manifest,
-  backup selector/fallback and crash contract. `PERSIST-P12-RESTART-EQUIV-001` remains
-  Open/shared-owner, dependent on P10 economy and P1 lifecycle/deployment.
-- The finite persistence sub-slices are evidence partitions under existing IDs, not new children;
-  remaining shared-owner recovery work is not dependency-ready.
+- The 2026-09-03 owner review traced Legacy `Envir.WorkLoop` `:2147-2155`: configurable
+  `SaveDelay` saves DB/accounts/guilds/goods/conquests together; Go has no unified periodic save.
+- Exact cadence requires Legacy `[Database] SaveDelay`, absent from the completed P1 Config contract;
+  an auth-only fixed ticker would not be source-equivalent or close restart-equivalence.
+- Go world sidecar, auth/117, world export, lifecycle and P10 economy remain separate owners;
+  no unified generation/manifest, backup selector/fallback or crash contract exists.
+- No new child ID or implementation workstream is selected; the finite persistence sub-slices remain
+  evidence partitions, and `PERSIST-P12-RESTART-EQUIV-001` stays Open/shared-owner.
 
 ## Active leaf and protected work
 
