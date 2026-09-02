@@ -46,7 +46,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `786bd336` (`docs: clarify P12 blocked candidates`). Evidence snapshot base:
+- Observed HEAD: `f0cbb595` (`docs: close P12 corrupt character index`). Evidence snapshot base:
   `a3ecb7d5` (`docs: record P12 account counter closure`); subsequent Legacy commits in this
   handoff are control-document-only updates.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
