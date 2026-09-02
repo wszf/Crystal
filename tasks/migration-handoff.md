@@ -1,250 +1,72 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 (P12 owner/recovery review; no dependency-ready successor)
+Last updated: 2026-09-03 04:19 (Asia/Singapore)
 
-This replace-in-place file is the current evidence snapshot; historical summaries
-are not migration evidence.
+This is the replace-in-place current snapshot. The automatic compact summary is
+not evidence; do not startup-read historical handoff archives.
 
 ## Goal and control-plane state
 
 - Goal `01a02fde-6d48-7613-8545-015d3628e9f0` remains ongoing; it is neither
-  Complete nor Blocked.
-- P6 remains scope-frozen at nineteen children: eighteen Complete and
-  `ITEM-P6-USE-CATALOG-001` is complete for its registered scope with no dependency-ready
-  successor; P9 closure is finite and reviewed with no production-ready child.
-  P10 closure is also finite and reviewed with no production-ready child. P11 closure is
-  now finite and reviewed: all residual dispatch families are routed to accepted P6-P10
-  owners or explicitly excluded, with no unassigned P11-owned behavior. P12 now has a finite
-  five-ID candidate registry; Account-ID, Character-ID, bounded corrupt-index continuity,
-  dirty-shutdown checkpoint correction, CanStart DB-check projection, JSON staging cleanup and
-  auth/117 same-generation snapshot are complete for their bounded contracts. Restart-equivalence
-  retains shared-owner/recovery gaps.
-- `WS-ITEM-P6-USE-HERO-BUFF-SEAL-LIFECYCLE-001` is Complete in Go `732f8fe`;
-  this closes one bounded correction only, not the active leaf, P6 or the Goal.
-- `WS-ITEM-P6-USE-BOOK-001` is Complete in Go `5779c89`; Player Inventory Book
-  learning, atomic item/Magics commit and authenticated persistence/projection evidence
-  are closed without reopening the catalog leaf.
-- Verified correction `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` is Complete in Go `349d5a0`;
-  Book admission ignores only temporary Magic records, world runtime Magic authority is
-  rebased before commit, stale temporary records are not persisted and active temporary
-  equipment Magics still reject duplicate learning.
-- `WS-ITEM-P6-USE-SCROLL-001` is Complete in Go `59b2914`; Player Inventory Scroll
-  shapes 0-7 and 11-12 now have production-entry, persistence, observer and failure
-  evidence without reopening completed item-use leaves.
-- P9 and P10 closures are finite and reviewed without a production-ready child; both phases
-  remain In progress/Frozen. P11 closure is finite and reviewed as scope-frozen Complete:
-  its residual dispatch families route to existing phase owners or explicit exclusions.
-  Current routing leaf is `DISC-P12-CLOSURE`; the finite P12 candidate ledger is now recorded
-  in the Go matrix. Account-ID, Character-ID, bounded corrupt-index continuity and CanStart
-  DB checks are complete; remaining discovery is limited to restart-equivalence.
-- `WS-ITEM-P6-USE-FOOD-NONZERO-001` is Complete in Go `c620075`; Player Inventory
-  Food Shape != 0 repair/report semantics, including unknown nonzero shapes, are closed.
-- `DISC-P6-USE-CATALOG-CLOSURE-001` is complete: the finite Script/Transform/Deco/
-  MonsterSpawn family/shape ledger, Legacy contracts, Go owners and blockers are recorded;
-  no dependency-ready functional successor remains inside this leaf.
+  Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
+  `luna_worker` (`gpt-5.6-luna/max`).
+- Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
+  restart-equivalence. `CFG-P1-SAVEDELAY-001` is Complete in Go
+  `b77e0119f74c5c178532e9892406a4a2b36fc6fb` as the missing `[Database] SaveDelay`
+  INI input; it does not start periodic save, backup or cross-store recovery.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
-- Branch: `migration/goal-orchestration`.
-- Observed HEAD: `3083b40c` (`docs: refresh P12 auth snapshot handoff`); this update is
-  another Legacy control-document-only change. Every Legacy `.cs` file remains untouched.
-- `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
-  do not reset, overwrite, stage or commit it.
-- This evidence update owns only `tasks/migration-active.md` and this handoff.
-- Every Legacy `.cs` file is permanently read-only.
+- Branch `migration/goal-orchestration`; pre-control-commit HEAD
+  `d7d9c0c9701d04f3deead1a3f31e8842b4e544fb`; upstream
+  `origin/migration/goal-orchestration`, ahead/behind 0.
+- Before this control refresh the index and worktree were clean. The only
+  expected unstaged paths after this write are `tasks/migration-active.md` and
+  this handoff. There are no staged or untracked paths and no Legacy
+  implementation changes. `tasks/lessons.md` is clean.
+- Pre-edit `git diff --check`, `git diff --cached --check` and all three Legacy
+  C# queries exit 0/empty. This snapshot records the expected one control-document
+  commit delta.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
-- Branch: `migrate/drop-owner-p12`.
-- HEAD: `ec7c913` (`docs: record P12 owner recovery review`), not pushed; Go implementation is
-  `05c07ac` and preserves the earlier CanStart, shutdown, counter and staging-cleanup commits.
-- The Go worktree is clean and no generated binary remains in the repo. Legacy `tasks/lessons.md`
-  remains the user's unrelated pre-existing modification and is uncommitted.
-
-## Completed Hero seal Buff lifecycle evidence
-
-- Legacy `SealHero` removes the Hero from character slots but leaves the same global
-  live HeroInfo, whose Buff list is reused by `AddHero`/`SummonHero` in the same process.
-  HeroInfo Save/Load still omits Buffs, so logout/relogin and restart remain loss edges.
-- Go now clones a summoned Hero's Buffs and per-type clocks before successful seal
-  removes its runtime. An already-unsummoned Hero keeps its existing dormant sidecar.
-- DeleteHero removes only the released Hero's sidecar. Other sealed Hero sidecars owned
-  by the same live session are no longer erased by broad slot-array cleanup.
-- Same-owner SealedHero attach reuses the dormant state. If a sealed item is transferred
-  between two online sessions, world attach atomically moves that Hero's sidecar from
-  the source player to the authenticated target before summon.
-- Failed/stale attach does not move the sidecar because ownership transfer runs only
-  after the runtime identity guard accepts the authoritative attach result.
-- Summon clones the transferred state, deletes its dormant entry, resets LastTime,
-  retains NextTime, restores hidden/paused state and replays AddBuff through the existing
-  ObjectHero/health/colour/AddBuff/spawn-state/UseItem ordering.
-- No Buff enters Character, auth or JSON persistence; no timer, queue, global durable
-  Hero store, item authority or SealedHero business branch was added.
-
-## Verification ledger
-
-Passed for Go `c1e73b5` (Book production correction `349d5a0`) after the P9-P11 closure evidence updates, including prior Scroll/Food and Hero seal evidence:
-
-- summoned and unsummoned SealHero plus DeleteHero transcript/sidecar matrix at count 20;
-- authenticated NPC seal→ClientUseItem→same-process reattach→AddBuff and relogin-loss
-  transcript, valid cross-owner handoff, full-slot and missing-Hero failures at count 20;
-- focused race for the same production paths at count 5;
-- Player Book known/unknown/duplicate/count/reload authenticated session, atomic concurrent
-  auth mutation, current-world Magic progress rebase, stale/active temporary Magic gates,
-  Player stat-refresh and existing cooldown-preservation tests at count 20; the Book
-  authority correction runs through the same production session/auth/world path.
-- Player Scroll shapes 0-7 and 11-12 authenticated production-entry success/failure,
-  transition, revival, balance saturation, observer and JSON persistence transcripts;
-- focused Scroll tests pass at count 10 and focused race passes;
-- Player Food Shape 1 and unknown positive/negative nonzero shapes through the authenticated
-  mount-feed production path, including stack consumption, cap/no-loss durability semantics,
-  localized `MountFed`, Item Lost reporting, JSON reload and failure gates;
-- focused Food-adjacent tests pass at count 20 and focused race passes;
-- P12 Account-ID focused tests pass at count 10 and focused race: production TCP raw-header
-  100 → account indexes 101/102 across graceful checkpoint/restart, retained-gap re-export,
-  failed/duplicate no-consume behavior, and deterministic JSON/117 checkpoint interleave;
-- P12 corrupt-character-index focused tests pass at count 10 and focused race: real TCP load/login
-  preserves duplicate, zero and negative indexes in physical order; first-match delete tombstones
-  only the first duplicate; graceful 117 checkpoint/restart preserves the remaining records; the
-  next character allocates index 100 and re-export retains the raw order and values;
-- complete `cmd/crystal-server` package with the registered Quest fixture skipped;
-- full `go test ./... -skip '^TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin$' -count=1`;
-- final full `go test -race ./... -skip '^TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin$' -count=1`;
-- `go vet ./...`, `go build ./...`, formatting, `git diff --check`, staged diff check,
-  C# audits and an independent read-only correction review with no finding.
-- The Book correction was triggered by a reproduced `ServerUseItem(false)` common-gate
-  regression: stale `IsTempSpell` records in the session/auth snapshot no longer block
-  admission, while the world runtime snapshot remains the duplicate-learning authority.
-
-The unskipped full `go test ./... -count=1` currently retains only the registered Quest
-fixture baseline: `TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin` fails
-with `mail packet id = 26, want 206`; no Scroll test fails.
-
-The first full-race invocation returned exit 1 in `cmd/crystal-server`, but its displayed
-output was truncated before the failing test name. An immediate isolated server-race
-rerun passed, followed by a complete full-race rerun that also passed. The Quest P7
-fixture remains the unchanged registered baseline blocker (`mail packet id = 26,
-want 206`).
-
-## P12 Account-ID bounded closure evidence
-
-- `PERSIST-P12-ACCOUNT-ID-001` is Complete for the ordinary positive-int32 contract. Legacy
-  117 offset 8 is the used account high-watermark; Go account creation allocates the next
-  positive index only after validation and duplicate checks, and successful metadata creation
-  is fenced by `saveMu → s.mu`.
-- Production TCP `TestProductionStartupLegacyAccountCounterCheckpointRestart` starts from raw
-  header 100, creates `FirstAccount` at index 101 and `SecondAccount` at index 102, checkpoints
-  both generations on graceful shutdown, preserves creation IP/date metadata, and verifies the
-  retained account after restart. `TestP12AccountIDReexportRestartRetainsGap` removes index
-  100, proves the checkpoint header remains monotonic, re-exports indexes 101/102, restarts,
-  and proves the removed record is not reused.
-- `TestP12AccountIDSerializesCreateWithJSONCheckpoint` blocks account creation during the
-  JSON snapshot → 117 checkpoint hook window and verifies JSON/117 contain only the old
-  generation before release. Focused repeated and focused race tests pass. JSON-authoritative
-  source precedence remains unchanged; account wrap/zero/negative, corrupt duplicate-index
-  normalization, backup/restore, manifest and broad restart recovery remain excluded.
-
-## P12 Character-ID bounded closure evidence
-
-- `PERSIST-P12-CHARACTER-ID-001` is Complete for its bounded contract. Legacy 117 offset 12
-  is the used-character high-watermark; Go auth and JSON store the next-available counter.
-  Import/export, bridge checkpoint and restart preserve ordinary retained gaps plus int32
-  negative/zero wrap IDs. `TestP12CharacterIDSerializesCreateWithJSONCheckpoint` also holds
-  `CreateCharacter`/`CreateCharacterWithMetadata` behind the SaveJSON-to-117 checkpoint window,
-  so the role counter cannot be captured in different generations by that production path.
-- Production TCP `TestProductionStartupLegacyCharacterCounterCheckpointRestart` authenticates
-  through `ServerConnected`, `ClientVersion`, `ClientLogin` and `ClientNewCharacter`, creates
-  indexes 101/102 after raw header 100, checkpoints on graceful shutdown, restarts, and verifies
-  the next allocation. Bridge tests cover JSON/117 conversion, concurrent checkpoint/create,
-  negative wrap record retention and zero-wrap restart continuity.
-- Focused repeated and focused race tests pass. Full `go test ./...` and full `go test -race ./...`
-  pass with the registered Quest baseline skipped; the unskipped suite retains only
-  `TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin` (`mail packet id = 26, want
-  206`). `go vet ./...`, `go build ./...`, formatting, `git diff --check` and C# audits pass.
-  Production changes are committed in Go `ed71f29` (with `0156b3d` and `1c45002` as earlier
-  counter/wrap commits); matrix documentation is committed in Go `dde96a3`.
-
-## P12 corrupt-character-index bounded closure evidence
-
-- `PERSIST-P12-CORRUPT-CHAR-INDEX-001` is Complete for the source-equivalent bounded contract.
-  The Go counter-aware 117 writer preserves duplicate, zero and negative indexes in Legacy order;
-  compatibility marshal zero-normalization remains outside this bridge scope.
-- `TestP12CorruptCharacterIndexReexportsInPhysicalOrder` proves indexes `7, 7, 0, -1` round-trip;
-  real TCP `TestProductionStartupLegacyCorruptCharacterIndexCheckpointRestart` proves selection,
-  first-match delete, graceful checkpoint/restart, next-create 100 and physical-order re-export.
-- `WS-PERSIST-P12-DIRTY-CHECKPOINT-001` is complete in `26a037c`: real HTTP dirty shutdown
-  hook count is 1 after successful SaveJSON, and 2 when the committed JSON/hook failure requires
-  explicit retry; both JSON and 117 retain the created account metadata. This correction remains
-  outside broad corrupt-data recovery, backup/restore and manifest work.
-- Legacy's duplicate/nonpositive index behavior is a post-migration review item, not a blocker;
-  new-character allocation remains unchecked.
-
-## P12 CanStart DB-check bounded closure
-
-- `PERSIST-P12-CANSTART-DBCHECKS-001` is Complete for the bounded projection in Go `fb60853`: Legacy Setup/FishingSystem/RefineSystem values, exact 50-name order, strict monster lookup, normalized item lookup, first-missing/item suffixes, disabled bypass, malformed projection rejection and WorldMap-after-DB ordering are implemented.
-- `TestP12CanStart*` exercises the real startup entry with listener-not-called failures and successful game/status listener opening; export/reload, source fallback and full 50-position first-missing tests pass at repeated count 20 and focused race count 5. `go test ./...` and `go test -race ./...` pass with the registered Quest fixture skipped; vet/build pass.
-- Legacy default `WhiteSerpent` is retained from `Settings.cs`; old world JSON without `legacyStartupChecks` leaves the P12 gate disabled because Enforce/Fishing/Refine values are unavailable, so re-export is required for an equivalent gate.
-
-## P12 JSON/auth same-generation bounded closure
-
-- `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` remains Complete in Go `f3820d6`; `auth.Service.SaveJSON` cleans failed `path + ".tmp"` staging without changing `JSONCommitted`, checkpoint order, `saveMu` or JSON precedence.
-- `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` is Complete in Go `05c07ac`; one detached `CheckpointSnapshot` carries accounts, characters, counters and `CapturedAt` to JSON plus the stateless 117 bridge.
-- Real production HTTP/TCP/operator interleave proves the post-snapshot account mutation is absent from both stores; JSON/117 metadata, reload parity and counter tests pass. Focused repeated/race, full skipped-Quest test/race, vet and build pass.
-- The unskipped Quest fixture remains the known baseline (`mail packet id = 26, want 206`). These bounded slices do not claim `Sync`, `.n/.o`, manifest, backup/restore, cross-store atomicity or complete crash/restart equivalence.
-
-## P12 finite candidate review
-
-- Existing IDs in scope: `PERSIST-P12-ACCOUNT-ID-001`, `PERSIST-P12-CHARACTER-ID-001`,
-  `PERSIST-P12-CORRUPT-CHAR-INDEX-001`, `PERSIST-P12-CANSTART-DBCHECKS-001` and
-  `PERSIST-P12-RESTART-EQUIV-001`; no new child ID was created.
-- Account-ID, Character-ID and corrupt-index workstreams remain complete for their bounded
-  production contracts; neither enlarges P3 ownership or authorizes broad P12 recovery.
-- `DISC-P12-CLOSURE-REVIEW-002` traced Legacy `Envir.CanStartEnvir` at
-  `Server/MirEnvir/Envir.cs:1925-1994`: StartPoints, 50 configured monster names, RefineOreName
-  and WorldMap are checked in that order; P12 projected these inputs without reopening P1/P5/P6.
-- The 2026-09-03 owner review traced Legacy `Envir.WorkLoop` `:2147-2155`: configurable
-  `SaveDelay` saves DB/accounts/guilds/goods/conquests together; Go has no unified periodic save.
-- Exact cadence requires Legacy `[Database] SaveDelay`, absent from the completed P1 Config contract;
-  an auth-only fixed ticker would not be source-equivalent or close restart-equivalence.
-- Go world sidecar, auth/117, world export, lifecycle and P10 economy remain separate owners;
-  no unified generation/manifest, backup selector/fallback or crash contract exists.
-- No new child ID or implementation workstream is selected; the finite persistence sub-slices remain
-  evidence partitions, and `PERSIST-P12-RESTART-EQUIV-001` stays Open/shared-owner.
+- Branch `migrate/drop-owner-p12`; HEAD
+  `b77e0119f74c5c178532e9892406a4a2b36fc6fb`; tracks `origin/migrate/drop-owner-p12`.
+- Index and worktree are clean. Commit `b77e011` contains SaveDelay production,
+  tests and matrix evidence only.
+- `git diff --check`, `git diff --cached --check` and all three Go C# queries
+  exit 0/empty. No owned Go/server process is active.
 
 ## Active leaf and protected work
 
-- Active leaf: `DISC-P12-CLOSURE` (bounded discovery; P12 remains Open).
-- Previous `DISC-P9-CLOSURE` and `DISC-P10-CLOSURE` are finite and reviewed; P9/P10 are
-  Frozen but remain In progress because no child met the production evidence gate. `DISC-P11-CLOSURE`
-  is also complete: P11 is scope-frozen Complete after every residual dispatch family was routed
-  to an accepted phase owner or explicit no-op exclusion.
-- Completed workstreams include `WS-ITEM-P6-USE-BOOK-AUTHORITY-001` at Go `349d5a0`,
-  `WS-ITEM-P6-USE-SCROLL-001` at Go `59b2914` and `WS-ITEM-P6-USE-FOOD-NONZERO-001`
-  at Go `c620075`, plus the earlier P6/P8 evidence listed in the matrix.
-- The finite P12 candidate registry is recorded below the P12 summary in the Go matrix.
-  `PERSIST-P12-CHARACTER-ID-001`, bounded `PERSIST-P12-ACCOUNT-ID-001`,
-  `PERSIST-P12-CORRUPT-CHAR-INDEX-001`, `WS-PERSIST-P12-DIRTY-CHECKPOINT-001`,
-  `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` and `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001`
-  are complete for bounded production evidence.
-  The next recovery point is shared-owner restart/recovery discovery; no broad persistence,
-  backup or deployment implementation is authorized.
-- Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
-  projection; do not infer an owner for an unassessed P12 boundary.
-- Do not implement P12 broad scope, reopen completed leaves, assign unverified owners, change
-  protocols or modify any C#.
+- Active leaf: `DISC-P12-CLOSURE`.
+- SaveDelay now loads Legacy `Settings.SaveDelay` default 5 through
+  `applyLegacyP1`, write-backs missing/invalid `SaveDelay=5`, and accepts
+  zero/negative int32 values. Do not treat this as WorkLoop periodic save.
+- Preserve completed P2-P11 authorities, latest-auth revision/CAS, the bounded
+  P12 counter/CanStart/JSON/auth-snapshot slices, and persistence-before-visible
+  projection. Do not implement backup/restore, unified periodic save, or infer a
+  shared recovery owner.
+- All `.cs` remains read-only.
+
+## Verification ledger
+
+- `go test ./internal/config -run '^$'` exits 0.
+- Focused `TestDatabaseSaveDelay*` plus missing-Setup/invalid-P1 write-back tests
+  exit 0; SaveDelay repeated count 20 and race count 5 exit 0.
+- `go test ./internal/config -count=1` exits 0.
+- `go test ./cmd/crystal-server -run 'TestProductionConfigPath' -count=1` exits 0.
+- `git diff --check` and both-repository C# gates are empty. No consumer ticker
+  or WorkLoop save was added.
 
 ## Exact recovery sequence
 
-1. Verify both repositories independently; preserve `tasks/lessons.md` and rerun
-   tracked/staged/untracked `.cs` audits.
-2. Read only the P12 summary and finite ledger in the Go matrix, plus the active index and handoff.
-3. Trace read-only Legacy checkpoint, backup, restart and deployment call chains for each
-   P12 residual; do not write C#.
-4. Reconcile each finite child’s wire/store format, unique Go owner, dependencies and
-   focused/repeated/race/restart/backup evidence; keep unresolved gaps explicit.
-5. Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership;
-   no residual is ready until its own owner is verified.
-6. Keep remaining shared-owner recovery work in discovery; do not infer a new owner or widen
-   the completed bounded JSON/auth slices into broad persistence, backup or deployment behavior.
+1. Verify both repositories independently. Resume only `DISC-P12-CLOSURE`.
+2. Read the P12 summary and finite ledger; treat `CFG-P1-SAVEDELAY-001` as a
+   completed INI input, not a periodic-save owner.
+3. Continue read-only owner tracing for backup, world-export, sidecar restart and
+   unified WorkLoop save. Do not infer a new owner or write C#.
+4. Keep remaining shared-owner recovery in discovery; do not reopen completed
+   P12 slices or P1 Config beyond the SaveDelay field already landed.

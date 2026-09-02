@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (Go `05c07ac`; matrix `660adcf`; snapshot workstream complete)
+Last verified: 2026-09-03 (Go SaveDelay INI; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,16 +46,15 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` — Complete for the
-  auth-owned account/character/counter same-generation snapshot contract.
-- Recovery review: 2026-09-03 read-only tracing found no dependency-ready P12 successor; no new
-  child ID or implementation workstream is selected.
-- Outcome: `auth.Service` captures one detached `CheckpointSnapshot` (including `CapturedAt`);
-  JSON and the 117 bridge consume that generation, while restart-equivalence remains Open/shared-owner.
-- Authority/files: `saveMu → s.mu`; `internal/auth/{service.go,checkpoint.go}`,
-  `internal/legacyaccountbridge/{bridge.go,bridge_test.go}`, and production HTTP/TCP tests.
-- Evidence: focused/repeated/race bridge/auth tests, real production HTTP+TCP/operator interleave,
-  restart-load parity, full skipped-Quest test/race, vet and build all pass.
+- Active workstream: `CFG-P1-SAVEDELAY-001` — Complete for the `[Database] SaveDelay`
+  INI default/read/write-back contract; it does not start periodic save.
+- Recovery review: SaveDelay INI is now a complete P1 input. Unified WorkLoop save,
+  backup/restore and cross-store recovery remain shared-owner and unselected.
+- Outcome: Setup.ini `SaveDelay` defaults to 5 minutes and write-backs missing/invalid
+  values; zero/negative int32 values are accepted. Restart-equivalence stays Open.
+- Authority/files: `internal/config/{config.go,config_test.go,p1_contract_test.go}`.
+- Evidence: focused SaveDelay tests count 20 and race count 5; config package and
+  production Setup.ini load tests pass. No WorkLoop/ticker consumer was added.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
 - Dependencies: SaveDelay/global periodic save require P1 lifecycle/config, P10 economy and world owners.
@@ -85,8 +84,8 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- Active implementation: the bounded P12 workstreams above are complete; remaining restart-equivalence
-  candidates stay discovery inputs and broad persistence/backup/recovery implementation is forbidden.
+- [x] Complete `CFG-P1-SAVEDELAY-001` INI/default/write-back. Remaining restart-equivalence
+  candidates stay discovery inputs; broad persistence/backup/recovery implementation is forbidden.
 
 ### P7 frozen child registry
 
