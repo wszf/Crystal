@@ -47,7 +47,7 @@ are not migration evidence.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch: `migration/goal-orchestration`.
-- Observed HEAD: `84abefd0` (`docs: refresh P12 staging cleanup handoff`); this update is
+- Observed HEAD: `1dd1865f` (`docs: record P12 auth snapshot handoff`); this update is
   another Legacy control-document-only change. Every Legacy `.cs` file remains untouched.
 - `tasks/lessons.md` is the user's pre-existing tracked modification. Preserve it;
   do not reset, overwrite, stage or commit it.
