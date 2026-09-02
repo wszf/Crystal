@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 05:05 (Asia/Singapore)
+Last updated: 2026-09-03 05:11 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -11,15 +11,15 @@ not evidence; do not startup-read historical handoff archives.
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
-  restart-equivalence. World-export dated copies are Complete in Go
-  `87e33fffc819dc0c67fb095e246f6a63f4446492`. Guild/goods/conquest files and
-  unified WorkLoop save are still unselected.
+  restart-equivalence. Sidecar n/o staging is Complete in Go
+  `f116b1b118e764f0fa7136e5bfa6a7dbf34c1a99`. Envir/Goods `.msd`, guild `.mgd`
+  and conquest `.mcd` files are still unselected.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch `migration/goal-orchestration`; pre-control-commit HEAD
-  `81c1bc1eb7cf4745761be9d91e5792f017885af2`.
+  `228c83295ec2d37288e44af0241d152ea1f859ae`.
 - Before this control refresh the index and worktree were clean except the
   expected unstaged `tasks/migration-active.md` and this handoff.
 - This snapshot records the expected one control-document commit delta.
@@ -28,7 +28,7 @@ not evidence; do not startup-read historical handoff archives.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `87e33fffc819dc0c67fb095e246f6a63f4446492`.
+  `f116b1b118e764f0fa7136e5bfa6a7dbf34c1a99`.
 - Index and worktree are clean.
 - `git diff --check` and all three Go C# queries exit 0/empty. No owned
   Go/server process is active.
@@ -36,23 +36,20 @@ not evidence; do not startup-read historical handoff archives.
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE`.
-- SaveDelay now copies the live world export to CWD-relative
-  `Back Up/Database/Database YYYY-MM-DD HH-MM-SS.bak` without moving it, then
-  continues the existing account backup/JSON/117 path.
-- Do not rewrite MirDB or implement guild/goods/conquest periodic files.
+- The UsedGoods/respawn sidecar now writes `pathn`, promotes via `patho`, and
+  deletes leftover `.o`. Loaders still read only the final runtime JSON.
+- Do not add Envir/Goods `.msd` writers or guild/conquest periodic files.
   All `.cs` remains read-only.
 
 ## Verification ledger
 
-- World-copy tests pass count 20 and race count 5.
-- Persist tests now include world copy; count 20 and race count 5 pass.
-- Production TCP account checkpoint/restart still passes.
-- `go vet` of touched packages and `go build ./...` exit 0.
+- Sidecar n/o tests pass count 20 and race count 5.
+- `go test ./internal/worlddata -count=1`, `go vet ./internal/worlddata` and
+  `go build ./...` exit 0.
 
 ## Exact recovery sequence
 
 1. Verify both repositories independently. Resume only `DISC-P12-CLOSURE`.
-2. Treat SaveDelay INI, 117 n/o, account backups and world-export copies as
-   completed inputs, not unified WorkLoop save.
-3. Continue owner tracing for guild/goods/conquest files and sidecar restart.
-   Do not write C#.
+2. Treat SaveDelay INI, 117 n/o, account/world backups and sidecar staging as
+   completed inputs, not `.msd`/`.mgd`/`.mcd` writers.
+3. Continue owner tracing for guild/goods/conquest Legacy files. Do not write C#.
