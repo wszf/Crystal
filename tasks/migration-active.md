@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (Go WorkLoop save order; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (Go NeedSave gating; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,14 +46,15 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-WORKLOOP-ORDER-001` — Complete for SaveDelay
-  Accounts → Database → Guilds → Goods → Conquests ordering.
-- Recovery review: file stores and WorkLoop order are complete. NeedSave,
-  GuildRefreshNeeded and MirDB rewrite stay unselected.
-- Outcome: one SaveDelay timer runs the five stores in Envir.WorkLoop order
-  and continues later stores after an earlier error.
-- Authority/files: `cmd/crystal-server/{account_periodic_save.go,main.go}` and tests.
-- Evidence: order test count 20/race 5; existing account backup tests still pass.
+- Active workstream: `WS-PERSIST-P12-NEEDSAVE-001` — Complete for dirty-only
+  guild/conquest/UsedGoods file writes.
+- Recovery review: NeedSave gating is complete. GuildRefreshNeeded and MirDB
+  rewrite stay unselected.
+- Outcome: periodic save writes only NeedSave guilds/conquests/NPCs; guild and
+  conquest flags clear before write; NPC flags stay set as in Legacy.
+- Authority/files: protocol/auth guild+conquest, world NPC, guild/goods writers.
+- Evidence: skip-clean guild test; focused write/order tests count 20/race 5;
+  auth package tests pass.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: checkpoint/backup/startup consumers only after read-only call-chain tracing; C# read-only.
 - Dependencies: SaveDelay/global periodic save require P1 lifecycle/config, P10 economy and world owners.
@@ -83,8 +84,8 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI, 117 n/o, backups, sidecar, file stores and WorkLoop order.
-  Remaining restart-equivalence stays discovery; NeedSave/MirDB rewrite remain open.
+- [x] Complete SaveDelay INI, 117 n/o, backups, sidecar, file stores, order and NeedSave.
+  Remaining restart-equivalence stays discovery; GuildRefreshNeeded/MirDB remain open.
 
 ### P7 frozen child registry
 
