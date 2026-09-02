@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-02 (Go `b3d6e68`; P12 closure discovery blockers)
+Last verified: 2026-09-02 (Go `3bdb427`; P12 corrupt-index bounded closure)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -48,13 +48,14 @@ Keep this file at or below 300 lines and 32 KiB.
   workstreams are Complete, while P12 remains Open for other persistence/recovery contracts.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review; P11 is
   scope-frozen and Complete because no unassigned P11-owned behavior remains.
-- Active workstream: `PERSIST-P12-ACCOUNT-ID-001` — Complete for the bounded positive-int32
-  contract. It retains the Legacy 117 NextAccountID high-watermark through import, production
-  TCP creation, checkpoint, restart and re-export; `saveMu → s.mu` fencing prevents generation
-  splits. Character-ID is separately Complete; no broad P12 recovery implementation was added.
-- Outcome: the finite candidate registry is recorded in the Go matrix; Account-ID and Character-ID
-  are complete for their bounded contracts, while corrupt-index, CanStart and restart-equivalence
-  inputs remain open or externally blocked. The next recovery point is bounded discovery.
+- Active workstream: `PERSIST-P12-CORRUPT-CHAR-INDEX-001` — Complete for the bounded
+  source-equivalent contract. Legacy duplicate, zero and negative character indexes retain
+  physical order; first-match mutation and unchecked next-create behavior are preserved through
+  the Go 117 checkpoint bridge and real TCP lifecycle. Account-ID and Character-ID are separately
+  Complete; no broad P12 recovery implementation was added.
+- Outcome: the finite candidate registry is recorded in the Go matrix; Account-ID, Character-ID
+  and bounded corrupt-index behavior are complete, while CanStart and restart-equivalence inputs
+  remain open or externally blocked. The next recovery point is bounded discovery.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Legacy: `Server/MirEnvir/{Envir.cs,Map.cs}`, `Server/MirDatabase/{AccountInfo,CharacterInfo}.cs`,
   checkpoint/backup and startup consumers only after a read-only call-chain trace; C# read-only.
@@ -67,30 +68,28 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ### Protected Go ownership
 
-- Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible
-  projection while auditing P12 checkpoint and recovery boundaries.
-- No parallel persistence authority or unreviewed production child; the completed Character-ID
-  and Account-ID workstreams are limited to their explicit 117 header/import/checkpoint/restart
-  contracts.
+- Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible projection while auditing P12 checkpoint and recovery boundaries.
+- No parallel persistence authority or unreviewed production child; completed Character-ID and Account-ID workstreams remain limited to their explicit 117 header/import/checkpoint/restart contracts.
 
 ### Remaining acceptance work
 
-- [x] Record the finite P12 candidate registry with Legacy chains, wire/store formats, current
-  owners, dependencies and focused/repeated/race/restart/backup evidence gaps.
+- [x] Record the finite P12 candidate registry with Legacy chains, wire/store formats, owners, dependencies and focused/repeated/race/restart/backup evidence gaps.
 - [x] Keep P2 account bridge, P10 economy and P1 deployment inputs separate from P12 ownership.
-- [x] Review the finite registry and select `PERSIST-P12-CHARACTER-ID-001` as a
-  dependency-ready bounded production workstream.
+- [x] Review the finite registry and select `PERSIST-P12-CHARACTER-ID-001` as a dependency-ready bounded production workstream.
 - [x] Complete Character-ID import/checkpoint/restart/re-export/create and focused-race evidence,
   including int32 negative/zero wrap and JSON-triggered checkpoint serialization.
 - [x] Select and complete `PERSIST-P12-ACCOUNT-ID-001` for ordinary positive int32 headers:
   production TCP high-header create/restart, retained-gap re-export, and deterministic JSON/117
   checkpoint interleave evidence.
+- [x] Select and complete `PERSIST-P12-CORRUPT-CHAR-INDEX-001` for the source-equivalent
+  duplicate/zero/negative character-index contract: physical-order re-export, first-match delete,
+  graceful checkpoint, restart selection and unchecked next-create through the real TCP path.
 - [ ] Re-review the remaining P12 owner/recovery gaps and select another child only after a
   dependency-ready production owner and evidence contract exists; no successor is authorized yet.
 
-- Active implementation: bounded Character-ID and Account-ID header/ID continuity are complete;
-  all other P12 candidates remain discovery inputs and broad persistence/backup/recovery
-  implementation is forbidden.
+- Active implementation: bounded Character-ID, Account-ID and corrupt-character-index continuity
+  are complete; all other P12 candidates remain discovery inputs and broad persistence/backup/
+  recovery implementation is forbidden.
 
 ### P7 frozen child registry
 
@@ -276,11 +275,11 @@ broad unnamed scope.
   import, checkpoint/re-export, restart, and the next create. P3 owns allocation
   after an authoritative counter is installed; retained-gap importer/writer
   authority remains P12.
-- `PERSIST-P12-CORRUPT-CHAR-INDEX-001` (open input to `DISC-P12-CLOSURE`):
-  preserve duplicate and nonpositive retained `CharacterInfo.Index` values
-  through version-117 checkpoint/re-export and restart. P3 owns current-process
-  first-match client lookup/mutation outcomes; P12 owns writer
-  normalization/rejection and recovery continuity after the contract is frozen.
+- `PERSIST-P12-CORRUPT-CHAR-INDEX-001` (Complete bounded input to `DISC-P12-CLOSURE`):
+  preserve duplicate and nonpositive retained `CharacterInfo.Index` values through version-117
+  checkpoint/re-export and restart. P3 retains current-process first-match client lookup/mutation;
+  P12's counter-aware writer/bridge preserves physical order without normalization or rejection.
+  The observed Legacy oddity is recorded for post-migration review, not treated as a blocker.
 - `NPC-P7-ACCESS-GATE-001` is Complete and unblocks
   `STORAGE-P2-NPC-GATE-001`; P2 retains storage response/lifetime ownership.
 - `NPC-P7-SCRIPT-CLOSURE-001` is Complete as a discovery input: accepted
