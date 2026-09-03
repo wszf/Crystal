@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (MirDB MagicInfo writer Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (MirDB GTMap writer Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,18 +46,18 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-MAGIC-001` — Complete for current-layout
-  MagicInfo.Save records; editor counters and quest `.txt` remain unselected.
-- Recovery review: MirDB map/item/monster/NPC/quest-header/GameShop/ConquestInfo/Magic
-  serializers are bounded completed inputs; quest sidecars stay unselected.
-- Outcome: WriteWorldDatabaseCatalogWithMagics emits spell costs, needs, delays,
-  powers, range and multipliers through n/o staging.
-- Authority/files: Go `internal/legacyworld/{database.go,world_database_write.go}` and tests.
-- Evidence: MagicInfo round-trip plus prior catalog writer tests pass count 20/race 5.
+- Active workstream: `WS-PERSIST-P12-MIRDB-GTMAP-001` — Complete for current-layout
+  GTMap.Save records; editor counters and quest `.txt` remain unselected.
+- Recovery review: MirDB catalog serializers including GTMap are bounded completed
+  inputs; quest sidecars and editor counters stay unselected.
+- Outcome: WriteWorldDatabaseCatalogWithGTMaps emits Index/Key/Name/Owner/Leaders
+  and price/days/begin through n/o staging.
+- Authority/files: Go `internal/legacyworld/world_database_write.go` and tests.
+- Evidence: GTMap round-trip plus prior catalog writer tests pass count 20/race 5.
   Full skipped-baseline integration remains the registered Quest fixture exclusion.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: current 117 parser and MagicInfo.Save layout are complete inputs;
-  GTMap and editor counters remain later catalog slices.
+- Dependencies: current 117 parser and GTMapRecord projection are complete inputs;
+  editor counters and quest `.txt` remain later slices.
 - Forbidden: quest sidecar rewrite, runtime ObjectID persistence, partial-writer SaveDelay
   wiring that clears unowned sections, cross-store manifest/all-or-nothing, backup/recovery,
   reopening leaves, protocol changes or any C# write.
@@ -85,9 +85,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs/GameShop/ConquestInfo/magics.
+- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs/GameShop/ConquestInfo/magics/GTMap.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
-- [x] Complete `WS-PERSIST-P12-MIRDB-MAGIC-001`: MagicInfo.Save records; quest `.txt` remain outside.
+- [x] Complete `WS-PERSIST-P12-MIRDB-GTMAP-001`: GTMap.Save records; quest `.txt` remain outside.
 
 ### P7 frozen child registry
 
