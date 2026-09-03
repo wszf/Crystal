@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 (P12 owner/recovery audit; shared-owner blocker preserved; UTC)
+Last updated: 2026-09-03 (dependency-ready leaf audit; P12 shared-owner blocker preserved; UTC)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -22,12 +22,15 @@ not evidence; do not startup-read historical handoff archives.
   1996-2004,2147-2155,2199-2204,3294-3301`); MirDB respawn/spawn state crosses
   account loading, and GTMap/guild/conquest startup joins cross stores. Legacy
   loaders read primary files only and expose no `.bak`/`.o`/`.n` restore path.
+- Non-P12 selection audit found no dependency-ready implementation leaf: P9/P10
+  child registries remain discovery-only/no-child-authorized, which blocks the
+  remaining P1/P4/P6/P7 candidates. No leaf was activated and no code scope opened.
 
 ## Legacy repository state
 
 - Root: `/workspace/Crystal`.
 - Branch `migration/goal-orchestration`; HEAD
-  `33f25561227343febcbdf36fc422cf210162d1e1` before this documentation-only
+  `db71a24768df0fc79a435f96350f0d38da591b2d` before this documentation-only
   refresh. The expected post-refresh state is clean: no tracked, staged or
   untracked changes, and all three `.cs` gates are empty.
 
