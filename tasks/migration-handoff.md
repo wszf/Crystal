@@ -18,8 +18,8 @@ not evidence; do not startup-read historical handoff archives.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
-- Branch `migration/goal-orchestration`; HEAD is the control-doc update pending
-  below this handoff. No `.cs` file is modified, added, deleted or renamed.
+- Branch `migration/goal-orchestration`; HEAD `1fedaee5`, with active index and
+  handoff pushed to origin. No `.cs` file is modified, added, deleted or renamed.
 
 ## Go repository state
 
@@ -52,9 +52,9 @@ not evidence; do not startup-read historical handoff archives.
 
 ## Exact recovery sequence
 
-1. Push Go commits `9904aef` and `7781073`, then push the Legacy control-doc
-   commit after updating this handoff and the active index.
-2. Re-run both repository status/C# gates and `tasks/check-migration-control.sh`;
+1. Re-run both repository status/C# gates and `tasks/check-migration-control.sh`;
+   Go commits `9904aef`/`7781073` and Legacy control commit `1fedaee5` are already pushed.
+2. Keep the active index and handoff synchronized with the next bounded workstream;
    preserve any unrelated `tasks/lessons.md` modification.
 3. Treat the SaveDelay MirDB caller as a completed bounded input, not complete
    MirDB persistence/recovery. Resume only `DISC-P12-CLOSURE` and select the next
