@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 08:42 (Asia/Singapore)
+Last updated: 2026-09-03 08:45 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -11,43 +11,45 @@ not evidence; do not startup-read historical handoff archives.
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
-  restart-equivalence. MirDB export composition is Complete in Go
-  `4656357d49f9dffbf1eec85729b6fa45fd29411b`. SaveDelay MirDB wiring remains
-  unselected because JSON exports do not carry magics.
+  restart-equivalence. WriteWorldExport now merges existing MirDB magics,
+  counters and quest FileNames in Go `2334662bc9b6f9883137a87104b05d09e9c8d965`.
+  SaveDelay MirDB path selection remains unselected.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
-- Branch `migration/goal-orchestration`; HEAD
+- Branch `migration/goal-orchestration`; pre-control-commit HEAD
   `5a63a1cc7c0c4f3373f122d2b4e4194d946a6e90`.
-- Active index records the completed MirDB export-composer batch and is pushed
-  to origin. No Legacy worktree changes are pending.
+- Before this control refresh the index and worktree were clean except the
+  expected unstaged `tasks/migration-active.md` and this handoff.
+- This snapshot records the expected one control-document commit delta.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `4656357d49f9dffbf1eec85729b6fa45fd29411b`, pushed to origin.
-- Only `docs/migration-matrix.md` has the pending evidence edit for this batch.
+  `2334662bc9b6f9883137a87104b05d09e9c8d965`.
+- Unrelated unstaged file (not this leaf): `docs/migration-matrix.md`. Preserve it.
 - `git diff --check` and all three Go C# queries exit 0/empty. No owned
   Go/server process is active.
 
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE`.
-- WriteWorldExport now maps a loaded world JSON export into Server.MirDB,
-  including Dragon and respawn snapshots.
-- Do not wire SaveDelay to this composer while magics would be written empty.
-  All `.cs` remains read-only.
+- WriteWorldExport parses an existing Server.MirDB first so magics, editor
+  counters and quest FileNames survive a JSON-export rewrite.
+- Do not wire SaveDelay without an explicit MirDB path. All `.cs` remains
+  read-only.
 
 ## Verification ledger
 
-- Export-composer plus prior catalog writer tests pass count 20 and race count 5.
+- Preserve-magics plus prior catalog writer tests pass count 20 and race count 5.
 - `go test ./internal/legacyworld -count=1`, `go vet ./internal/legacyworld` and
   `go build ./...` exit 0.
 
 ## Exact recovery sequence
 
-1. Verify both repositories independently. Resume only `DISC-P12-CLOSURE`.
-2. Treat export composition as a completed input, not SaveDelay MirDB wiring.
+1. Verify both repositories independently. Preserve unstaged matrix edits.
+   Resume only `DISC-P12-CLOSURE`.
+2. Treat export merge as a completed input, not SaveDelay MirDB wiring.
 3. Continue owner tracing for remaining restart-equivalence. Do not write C#.
