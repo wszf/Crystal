@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (SaveDelay Server.MirDB write Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (graceful shutdown store boundary Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,20 +46,19 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-SAVEDELAY-MIRDB-001` — Complete for writing
-  CWD-relative Server.MirDB on the SaveDelay database step.
-- Recovery review: SaveDelay now rewrites JSON then Server.MirDB; magics merge
-  from any existing binary file. Unified restart-equivalence stays Open.
-- Outcome: persistPeriodicWorkLoopSave calls WriteWorldExport("./Server.MirDB")
-  after the JSON dated copy/rewrite when a configured world catalog is loaded;
-  an empty world path skips the MirDB write.
-- Authority/files: Go `cmd/crystal-server/{world_catalog_save.go,account_periodic_save.go}`
-  and tests, committed in `9904aef`.
-- Evidence: WorkLoop order/path test asserts Server.MirDB and the no-world-path
-  guard; count 20/race 5 pass. Full skipped-baseline integration remains the
-  registered Quest fixture exclusion.
+- Active workstream: `WS-PERSIST-P12-SHUTDOWN-WORKLOOP-001` — Complete for
+  the final graceful shutdown store boundary; SaveDelay MirDB remains complete input.
+- Recovery review: the production shutdown now force-writes UsedGoods before the
+  existing account checkpoint, then force-writes Guilds and Conquests; full
+  restart-equivalence remains Open/shared-owner.
+- Outcome: `runServerWithContextAndServiceFactories` retains Legacy's final
+  StopEnvir → SaveAccounts → SaveGuilds(true) → SaveConquests(true) order for
+  the Go-owned stores, with first-error logging/return on Guild/Conquest writes.
+- Authority/files: Go `cmd/crystal-server/{main.go,account_periodic_save.go,world_goods_save.go,conquest_save.go}`,
+  `internal/legacyworld/guild_write.go` and tests, committed in `55cf0b5`.
+- Evidence: real startup/listener shutdown writes clean UsedGoods, Guilds and Conquests; focused count 20/race 5 pass. Full skipped-baseline integration remains the registered unrelated startup-fixture baseline.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: WriteWorldExport magics merge and SaveDelay timer are complete inputs; remaining restart-equivalence stays discovery.
+- Dependencies: existing n/o writers, auth snapshots, P1 lifecycle and P10 mutation owners are complete inputs; recovery remains discovery.
 - Forbidden: runtime ObjectID persistence, cross-store manifest/all-or-nothing,
   backup/recovery, reopening leaves, protocol changes or any C# write.
 
@@ -89,6 +88,7 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete SaveDelay INI through MirDB catalog serializers, counters, quest `.txt`, export compose/merge and Server.MirDB write.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
 - [x] Complete `WS-PERSIST-P12-SAVEDELAY-MIRDB-001`: CWD-relative Server.MirDB on SaveDelay; remaining restart-equivalence stays Open.
+- [x] Complete `WS-PERSIST-P12-SHUTDOWN-WORKLOOP-001`: graceful shutdown force-writes UsedGoods, Guilds and Conquests after the existing account checkpoint boundary; complete restart-equivalence stays Open.
 
 ### P7 frozen child registry
 
