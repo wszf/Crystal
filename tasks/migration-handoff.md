@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 07:55 (Asia/Singapore)
+Last updated: 2026-09-03 08:03 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -11,16 +11,15 @@ not evidence; do not startup-read historical handoff archives.
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
-  restart-equivalence. MirDB ConquestInfo write is Complete only as a bounded
-  serializer in Go `bfadacb0d9d97432fbf4a8510daa5f73e86b3af4`; no production
-  SaveDelay caller exists. Editor counters, static snapshot composition, Magics
-  and quest `.txt` sidecars are still unselected.
+  restart-equivalence. MirDB MagicInfo write is Complete in Go
+  `90bf13a28880e4630f7ac5b04cf22582871c8b0c`. Quest `.txt` sidecars and GTMap
+  remain unselected.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch `migration/goal-orchestration`; pre-control-commit HEAD
-  `091c417833acec20fdfe6964e543b0f8ccb64247`.
+  `f5730508984610202eb918b5065b6532267c0992`.
 - Before this control refresh the index and worktree were clean except the
   expected unstaged `tasks/migration-active.md` and this handoff.
 - This snapshot records the expected one control-document commit delta.
@@ -29,31 +28,26 @@ not evidence; do not startup-read historical handoff archives.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `bfadacb0d9d97432fbf4a8510daa5f73e86b3af4`.
-- Unrelated unstaged file (not this leaf): `docs/migration-matrix.md`. Preserve it.
+  `90bf13a28880e4630f7ac5b04cf22582871c8b0c`.
+- Index and worktree are clean.
 - `git diff --check` and all three Go C# queries exit 0/empty. No owned
   Go/server process is active.
 
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE`.
-- WriteWorldDatabaseCatalogWithConquests now emits ConquestInfo.Save records
-  including guards, gates, walls, sieges, flags, schedule and control points as a
-  bounded n/o-staged serializer; it is not called by the production SaveDelay path.
-- Do not claim editor-counter continuity, a complete MirDB rewrite, static
-  snapshot/sidecar composition, MagicInfo or quest sidecar rewrite. All `.cs`
-  remains read-only.
+- WriteWorldDatabaseCatalogWithMagics now emits MagicInfo.Save records including
+  range and multipliers. parseWorldDatabase now stores magics instead of skipping.
+- Do not claim quest sidecar or GTMap rewrite. All `.cs` remains read-only.
 
 ## Verification ledger
 
-- ConquestInfo plus prior catalog writer tests pass count 20 and race count 5.
+- MagicInfo plus prior catalog writer tests pass count 20 and race count 5.
 - `go test ./internal/legacyworld -count=1`, `go vet ./internal/legacyworld` and
   `go build ./...` exit 0.
 
 ## Exact recovery sequence
 
-1. Verify both repositories independently. Preserve unstaged matrix edits.
-   Resume only `DISC-P12-CLOSURE`.
-2. Treat ConquestInfo MirDB write as a bounded completed input, not production
-   SaveDelay wiring or a complete catalog rewrite; do not select magics yet.
+1. Verify both repositories independently. Resume only `DISC-P12-CLOSURE`.
+2. Treat MagicInfo MirDB write as a completed input, not quest `.txt` sidecars.
 3. Continue owner tracing for remaining catalog sections. Do not write C#.

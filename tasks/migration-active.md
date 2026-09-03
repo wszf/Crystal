@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (MirDB ConquestInfo writer Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (MirDB MagicInfo writer Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,19 +46,18 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-CONQUESTINFO-001` — Complete only for the
-  bounded current-layout ConquestInfo.Save serializer; no production SaveDelay caller.
-  Magics, editor counters and quest `.txt` remain unselected.
-- Recovery review: MirDB map/item/monster/NPC/quest-header/GameShop/ConquestInfo serializers
-  are bounded completed inputs, not a complete production MirDB rewrite; magics and quest sidecars stay unselected.
-- Outcome: WriteWorldDatabaseCatalogWithConquests emits guards, gates, walls, sieges,
-  flags, schedule and control points through n/o staging; no production world-save path invokes it.
-- Authority/files: Go `internal/legacyworld/world_database_write.go` and tests; production integration requires a shared catalog/counter owner.
-- Evidence: ConquestInfo plus prior catalog writer tests pass count 20/race 5; full
-  skipped-baseline integration remains the registered Quest fixture exclusion.
+- Active workstream: `WS-PERSIST-P12-MIRDB-MAGIC-001` — Complete for current-layout
+  MagicInfo.Save records; editor counters and quest `.txt` remain unselected.
+- Recovery review: MirDB map/item/monster/NPC/quest-header/GameShop/ConquestInfo/Magic
+  serializers are bounded completed inputs; quest sidecars stay unselected.
+- Outcome: WriteWorldDatabaseCatalogWithMagics emits spell costs, needs, delays,
+  powers, range and multipliers through n/o staging.
+- Authority/files: Go `internal/legacyworld/{database.go,world_database_write.go}` and tests.
+- Evidence: MagicInfo round-trip plus prior catalog writer tests pass count 20/race 5.
+  Full skipped-baseline integration remains the registered Quest fixture exclusion.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: current 117 parser and ConquestInfo projection are complete inputs;
-  static snapshot composition, editor-counter continuity and MagicInfo remain later slices.
+- Dependencies: current 117 parser and MagicInfo.Save layout are complete inputs;
+  GTMap and editor counters remain later catalog slices.
 - Forbidden: quest sidecar rewrite, runtime ObjectID persistence, partial-writer SaveDelay
   wiring that clears unowned sections, cross-store manifest/all-or-nothing, backup/recovery,
   reopening leaves, protocol changes or any C# write.
@@ -86,9 +85,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs/GameShop/ConquestInfo; magics remain open.
+- [x] Complete SaveDelay INI through MirDB maps/items/monsters/NPCs/GameShop/ConquestInfo/magics.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
-- [x] Complete `WS-PERSIST-P12-MIRDB-CONQUESTINFO-001`: ConquestInfo.Save records; magics remain outside.
+- [x] Complete `WS-PERSIST-P12-MIRDB-MAGIC-001`: MagicInfo.Save records; quest `.txt` remain outside.
 
 ### P7 frozen child registry
 
