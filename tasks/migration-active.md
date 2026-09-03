@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (MirDB editor counters Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (Quest .txt sidecar writer Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,20 +46,20 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-COUNTERS-001` — Complete for the eight
-  SaveDB editor-index headers; quest `.txt` remain unselected.
-- Recovery review: MirDB catalog serializers including GTMap and editor counters
-  are bounded completed inputs; quest sidecars stay unselected.
-- Outcome: WriteWorldDatabaseCatalogWithEditorCounters emits Map/Item/Monster/NPC
-  /Quest/Gameshop/Conquest/Respawn indexes; parseWorldDatabase now reads them.
-- Authority/files: Go `internal/legacyworld/{database.go,world_database_write.go}` and tests.
-- Evidence: editor-counter round-trip plus prior catalog writer tests pass count 20/race 5.
+- Active workstream: `WS-PERSIST-P12-QUEST-TXT-001` — Complete for QuestPath sidecar
+  text matching QuestInfo.LoadInfo section headers.
+- Recovery review: MirDB catalog serializers, editor counters and quest `.txt`
+  writers are bounded completed inputs; SaveDelay wiring stays unselected.
+- Outcome: WriteQuestFile/WriteQuestFiles emit Envir/Quests/{FileName}.txt with
+  description, task, flag and reward sections.
+- Authority/files: Go `internal/legacyworld/quest_write.go` and tests.
+- Evidence: quest sidecar round-trip plus path tests pass count 20/race 5.
   Full skipped-baseline integration remains the registered Quest fixture exclusion.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: current 117 parser and SaveDB header layout are complete inputs;
-  quest `.txt` remain a later sidecar slice.
-- Forbidden: quest sidecar rewrite, runtime ObjectID persistence, partial-writer SaveDelay
-  wiring that clears unowned sections, cross-store manifest/all-or-nothing, backup/recovery,
+- Dependencies: parseQuestSource and QuestDatabaseRecord.FileName are complete inputs;
+  SaveDelay world-save wiring remains a later shared-owner slice.
+- Forbidden: runtime ObjectID persistence, partial-writer SaveDelay wiring that
+  clears unowned sections, cross-store manifest/all-or-nothing, backup/recovery,
   reopening leaves, protocol changes or any C# write.
 
 ### Protected Go ownership
@@ -85,9 +85,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI through MirDB catalog serializers and editor counters.
+- [x] Complete SaveDelay INI through MirDB catalog serializers, editor counters and quest `.txt`.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
-- [x] Complete `WS-PERSIST-P12-MIRDB-COUNTERS-001`: eight SaveDB editor indexes; quest `.txt` remain outside.
+- [x] Complete `WS-PERSIST-P12-QUEST-TXT-001`: QuestPath sidecar text; SaveDelay MirDB wiring remains outside.
 
 ### P7 frozen child registry
 
