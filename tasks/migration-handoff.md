@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 08:23 (Asia/Singapore)
+Last updated: 2026-09-03 08:37 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -11,15 +11,15 @@ not evidence; do not startup-read historical handoff archives.
   Complete nor Blocked. Main is `gpt-5.6-sol/ultra`; bounded workers default to
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
-  restart-equivalence. QuestPath sidecar write is Complete in Go
-  `1ccedcc974172f791c83abb8d4019f4d9f2f740b`. SaveDelay MirDB wiring remains
-  unselected.
+  restart-equivalence. MirDB export composition is Complete in Go
+  `4656357d49f9dffbf1eec85729b6fa45fd29411b`. SaveDelay MirDB wiring remains
+  unselected because JSON exports do not carry magics.
 
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
 - Branch `migration/goal-orchestration`; pre-control-commit HEAD
-  `6a07cbdf296cfb72e1289c65944af52617dff61b`.
+  `d7629d6cc6b77b35e634b1a3940a0d318cec192c`.
 - Before this control refresh the index and worktree were clean except the
   expected unstaged `tasks/migration-active.md` and this handoff.
 - This snapshot records the expected one control-document commit delta.
@@ -28,7 +28,7 @@ not evidence; do not startup-read historical handoff archives.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `1ccedcc974172f791c83abb8d4019f4d9f2f740b`.
+  `4656357d49f9dffbf1eec85729b6fa45fd29411b`.
 - Index and worktree are clean.
 - `git diff --check` and all three Go C# queries exit 0/empty. No owned
   Go/server process is active.
@@ -36,19 +36,19 @@ not evidence; do not startup-read historical handoff archives.
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE`.
-- WriteQuestFile/WriteQuestFiles now emit Envir/Quests/{FileName}.txt with
-  LoadInfo section headers.
-- Do not claim SaveDelay wiring of the partial MirDB writer. All `.cs` remains
-  read-only.
+- WriteWorldExport now maps a loaded world JSON export into Server.MirDB,
+  including Dragon and respawn snapshots.
+- Do not wire SaveDelay to this composer while magics would be written empty.
+  All `.cs` remains read-only.
 
 ## Verification ledger
 
-- Quest sidecar round-trip and path tests pass count 20 and race count 5.
+- Export-composer plus prior catalog writer tests pass count 20 and race count 5.
 - `go test ./internal/legacyworld -count=1`, `go vet ./internal/legacyworld` and
   `go build ./...` exit 0.
 
 ## Exact recovery sequence
 
 1. Verify both repositories independently. Resume only `DISC-P12-CLOSURE`.
-2. Treat quest `.txt` write as a completed input, not SaveDelay MirDB wiring.
+2. Treat export composition as a completed input, not SaveDelay MirDB wiring.
 3. Continue owner tracing for remaining restart-equivalence. Do not write C#.
