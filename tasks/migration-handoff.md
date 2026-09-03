@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 08:37 (Asia/Singapore)
+Last updated: 2026-09-03 08:42 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -18,18 +18,17 @@ not evidence; do not startup-read historical handoff archives.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
-- Branch `migration/goal-orchestration`; pre-control-commit HEAD
-  `d7629d6cc6b77b35e634b1a3940a0d318cec192c`.
-- Before this control refresh the index and worktree were clean except the
-  expected unstaged `tasks/migration-active.md` and this handoff.
-- This snapshot records the expected one control-document commit delta.
+- Branch `migration/goal-orchestration`; HEAD
+  `5a63a1cc7c0c4f3373f122d2b4e4194d946a6e90`.
+- Active index records the completed MirDB export-composer batch and is pushed
+  to origin. No Legacy worktree changes are pending.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `4656357d49f9dffbf1eec85729b6fa45fd29411b`.
-- Index and worktree are clean.
+  `4656357d49f9dffbf1eec85729b6fa45fd29411b`, pushed to origin.
+- Only `docs/migration-matrix.md` has the pending evidence edit for this batch.
 - `git diff --check` and all three Go C# queries exit 0/empty. No owned
   Go/server process is active.
 
