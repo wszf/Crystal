@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 (after path-alias closure; Asia/Singapore)
+Last updated: 2026-09-03 (derived-sidecar closure; blocked at shared-owner boundary; Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -13,9 +13,9 @@ not evidence; do not startup-read historical handoff archives.
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
   complete restart-equivalence. `WS-PERSIST-P12-PATH-ALIAS-001` is complete in Go
   `fce9835` with matrix evidence in `e3561df`; fixed-store alias validation is
-  complete in Go `e0507a0`, and the next active bounded workstream is
-  `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001`. Existing SaveDelay, shutdown, world,
-  account, periodic and sidecar boundaries remain bounded inputs, not complete recovery.
+  complete in Go `e0507a`, and derived-sidecar alias validation is complete in Go
+  `84e3301`. No further dependency-ready production child is selected until a
+  Legacy-backed shared recovery owner exists.
 
 ## Legacy repository state
 
@@ -29,22 +29,24 @@ not evidence; do not startup-read historical handoff archives.
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `e3561df36e66d6dd3ea4d974e3955db40d243369`, pushed to
-  `origin/migrate/drop-owner-p12`. Path-alias production code is in
-  `fce983582619f70fdacbbffef7a9a32235f55448`; matrix evidence is in `e3561df`.
+  `5035b5a4f123d389ea103550372170f8abb403fc`, pushed to
+  `origin/migrate/drop-owner-p12`. Path-alias code is in `fce9835`, fixed-store
+  guard in `e0507a`, derived-sidecar guard in `84e3301`; matrix evidence is in
+  `5035b5a`.
 - `Config.Validate` and the production startup seam now reject whitespace-only
-  optional paths, pairwise clean-absolute aliases, and cross-authority aliases to
-  fixed CWD `Server.MirDB`/`Server.MirADB`; intentional Legacy-account → MirADB
-  mapping remains allowed. The next slice guards the derived runtime-sidecar path.
+  optional paths, pairwise clean-absolute aliases, cross-authority fixed-store
+  aliases, and derived runtime-sidecar aliases; the intentional Legacy-account →
+  MirADB mapping remains allowed.
 - SaveDelay/shutdown account, world, Guild, Goods, Conquest and runtime-sidecar
   callers remain bounded store-order coverage, not complete recovery.
 
 ## Active leaf and protected work
 
 - Active leaf: `DISC-P12-CLOSURE`.
-- `WS-PERSIST-P12-SIDECAR-ERROR-CONTEXT-001` is Complete only for logging
-  runtime-sidecar write failures while retaining dirty/retry semantics;
-  periodic/account/world/shutdown callers remain completed inputs.
+- The three path-alias guards are Complete only for startup ownership checks:
+  optional pairwise paths, fixed CWD MirDB/MirADB cross-authority paths, and the
+  derived runtime-sidecar fallback. Periodic/account/world/shutdown callers remain
+  bounded completed inputs.
 - Existing-target MagicInfo/editor counters/quest filenames are preserved by the
   export merge. New-target authority for those sections, backup/restore,
   manifest, rollback, crash recovery, runtime ObjectID, retry-after-exit and
@@ -68,11 +70,9 @@ not evidence; do not startup-read historical handoff archives.
 
 1. Re-run both repository status/C# gates and `tasks/check-migration-control.sh`;
    commit and push this active/handoff control snapshot.
-2. Resume `DISC-P12-CLOSURE` at `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001`:
-   guard account/Legacy-account paths against the effective
-   `WorldExportPath + ".runtime.json"` fallback only when RespawnStatePath is empty,
-   then prove production startup rejection before load/bind/write at count 20/race 5.
-3. Treat SaveDelay, shutdown and prior path-alias callers as completed bounded
-   inputs, not complete MirDB persistence/recovery. Do not write C# or reopen
-   completed leaves; after the derived-sidecar slice, update matrix/index/handoff
-   and select the next dependency-ready workstream.
+2. No dependency-ready P12 production child is currently available: the remaining
+   `PERSIST-P12-RESTART-EQUIV-001` work spans auth/world/economy/sidecar owners and
+   lacks a Legacy-backed shared recovery owner, source precedence and failure contract.
+3. Do not synthesize manifest/generation/restore/rollback/crash or cross-store atomicity
+   semantics. Resume only when a finite Legacy-backed owner is registered; then update
+   matrix/index/handoff and continue, without writing C# or reopening completed leaves.
