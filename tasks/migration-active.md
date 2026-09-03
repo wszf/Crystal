@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (MirDB export merge Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (SaveDelay Server.MirDB write Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,21 +46,22 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-MIRDB-EXPORT-MERGE-001` — Complete for merging
-  existing MirDB magics/counters/quest FileNames into WriteWorldExport.
-- Recovery review: export composition now preserves magics; SaveDelay wiring stays
-  unselected until a production MirDB path owner is chosen.
-- Outcome: an existing Server.MirDB is parsed first so magics, editor counters and
-  quest FileNames survive a JSON-export rewrite.
-- Authority/files: Go `internal/legacyworld/world_database_write.go` and tests.
-- Evidence: preserve-magics round-trip plus prior catalog tests pass count 20/race 5.
-  Full skipped-baseline integration remains the registered Quest fixture exclusion.
+- Active workstream: `WS-PERSIST-P12-SAVEDELAY-MIRDB-001` — Complete for writing
+  CWD-relative Server.MirDB on the SaveDelay database step.
+- Recovery review: SaveDelay now rewrites JSON then Server.MirDB; magics merge
+  from any existing binary file. Unified restart-equivalence stays Open.
+- Outcome: persistPeriodicWorkLoopSave calls WriteWorldExport("./Server.MirDB")
+  after the JSON dated copy/rewrite when a configured world catalog is loaded;
+  an empty world path skips the MirDB write.
+- Authority/files: Go `cmd/crystal-server/{world_catalog_save.go,account_periodic_save.go}`
+  and tests, committed in `9904aef`.
+- Evidence: WorkLoop order/path test asserts Server.MirDB and the no-world-path
+  guard; count 20/race 5 pass. Full skipped-baseline integration remains the
+  registered Quest fixture exclusion.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: WriteWorldExport and parseWorldDatabase are complete inputs;
-  SaveDelay path selection remains a later shared-owner slice.
-- Forbidden: runtime ObjectID persistence, SaveDelay wiring without an explicit
-  MirDB path, cross-store manifest/all-or-nothing, backup/recovery, reopening leaves,
-  protocol changes or any C# write.
+- Dependencies: WriteWorldExport magics merge and SaveDelay timer are complete inputs; remaining restart-equivalence stays discovery.
+- Forbidden: runtime ObjectID persistence, cross-store manifest/all-or-nothing,
+  backup/recovery, reopening leaves, protocol changes or any C# write.
 
 ### Protected Go ownership
 
@@ -85,9 +86,9 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 
-- [x] Complete SaveDelay INI through MirDB catalog serializers, counters, quest `.txt` and export compose/merge.
+- [x] Complete SaveDelay INI through MirDB catalog serializers, counters, quest `.txt`, export compose/merge and Server.MirDB write.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
-- [x] Complete `WS-PERSIST-P12-MIRDB-EXPORT-MERGE-001`: preserve magics/counters on export rewrite; SaveDelay path remains outside.
+- [x] Complete `WS-PERSIST-P12-SAVEDELAY-MIRDB-001`: CWD-relative Server.MirDB on SaveDelay; remaining restart-equivalence stays Open.
 
 ### P7 frozen child registry
 
