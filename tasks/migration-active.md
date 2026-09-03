@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (sidecar persistence error context Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (path-alias validation Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,26 +46,27 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-SIDECAR-ERROR-CONTEXT-001` — Complete for
-  reporting runtime-sidecar write failures; periodic/shutdown boundaries remain inputs.
-- Recovery review: runtime ticker and empty-world stop path now log respawn-state
-  write failures instead of silently discarding them; full restart-equivalence remains Open/shared-owner.
-- Outcome: existing dirty-and-retry semantics remain unchanged while production
-  sidecar errors are observable at the existing write boundary.
-- Authority/files: Go `cmd/crystal-server/world.go` and `world_test.go`, committed
-  in `45ebc6f`; periodic error context remains `0acab15`.
-- Evidence: injected sidecar writer failure reaches the production ticker log;
-  runtime restore passes focused count 20/race 5. Full skipped-baseline integration remains unrelated.
+- Active workstream: `WS-PERSIST-P12-FIXED-STORE-ALIAS-001` — reject optional
+  persistence paths that alias Legacy's fixed CWD MirDB/MirADB stores.
+- Recovery review: `WS-PERSIST-P12-PATH-ALIAS-001` is Complete for optional pairwise
+  aliases; Go still permits an optional JSON/world/runtime path to collide with fixed
+  `./Server.MirDB` or `./Server.MirADB`, while restart-equivalence remains Open/shared-owner.
+- Outcome: production startup rejects clean absolute aliases between any optional
+  persistence path and fixed CWD `./Server.MirDB`/`./Server.MirADB` before load, bind or write.
+- Authority/files: Legacy fixed paths plus Go `internal/config/config.go` and focused
+  config/startup tests; production entry is `config.Load` → `Config.Validate` →
+  `runServerWithContextAndServiceFactories`.
+- Evidence target: real startup/config path with fixed-store collisions and distinct paths,
+  repeated count 20/race 5 where relevant; no file writes or listener bind on rejection.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: existing n/o writers, auth snapshots, P1 lifecycle and P10 mutation owners are complete inputs; recovery remains discovery.
-- Forbidden: runtime ObjectID persistence, cross-store manifest/all-or-nothing,
-  backup/recovery, reopening leaves, protocol changes or any C# write.
-
+- Dependencies: optional path-alias validation and fixed Legacy path authority are complete
+  inputs; no shared recovery owner exists.
+- Forbidden: symlink/existence probing, retention, restore selector/fallback, manifest,
+  rollback, crash recovery, cross-store atomicity, reopening leaves or any C# write.
 ### Protected Go ownership
 
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible projection while auditing P12 checkpoint and recovery boundaries.
 - No parallel persistence authority or unreviewed production child; completed Character-ID and Account-ID workstreams remain limited to their explicit 117 header/import/checkpoint/restart contracts.
-
 ### Remaining acceptance work
 
 - [x] Record the finite P12 candidate registry with Legacy chains, wire/store formats, owners, dependencies and focused/repeated/race/restart/backup evidence gaps.
@@ -83,12 +84,14 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-JSON-ATOMIC-CLEANUP-001` with SaveJSON WriteFile/Rename failure cleanup, old-target preservation, JSONSaveError outcome and production-path evidence.
 - [x] Complete `WS-PERSIST-P12-AUTH-DUALSTORE-GENERATION-001` with detached auth snapshot,
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
-
+- [x] Complete `WS-PERSIST-P12-PATH-ALIAS-001` with optional path whitespace/clean-absolute
+  alias rejection before production load, bind or write; fixed CWD store aliases remain separate.
+- [ ] Complete `WS-PERSIST-P12-FIXED-STORE-ALIAS-001` with fixed CWD MirDB/MirADB collision
+  rejection; do not expand into filesystem probing or recovery semantics.
 - [x] Complete SaveDelay INI through MirDB catalog serializers, counters, quest `.txt`, export compose/merge and Server.MirDB write.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
 - [x] Complete `WS-PERSIST-P12-SAVEDELAY-MIRDB-001`: CWD-relative Server.MirDB on SaveDelay; remaining restart-equivalence stays Open.
 - [x] Complete `WS-PERSIST-P12-SHUTDOWN-WORKLOOP-001`: graceful shutdown force-writes UsedGoods, Guilds and Conquests after the existing account checkpoint boundary; complete restart-equivalence stays Open. [x] Complete `WS-PERSIST-P12-SHUTDOWN-ERROR-BOUNDARY-001`: production returns final world-runtime persistence errors. [x] Complete `WS-PERSIST-P12-SHUTDOWN-ACCOUNT-ERROR-001`: JSON-only shutdown failures reach the production result while legacy retry remains intact. [x] Complete `WS-PERSIST-P12-PERIODIC-ERROR-CONTEXT-001`: first SaveDelay store failures include stage context while all ordered steps continue. [x] Complete `WS-PERSIST-P12-SIDECAR-ERROR-CONTEXT-001`: runtime sidecar write failures are logged without changing dirty/retry semantics.
-
 ### P7 frozen child registry
 
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
@@ -123,7 +126,6 @@ owns exact routing evidence.
 | `QUEST-P7-LIFECYCLE-TIMER-001` | Complete | `QUEST-P7-CORE-001` + `PERSIST-P2-CHECKPOINT-RESTART-001` | accepted lifecycle/runtime/session evidence | 24h/completion/zero-task/relogin/race |
 | `QUEST-P7-PROGRESS-QUIRKS-001` | Complete | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | accepted runtime/session evidence | class/name/flag boundaries |
 | `QUEST-P7-ACCEPT-CARRY-QUIRK-001` | Complete | `QUEST-P7-CORE-001` + `ITEM-P6-GRID-MUTATION-001` | accepted production/runtime/session evidence | sequential partial failure transcript |
-
 ### P6 frozen child registry
 
 Independent Legacy/Go auditors produced the finite denominator. Reviewer
@@ -152,7 +154,6 @@ Catalog is the sole Active unfinished child.
 | `REFINE-P6-WORKBENCH-001` | Complete | P7 page authority (Complete) | committed/accepted refine/auth/world/session evidence | delayed production/restart/race |
 | `CRAFT-P6-NPC-001` | Complete | P7/P10 | existing committed evidence | ingredients/RNG/order/persistence |
 | `MINE-P6-RUBBLE-001` | Complete | P4 map + P5 adapters | config/schema/world/session | RNG/timers/payout/restart/race |
-
 ### P4 frozen child registry
 
 Independent reviewer `01a03617-76c2-7652-ab64-7e27143ce72b` rejected two
@@ -171,7 +172,6 @@ finding. Nine children are Complete and collision rules remain dependency-blocke
 | `MAP-P4-LIGHT-001` | Complete | — | committed Go `fc6b98b6b312357d850f6710fbf697b8678fd4c2` | UTC production clock/non-UTC host |
 | `MAP-P4-NOREINCARNATION-AUTH-001` | Complete | P5 spell (Complete) | committed Go `1aef1eac1953ca184d7e96c5394ae3c2cc5a3cc3` | imported denial + unchanged amulet/no successful cast |
 | `CHAT-P4-MAP-CONTEXT-001` | Complete | P6 shout arming (Complete) | accepted map import/chat/session evidence | NoNames/shout recipients/order |
-
 ### P1 frozen child registry
 
 Every functional leaf also runs the standard leaf gate. `Ready` means its finite
@@ -192,7 +192,6 @@ selected now.
 | `OPS-P1-DEPLOY-001` | Ready | all other P1 leaves | `README.md`; new `cmd/crystal-server/deployment_test.go`; matrix evidence | fresh package + full unexcluded gates |
 | `NOTICE-P1-EDGE-001` | Complete | — | none | existing notice/session evidence |
 | `DOC-P1-EVIDENCE-001` | Complete | — | matrix P1/P12 prose | bounded documentation review |
-
 ### P2 frozen child registry
 
 Independent read-only reviewer `01a031c0-18ea-71e3-ba9f-b6cf96be57d4`
@@ -210,7 +209,6 @@ denominator only.
 | `PERSIST-P2-ACCOUNT-BRIDGE-001` | Complete | — | none | existing JSON/117/global merge evidence |
 | `PERSIST-P2-CHECKPOINT-RESTART-001` | Complete | bridge | none | existing production checkpoint/restart smoke |
 | `PERSIST-P2-SOURCE-PRECEDENCE-001` | Complete | bridge | new `p2_account_precedence_test.go`; bounded startup if needed | conflicting-source startup/checkpoint/reload |
-
 ### P3 frozen child registry
 
 Independent reviewer `01a0327e-55a1-7f63-9fb7-0b8bdcc061af` accepted this
@@ -249,7 +247,6 @@ broad unnamed scope.
 | `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system children |
 | `DISC-P11-CLOSURE` | P11 | Discovery | finite miscellaneous-system children |
 | `DISC-P12-CLOSURE` | P12 | Discovery | finite five-ID persistence/recovery candidate registry; owner/evidence review remains open |
-
 ### Registered cross-phase finding
 
 - `GUILD-P9-NPC-SCRIPT-001` (`Ready` input to `DISC-P9-CLOSURE`): expose the
