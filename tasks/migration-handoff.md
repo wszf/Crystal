@@ -1,6 +1,6 @@
 # Crystal Go migration current handoff
 
-Last updated: 2026-09-03 08:45 (Asia/Singapore)
+Last updated: 2026-09-03 08:58 (Asia/Singapore)
 
 This is the replace-in-place current snapshot. The automatic compact summary is
 not evidence; do not startup-read historical handoff archives.
@@ -18,18 +18,16 @@ not evidence; do not startup-read historical handoff archives.
 ## Legacy repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal`.
-- Branch `migration/goal-orchestration`; pre-control-commit HEAD
-  `5a63a1cc7c0c4f3373f122d2b4e4194d946a6e90`.
-- Before this control refresh the index and worktree were clean except the
-  expected unstaged `tasks/migration-active.md` and this handoff.
-- This snapshot records the expected one control-document commit delta.
+- Branch `migration/goal-orchestration`; HEAD
+  `1f1a612e19334ebb113caed554b83da9520526cc`.
+- Active index and handoff are clean and pushed to origin.
 
 ## Go repository state
 
 - Root: `/Users/wszf/Dropbox/source_code/git_work/me_work/Crystal.GoServer`.
 - Branch `migrate/drop-owner-p12`; HEAD
-  `2334662bc9b6f9883137a87104b05d09e9c8d965`.
-- Unrelated unstaged file (not this leaf): `docs/migration-matrix.md`. Preserve it.
+  `37eef08739fd28bd8945f8765bc1ee7d7e515d68`, pushed to origin.
+- The matrix records the export-merge evidence and the Go worktree is clean.
 - `git diff --check` and all three Go C# queries exit 0/empty. No owned
   Go/server process is active.
 
@@ -43,9 +41,11 @@ not evidence; do not startup-read historical handoff archives.
 
 ## Verification ledger
 
-- Preserve-magics plus prior catalog writer tests pass count 20 and race count 5.
-- `go test ./internal/legacyworld -count=1`, `go vet ./internal/legacyworld` and
-  `go build ./...` exit 0.
+- Preserve-magics/counters plus prior catalog writer tests pass count 20 and
+  focused race count 5.
+- `go test ./internal/legacyworld ./internal/worlddata -run '^$'`, `go vet
+  ./internal/legacyworld ./internal/worlddata`, `go build ./...` and
+  `git diff --check` exit 0.
 
 ## Exact recovery sequence
 
