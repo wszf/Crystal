@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (path-alias validation Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (fixed-store alias validation Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,23 +46,24 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-FIXED-STORE-ALIAS-001` — reject optional
-  persistence paths that alias Legacy's fixed CWD MirDB/MirADB stores.
-- Recovery review: `WS-PERSIST-P12-PATH-ALIAS-001` is Complete for optional pairwise
-  aliases; Go still permits an optional JSON/world/runtime path to collide with fixed
-  `./Server.MirDB` or `./Server.MirADB`, while restart-equivalence remains Open/shared-owner.
-- Outcome: production startup rejects clean absolute aliases between any optional
-  persistence path and fixed CWD `./Server.MirDB`/`./Server.MirADB` before load, bind or write.
-- Authority/files: Legacy fixed paths plus Go `internal/config/config.go` and focused
-  config/startup tests; production entry is `config.Load` → `Config.Validate` →
+- Active workstream: `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001` — reject account
+  paths that collide with the effective runtime sidecar fallback.
+- Recovery review: `WS-PERSIST-P12-PATH-ALIAS-001` and `WS-PERSIST-P12-FIXED-STORE-ALIAS-001`
+  are Complete; Go still permits an account path to alias `WorldExportPath + ".runtime.json"`
+  when `RespawnStatePath` is empty, while restart-equivalence remains Open/shared-owner.
+- Outcome: production startup rejects clean absolute aliases between account/Legacy-account
+  paths and the derived runtime sidecar before load, listener bind or persistence write.
+- Authority/files: existing Go world runtime-sidecar fallback plus `internal/config/config.go`
+  and focused config/startup tests; production entry is `config.Load` → `Config.Validate` →
   `runServerWithContextAndServiceFactories`.
-- Evidence target: real startup/config path with fixed-store collisions and distinct paths,
+- Evidence target: real startup/config path with derived-sidecar collisions and distinct paths,
   repeated count 20/race 5 where relevant; no file writes or listener bind on rejection.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: optional path-alias validation and fixed Legacy path authority are complete
+- Dependencies: optional/fixed path-alias validation and existing sidecar fallback are complete
   inputs; no shared recovery owner exists.
 - Forbidden: symlink/existence probing, retention, restore selector/fallback, manifest,
-  rollback, crash recovery, cross-store atomicity, reopening leaves or any C# write.
+  rollback, crash recovery, cross-store atomicity, changing sidecar fallback semantics,
+  reopening leaves or any C# write.
 ### Protected Go ownership
 
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible projection while auditing P12 checkpoint and recovery boundaries.
@@ -86,8 +87,10 @@ Keep this file at or below 300 lines and 32 KiB.
   shared counters/CapturedAt, stateless 117 adapter and production interleave/restart evidence.
 - [x] Complete `WS-PERSIST-P12-PATH-ALIAS-001` with optional path whitespace/clean-absolute
   alias rejection before production load, bind or write; fixed CWD store aliases remain separate.
-- [ ] Complete `WS-PERSIST-P12-FIXED-STORE-ALIAS-001` with fixed CWD MirDB/MirADB collision
-  rejection; do not expand into filesystem probing or recovery semantics.
+- [x] Complete `WS-PERSIST-P12-FIXED-STORE-ALIAS-001` with fixed CWD MirDB/MirADB collision
+  rejection; preserve the intentional Legacy-account → MirADB authority mapping.
+- [ ] Complete `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001` with derived sidecar collision
+  rejection when RespawnStatePath is empty; do not change fallback or recovery semantics.
 - [x] Complete SaveDelay INI through MirDB catalog serializers, counters, quest `.txt`, export compose/merge and Server.MirDB write.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
 - [x] Complete `WS-PERSIST-P12-SAVEDELAY-MIRDB-001`: CWD-relative Server.MirDB on SaveDelay; remaining restart-equivalence stays Open.

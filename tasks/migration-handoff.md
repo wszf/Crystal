@@ -12,8 +12,9 @@ not evidence; do not startup-read historical handoff archives.
   `luna_worker` (`gpt-5.6-luna/max`).
 - Unique Active leaf is `DISC-P12-CLOSURE`. P12 remains Open/shared-owner for
   complete restart-equivalence. `WS-PERSIST-P12-PATH-ALIAS-001` is complete in Go
-  `fce9835` with matrix evidence in `e3561df`; the next active bounded workstream is
-  `WS-PERSIST-P12-FIXED-STORE-ALIAS-001`. Existing SaveDelay, shutdown, world,
+  `fce9835` with matrix evidence in `e3561df`; fixed-store alias validation is
+  complete in Go `e0507a0`, and the next active bounded workstream is
+  `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001`. Existing SaveDelay, shutdown, world,
   account, periodic and sidecar boundaries remain bounded inputs, not complete recovery.
 
 ## Legacy repository state
@@ -32,9 +33,9 @@ not evidence; do not startup-read historical handoff archives.
   `origin/migrate/drop-owner-p12`. Path-alias production code is in
   `fce983582619f70fdacbbffef7a9a32235f55448`; matrix evidence is in `e3561df`.
 - `Config.Validate` and the production startup seam now reject whitespace-only
-  optional persistence paths and pairwise clean-absolute aliases before any
-  load, listener bind or persistence write. Fixed CWD `Server.MirDB`/`Server.MirADB`
-  aliases are the next bounded workstream.
+  optional paths, pairwise clean-absolute aliases, and cross-authority aliases to
+  fixed CWD `Server.MirDB`/`Server.MirADB`; intentional Legacy-account → MirADB
+  mapping remains allowed. The next slice guards the derived runtime-sidecar path.
 - SaveDelay/shutdown account, world, Guild, Goods, Conquest and runtime-sidecar
   callers remain bounded store-order coverage, not complete recovery.
 
@@ -52,10 +53,11 @@ not evidence; do not startup-read historical handoff archives.
 
 ## Verification ledger
 
-- Path validation/config/startup tests pass at focused `-count=20` and focused
-  race `-count=5`; rejected aliases make zero listener calls and leave the target
-  path absent. Full Go tests and full race pass when excluding the four registered
-  baselines: the three world-bootstrap error expectation tests and
+- Optional and fixed-store path validation/config/startup tests pass at focused
+  `-count=20` and focused race `-count=5`; rejected aliases make zero listener
+  calls and leave fixed targets absent, while the intentional Legacy-account →
+  MirADB mapping remains accepted. Full Go tests and full race pass when excluding
+  the four registered baselines: three world-bootstrap error expectation tests and
   `TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin` (`mail packet id = 26, want 206`).
 - Unskipped full test and race runs reproduce those same four baseline failures;
   no path-alias failure or race is present. `gofmt`, `git diff --check`,
@@ -66,11 +68,11 @@ not evidence; do not startup-read historical handoff archives.
 
 1. Re-run both repository status/C# gates and `tasks/check-migration-control.sh`;
    commit and push this active/handoff control snapshot.
-2. Resume `DISC-P12-CLOSURE` at `WS-PERSIST-P12-FIXED-STORE-ALIAS-001`:
-   inspect Legacy fixed CWD `Server.MirDB`/`Server.MirADB`, implement only the
-   optional-to-fixed clean-absolute collision gate, then prove production startup
-   rejection before load/bind/write at count 20/race 5.
-3. Treat SaveDelay, shutdown and optional path-alias callers as completed bounded
+2. Resume `DISC-P12-CLOSURE` at `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001`:
+   guard account/Legacy-account paths against the effective
+   `WorldExportPath + ".runtime.json"` fallback only when RespawnStatePath is empty,
+   then prove production startup rejection before load/bind/write at count 20/race 5.
+3. Treat SaveDelay, shutdown and prior path-alias callers as completed bounded
    inputs, not complete MirDB persistence/recovery. Do not write C# or reopen
-   completed leaves; after the fixed-store slice, update matrix/index/handoff and
-   select the next dependency-ready workstream.
+   completed leaves; after the derived-sidecar slice, update matrix/index/handoff
+   and select the next dependency-ready workstream.
