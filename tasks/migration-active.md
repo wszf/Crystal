@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (account shutdown error boundary Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-03 (periodic persistence error context Complete; `DISC-P12-CLOSURE` still Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -46,17 +46,16 @@ Keep this file at or below 300 lines and 32 KiB.
 - Leaf ID: `DISC-P12-CLOSURE`
 - Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
 - Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `WS-PERSIST-P12-SHUTDOWN-ACCOUNT-ERROR-001` — Complete for
-  surfacing account JSON shutdown failures; prior shutdown boundaries remain inputs.
-- Recovery review: JSON-first shutdown keeps the legacy 117 retry after committed
-  JSON-hook failure; a JSON-only failure now reaches the production result;
-  full restart-equivalence remains Open/shared-owner.
-- Outcome: account JSON errors are returned unless a configured legacy checkpoint
-  retry succeeds; existing first-error and store ordering remain intact.
-- Authority/files: Go `cmd/crystal-server/{main.go,http_service_test.go}`,
-  committed in `dea8d24`; prior shutdown boundary is `e63a540`.
-- Evidence: real HTTP account creation with injected JSON target failure returns
-  the shutdown error; dual-store retry still passes focused count 20/race 5. Full skipped-baseline integration remains unrelated.
+- Active workstream: `WS-PERSIST-P12-PERIODIC-ERROR-CONTEXT-001` — Complete for
+  identifying the first failing SaveDelay store; shutdown boundaries remain inputs.
+- Recovery review: periodic SaveDelay still executes all Legacy-ordered stores after
+  a failure, but its returned/logged error now names the failing stage; full restart-equivalence remains Open/shared-owner.
+- Outcome: `persistPeriodicWorkLoopSave` preserves first-error semantics and wraps
+  the cause with accounts/database/guilds/goods/conquests context.
+- Authority/files: Go `cmd/crystal-server/account_periodic_save.go` and tests,
+  committed in `0acab15`; account shutdown boundary remains `dea8d24`.
+- Evidence: injected account-stage writer failure retains all five production
+  store steps and exposes the `accounts` stage; focused count 20/race 5 pass. Full skipped-baseline integration remains unrelated.
 - Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
 - Dependencies: existing n/o writers, auth snapshots, P1 lifecycle and P10 mutation owners are complete inputs; recovery remains discovery.
 - Forbidden: runtime ObjectID persistence, cross-store manifest/all-or-nothing,
@@ -88,7 +87,7 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete SaveDelay INI through MirDB catalog serializers, counters, quest `.txt`, export compose/merge and Server.MirDB write.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
 - [x] Complete `WS-PERSIST-P12-SAVEDELAY-MIRDB-001`: CWD-relative Server.MirDB on SaveDelay; remaining restart-equivalence stays Open.
-- [x] Complete `WS-PERSIST-P12-SHUTDOWN-WORKLOOP-001`: graceful shutdown force-writes UsedGoods, Guilds and Conquests after the existing account checkpoint boundary; complete restart-equivalence stays Open. [x] Complete `WS-PERSIST-P12-SHUTDOWN-ERROR-BOUNDARY-001`: production returns final world-runtime persistence errors. [x] Complete `WS-PERSIST-P12-SHUTDOWN-ACCOUNT-ERROR-001`: JSON-only shutdown failures reach the production result while legacy retry remains intact.
+- [x] Complete `WS-PERSIST-P12-SHUTDOWN-WORKLOOP-001`: graceful shutdown force-writes UsedGoods, Guilds and Conquests after the existing account checkpoint boundary; complete restart-equivalence stays Open. [x] Complete `WS-PERSIST-P12-SHUTDOWN-ERROR-BOUNDARY-001`: production returns final world-runtime persistence errors. [x] Complete `WS-PERSIST-P12-SHUTDOWN-ACCOUNT-ERROR-001`: JSON-only shutdown failures reach the production result while legacy retry remains intact. [x] Complete `WS-PERSIST-P12-PERIODIC-ERROR-CONTEXT-001`: first SaveDelay store failures include stage context while all ordered steps continue.
 
 ### P7 frozen child registry
 
