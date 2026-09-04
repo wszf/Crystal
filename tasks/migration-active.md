@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-03 (derived-sidecar alias validation Complete; `DISC-P12-CLOSURE` still Active)
+Last verified: 2026-09-04 (P9/P10 finite closure registered; `NPC-P7-ACTION-SOCIAL-001` Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -20,8 +20,8 @@ Keep this file at or below 300 lines and 32 KiB.
   workstream may enumerate finite children without implementing open scope.
 - `Complete` phase labels are not a project percentage. Leaf burn-down and ETA
   are publishable only for a scope-frozen phase.
-- Current project-wide ETA/percentage remain `Unavailable`: P1-P7 are finite,
-  but P9-P12 still have open inventories.
+- Current project-wide ETA/percentage remain `Unavailable`: P0-P11 are finite,
+  while P12 retains an open shared-owner recovery boundary.
 
 ## Phase routing summary
 
@@ -43,26 +43,23 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `DISC-P12-CLOSURE`
-- Status: `Active` bounded P12 closure routing; P12 remains Open for shared persistence/recovery.
-- Previous routing: `DISC-P11-CLOSURE` is Complete as a finite residual-route review.
-- Active workstream: `PERSIST-P12-RESTART-EQUIV-001` — blocked shared-owner
-  recovery closure; no dependency-ready production child is currently selected.
-- Recovery review: `WS-PERSIST-P12-PATH-ALIAS-001`, `WS-PERSIST-P12-FIXED-STORE-ALIAS-001`
-  and `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001` are Complete. Remaining P12 scope spans
-  auth/world/economy/sidecar owners and lacks a Legacy-backed shared recovery owner.
-- Outcome: pause implementation only at this verified dependency boundary; do not claim
-  complete restart equivalence until owner, source precedence and recovery contract exist.
-- Authority/files: Legacy WorkLoop/backup chains remain read-only evidence; Go owners are
-  `auth.Service`, `legacyaccountbridge`, `legacyworld`, world runtime-sidecar and P10/P1
-  consumers. Matrix row `PERSIST-P12-RESTART-EQUIV-001` is the authority.
-- Evidence target: preserve the completed production path-alias evidence and record the
-  blocker; resume implementation only after a finite Legacy-backed child is registered.
-- Go matrix anchors to read: P12 summary row and the finite ledger immediately below it.
-- Dependencies: shared recovery owner, source precedence and failure/restart contract are
-  missing; do not synthesize them in this leaf.
-- Forbidden: manifest/generation, retention, restore selector/fallback, rollback, crash
-  recovery, cross-store atomicity, new MagicInfo/counter authority, reopening leaves or any C# write.
+- Leaf ID: `NPC-P7-ACTION-SOCIAL-001`
+- Status: `Active`; the finite 12-action social slice is now dependency-ready because
+  Control Flow and the registered `GUILD-P9-NPC-SCRIPT-001`/`MAIL-P10-NPC-SCRIPT-001`
+  inputs are available.
+- Workstream: `WS-P7-SOCIAL-GO-IMPLEMENT-001`; Go-only parser/runtime, focused production
+  entry tests, and online/offline persistence/recipient-order evidence. No C# writes.
+- Owned files: `internal/worlddata/npcscript.go` plus its focused parser test; bounded
+  `cmd/crystal-server/default_npc.go`/new social helper and production-session tests.
+- Go matrix anchors to read: P7 `NPC-P7-ACTION-SOCIAL-001`, P9/P10 cross-phase input entries and
+  Legacy `NPCSegment.ParseAct`/player `Act` evidence.
+- Outcome: implement the finite 12-action social slice in Go and verify parser/runtime,
+  persistence, recipients and production packet order at the leaf gate.
+- Acceptance: `GIVEGUILDGOLD`/`TAKEGUILDGOLD`, six name-list actions, and
+  `COMPOSEMAIL`/`ADDMAILGOLD`/`ADDMAILITEM`/`SENDMAIL`; exact parser failure boundaries,
+  guild/name-list/mail state, recipient and packet ordering, persistence, focused repeated/race.
+- Protected blocker: `PERSIST-P12-RESTART-EQUIV-001` remains blocked/shared-owner; do not
+  invent a recovery owner or synthesize manifest/generation/restore/rollback/crash semantics.
 ### Protected Go ownership
 
 - Preserve completed P2-P11 authorities, latest-auth revision/CAS and persistence-before-visible projection while auditing P12 checkpoint and recovery boundaries.
@@ -91,6 +88,8 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001` with derived sidecar collision
   rejection when RespawnStatePath is empty; do not change fallback or recovery semantics.
 - [ ] Resume `PERSIST-P12-RESTART-EQUIV-001` only after a finite Legacy-backed shared owner is registered.
+- [ ] Implement and close `NPC-P7-ACTION-SOCIAL-001` through its Go parser/runtime and
+  production-entry persistence/recipient-order gates.
 - [x] Complete SaveDelay INI through MirDB catalog serializers, counters, quest `.txt`, export compose/merge and Server.MirDB write.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
 - [x] Complete `WS-PERSIST-P12-SAVEDELAY-MIRDB-001`: CWD-relative Server.MirDB on SaveDelay; remaining restart-equivalence stays Open.
@@ -100,7 +99,7 @@ Keep this file at or below 300 lines and 32 KiB.
 Reviewer `01a044f4-387d-7e52-8279-8f2648d12a06` rejected revision 1, then
 accepted revision 2 with `No findings`. Control Flow terminal review withdrew its
 only provisional finding after tracing the serialized production call chain. The
-frozen 24-child denominator is now 18 Complete + 6 Ready; the matrix
+frozen 24-child denominator is now 18 Complete + 1 Active + 5 Ready; the matrix
 owns exact routing evidence.
 
 | Leaf ID | Status | Dependency | Go write authority | Additional gate |
@@ -115,7 +114,7 @@ owns exact routing evidence.
 | `NPC-P7-SPEECH-INPUT-001` | Complete | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-WIRE-STATIC-001` + `ITEM-P6-WIRE-CATALOG-001` | ledger D | placeholders/info order/sticky input |
 | `NPC-P7-CONTROL-FLOW-001` | Complete | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger E | 7 keywords/order/state/delay/chain |
 | `NPC-P7-ACTION-STATE-001` | Complete | Control Flow + `CFG-P1-CONTRACT-001` + `EQUIP-P6-CORE-001` | committed Go `83a37867942edc42d780edacb1083db4bfebd13c` | 14-key table/restart/RNG/UI |
-| `NPC-P7-ACTION-SOCIAL-001` | Ready | Control Flow + `GUILD-P9-NPC-SCRIPT-001` + `MAIL-P10-NPC-SCRIPT-001` | ledger G | 12-key table/persistence/recipients |
+| `NPC-P7-ACTION-SOCIAL-001` | Active | Control Flow + registered `GUILD-P9-NPC-SCRIPT-001` + `MAIL-P10-NPC-SCRIPT-001` | Go parser/runtime and production-session tests | 12-key table/persistence/recipients |
 | `NPC-P7-ACTION-WORLD-001` | Ready | Control Flow + `MONSTER-P5-BASE-FAMILY-001` + `ITEM-P6-GRID-MUTATION-001` + `GUILD-P9-NPC-SCRIPT-001` | ledger H | 11-key recipient/persistence/race matrix |
 | `NPC-P7-COND-LOCAL-001` | Complete | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-ACTION-STATE-001` | committed Go `424978eabe5de76d84979f3fe108bf7968173aa0` | exact 7-key + shared malformed/operator quirks |
 | `NPC-P7-COND-WORLD-001` | Ready | `NPC-P7-COND-LOCAL-001` + `GUILD-P9-NPC-SCRIPT-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger J | exact 24-key snapshot/no-side-effect/race matrix |
@@ -246,8 +245,8 @@ broad unnamed scope.
 | `DISC-P5-CLOSURE` | P5 | Complete | 16 finite children after regen/HP-drain/safe-zone/Revelation findings: 12 Complete + 4 unfinished at refresh discovery |
 | `DISC-P6-CLOSURE` | P6 | Complete | 19 finite children: 7 Complete + 12 unfinished at freeze |
 | `DISC-P7-CLOSURE` | P7 | Complete | 24 finite children: 4 Complete + 20 unfinished at freeze |
-| `DISC-P9-CLOSURE` | P9 | Discovery | finite guild/war/territory children |
-| `DISC-P10-CLOSURE` | P10 | Discovery | finite economy-system children |
+| `DISC-P9-CLOSURE` | P9 | Complete | five finite P9-owned children plus two Ready cross-phase inputs; no P9 implementation child dependency-ready |
+| `DISC-P10-CLOSURE` | P10 | Complete | five finite P10-owned children plus one Ready P7 cross-phase input; no P10 implementation child dependency-ready |
 | `DISC-P11-CLOSURE` | P11 | Discovery | finite miscellaneous-system children |
 | `DISC-P12-CLOSURE` | P12 | Discovery | finite five-ID persistence/recovery candidate registry; owner/evidence review remains open |
 ### Registered cross-phase finding
