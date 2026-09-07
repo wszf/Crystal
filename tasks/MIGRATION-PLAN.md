@@ -125,3 +125,10 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   timing failures skipped pass. Graphical client reaches character selection;
   full-population game entry and live probe still stall. Profile and resolve
   the remaining runtime delay before accepting the client/Legacy rehearsal.
+
+- Package 5 full-population protocol rehearsal now passes. `d319bad` / `1e3cf3c`
+  remove profiled route/target scans; `9fcebdf` yields between overdue world
+  passes. `f971b26` batches initial bootstrap; `9eae2a5` / `dcd3dda` make the live
+  probe respect admission/movement rules. Filtered all-package and focused race
+  checks pass. Graphical client still crashes during game entry; isolated Legacy
+  comparison is running. Quest/economy/combat and client acceptance remain open.
