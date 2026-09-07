@@ -119,6 +119,8 @@ Recent focused commits:
   checks and custom cast thresholds; focused race and filtered full suite pass.
 - `c7d1c80`: KILL/DIE direct death, revival/drop authority, GMNeverDie and
   broadcast quirks; session/reload/race and filtered full-suite checks pass.
+- `f39e0a2`: CHANGEGENDER/CHANGECLASS identity authority, target-session logout,
+  offline handling and parsing; session/reload/race and filtered full suite pass.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
@@ -126,11 +128,14 @@ Continue in this order:
 1. KILL/DIE now use direct death lifecycle with revival/drop authority,
    GMNeverDie distinctions and Legacy broadcast counts. Go status records the
    tests and remaining shared death gaps (PK/luck penalties and default-NPC Die).
+   CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
+   normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   CHANGEGENDER/CHANGECLASS, LEVELHERO, DECO, AWAKENING, archive/backup/load/restore,
+   LEVELHERO (spawned Hero only), DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
    RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
+   Revisit shared death gaps only if they block the next operator command.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
