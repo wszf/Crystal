@@ -105,13 +105,13 @@ Recent focused commits:
 - `c62275e`: ADJUSTPKPOINT assignment and target-session persistence.
 - `76eac73`: group-recall consent, equipment gates, cooldown and teleport delivery.
 - `f8e1acb`: current conquest-file reload with authoritative JSON precedence.
+- `5664f4e`: MAPMOVE/GOTO/RECALL with session persistence and race checks.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Finish MAPMOVE/GOTO/RECALL validation, then trace remaining reachable commands before declaring parity: KILL, DIE,
-   CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, MAPMOVE/GOTO/RECALL,
-   MOB/CLEARMOB/RECALLMOB, DECO, AWAKENING, archive/backup/load/restore,
+1. Finish SETTIMER/SETLIGHT validation, then trace remaining reachable commands before declaring parity: KILL, DIE,
+   CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, MOB/CLEARMOB/RECALLMOB, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
    RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE, DELETESKILL and
