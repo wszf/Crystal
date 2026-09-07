@@ -112,12 +112,13 @@ Recent focused commits:
 - `d122d10` / `d571f72`: MagicInfo export/JSON and Legacy database saves.
 - `c80a2ab`: custom spell metadata across runtime, packets, books and account admission.
 - `38323f0`: source enum parsing independent of editable spell display names.
+- `fdb60cf`: all 109 current spell defaults match FillMagicInfoList.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Runtime custom spell metadata is wired and tested. Correct obsolete pre-71
-   default overrides and missing ordinary projectile skill training, then trace remaining reachable commands before declaring parity: KILL, DIE,
+1. Finish GIVESKILL/DELETESKILL validation, then correct missing ordinary
+   projectile skill training and NPC custom spell admission; continue to trace remaining reachable commands before declaring parity: KILL, DIE,
    CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
