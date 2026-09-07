@@ -151,10 +151,8 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   Online archive session binding landed as Go `e0fcd7d`, guild storage as
-   `6543b0e`, and NPC guild currency as `3005d96`. `7b0f92d` repairs the live
-   GIVEGOLD fixture to preserve account identity. Guild logout is `2d36283`;
-   rank definitions/notices and readback use scoped actors in `66e4cb8`.
+   Online archive session, guild storage/currency/logout and scoped rank
+   definitions/notices/readback are implemented; commit details are in Go status.
    Creation/invitation authority landed as Go `6c3154f`.
    Leave/kick/NPC removal is `964b453`; member promotion in `8cd4c95` preserves
    Legacy registry-vs-live target distinctions. Guild buff admission/status delivery
@@ -176,12 +174,13 @@ Continue in this order:
    Missing-owner-record returns now match Legacy with auth/race coverage.
    Periodic equipment scanning now matches Legacy with auth/race tests.
    Ordinary NPC ambient speech/reload now passes focused/race tests.
-   Next: verify CALL/automatic side-effect exclusions, then operator audit.
+   CALL/automatic NPC-side-effect exclusions pass tests; next fix shared
+   automatic/CALL filenames (separate normal/event pages), then operator audit.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
    endpoints and ambient speech are implemented. CALL uses LoadedObjectID zero;
-   its guarded NPC side effects are being verified in Go status. CLEARIPBLOCKS
+   its guarded NPC side effects are verified in Go status. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward authority and guild storage
    are implemented; retain the remaining global-index continuation gaps in scope
@@ -197,7 +196,7 @@ recovery, Hiding, NPC delayed GOTO, cross-map LoverRecall). Their unchanged-base
 reproductions and earlier repaired fixtures are recorded in Go status. This is
 not an unfiltered-green suite. OmaMage extra-roll transcript flakiness also
 reproduces on untouched ccdb06b; it has not been added to the six exclusions.
-Latest rental slices pass focused/race tests; final broad run hits only the inspection
-packet-26 race reproduced 21/100 on 9821e04 (no added skip). Earlier broad run passes.
+Latest rental/NPC slices pass focused/race and filtered broad tests. Inspection
+packet-26 flakiness reproduced 21/100 on 9821e04; no added skip.
 New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
 cutover acceptance remain unproven. No migration-complete claim yet.
