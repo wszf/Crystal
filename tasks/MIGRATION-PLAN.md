@@ -190,11 +190,12 @@ Continue in this order:
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
 3. Complete remaining integration acceptance and report its actual limits.
-Regression policy: the latest all-package checks pass with only six reproduced
-baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
+Regression policy: keep the six reproduced baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
 recovery, Hiding, NPC delayed GOTO, cross-map LoverRecall). Their unchanged-baseline
 reproductions and earlier repaired fixtures are recorded in Go status. This is
 not an unfiltered-green suite. OmaMage extra-roll transcript flakiness also
 reproduces on untouched ccdb06b; it has not been added to the six exclusions.
+Latest rental slices pass focused/race tests; final broad run hits only the inspection
+packet-26 race reproduced 21/100 on 9821e04 (no added skip). Earlier broad run passes.
 New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
 cutover acceptance remain unproven. No migration-complete claim yet.
