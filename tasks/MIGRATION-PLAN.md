@@ -115,3 +115,13 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   (PoisonCloud transcript and map-hazard restart HP) reproduce on unchanged
   `f5ddcb6`; details remain in Go status. Full-data session setup exposed a nil
   synthetic-map assumption, now under regression testing. Package 5 remains open.
+
+- Package 5: `794ce92` fixes exported-world nil-map login; `2c1bb54` configures
+  shared world settings before startup; `78d94b9` indexes additional nearby
+  consumers; `1358721` keeps production world advancement on its shared ticker.
+  `b9e905c` gates asynchronous broadcasts through bootstrap, with mentorship
+  ordering corrected in `a0a211b`. `2185ce4` adds explicit live-world probe mode.
+  Focused race checks and the full package set with six reproduced baseline
+  timing failures skipped pass. Graphical client reaches character selection;
+  full-population game entry and live probe still stall. Profile and resolve
+  the remaining runtime delay before accepting the client/Legacy rehearsal.
