@@ -104,22 +104,22 @@ Recent focused commits:
 - `199a60d`: unbound Hero registry, inventory and reserved IDs across checkpoints.
 - `c62275e`: ADJUSTPKPOINT assignment and target-session persistence.
 - `76eac73`: group-recall consent, equipment gates, cooldown and teleport delivery.
+- `f8e1acb`: current conquest-file reload with authoritative JSON precedence.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Close the confirmed conquest restart gap: startup imports stale exported
-   conquest state while runtime writes current `Conquests/*.mcd` files. Retain
-   authoritative JSON precedence and test ownership/balances/structures on reload.
-2. Trace remaining reachable commands before declaring parity: KILL, DIE,
+1. Finish MAPMOVE/GOTO/RECALL validation, then trace remaining reachable commands before declaring parity: KILL, DIE,
    CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, MAPMOVE/GOTO/RECALL,
    MOB/CLEARMOB/RECALLMOB, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
-   as well; this discovery list is not an exhaustive absence claim.
-3. Finish packet, Settings, spell and AI behavior audits, including remaining
+   as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
+   RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE, DELETESKILL and
+   SETTIMER/SETLIGHT. This discovery list is not an exhaustive absence claim.
+2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
-4. Complete remaining integration acceptance and report its actual limits.
+3. Complete remaining integration acceptance and report its actual limits.
 
 Regression policy: the latest all-package checks pass with only six reproduced
 baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
