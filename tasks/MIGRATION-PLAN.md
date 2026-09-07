@@ -117,13 +117,16 @@ Recent focused commits:
 - `a387a97`: NPC custom skill admission and canonical enum names.
 - `0e8465c`: successful projectile-hit skill training, packet/XP persistence
   checks and custom cast thresholds; focused race and filtered full suite pass.
+- `c7d1c80`: KILL/DIE direct death, revival/drop authority, GMNeverDie and
+  broadcast quirks; session/reload/race and filtered full-suite checks pass.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Implement confirmed KILL/DIE gaps using direct death lifecycle (including
-   revival/drop behavior); Go status records the permission and broadcast audit.
-   Continue tracing remaining reachable commands before declaring parity:
+1. KILL/DIE now use direct death lifecycle with revival/drop authority,
+   GMNeverDie distinctions and Legacy broadcast counts. Go status records the
+   tests and remaining shared death gaps (PK/luck penalties and default-NPC Die).
+   Continue tracing remaining reachable operator commands before declaring parity:
    CHANGEGENDER/CHANGECLASS, LEVELHERO, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
