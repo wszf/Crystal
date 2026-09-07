@@ -190,6 +190,7 @@ Regression policy: the latest all-package checks pass with only six reproduced
 baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
 recovery, Hiding, NPC delayed GOTO, cross-map LoverRecall). Their unchanged-baseline
 reproductions and earlier repaired fixtures are recorded in Go status. This is
-not an unfiltered-green suite. New regressions must be fixed; those pre-existing
-failures do not block package work. Long-running load/crash recovery and production
+not an unfiltered-green suite. OmaMage extra-roll transcript flakiness also
+reproduces on untouched ccdb06b; it has not been added to the six exclusions.
+New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
 cutover acceptance remain unproven. No migration-complete claim yet.
