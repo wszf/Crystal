@@ -164,7 +164,10 @@ Continue in this order:
    archive/repair/checkpoint tests passing. Palace/member views now project live
    guild membership; inspection follows Legacy registry resolution even for
    online objects (removed target gives no response, restore supplies the row).
-   Focused conquest/inspection tests pass. Next: relationship/rental actor paths.
+   Conquest/inspection race and filtered full suite pass (same six skips).
+   Wedding-ring creation/replacement now use connected owner handles; focused
+   archive/item/gold/checkpoint tests pass. Next: marriage/divorce, mentorship
+   and rental actor paths.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
