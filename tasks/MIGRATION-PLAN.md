@@ -171,9 +171,9 @@ Continue in this order:
    hits only the already-reproduced inspection packet-26 flake (no new skip).
    TOGGLETRANSFORM and player appearance/FastRun lifecycle now have focused
    runtime/session/wire/race tests; broad has only the known inspection flake.
-   GATES and STARTCONQUEST now have focused authority/transcript/session tests;
-   race and filtered broad tests pass. Next: RESETCONQUEST, flags and REVIVE;
-   preserve reset archer Alive and flag-owner quirks recorded in Go status.
+   GATES, STARTCONQUEST and RESETCONQUEST now have focused authority/transcript/
+   session tests; race and filtered broad tests pass. Reset preserves archer Alive
+   and flag-owner quirks. Next: flag operators and REVIVE (details in Go status).
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
