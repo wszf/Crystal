@@ -128,6 +128,11 @@ Recent focused commits:
 - `c70c481`: AWAKENING/REMOVEAWAKENING atomic equipment mutation without NPC payment,
   source failure/removal quirks, session authority/reload and focused race checks;
   filtered all-package pass after both commands (same six baseline skips).
+- `1a2e50a`: version-117 character archives, timestamp overwrite/prefix rules
+  and Hero registry references; independent codec/file tests pass.
+- `4751b8a`: archive command registry/session/reload and race checks pass; filtered
+  full suite passes with the same six skips. Online archived characters still
+  need detached authority for later auth-backed mutations (see Go status).
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
@@ -138,8 +143,9 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   BACKUPPLAYER/ARCHIVEPLAYER/LOADPLAYER/RESTOREPLAYER,
-   RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
+   RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Archive command registry
+   behavior is implemented; retain the online archive continuation gap in scope
+   before claiming command parity. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
    RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
    Revisit shared death gaps only if they block the next operator command.
