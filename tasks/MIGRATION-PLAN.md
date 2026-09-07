@@ -179,8 +179,9 @@ Continue in this order:
    Named INFO passes focused/race and filtered broad tests, including archived readback.
    Ground cleanup/rollback and creature movement order pass focused/race tests.
    Initial allocation already stamps cell order (earlier gap claim corrected).
-   Next: facing INFO first-occupant query, quest branches and transform appearance/
-   FastRun contracts documented from source in Go status.
+   Facing INFO now follows first-occupant ordering across live object families;
+   delayed spell insertion and exact formatted readback have focused/race coverage.
+   Next: quest branches and transform appearance/FastRun contracts in Go status.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
