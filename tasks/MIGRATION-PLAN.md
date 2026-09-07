@@ -155,8 +155,11 @@ Continue in this order:
    `6543b0e`, and NPC guild currency as `3005d96`. `7b0f92d` repairs the live
    GIVEGOLD fixture to preserve account identity. Guild logout is `2d36283`;
    rank definitions/notices and readback use scoped actors in `66e4cb8`.
-   Next: guild creation/invite/leave/kick/member-promotion authority, preserving
-   Legacy registry-vs-live target distinctions, then relationship/rental paths.
+   Creation/invitation authority landed as Go `6c3154f`.
+   Leave/kick/NPC removal is `964b453`; member promotion in `8cd4c95` preserves
+   Legacy registry-vs-live target distinctions. Next audit live
+   guild buff/war/territory/conquest/inspection consumers, then relationship/rental
+   paths. These still contain confirmed global-index actor lookups.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
