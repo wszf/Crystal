@@ -157,9 +157,10 @@ Continue in this order:
    rank definitions/notices and readback use scoped actors in `66e4cb8`.
    Creation/invitation authority landed as Go `6c3154f`.
    Leave/kick/NPC removal is `964b453`; member promotion in `8cd4c95` preserves
-   Legacy registry-vs-live target distinctions. Next audit live
-   guild buff/war/territory/conquest/inspection consumers, then relationship/rental
-   paths. These still contain confirmed global-index actor lookups.
+   Legacy registry-vs-live target distinctions. Guild buff admission/status delivery
+   landed as `5969c5d`; guild XP/member-view continuation landed as `4c5193a`.
+   Next audit live war/territory/conquest/inspection consumers, then relationship/
+   rental paths. These still contain confirmed global-index actor lookups.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
