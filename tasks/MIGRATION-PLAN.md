@@ -139,4 +139,7 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   both servers; recorded screenshots and dataset hashes are in Go
   `docs/MIGRATION-REHEARSAL.md`. `c250fa3` adds the missing first-login starter
   grants atomically. Shared HumanObject initialization also exposed the Hero
-  level-zero/start-item path; its fix and gameplay rehearsal are in progress.
+  level-zero/start-item path; `a545a67` fixes initialization and starter grants.
+  Focused race and filtered all-package checks pass. Both graphical clients
+  complete quest 1 for 10 experience and one potion and unlock quest 2.
+  Combat/economy/guild and restart comparisons remain in progress.
