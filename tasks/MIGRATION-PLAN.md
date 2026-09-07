@@ -153,8 +153,10 @@ Continue in this order:
    Continue tracing remaining reachable operator commands before declaring parity:
    Online archive session binding landed as Go `e0fcd7d`, guild storage as
    `6543b0e`, and NPC guild currency as `3005d96`. `7b0f92d` repairs the live
-   GIVEGOLD fixture to preserve account identity. Next: guild logout and
-   membership/rank authority, then relationship/rental global-index boundaries.
+   GIVEGOLD fixture to preserve account identity. Guild logout is `2d36283`;
+   rank definitions/notices and readback use scoped actors in `66e4cb8`.
+   Next: guild creation/invite/leave/kick/member-promotion authority, preserving
+   Legacy registry-vs-live target distinctions, then relationship/rental paths.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
