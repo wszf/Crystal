@@ -174,8 +174,8 @@ Continue in this order:
    Missing-owner-record returns now match Legacy with auth/race coverage.
    Periodic equipment scanning now matches Legacy with auth/race tests.
    Ordinary NPC ambient speech/reload now passes focused/race tests.
-   CALL/automatic NPC-side-effect exclusions pass tests; next fix shared
-   automatic/CALL filenames (separate normal/event pages), then operator audit.
+   CALL/automatic exclusions and shared filenames now pass focused/race tests,
+   preserving normal/event pages through reload. Next: remaining operator audit.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
