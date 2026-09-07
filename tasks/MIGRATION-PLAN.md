@@ -171,9 +171,9 @@ Continue in this order:
    hits only the already-reproduced inspection packet-26 flake (no new skip).
    TOGGLETRANSFORM and player appearance/FastRun lifecycle now have focused
    runtime/session/wire/race tests; broad has only the known inspection flake.
-   GATES, STARTCONQUEST and RESETCONQUEST now have focused authority/transcript/
-   session tests; race and filtered broad tests pass. Reset preserves archer Alive
-   and flag-owner quirks. Next: flag operators and REVIVE (details in Go status).
+   GATES, STARTCONQUEST, RESETCONQUEST and flag commands now have focused
+   authority/transcript/session, race and filtered broad passes. Reset preserves
+   archer Alive/flag quirks; flag RNG/parse order is covered. Next: REVIVE/STARTWAR.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
@@ -182,8 +182,8 @@ Continue in this order:
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward authority and guild storage
    are implemented; retain the remaining global-index continuation gaps in scope
-   before claiming command parity. Continue auditing STARTWAR, conquest/flag
-   operators, REVIVE and surrounding branches; this is not an exhaustive list.
+   before claiming command parity. Continue auditing REVIVE, STARTWAR and
+   surrounding branches; this is not an exhaustive list.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
