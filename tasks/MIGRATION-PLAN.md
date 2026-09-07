@@ -123,8 +123,11 @@ Recent focused commits:
   offline handling and parsing; session/reload/race and filtered full suite pass.
 - `23e807a`: LEVELHERO spawned-Hero admission, XP preservation, vital/level
   packet order and persistence; focused/session/race and filtered full suite pass.
-- DECO: runtime objects, actor duplicate spawn, later-entry and movement visibility;
+- `f8cdee6`: DECO runtime objects, actor duplicate spawn, later-entry/movement visibility;
   focused command/session/codec and static visibility race checks pass.
+- `c70c481`: AWAKENING/REMOVEAWAKENING atomic equipment mutation without NPC payment,
+  source failure/removal quirks, session authority/reload and focused race checks;
+  filtered all-package pass after both commands (same six baseline skips).
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
@@ -135,8 +138,7 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   AWAKENING/REMOVEAWAKENING (equipment
-   mutation without the NPC payment path), archive/backup/load/restore,
+   BACKUPPLAYER/ARCHIVEPLAYER/LOADPLAYER/RESTOREPLAYER,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
    RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
