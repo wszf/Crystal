@@ -160,3 +160,11 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   The Settings/AI audit confirms missing map-respawn rarity profiles affecting
   stats, rewards and display; close this and the recorded reachable-command
   gaps before completing package 5.
+
+- Package 5: Go `526b1bb` implements map-respawn rarity with focused/race checks.
+  Fresh paired gameplay matches level 22, XP 11, gold 930, two potions and quest
+  progress. The clean-restart comparison exposes lost Go guild membership:
+  zero guild headers and the stale exported seed bypass saved guild files.
+  Header/file reload repair and regression checks are in progress. Full suite
+  also exposed an operator-ban test deadline race reproduced on `f5ddcb6`;
+  its terminal-read assertion was corrected without adding a baseline skip.
