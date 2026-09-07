@@ -187,3 +187,8 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   all-package checks pass. CLEARBUFFS and the remaining reachable command and
   Settings/AI audit continue; the live gameplay/restart checkpoint comparison
   is recorded, but the overall plan is not yet complete.
+
+- Package 5: Go `3e0753d` restores CLEARBUFFS and reverse buff expiry/visibility
+  packet order. Focused/race and filtered all-package checks pass. Remaining
+  reachable commands, Settings/AI and checkpoint behavior still require audit;
+  package 5 is open.
