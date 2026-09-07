@@ -143,3 +143,13 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   Focused race and filtered all-package checks pass. Both graphical clients
   complete quest 1 for 10 experience and one potion and unlock quest 2.
   Combat/economy/guild and restart comparisons remain in progress.
+
+- Package 5 command rehearsal: `5e05c7c` / `a7f8ae1` restore GIVEGOLD and LEVEL;
+  `8eae9a6` protects guild creation's consumed items and packet order;
+  `670f4bf` restores CREATEGUILD. Focused session/reload/race checks pass.
+  Ordinary quest checkpoints match; Legacy's authenticated probe, prepared
+  guild/economy sequence, clean restart and Hen combat succeed. Go replay and
+  broad regression checks are underway. The reachable-command audit has also
+  found candidates in operator progression/appearance, monster/group recall,
+  and archive/reload commands; trace and close them within package 5 before
+  declaring the overall remaining migration complete.
