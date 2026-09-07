@@ -106,16 +106,16 @@ Recent focused commits:
 - `76eac73`: group-recall consent, equipment gates, cooldown and teleport delivery.
 - `f8e1acb`: current conquest-file reload with authoritative JSON precedence.
 - `5664f4e`: MAPMOVE/GOTO/RECALL with session persistence and race checks.
+- `1cf0452`: SETTIMER/SETLIGHT with focused session and race checks.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Finish SETTIMER/SETLIGHT validation, then trace remaining reachable commands before declaring parity: KILL, DIE,
+1. Finish CLEARMOB and MOB/RECALLMOB, then trace remaining reachable commands before declaring parity: KILL, DIE,
    CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, MOB/CLEARMOB/RECALLMOB, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
-   RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE, DELETESKILL and
-   SETTIMER/SETLIGHT. This discovery list is not an exhaustive absence claim.
+   RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE, DELETESKILL and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
