@@ -174,3 +174,10 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   The same bridge also drops auction/global GameShop state and unused item-ID
   reservations in legacy-only mode. Extend its runtime snapshot and prevent
   empty current auction lists from resurrecting the old exported seed.
+
+- Package 5: Go `76a89d5`/`95ebe2c` preserve current auction/GameShop state and
+  item reservations across Legacy checkpoints; focused/race and filtered
+  all-package tests pass. The fresh live guild retry now survives clean
+  shutdown/restart/relogin with the matching balances/items/progress and 50
+  guild gold. GIVECREDIT/GIVEPEARLS and the remaining reachable-command/Settings
+  audit are still in progress; package 5 remains open.
