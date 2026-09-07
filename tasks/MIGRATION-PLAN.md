@@ -163,9 +163,7 @@ Continue in this order:
    Ordinary NPC ambient speech/reload now passes focused/race tests.
    CALL/automatic exclusions and shared filenames now pass focused/race tests,
    preserving normal/event pages through reload; filtered broad tests pass.
-   Named INFO passes focused/race and filtered broad tests, including archived readback.
-   Ground cleanup/rollback and creature movement order pass focused/race tests.
-   Initial allocation already stamps cell order (earlier gap claim corrected).
+   Cell cleanup/re-entry tests pass; initial allocation already stamps order.
    Facing INFO now follows first-occupant ordering across live object families;
    delayed spell insertion and exact formatted readback have focused/race coverage.
    CLEARQUESTS/SETQUEST now preserve live owner/receiver identity with focused
@@ -174,7 +172,8 @@ Continue in this order:
    TOGGLETRANSFORM and player appearance/FastRun lifecycle now have focused
    runtime/session/wire/race tests; broad has only the known inspection flake.
    Next: conquest operator authority/transcripts
-   (STARTCONQUEST, RESETCONQUEST, GATES, flags) and REVIVE.
+   (STARTCONQUEST, RESETCONQUEST, flags) and REVIVE. GATES now has focused
+   authority/order/blocker/session coverage; validation is recorded in Go status.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
