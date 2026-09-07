@@ -113,16 +113,17 @@ Recent focused commits:
 - `c80a2ab`: custom spell metadata across runtime, packets, books and account admission.
 - `38323f0`: source enum parsing independent of editable spell display names.
 - `fdb60cf`: all 109 current spell defaults match FillMagicInfoList.
+- `85bd224`: GIVESKILL/DELETESKILL with session persistence and packet quirks.
+- `a387a97`: NPC custom skill admission and canonical enum names.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Finish GIVESKILL/DELETESKILL validation, then correct missing ordinary
-   projectile skill training and NPC custom spell admission; continue to trace remaining reachable commands before declaring parity: KILL, DIE,
-   CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, DECO, AWAKENING, archive/backup/load/restore,
+1. Correct missing ordinary projectile skill training; continue to trace remaining reachable commands before declaring parity: KILL, DIE,
+   CHANGEGENDER/CHANGECLASS, LEVELHERO, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
-   RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE, DELETESKILL and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
+   RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
