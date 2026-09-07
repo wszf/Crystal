@@ -99,6 +99,8 @@ A fresh Go guild retry survives clean restart/relogin with 50 guild gold; the
 earlier failure and successful retry remain separately recorded.
 
 Recent focused commits:
+- `762c36f`: CLEARIPBLOCKS with GM admission, retained connection/creation history,
+  production-session/race checks and the same filtered full-suite pass.
 - `3e0753d`: public CLEARBUFFS and reverse buff expiry/visibility packet order.
 - `06ce788`: rarity colour restoration after tame expiry.
 - `199a60d`: unbound Hero registry, inventory and reserved IDs across checkpoints.
@@ -145,7 +147,9 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   RELOADNPCS, CLEARIPBLOCKS and TRIGGER. NPC reload must save/drain goods,
+   RELOADNPCS and TRIGGER. CLEARIPBLOCKS now clears shared IP blocks while
+   retaining live admission counts and creation-abuse history (see Go status).
+   NPC reload must save/drain goods,
    clear robot schedules and reload registered scripts/goods without changing
    NPC identities (see Go status for the traced source boundary). Archive registry
    behavior is implemented; retain the online archive continuation gap in scope
