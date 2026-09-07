@@ -151,13 +151,18 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   Online archive continuation is next. TRIGGER now queues target-session
+   Online archive session binding landed as Go `e0fcd7d`, guild storage as
+   `6543b0e`, and NPC guild currency as `3005d96`. `7b0f92d` repairs the live
+   GIVEGOLD fixture to preserve account identity. Next: guild logout and
+   membership/rank authority, then relationship/rental global-index boundaries.
+   TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
    ambient-speech and called-script context follow-ups documented in Go status
    (ordinary root quest endpoints are implemented). CLEARIPBLOCKS
-   preserves live admission counts and creation-abuse history. Archive registry
-   behavior is implemented; retain the online archive continuation gap in scope
+   preserves live admission counts and creation-abuse history. Archive registry,
+   connected item/storage/reward authority and guild storage
+   are implemented; retain the remaining global-index continuation gaps in scope
    before claiming command parity. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
    RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
