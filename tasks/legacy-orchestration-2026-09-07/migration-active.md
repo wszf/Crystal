@@ -1,6 +1,6 @@
 # Crystal migration active index
 
-Last verified: 2026-09-04 (P9/P10 finite closure registered; `NPC-P7-ACTION-SOCIAL-001` Active)
+Last verified: 2026-09-05 (P9/P10 finite closure registered; `NPC-P7-ACTION-WORLD-001` Active)
 
 This is the concise execution router for the persistent migration Goal. The Go `docs/migration-matrix.md` remains the detailed status/evidence authority; do not copy its narratives here or read the full matrix during normal recovery.
 Keep this file at or below 300 lines and 32 KiB.
@@ -43,21 +43,24 @@ Keep this file at or below 300 lines and 32 KiB.
 
 ## Active batch
 
-- Leaf ID: `NPC-P7-ACTION-SOCIAL-001`
-- Status: `Active`; the finite 12-action social slice is now dependency-ready because
-  Control Flow and the registered `GUILD-P9-NPC-SCRIPT-001`/`MAIL-P10-NPC-SCRIPT-001`
-  inputs are available.
-- Workstream: `WS-P7-SOCIAL-GO-IMPLEMENT-001`; Go-only parser/runtime, focused production
-  entry tests, and online/offline persistence/recipient-order evidence. No C# writes.
-- Owned files: `internal/worlddata/npcscript.go` plus its focused parser test; bounded
-  `cmd/crystal-server/default_npc.go`/new social helper and production-session tests.
-- Go matrix anchors to read: P7 `NPC-P7-ACTION-SOCIAL-001`, P9/P10 cross-phase input entries and
-  Legacy `NPCSegment.ParseAct`/player `Act` evidence.
-- Outcome: implement the finite 12-action social slice in Go and verify parser/runtime,
-  persistence, recipients and production packet order at the leaf gate.
-- Acceptance: `GIVEGUILDGOLD`/`TAKEGUILDGOLD`, six name-list actions, and
-  `COMPOSEMAIL`/`ADDMAILGOLD`/`ADDMAILITEM`/`SENDMAIL`; exact parser failure boundaries,
-  guild/name-list/mail state, recipient and packet ordering, persistence, focused repeated/race.
+- Leaf ID: `NPC-P7-ACTION-WORLD-001`
+- Status: `Active`; the finite 11-action world slice is dependency-ready because
+  Control Flow, `MONSTER-P5-BASE-FAMILY-001`, `ITEM-P6-GRID-MUTATION-001`, and the
+  registered `GUILD-P9-NPC-SCRIPT-001` input are complete/available.
+- Workstream: `WS-P7-WORLD-ACTIONS-GO-IMPLEMENT-001`; Go-only parser/runtime,
+  focused production-entry tests, and world-state/recipient/persistence evidence. No C# writes.
+- Owned files: `internal/worlddata/npcscript.go`/world-action parser tests; `internal/protocol/{packet,object_level_effects*}.go`;
+  `cmd/crystal-server/{default_npc,main,world,ordinary_pets,player_spell_buffs,monster_dynamic_constructor_test,npc_script_actions_world*,npc_script_world_*,npc_script_drop*}.go`;
+  `internal/legacyworld/{drops,npc_drops_test}.go`; bounded direct runtime/recipient/persistence adapters only.
+- Go matrix anchors to read: P7 `NPC-P7-ACTION-WORLD-001`, ledger H, and the registered
+  `GUILD-P9-NPC-SCRIPT-001` input; Legacy `NPCSegment.ParseAct`/player `Act` and
+  MonsterObject/Envir authorities are read-only comparison sources.
+- Outcome: implement the finite 11-action world slice in Go and verify parser/runtime,
+  state mutation, recipient/order, persistence and focused repeated/race behavior.
+- Acceptance: `GIVEPET`/`CLEARPETS`/`REMOVEPET`, `MONGEN`/`MONCLEAR`,
+  `GIVEBUFF`/`REMOVEBUFF`, `ADDTOGUILD`/`REMOVEFROMGUILD`,
+  `REFRESHEFFECTS`, and `DROP`; exact parser failure boundaries, ordinary/default
+  production entry behavior, state/persistence/recipient order, focused repeated/race.
 - Protected blocker: `PERSIST-P12-RESTART-EQUIV-001` remains blocked/shared-owner; do not
   invent a recovery owner or synthesize manifest/generation/restore/rollback/crash semantics.
 ### Protected Go ownership
@@ -88,8 +91,10 @@ Keep this file at or below 300 lines and 32 KiB.
 - [x] Complete `WS-PERSIST-P12-DERIVED-RUNTIME-ALIAS-001` with derived sidecar collision
   rejection when RespawnStatePath is empty; do not change fallback or recovery semantics.
 - [ ] Resume `PERSIST-P12-RESTART-EQUIV-001` only after a finite Legacy-backed shared owner is registered.
-- [ ] Implement and close `NPC-P7-ACTION-SOCIAL-001` through its Go parser/runtime and
+- [x] Implement and close `NPC-P7-ACTION-SOCIAL-001` through its Go parser/runtime and
   production-entry persistence/recipient-order gates.
+- [ ] Implement and close `NPC-P7-ACTION-WORLD-001` through its Go parser/runtime and
+  production-entry state/recipient/persistence/race gates.
 - [x] Complete SaveDelay INI through MirDB catalog serializers, counters, quest `.txt`, export compose/merge and Server.MirDB write.
 - [x] Complete `WS-PERSIST-P12-NEEDSAVE-TRANSIENT-001`: transient JSON exclusion and Legacy-explicit dirty boundaries.
 - [x] Complete `WS-PERSIST-P12-SAVEDELAY-MIRDB-001`: CWD-relative Server.MirDB on SaveDelay; remaining restart-equivalence stays Open.
@@ -114,8 +119,8 @@ owns exact routing evidence.
 | `NPC-P7-SPEECH-INPUT-001` | Complete | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-WIRE-STATIC-001` + `ITEM-P6-WIRE-CATALOG-001` | ledger D | placeholders/info order/sticky input |
 | `NPC-P7-CONTROL-FLOW-001` | Complete | `NPC-P7-SCRIPT-LOAD-001` + `NPC-P7-PAGE-GRAMMAR-001` | ledger E | 7 keywords/order/state/delay/chain |
 | `NPC-P7-ACTION-STATE-001` | Complete | Control Flow + `CFG-P1-CONTRACT-001` + `EQUIP-P6-CORE-001` | committed Go `83a37867942edc42d780edacb1083db4bfebd13c` | 14-key table/restart/RNG/UI |
-| `NPC-P7-ACTION-SOCIAL-001` | Active | Control Flow + registered `GUILD-P9-NPC-SCRIPT-001` + `MAIL-P10-NPC-SCRIPT-001` | Go parser/runtime and production-session tests | 12-key table/persistence/recipients |
-| `NPC-P7-ACTION-WORLD-001` | Ready | Control Flow + `MONSTER-P5-BASE-FAMILY-001` + `ITEM-P6-GRID-MUTATION-001` + `GUILD-P9-NPC-SCRIPT-001` | ledger H | 11-key recipient/persistence/race matrix |
+| `NPC-P7-ACTION-SOCIAL-001` | Complete | Control Flow + registered `GUILD-P9-NPC-SCRIPT-001` + `MAIL-P10-NPC-SCRIPT-001` | Go parser/runtime and production-session tests | 12-key table/persistence/recipients |
+| `NPC-P7-ACTION-WORLD-001` | Active | Control Flow + `MONSTER-P5-BASE-FAMILY-001` + `ITEM-P6-GRID-MUTATION-001` + `GUILD-P9-NPC-SCRIPT-001` | ledger H | 11-key recipient/persistence/race matrix |
 | `NPC-P7-COND-LOCAL-001` | Complete | `NPC-P7-PAGE-GRAMMAR-001` + `NPC-P7-ACTION-STATE-001` | committed Go `424978eabe5de76d84979f3fe108bf7968173aa0` | exact 7-key + shared malformed/operator quirks |
 | `NPC-P7-COND-WORLD-001` | Ready | `NPC-P7-COND-LOCAL-001` + `GUILD-P9-NPC-SCRIPT-001` + `CONQUEST-P9-NPC-ECONOMY-001` | ledger J | exact 24-key snapshot/no-side-effect/race matrix |
 | `NPC-P7-DEFAULT-CALLBACK-001` | Ready | `NPC-P7-CONTROL-FLOW-001` + `NPC-P7-SPEECH-INPUT-001` + all three Action and both Condition IDs in rows above | ledger K | all 12 production callbacks |
@@ -145,7 +150,7 @@ Catalog is the sole Active unfinished child.
 | `EQUIP-P6-CORE-001` | Complete | P8/P11 feature owners (Complete) | equipment/session | slots/sockets/stats/order/race |
 | `ITEM-P6-USE-ADMISSION-001` | Complete | P1 LOC + P5 stats | committed Go `f6e9f2ba69d3a1cb0e7d37536e726c3e2a666cd2` | all gates and localized order |
 | `ITEM-P6-USE-BASIC-001` | Complete | — | existing committed evidence | potion/delete success paths |
-| `ITEM-P6-USE-CATALOG-001` | Active | P4/P5/P7/P9/P10; Player Potion Shape 4/5 dependency-ready | item use/Buff/session; `WS-ITEM-P6-USE-POTION-RATE-004-005-001` | exact rate Stat/duration/consumer/order |
+| `ITEM-P6-USE-CATALOG-001` | Ready | P4/P5/P7/P9/P10; Player Potion Shape 4/5 dependency-ready | item use/Buff/session; `WS-ITEM-P6-USE-POTION-RATE-004-005-001` | exact rate Stat/duration/consumer/order |
 | `ITEM-P6-SHOUT-ARMING-001` | Complete | — | committed Go `1d399992a690614a122cc46b3e64b4cda8272c2f` | Hint/UseItem/state/repeated/race |
 | `DROP-P6-GROUND-LIFECYCLE-001` | Complete | P5/P11 producers | ground/drop/death/session | actual death ground drops |
 | `ITEM-P6-EXPIRY-001` | Complete | P10/P12 consumers | committed Go `e7e3b4c` | strict times/no-refresh/restart |
@@ -277,10 +282,8 @@ broad unnamed scope.
   checkpoint/re-export and restart. P3 retains current-process first-match client lookup/mutation;
   P12's counter-aware writer/bridge preserves physical order without normalization or rejection.
   The observed Legacy oddity is recorded for post-migration review, not treated as a blocker.
-- `NPC-P7-ACCESS-GATE-001` is Complete and unblocks
-  `STORAGE-P2-NPC-GATE-001`; P2 retains storage response/lifetime ownership.
-- `NPC-P7-SCRIPT-CLOSURE-001` is Complete as a discovery input: accepted
-  `DISC-P7-CLOSURE` partitions it into the named script/action/condition leaves.
+- `NPC-P7-ACCESS-GATE-001` is Complete and unblocks `STORAGE-P2-NPC-GATE-001`; P2 retains storage response/lifetime ownership.
+- `NPC-P7-SCRIPT-CLOSURE-001` is Complete as a discovery input: accepted `DISC-P7-CLOSURE` partitions it into the named script/action/condition leaves.
 - `PERSIST-P12-RESTART-EQUIV-001` (open shared-owner input to
   `DISC-P12-CLOSURE`, dependent on P3-P11 authorities): preserve periodic save,
   atomic replacement, backup, global re-export, and complete multi-store
@@ -290,7 +293,6 @@ broad unnamed scope.
 - `CFG-P1-MONSTER-AI-RUNTIME-001` (`Ready`, dependent on P5 lifecycle):
   preserve `MonsterProcessWhenAlone`, recall enabled/range/cooldown defaults,
   INI write-back and their inherited MonsterObject runtime consumers.
-
 ## Selection protocol
 1. Verify this index and handoff against each repository separately.
 2. Resume the Primary `Active` leaf with disjoint bounded workstreams; do not inventory all remaining phases up front.
