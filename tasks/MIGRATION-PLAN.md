@@ -56,12 +56,9 @@ historical only. C# remains read-only. Implementation belongs in Crystal.GoServe
 
 ## Remaining migration beyond individual features
 
-Data compatibility and session/item authority precede new reward mutations;
-shared buff/spawn behavior precedes NPC and monster consumers. After functional
-parity, validate long-running timers, concurrent saves, crash/restart recovery,
-operator configuration/logging, and realistic population/load before cutover.
-Keep findings in this short plan; add the next concrete package as evidence
-arrives, rather than declaring an exhaustive feature percentage.
+Data/session authority and shared buff/spawn behavior precede reward mutations.
+After functional parity, validate timers, concurrent saves, crash/restart recovery,
+operator configuration/logging and realistic population/load before cutover.
 
 ## Non-goals and blockers
 
@@ -174,8 +171,10 @@ Continue in this order:
    CLEARQUESTS/SETQUEST now preserve live owner/receiver identity with focused
    archive, timer and session checkpoint tests; race passes. Broad validation
    hits only the already-reproduced inspection packet-26 flake (no new skip).
-   Next: shared transform
-   appearance/FastRun projection and TOGGLETRANSFORM, then conquest operators.
+   TOGGLETRANSFORM and player appearance/FastRun lifecycle now have focused
+   runtime/session/wire/race tests; broad has only the known inspection flake.
+   Next: conquest operator authority/transcripts
+   (STARTCONQUEST, RESETCONQUEST, GATES, flags) and REVIVE.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
@@ -184,9 +183,8 @@ Continue in this order:
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward authority and guild storage
    are implemented; retain the remaining global-index continuation gaps in scope
-   before claiming command parity. Audit later switch branches
-   as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
-   RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
+   before claiming command parity. Continue auditing STARTWAR, conquest/flag
+   operators, REVIVE and surrounding branches; this is not an exhaustive list.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
