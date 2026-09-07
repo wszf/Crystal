@@ -65,8 +65,8 @@ operator configuration/logging and realistic population/load before cutover.
 No C# implementation edits, global git configuration changes, new orchestration
 framework, speculative server rewrite, or production cutover in these packages.
 Retain existing tests even when their historical names mention old milestones.
-The isolated 117/0 development snapshot has validated client/gameplay/restart
-traces; production parity and load/cutover acceptance remain unproven. Unsupported legacy database versions must remain explicit errors.
+The isolated 117/0 snapshot validates client/gameplay/restart traces; production
+parity and load/cutover remain unproven. Unsupported database versions must error.
 
 ## Execution and current acceptance
 
@@ -175,7 +175,8 @@ Continue in this order:
    authority/transcript/session, race and filtered broad passes. Reset preserves
    archer Alive/flag quirks; flag RNG/parse order is covered. REVIVE now passes
    focused/session/race and filtered broad checks, including archive isolation
-   and ordered object replay. Next: free STARTWAR and remaining operator audit.
+   and ordered object replay. Free STARTWAR now passes focused/session/race and
+   filtered broad checks. Next: FIND/MOVE text, missing-map and group-gate gaps.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
@@ -184,8 +185,7 @@ Continue in this order:
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward authority and guild storage
    are implemented; retain the remaining global-index continuation gaps in scope
-   before claiming command parity. Continue STARTWAR and surrounding branches;
-   this is not an exhaustive list.
+   before claiming command parity. Continue the operator audit; the list is open.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
