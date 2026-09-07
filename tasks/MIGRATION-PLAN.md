@@ -115,11 +115,15 @@ Recent focused commits:
 - `fdb60cf`: all 109 current spell defaults match FillMagicInfoList.
 - `85bd224`: GIVESKILL/DELETESKILL with session persistence and packet quirks.
 - `a387a97`: NPC custom skill admission and canonical enum names.
+- `0e8465c`: successful projectile-hit skill training, packet/XP persistence
+  checks and custom cast thresholds; focused race and filtered full suite pass.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Correct missing ordinary projectile skill training; continue to trace remaining reachable commands before declaring parity: KILL, DIE,
+1. Implement confirmed KILL/DIE gaps using direct death lifecycle (including
+   revival/drop behavior); Go status records the permission and broadcast audit.
+   Continue tracing remaining reachable commands before declaring parity:
    CHANGEGENDER/CHANGECLASS, LEVELHERO, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
