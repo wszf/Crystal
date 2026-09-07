@@ -174,7 +174,8 @@ Continue in this order:
    (auth, race and focused server tests pass). World rental returns now retain
    session recipients and per-player protection; rental/item-expiry race passes.
    Missing-owner-record returns now match Legacy with auth/race coverage.
-   Next: periodic equipment-scan contract, then retained NPC/operator audit.
+   Periodic equipment scanning now matches Legacy with auth/race tests.
+   Next: retained NPC speech/registration effects and operator audit.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
