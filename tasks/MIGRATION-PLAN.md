@@ -175,12 +175,13 @@ Continue in this order:
    session recipients and per-player protection; rental/item-expiry race passes.
    Missing-owner-record returns now match Legacy with auth/race coverage.
    Periodic equipment scanning now matches Legacy with auth/race tests.
-   Next: retained NPC speech/registration effects and operator audit.
+   Ordinary NPC ambient speech/reload now passes focused/race tests.
+   Next: verify CALL/automatic side-effect exclusions, then operator audit.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
-   goods and reloads scripts without changing NPC identities; retain the shared
-   ambient-speech and called-script context follow-ups documented in Go status
-   (root quest endpoints are implemented). CLEARIPBLOCKS
+   goods and reloads scripts without changing NPC identities; ordinary root quest
+   endpoints and ambient speech are implemented. CALL uses LoadedObjectID zero;
+   its guarded NPC side effects are being verified in Go status. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward authority and guild storage
    are implemented; retain the remaining global-index continuation gaps in scope
