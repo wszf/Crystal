@@ -99,6 +99,10 @@ A fresh Go guild retry survives clean restart/relogin with 50 guild gold; the
 earlier failure and successful retry remain separately recorded.
 
 Recent focused commits:
+- `6e8c5d5` / `0fdb8a2`: ordinary NPC quest rebinding and TRIGGER target-session
+  callbacks; focused/race and the same filtered all-package checks pass.
+- `410703e` / `9c1c19d`: NPC source provenance and core RELOADNPCS goods/script
+  lifecycle, open dialogue/queued-call refresh, robot clock and filtered tests.
 - `762c36f`: CLEARIPBLOCKS with GM admission, retained connection/creation history,
   production-session/race checks and the same filtered full-suite pass.
 - `3e0753d`: public CLEARBUFFS and reverse buff expiry/visibility packet order.
@@ -147,11 +151,12 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   RELOADNPCS and TRIGGER. CLEARIPBLOCKS now clears shared IP blocks while
-   retaining live admission counts and creation-abuse history (see Go status).
-   NPC reload must save/drain goods,
-   clear robot schedules and reload registered scripts/goods without changing
-   NPC identities (see Go status for the traced source boundary). Archive registry
+   Online archive continuation is next. TRIGGER now queues target-session
+   default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
+   goods and reloads scripts without changing NPC identities; retain the shared
+   ambient-speech and called-script context follow-ups documented in Go status
+   (ordinary root quest endpoints are implemented). CLEARIPBLOCKS
+   preserves live admission counts and creation-abuse history. Archive registry
    behavior is implemented; retain the online archive continuation gap in scope
    before claiming command parity. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
