@@ -106,3 +106,12 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   Export and server binding succeed; the initial client handshake times out
   behind a world tick doing repeated full-population target scans. Fix and
   re-run the rehearsal. `04a7cc6` corrects five baseline test fixtures.
+
+- Package 5 follow-up: `b8ad867` / `349778e` remove repeated target scans/sorts;
+  `15e11da` / `8841c77` wire and apply inherited MonsterProcessWhenAlone;
+  `86a58f0` indexes monster cells during ticks and centralizes index updates.
+  Focused AI/query tests and race checks pass. `f5ddcb6` fixes Hallucination's
+  test synchronization (100 repetitions pass). Two more intermittent tests
+  (PoisonCloud transcript and map-hazard restart HP) reproduce on unchanged
+  `f5ddcb6`; details remain in Go status. Full-data session setup exposed a nil
+  synthetic-map assumption, now under regression testing. Package 5 remains open.
