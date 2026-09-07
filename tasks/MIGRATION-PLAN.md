@@ -181,3 +181,9 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   shutdown/restart/relogin with the matching balances/items/progress and 50
   guild gold. GIVECREDIT/GIVEPEARLS and the remaining reachable-command/Settings
   audit are still in progress; package 5 remains open.
+
+- Package 5: Go `3c12584` restores credit/pearl commands; `dbb095f` restores
+  flag commands and their session/visibility behavior. Focused/race and filtered
+  all-package checks pass. CLEARBUFFS and the remaining reachable command and
+  Settings/AI audit continue; the live gameplay/restart checkpoint comparison
+  is recorded, but the overall plan is not yet complete.
