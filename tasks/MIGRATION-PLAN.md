@@ -133,6 +133,8 @@ Recent focused commits:
 - `4751b8a`: archive command registry/session/reload and race checks pass; filtered
   full suite passes with the same six skips. Online archived characters still
   need detached authority for later auth-backed mutations (see Go status).
+- `98d4b56`: RELOADDROPS live monster/harvest and special tables, source file
+  creation and partial-IO behavior; session/race and filtered full suite pass.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
@@ -143,7 +145,9 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Archive command registry
+   RELOADNPCS, CLEARIPBLOCKS and TRIGGER. NPC reload must save/drain goods,
+   clear robot schedules and reload registered scripts/goods without changing
+   NPC identities (see Go status for the traced source boundary). Archive registry
    behavior is implemented; retain the online archive continuation gap in scope
    before claiming command parity. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
