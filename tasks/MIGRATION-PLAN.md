@@ -132,3 +132,11 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   probe respect admission/movement rules. Filtered all-package and focused race
   checks pass. Graphical client still crashes during game entry; isolated Legacy
   comparison is running. Quest/economy/combat and client acceptance remain open.
+
+- Package 5 Legacy comparison found incorrect packet ordinals across 279 Go
+  constants. `e8ccef3` removes synthetic insertion shifts and adds a literal
+  Shared/Enums.cs fixture. The corrected client now enters BichonProvince on
+  both servers; recorded screenshots and dataset hashes are in Go
+  `docs/MIGRATION-REHEARSAL.md`. `c250fa3` adds the missing first-login starter
+  grants atomically. Shared HumanObject initialization also exposed the Hero
+  level-zero/start-item path; its fix and gameplay rehearsal are in progress.
