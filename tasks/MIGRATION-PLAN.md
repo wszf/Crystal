@@ -109,12 +109,15 @@ Recent focused commits:
 - `1cf0452`: SETTIMER/SETLIGHT with focused session and race checks.
 - `e34ef84`: CLEARMOB with map-cell ordering and shared death lifecycle.
 - `24b05cc`: MOB/RECALLMOB, GM-made drops and pet level colours.
-- `d122d10`: complete MagicInfo records retained through world export/JSON.
+- `d122d10` / `d571f72`: MagicInfo export/JSON and Legacy database saves.
+- `c80a2ab`: custom spell metadata across runtime, packets, books and account admission.
+- `38323f0`: source enum parsing independent of editable spell display names.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Wire exported custom spell definitions into runtime, then trace remaining reachable commands before declaring parity: KILL, DIE,
+1. Runtime custom spell metadata is wired and tested. Correct obsolete pre-71
+   default overrides and missing ordinary projectile skill training, then trace remaining reachable commands before declaring parity: KILL, DIE,
    CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
