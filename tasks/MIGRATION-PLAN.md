@@ -133,8 +133,6 @@ Recent focused commits:
   need detached authority for later auth-backed mutations (see Go status).
 - `98d4b56`: RELOADDROPS live monster/harvest and special tables, source file
   creation and partial-IO behavior; session/race and filtered full suite pass.
-- Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
-  GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
 1. KILL/DIE now use direct death lifecycle with revival/drop authority,
@@ -176,16 +174,17 @@ Continue in this order:
    archer Alive/flag quirks; flag RNG/parse order is covered. REVIVE now passes
    focused/session/race and filtered broad checks, including archive isolation
    and ordered object replay. Free STARTWAR now passes focused/session/race and
-   filtered broad checks. Next: FIND/MOVE text, missing-map and group-gate gaps.
-   TRIGGER now queues target-session
-   default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
+   filtered broad checks. FIND/MOVE text, missing-map and group-gate fixes pass
+   focused/session/race and filtered broad tests. Next: LEAVEGUILD failure/buff order.
+   TRIGGER queues target-session default callbacks with NPCUpdate ordering.
+   Core RELOADNPCS saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
    endpoints and ambient speech are implemented. CALL uses LoadedObjectID zero;
    its guarded NPC side effects are verified in Go status. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
-   connected item/storage/reward authority and guild storage
-   are implemented; retain the remaining global-index continuation gaps in scope
-   before claiming command parity. Continue the operator audit; the list is open.
+   connected item/storage/reward and guild-storage authority are implemented;
+   retain remaining global-index continuation gaps in scope
+   before claiming command parity. The remaining operator audit stays open.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
