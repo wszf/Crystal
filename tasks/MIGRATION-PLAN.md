@@ -96,3 +96,10 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   landed as Go `a5526c8` through current cross-grid item authority; focused session tests cover
   player/Hero mutations and save/reload. Final CombineItem and cross-grid race
   checks pass. Full suite has six known baseline failures and no new failures.
+
+- Package 4 data roots landed as Go `8bf588b`; Robot/monster lifecycle execution
+  landed as Go `89daa2d` (focused and race checks pass). Full suite
+  reports only six known baseline failures. No automatic-overload action is
+  deliberately unsupported; recursion is bounded and logged at depth 32.
+- Package 5 has a 117/0 dataset snapshot. Its export exposed a V100 map stride
+  bug (Go 27 bytes vs Legacy 26); correct this before rehearsal continues.
