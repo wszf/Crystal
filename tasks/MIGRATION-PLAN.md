@@ -169,7 +169,8 @@ Continue in this order:
    archive/item/gold/checkpoint tests pass. Marriage/consensual divorce now
    scope both connected actors with pair/checkpoint tests. Forced divorce now
    preserves live owner, registry spouse and recipient authority; focused tests
-   pass. Next: mentorship acceptance/XP settlement and rental.
+   pass. Mentorship acceptance now scopes both actors with isolation tests.
+   Next: logout XP, mentorship settlement and rental.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
