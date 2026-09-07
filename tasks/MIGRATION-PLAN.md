@@ -172,8 +172,8 @@ Continue in this order:
    pass. Mentorship acceptance now scopes both actors with isolation tests.
    Logout now preserves live actor/recipient state and registry partner XP.
    Acceptance preserves existing XP; settlement auth arithmetic now matches Legacy.
-   Settlement actor/recipient integration and focused/race tests now pass.
-   Next: rental return authority, item-protection keys and registry/live delivery.
+   Settlement actor/recipient integration passes focused/race and filtered full tests;
+   next are rental return authority, item-protection keys and registry/live delivery.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
@@ -189,7 +189,6 @@ Continue in this order:
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
 3. Complete remaining integration acceptance and report its actual limits.
-
 Regression policy: the latest all-package checks pass with only six reproduced
 baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
 recovery, Hiding, NPC delayed GOTO, cross-map LoverRecall). Their unchanged-baseline
