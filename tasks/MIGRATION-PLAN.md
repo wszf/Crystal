@@ -170,7 +170,8 @@ Continue in this order:
    scope both connected actors with pair/checkpoint tests. Forced divorce now
    preserves live owner, registry spouse and recipient authority; focused tests
    pass. Mentorship acceptance now scopes both actors with isolation tests.
-   Next: logout XP, mentorship settlement and rental.
+   Logout now preserves live actor/recipient state and registry partner XP.
+   Next: mentorship settlement/retained XP and rental (see Go status).
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
