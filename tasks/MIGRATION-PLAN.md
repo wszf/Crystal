@@ -173,7 +173,8 @@ Continue in this order:
    Logout now preserves live actor/recipient state and registry partner XP.
    Acceptance preserves existing XP; settlement auth arithmetic now matches Legacy.
    Settlement actor/recipient integration passes focused/race and filtered full tests;
-   next are rental return authority, item-protection keys and registry/live delivery.
+   auth rental protection/acks/mail transfers now detach with the live character
+   (auth, race and focused server tests pass). Next: world rental protection/delivery.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
