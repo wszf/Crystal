@@ -103,25 +103,23 @@ Recent focused commits:
 - `06ce788`: rarity colour restoration after tame expiry.
 - `199a60d`: unbound Hero registry, inventory and reserved IDs across checkpoints.
 - `c62275e`: ADJUSTPKPOINT assignment and target-session persistence.
+- `76eac73`: group-recall consent, equipment gates, cooldown and teleport delivery.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Finish group-recall command validation (ENABLEGROUPRECALL, GROUPRECALL,
-   RECALLMEMBER), including consent, Recall equipment set, shared cooldown,
-   target teleport delivery and persisted location.
-2. Close the confirmed conquest restart gap: startup imports stale exported
+1. Close the confirmed conquest restart gap: startup imports stale exported
    conquest state while runtime writes current `Conquests/*.mcd` files. Retain
    authoritative JSON precedence and test ownership/balances/structures on reload.
-3. Trace remaining reachable commands before declaring parity: KILL, DIE,
+2. Trace remaining reachable commands before declaring parity: KILL, DIE,
    CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, MAPMOVE/GOTO/RECALL,
    MOB/CLEARMOB/RECALLMOB, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well; this discovery list is not an exhaustive absence claim.
-4. Finish packet, Settings, spell and AI behavior audits, including remaining
+3. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
-5. Complete remaining integration acceptance and report its actual limits.
+4. Complete remaining integration acceptance and report its actual limits.
 
 Regression policy: the latest all-package checks pass with only six reproduced
 baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
