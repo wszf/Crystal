@@ -168,3 +168,9 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   Header/file reload repair and regression checks are in progress. Full suite
   also exposed an operator-ban test deadline race reproduced on `f5ddcb6`;
   its terminal-read assertion was corrected without adding a baseline skip.
+
+- Package 5: Go `161518b` fixes guild checkpoint headers and current-file reload;
+  focused/race and the filtered all-package run pass. Live retry is underway.
+  The same bridge also drops auction/global GameShop state and unused item-ID
+  reservations in legacy-only mode. Extend its runtime snapshot and prevent
+  empty current auction lists from resurrecting the old exported seed.
