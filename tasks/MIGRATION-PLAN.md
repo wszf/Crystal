@@ -153,3 +153,10 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   found candidates in operator progression/appearance, monster/group recall,
   and archive/reload commands; trace and close them within package 5 before
   declaring the overall remaining migration complete.
+
+- Package 5: Go `efda36c` fixes fresh NPC shop identity and atomic gold purchases;
+  `d3e1f0d` restores monster level-based experience reduction and global rate.
+  Focused/race and filtered all-package checks pass. Paired replay remains open.
+  The Settings/AI audit confirms missing map-respawn rarity profiles affecting
+  stats, rewards and display; close this and the recorded reachable-command
+  gaps before completing package 5.
