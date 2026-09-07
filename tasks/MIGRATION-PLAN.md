@@ -174,7 +174,9 @@ Continue in this order:
    Acceptance preserves existing XP; settlement auth arithmetic now matches Legacy.
    Settlement actor/recipient integration passes focused/race and filtered full tests;
    auth rental protection/acks/mail transfers now detach with the live character
-   (auth, race and focused server tests pass). Next: world rental protection/delivery.
+   (auth, race and focused server tests pass). World rental returns now retain
+   session recipients and per-player protection; rental/item-expiry race passes.
+   Next: missing-owner-record/equipment-scan rental contracts, then NPC/operator audit.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
