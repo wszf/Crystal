@@ -192,3 +192,8 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   packet order. Focused/race and filtered all-package checks pass. Remaining
   reachable commands, Settings/AI and checkpoint behavior still require audit;
   package 5 is open.
+
+- Package 5: Go `06ce788` restores rarity colour after tame expiry. Hero
+  checkpoints now retain unbound registry entries and reserved IDs across
+  reloads. Focused/race and filtered all-package checks pass. ADJUSTPKPOINT
+  and the remaining command/Settings/AI audit continue; package 5 remains open.
