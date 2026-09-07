@@ -165,18 +165,16 @@ Continue in this order:
    guild membership; inspection follows Legacy registry resolution even for
    online objects (removed target gives no response, restore supplies the row).
    Conquest/inspection race and filtered full suite pass (same six skips).
-   Wedding-ring creation/replacement now use connected owner handles; focused
-   archive/item/gold/checkpoint tests pass. Marriage/consensual divorce now
-   scope both connected actors with pair/checkpoint tests. Forced divorce now
-   preserves live owner, registry spouse and recipient authority; focused tests
-   pass. Mentorship acceptance now scopes both actors with isolation tests.
+   Wedding rings, marriage/divorce and mentorship acceptance now retain connected
+   actor/registry partner/recipient authority with focused checkpoint tests.
    Logout now preserves live actor/recipient state and registry partner XP.
    Acceptance preserves existing XP; settlement auth arithmetic now matches Legacy.
    Settlement actor/recipient integration passes focused/race and filtered full tests;
    auth rental protection/acks/mail transfers now detach with the live character
    (auth, race and focused server tests pass). World rental returns now retain
    session recipients and per-player protection; rental/item-expiry race passes.
-   Next: missing-owner-record/equipment-scan rental contracts, then NPC/operator audit.
+   Missing-owner-record returns now match Legacy with auth/race coverage.
+   Next: periodic equipment-scan contract, then retained NPC/operator audit.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
