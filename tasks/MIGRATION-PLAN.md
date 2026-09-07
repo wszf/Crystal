@@ -108,12 +108,14 @@ Recent focused commits:
 - `5664f4e`: MAPMOVE/GOTO/RECALL with session persistence and race checks.
 - `1cf0452`: SETTIMER/SETLIGHT with focused session and race checks.
 - `e34ef84`: CLEARMOB with map-cell ordering and shared death lifecycle.
+- `24b05cc`: MOB/RECALLMOB, GM-made drops and pet level colours.
+- `d122d10`: complete MagicInfo records retained through world export/JSON.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
 Continue in this order:
-1. Finish MOB/RECALLMOB, then trace remaining reachable commands before declaring parity: KILL, DIE,
-   CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, MOB/RECALLMOB, DECO, AWAKENING, archive/backup/load/restore,
+1. Wire exported custom spell definitions into runtime, then trace remaining reachable commands before declaring parity: KILL, DIE,
+   CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, DECO, AWAKENING, archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
    RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE, DELETESKILL and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
