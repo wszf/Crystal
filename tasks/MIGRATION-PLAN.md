@@ -121,6 +121,8 @@ Recent focused commits:
   broadcast quirks; session/reload/race and filtered full-suite checks pass.
 - `f39e0a2`: CHANGEGENDER/CHANGECLASS identity authority, target-session logout,
   offline handling and parsing; session/reload/race and filtered full suite pass.
+- `23e807a`: LEVELHERO spawned-Hero admission, XP preservation, vital/level
+  packet order and persistence; focused/session/race and filtered full suite pass.
 - Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
   GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
@@ -131,7 +133,8 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   LEVELHERO (spawned Hero only), DECO, AWAKENING, archive/backup/load/restore,
+   DECO (runtime object plus visibility), AWAKENING/REMOVEAWAKENING (equipment
+   mutation without the NPC payment path), archive/backup/load/restore,
    RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
    RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
