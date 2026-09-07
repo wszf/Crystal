@@ -88,5 +88,11 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
 - Full regression acceptance remains open: seven initial suite failures reproduce
   on untouched Go baseline `80a2324`, including an intermittent mount transcript.
   Details and reproducible commands: Go `docs/MIGRATION-STATUS.md`.
-  Fix those baseline failures before treating packages 1–2 as fully validated
-  or using the full suite as the gate for CombineItem work. No owners invented.
+  Per the current execution instruction, these baseline failures do not block
+  packages 3–5 unless new regressions appear. Full regression acceptance stays
+  open; no owners invented.
+
+- Package 3 protocol landed as Go `5c87a52`. All four CombineItem branches now
+  landed as Go `a5526c8` through current cross-grid item authority; focused session tests cover
+  player/Hero mutations and save/reload. Final CombineItem and cross-grid race
+  checks pass. Full suite has six known baseline failures and no new failures.
