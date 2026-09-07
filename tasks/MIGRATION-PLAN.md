@@ -173,7 +173,9 @@ Continue in this order:
    runtime/session/wire/race tests; broad has only the known inspection flake.
    GATES, STARTCONQUEST, RESETCONQUEST and flag commands now have focused
    authority/transcript/session, race and filtered broad passes. Reset preserves
-   archer Alive/flag quirks; flag RNG/parse order is covered. Next: REVIVE/STARTWAR.
+   archer Alive/flag quirks; flag RNG/parse order is covered. REVIVE now passes
+   focused/session/race and filtered broad checks, including archive isolation
+   and ordered object replay. Next: free STARTWAR and remaining operator audit.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
@@ -182,8 +184,8 @@ Continue in this order:
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward authority and guild storage
    are implemented; retain the remaining global-index continuation gaps in scope
-   before claiming command parity. Continue auditing REVIVE, STARTWAR and
-   surrounding branches; this is not an exhaustive list.
+   before claiming command parity. Continue STARTWAR and surrounding branches;
+   this is not an exhaustive list.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
@@ -193,7 +195,6 @@ recovery, Hiding, NPC delayed GOTO, cross-map LoverRecall). Their unchanged-base
 reproductions and earlier repaired fixtures are recorded in Go status. This is
 not an unfiltered-green suite. OmaMage extra-roll transcript flakiness also
 reproduces on untouched ccdb06b; it has not been added to the six exclusions.
-Latest rental/NPC slices pass focused/race and filtered broad tests. Inspection
-packet-26 flakiness reproduced 21/100 on 9821e04; no added skip.
+Inspection packet-26 flakiness reproduced 21/100 on 9821e04; no added skip.
 New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
 cutover acceptance remain unproven. No migration-complete claim yet.
