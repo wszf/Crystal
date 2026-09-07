@@ -172,12 +172,13 @@ Continue in this order:
    pass. Mentorship acceptance now scopes both actors with isolation tests.
    Logout now preserves live actor/recipient state and registry partner XP.
    Acceptance preserves existing XP; settlement auth arithmetic now matches Legacy.
-   Next: settlement actor/recipient integration, then rental.
+   Settlement actor/recipient integration and focused/race tests now pass.
+   Next: rental return authority, item-protection keys and registry/live delivery.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
    ambient-speech and called-script context follow-ups documented in Go status
-   (ordinary root quest endpoints are implemented). CLEARIPBLOCKS
+   (root quest endpoints are implemented). CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward authority and guild storage
    are implemented; retain the remaining global-index continuation gaps in scope
