@@ -14,13 +14,8 @@ historical only. C# remains read-only. Implementation belongs in Crystal.GoServe
 - Import/export supports explicit legacy layouts (world/account 117/0 in
   legacyworld; legacyaccount also has a separate 116/0 catalog reader).
   All detected map formats 0–7 and 100 have implementations.
-- Useful uncommitted WORLD work adds parser/runtime support for DROP, pets,
-  MONGEN/MONCLEAR, buffs, guild membership and REFRESHEFFECTS. It includes
-  protocol, persistence, recipient-order and production-session tests. Keep it.
-  Constructor/refresh test changes account for the new spawn callers.
-- Concrete gaps: Legacy `PlayerObject.CombineItem` and its connection dispatch
-  have no Go packet/handler; Go's HornedWarriorShield constant was 56 while
-  `Shared/Enums.cs` assigns 55 (56 is HornedCommanderShield); fixed below.
+- WORLD actions, CombineItem and corrected monster shield wire IDs are committed
+  with focused/protocol/session/race coverage (packages 1–3 below).
 - NPC player actions are substantially implemented, but C# NPCSegment also has
   actorless and monster action overloads. These require a separate execution-
   context audit; player-action coverage cannot establish their parity.
@@ -151,18 +146,13 @@ Continue in this order:
    CHANGEGENDER/CHANGECLASS now preserve targeting, identity persistence and
    normal logout admission; Go status records offline exception handling and tests.
    Continue tracing remaining reachable operator commands before declaring parity:
-   Online archive session, guild storage/currency/logout and scoped rank
-   definitions/notices/readback are implemented; commit details are in Go status.
-   Creation/invitation authority landed as Go `6c3154f`.
-   Leave/kick/NPC removal is `964b453`; member promotion in `8cd4c95` preserves
-   Legacy registry-vs-live target distinctions. Guild buff admission/status delivery
-   landed as `5969c5d`; guild XP/member-view continuation landed as `4c5193a`.
-   War request/declaration authority landed as `e172742`; territory and recall
-   scope landed as `903e36b`. Conquest NPC transactions now use connected actor handles, with focused
-   archive/repair/checkpoint tests passing. Palace/member views now project live
-   guild membership; inspection follows Legacy registry resolution even for
-   online objects (removed target gives no response, restore supplies the row).
-   Conquest/inspection race and filtered full suite pass (same six skips).
+   Online archive session and guild authority are implemented across storage,
+   currency/logout, rank definitions/readback, creation/invitation, leave/kick,
+   promotion, buffs/XP/member views, war, territory/recall and conquest NPC
+   transactions. Palace/member views project live membership; inspection uses
+   Legacy registry resolution (removed target is silent, restore supplies row).
+   Focused archive/checkpoint, race and filtered broad tests pass; detailed
+   commits and validation remain in Go status.
    Wedding rings, marriage/divorce and mentorship acceptance now retain connected
    actor/registry partner/recipient authority with focused checkpoint tests.
    Logout now preserves live actor/recipient state and registry partner XP.
@@ -181,7 +171,11 @@ Continue in this order:
    Initial allocation already stamps cell order (earlier gap claim corrected).
    Facing INFO now follows first-occupant ordering across live object families;
    delayed spell insertion and exact formatted readback have focused/race coverage.
-   Next: quest branches and transform appearance/FastRun contracts in Go status.
+   CLEARQUESTS/SETQUEST now preserve live owner/receiver identity with focused
+   archive, timer and session checkpoint tests; race passes. Broad validation
+   hits only the already-reproduced inspection packet-26 flake (no new skip).
+   Next: shared transform
+   appearance/FastRun projection and TOGGLETRANSFORM, then conquest operators.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
