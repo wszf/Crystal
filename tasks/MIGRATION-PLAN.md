@@ -171,7 +171,8 @@ Continue in this order:
    preserves live owner, registry spouse and recipient authority; focused tests
    pass. Mentorship acceptance now scopes both actors with isolation tests.
    Logout now preserves live actor/recipient state and registry partner XP.
-   Acceptance also preserves existing XP. Next: mentorship settlement and rental.
+   Acceptance preserves existing XP; settlement auth arithmetic now matches Legacy.
+   Next: settlement actor/recipient integration, then rental.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; retain the shared
@@ -183,7 +184,6 @@ Continue in this order:
    before claiming command parity. Audit later switch branches
    as well: STARTWAR, INFO, CLEARQUESTS/SETQUEST, TOGGLETRANSFORM, STARTCONQUEST/
    RESETCONQUEST/GATES, CHANGEFLAG/CHANGEFLAGCOLOUR, REVIVE and their remaining surrounding command branches. This discovery list is not an exhaustive absence claim.
-   Revisit shared death gaps only if they block the next operator command.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
