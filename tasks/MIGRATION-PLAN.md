@@ -73,130 +73,60 @@ arrives, rather than declaring an exhaustive feature percentage.
 No C# implementation edits, global git configuration changes, new orchestration
 framework, speculative server rewrite, or production cutover in these packages.
 Retain existing tests even when their historical names mention old milestones.
-No representative production dataset/client trace has been validated in this
-review; production parity and load/cutover acceptance remain unproven until that
-rehearsal. Unsupported legacy database versions must remain explicit errors.
+The isolated 117/0 development snapshot has validated client/gameplay/restart
+traces; production parity and load/cutover acceptance remain unproven. Unsupported legacy database versions must remain explicit errors.
 
-## Execution
+## Execution and current acceptance
 
-- Plan committed first as `1a21e4a4` in Crystal.
-- Go `3591b2b` lands reviewed WORLD actions; focused parser, protocol, runtime,
-  persistence and production-session tests pass.
-- Go `712134e` corrects Warrior/Commander shield IDs to 55/56, separates Blindness
-  (57), and tests literal wire IDs, restored visibility and observer lifecycle.
-  Affected tests and focused WORLD/buff race checks pass.
-- Full regression acceptance remains open: seven initial suite failures reproduce
-  on untouched Go baseline `80a2324`, including an intermittent mount transcript.
-  Details and reproducible commands: Go `docs/MIGRATION-STATUS.md`.
-  Per the current execution instruction, these baseline failures do not block
-  packages 3–5 unless new regressions appear. Full regression acceptance stays
-  open; no owners invented.
+1. WORLD actions landed as Go `3591b2b`; focused parser/runtime/session tests pass.
+2. Shield IDs landed as `712134e`; numeric wire and lifecycle/race tests pass.
+3. CombineItem landed as `5c87a52` / `a5526c8`: all four branches, player/Hero
+   inventory authority, packet order, rejected/replayed requests, RNG, persistence
+   and concurrent consumption are covered. Package complete.
+4. NPC roots and automatic contexts landed as `8bf588b` / `89daa2d`; event-driven
+   context/parameter isolation, configured roots and race checks pass. Package
+   complete. Go `docs/NPC-EXECUTION-CONTEXTS.md` records the source audit.
+5. Rehearsal and integration audit remain open. Detailed commit and test evidence
+   lives in Go `docs/MIGRATION-STATUS.md` and `docs/MIGRATION-REHEARSAL.md`.
 
-- Package 3 protocol landed as Go `5c87a52`. All four CombineItem branches now
-  landed as Go `a5526c8` through current cross-grid item authority; focused session tests cover
-  player/Hero mutations and save/reload. Final CombineItem and cross-grid race
-  checks pass. Full suite has six known baseline failures and no new failures.
+Package 5 has corrected map decoding and experience paths, full-population
+runtime scans and bootstrap delivery, 279 packet ordinals, player/Hero starter
+items, monster experience/rarity, globally allocated NPC purchases, atomic guild
+costs, and current guild/economy/Hero checkpoint reload. The graphical client
+enters both servers and completes the initial quest. Paired ordinary gameplay
+matches level 22, XP 11, gold 930, two potions and completed[1]/active[2] quests.
+A fresh Go guild retry survives clean restart/relogin with 50 guild gold; the
+earlier failure and successful retry remain separately recorded.
 
-- Package 4 data roots landed as Go `8bf588b`; Robot/monster lifecycle execution
-  landed as Go `89daa2d` (focused and race checks pass). Full suite
-  reports only six known baseline failures. No automatic-overload action is
-  deliberately unsupported; recursion is bounded and logged at depth 32.
-- Package 5 uses an isolated 117/0 development dataset snapshot. Go `d8ce4ce`
-  fixes map decoding; `4f297dd` fixes relative player/Hero experience paths.
-  Export and server binding succeed; the initial client handshake times out
-  behind a world tick doing repeated full-population target scans. Fix and
-  re-run the rehearsal. `04a7cc6` corrects five baseline test fixtures.
+Recent focused commits:
+- `3e0753d`: public CLEARBUFFS and reverse buff expiry/visibility packet order.
+- `06ce788`: rarity colour restoration after tame expiry.
+- `199a60d`: unbound Hero registry, inventory and reserved IDs across checkpoints.
+- `c62275e`: ADJUSTPKPOINT assignment and target-session persistence.
+- Earlier operator command fixes include GIVEGOLD, LEVEL, CREATEGUILD,
+  GIVECREDIT/GIVEPEARLS and SETFLAG/LISTFLAGS/CLEARFLAGS (see Go status).
 
-- Package 5 follow-up: `b8ad867` / `349778e` remove repeated target scans/sorts;
-  `15e11da` / `8841c77` wire and apply inherited MonsterProcessWhenAlone;
-  `86a58f0` indexes monster cells during ticks and centralizes index updates.
-  Focused AI/query tests and race checks pass. `f5ddcb6` fixes Hallucination's
-  test synchronization (100 repetitions pass). Two more intermittent tests
-  (PoisonCloud transcript and map-hazard restart HP) reproduce on unchanged
-  `f5ddcb6`; details remain in Go status. Full-data session setup exposed a nil
-  synthetic-map assumption, now under regression testing. Package 5 remains open.
+Continue in this order:
+1. Finish group-recall command validation (ENABLEGROUPRECALL, GROUPRECALL,
+   RECALLMEMBER), including consent, Recall equipment set, shared cooldown,
+   target teleport delivery and persisted location.
+2. Close the confirmed conquest restart gap: startup imports stale exported
+   conquest state while runtime writes current `Conquests/*.mcd` files. Retain
+   authoritative JSON precedence and test ownership/balances/structures on reload.
+3. Trace remaining reachable commands before declaring parity: KILL, DIE,
+   CHANGEGENDER/CHANGECLASS, LEVELHERO, GIVESKILL, MAPMOVE/GOTO/RECALL,
+   MOB/CLEARMOB/RECALLMOB, DECO, AWAKENING, archive/backup/load/restore,
+   RELOADDROPS/RELOADNPCS, CLEARIPBLOCKS and TRIGGER. Audit later switch branches
+   as well; this discovery list is not an exhaustive absence claim.
+4. Finish packet, Settings, spell and AI behavior audits, including remaining
+   item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
+   focused commits with tests and update this plan as evidence changes.
+5. Complete remaining integration acceptance and report its actual limits.
 
-- Package 5: `794ce92` fixes exported-world nil-map login; `2c1bb54` configures
-  shared world settings before startup; `78d94b9` indexes additional nearby
-  consumers; `1358721` keeps production world advancement on its shared ticker.
-  `b9e905c` gates asynchronous broadcasts through bootstrap, with mentorship
-  ordering corrected in `a0a211b`. `2185ce4` adds explicit live-world probe mode.
-  Focused race checks and the full package set with six reproduced baseline
-  timing failures skipped pass. Graphical client reaches character selection;
-  full-population game entry and live probe still stall. Profile and resolve
-  the remaining runtime delay before accepting the client/Legacy rehearsal.
-
-- Package 5 full-population protocol rehearsal now passes. `d319bad` / `1e3cf3c`
-  remove profiled route/target scans; `9fcebdf` yields between overdue world
-  passes. `f971b26` batches initial bootstrap; `9eae2a5` / `dcd3dda` make the live
-  probe respect admission/movement rules. Filtered all-package and focused race
-  checks pass. Graphical client still crashes during game entry; isolated Legacy
-  comparison is running. Quest/economy/combat and client acceptance remain open.
-
-- Package 5 Legacy comparison found incorrect packet ordinals across 279 Go
-  constants. `e8ccef3` removes synthetic insertion shifts and adds a literal
-  Shared/Enums.cs fixture. The corrected client now enters BichonProvince on
-  both servers; recorded screenshots and dataset hashes are in Go
-  `docs/MIGRATION-REHEARSAL.md`. `c250fa3` adds the missing first-login starter
-  grants atomically. Shared HumanObject initialization also exposed the Hero
-  level-zero/start-item path; `a545a67` fixes initialization and starter grants.
-  Focused race and filtered all-package checks pass. Both graphical clients
-  complete quest 1 for 10 experience and one potion and unlock quest 2.
-  Combat/economy/guild and restart comparisons remain in progress.
-
-- Package 5 command rehearsal: `5e05c7c` / `a7f8ae1` restore GIVEGOLD and LEVEL;
-  `8eae9a6` protects guild creation's consumed items and packet order;
-  `670f4bf` restores CREATEGUILD. Focused session/reload/race checks pass.
-  Ordinary quest checkpoints match; Legacy's authenticated probe, prepared
-  guild/economy sequence, clean restart and Hen combat succeed. Go replay and
-  broad regression checks are underway. The reachable-command audit has also
-  found candidates in operator progression/appearance, monster/group recall,
-  and archive/reload commands; trace and close them within package 5 before
-  declaring the overall remaining migration complete.
-
-- Package 5: Go `efda36c` fixes fresh NPC shop identity and atomic gold purchases;
-  `d3e1f0d` restores monster level-based experience reduction and global rate.
-  Focused/race and filtered all-package checks pass. Paired replay remains open.
-  The Settings/AI audit confirms missing map-respawn rarity profiles affecting
-  stats, rewards and display; close this and the recorded reachable-command
-  gaps before completing package 5.
-
-- Package 5: Go `526b1bb` implements map-respawn rarity with focused/race checks.
-  Fresh paired gameplay matches level 22, XP 11, gold 930, two potions and quest
-  progress. The clean-restart comparison exposes lost Go guild membership:
-  zero guild headers and the stale exported seed bypass saved guild files.
-  Header/file reload repair and regression checks are in progress. Full suite
-  also exposed an operator-ban test deadline race reproduced on `f5ddcb6`;
-  its terminal-read assertion was corrected without adding a baseline skip.
-
-- Package 5: Go `161518b` fixes guild checkpoint headers and current-file reload;
-  focused/race and the filtered all-package run pass. Live retry is underway.
-  The same bridge also drops auction/global GameShop state and unused item-ID
-  reservations in legacy-only mode. Extend its runtime snapshot and prevent
-  empty current auction lists from resurrecting the old exported seed.
-
-- Package 5: Go `76a89d5`/`95ebe2c` preserve current auction/GameShop state and
-  item reservations across Legacy checkpoints; focused/race and filtered
-  all-package tests pass. The fresh live guild retry now survives clean
-  shutdown/restart/relogin with the matching balances/items/progress and 50
-  guild gold. GIVECREDIT/GIVEPEARLS and the remaining reachable-command/Settings
-  audit are still in progress; package 5 remains open.
-
-- Package 5: Go `3c12584` restores credit/pearl commands; `dbb095f` restores
-  flag commands and their session/visibility behavior. Focused/race and filtered
-  all-package checks pass. CLEARBUFFS and the remaining reachable command and
-  Settings/AI audit continue; the live gameplay/restart checkpoint comparison
-  is recorded, but the overall plan is not yet complete.
-
-- Package 5: Go `3e0753d` restores CLEARBUFFS and reverse buff expiry/visibility
-  packet order. Focused/race and filtered all-package checks pass. Remaining
-  reachable commands, Settings/AI and checkpoint behavior still require audit;
-  package 5 is open.
-
-- Package 5: Go `06ce788` restores rarity colour after tame expiry. Go `199a60d` Hero
-  checkpoints retain unbound registry entries and reserved IDs across
-  reloads. Focused/race and filtered all-package checks pass. ADJUSTPKPOINT
-  and the remaining command/Settings/AI audit continue; package 5 remains open.
-
-- Package 5: Go `c62275e` restores ADJUSTPKPOINT with session/reload and race
-  checks. Group-recall command implementation and broader validation follow.
+Regression policy: the latest all-package checks pass with only six reproduced
+baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
+recovery, Hiding, NPC delayed GOTO, cross-map LoverRecall). Their unchanged-baseline
+reproductions and earlier repaired fixtures are recorded in Go status. This is
+not an unfiltered-green suite. New regressions must be fixed; those pre-existing
+failures do not block package work. Long-running load/crash recovery and production
+cutover acceptance remain unproven. No migration-complete claim yet.
