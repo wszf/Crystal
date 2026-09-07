@@ -19,8 +19,8 @@ historical only. C# remains read-only. Implementation belongs in Crystal.GoServe
   protocol, persistence, recipient-order and production-session tests. Keep it.
   Constructor/refresh test changes account for the new spawn callers.
 - Concrete gaps: Legacy `PlayerObject.CombineItem` and its connection dispatch
-  have no Go packet/handler; Go's HornedWarriorShield constant is 56 while
-  `Shared/Enums.cs` assigns 55 (56 is HornedCommanderShield).
+  have no Go packet/handler; Go's HornedWarriorShield constant was 56 while
+  `Shared/Enums.cs` assigns 55 (56 is HornedCommanderShield); fixed below.
 - NPC player actions are substantially implemented, but C# NPCSegment also has
   actorless and monster action overloads. These require a separate execution-
   context audit; player-action coverage cannot establish their parity.
@@ -79,5 +79,14 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
 
 ## Execution
 
-Plan committed before implementation. Test results and completed package commits
-will be recorded here as work lands.
+- Plan committed first as `1a21e4a4` in Crystal.
+- Go `3591b2b` lands reviewed WORLD actions; focused parser, protocol, runtime,
+  persistence and production-session tests pass.
+- Go `712134e` corrects Warrior/Commander shield IDs to 55/56, separates Blindness
+  (57), and tests literal wire IDs, restored visibility and observer lifecycle.
+  Affected tests and focused WORLD/buff race checks pass.
+- Full regression acceptance remains open: seven initial suite failures reproduce
+  on untouched Go baseline `80a2324`, including an intermittent mount transcript.
+  Details and reproducible commands: Go `docs/MIGRATION-STATUS.md`.
+  Fix those baseline failures before treating packages 1–2 as fully validated
+  or using the full suite as the gate for CombineItem work. No owners invented.
