@@ -175,7 +175,9 @@ Continue in this order:
    Periodic equipment scanning now matches Legacy with auth/race tests.
    Ordinary NPC ambient speech/reload now passes focused/race tests.
    CALL/automatic exclusions and shared filenames now pass focused/race tests,
-   preserving normal/event pages through reload. Next: remaining operator audit.
+   preserving normal/event pages through reload; filtered broad tests pass.
+   Next: INFO/quest operator branches and transform appearance/FastRun contracts
+   documented from source in Go status.
    TRIGGER now queues target-session
    default callbacks with NPCUpdate ordering. Core RELOADNPCS now saves/drains
    goods and reloads scripts without changing NPC identities; ordinary root quest
