@@ -101,5 +101,8 @@ rehearsal. Unsupported legacy database versions must remain explicit errors.
   landed as Go `89daa2d` (focused and race checks pass). Full suite
   reports only six known baseline failures. No automatic-overload action is
   deliberately unsupported; recursion is bounded and logged at depth 32.
-- Package 5 has a 117/0 dataset snapshot. Its export exposed a V100 map stride
-  bug (Go 27 bytes vs Legacy 26); correct this before rehearsal continues.
+- Package 5 uses an isolated 117/0 development dataset snapshot. Go `d8ce4ce`
+  fixes map decoding; `4f297dd` fixes relative player/Hero experience paths.
+  Export and server binding succeed; the initial client handshake times out
+  behind a world tick doing repeated full-population target scans. Fix and
+  re-run the rehearsal. `04a7cc6` corrects five baseline test fixtures.
