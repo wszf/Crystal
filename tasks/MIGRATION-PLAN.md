@@ -90,49 +90,9 @@ matches level 22, XP 11, gold 930, two potions and completed[1]/active[2] quests
 A fresh Go guild retry survives clean restart/relogin with 50 guild gold; the
 earlier failure and successful retry remain separately recorded.
 
-Recent focused commits:
-- `6e8c5d5` / `0fdb8a2`: ordinary NPC quest rebinding and TRIGGER target-session
-  callbacks; focused/race and the same filtered all-package checks pass.
-- `410703e` / `9c1c19d`: NPC source provenance and core RELOADNPCS goods/script
-  lifecycle, open dialogue/queued-call refresh, robot clock and filtered tests.
-- `762c36f`: CLEARIPBLOCKS with GM admission, retained connection/creation history,
-  production-session/race checks and the same filtered full-suite pass.
-- `3e0753d`: public CLEARBUFFS and reverse buff expiry/visibility packet order.
-- `06ce788`: rarity colour restoration after tame expiry.
-- `199a60d`: unbound Hero registry, inventory and reserved IDs across checkpoints.
-- `c62275e`: ADJUSTPKPOINT assignment and target-session persistence.
-- `76eac73`: group-recall consent, equipment gates, cooldown and teleport delivery.
-- `f8e1acb`: current conquest-file reload with authoritative JSON precedence.
-- `5664f4e`: MAPMOVE/GOTO/RECALL with session persistence and race checks.
-- `1cf0452`: SETTIMER/SETLIGHT with focused session and race checks.
-- `e34ef84`: CLEARMOB with map-cell ordering and shared death lifecycle.
-- `24b05cc`: MOB/RECALLMOB, GM-made drops and pet level colours.
-- `d122d10` / `d571f72`: MagicInfo export/JSON and Legacy database saves.
-- `c80a2ab`: custom spell metadata across runtime, packets, books and account admission.
-- `38323f0`: source enum parsing independent of editable spell display names.
-- `fdb60cf`: all 109 current spell defaults match FillMagicInfoList.
-- `85bd224`: GIVESKILL/DELETESKILL with session persistence and packet quirks.
-- `a387a97`: NPC custom skill admission and canonical enum names.
-- `0e8465c`: successful projectile-hit skill training, packet/XP persistence
-  checks and custom cast thresholds; focused race and filtered full suite pass.
-- `c7d1c80`: KILL/DIE direct death, revival/drop authority, GMNeverDie and
-  broadcast quirks; session/reload/race and filtered full-suite checks pass.
-- `f39e0a2`: CHANGEGENDER/CHANGECLASS identity authority, target-session logout,
-  offline handling and parsing; session/reload/race and filtered full suite pass.
-- `23e807a`: LEVELHERO spawned-Hero admission, XP preservation, vital/level
-  packet order and persistence; focused/session/race and filtered full suite pass.
-- `f8cdee6`: DECO runtime objects, actor duplicate spawn, later-entry/movement visibility;
-  focused command/session/codec and static visibility race checks pass.
-- `c70c481`: AWAKENING/REMOVEAWAKENING atomic equipment mutation without NPC payment,
-  source failure/removal quirks, session authority/reload and focused race checks;
-  filtered all-package pass after both commands (same six baseline skips).
-- `1a2e50a`: version-117 character archives, timestamp overwrite/prefix rules
-  and Hero registry references; independent codec/file tests pass.
-- `4751b8a`: archive command registry/session/reload and race checks pass; filtered
-  full suite passes with the same six skips. Online archived characters still
-  need detached authority for later auth-backed mutations (see Go status).
-- `98d4b56`: RELOADDROPS live monster/harvest and special tables, source file
-  creation and partial-IO behavior; session/race and filtered full suite pass.
+Completed operator/NPC, archive, skill metadata and session-authority commit
+history is recorded in Go `docs/MIGRATION-STATUS.md`. Use the current execution
+items below; completed historical commits are evidence, not a new work queue.
 
 Continue in this order:
 1. KILL/DIE now use direct death lifecycle with revival/drop authority,
@@ -202,10 +162,10 @@ Continue in this order:
    TurnUndead chance/retarget and delayed kill authority pass focused/refresh
    checks, including Hero EXPOwner and special death overrides. Archive/reload,
    dismissal and statue-training acceptance pass focused/race/filtered broad.
-   Repulsion shared live-cell traversal passes focused/refresh checks. Next
-   Hero synchronous push/damage authority now passes focused/refresh tests.
-   Next immediate archive/checkpoint acceptance, then player Repulsion-family
-   metadata damage correction (Go audit).
+   Repulsion shared live-cell traversal and Hero synchronous push/damage
+   authority and immediate archive/checkpoint acceptance pass focused/refresh,
+   race and filtered broad tests. Next player Repulsion-family metadata damage
+   correction (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
