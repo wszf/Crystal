@@ -175,12 +175,12 @@ Continue in this order:
    global-delay correction and randomized player area cast metadata pass focused/
    race/filtered broad checks. Taoist support audit confirms self/owner priority
    and no-target dispatch gaps. Shared Purification operation wake correction
-   passes focused/session/race checks. Taoist support selector foundation passes
-   focused checks. Purification dispatch/acceptance passes focused/refresh/race/
+   passes focused/session/race. Taoist selector/dispatch/acceptance passes focused/refresh/race/
    filtered broad. Healing/MassHealing checkpoints pass focused/refresh/race/filtered broad.
    Player Healing metadata passes focused/refresh/race/filtered broad.
    Monster friendliness correction passes focused support/healing checks; next
-   delayed player Healing practice and target validation (Go audit).
+   delayed Healing practice/targets pass focused/refresh. Next session skill
+   logout acceptance and final race/filtered broad (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
