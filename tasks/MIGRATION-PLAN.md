@@ -181,7 +181,8 @@ Continue in this order:
    Shared global replies and SETLIGHT/STARTCONQUEST map order pass focused/race/broad.
    RELOADNPCS custom registration/dispatch passes focused/session/race/broad.
    Hero timing, same-cell melee and learned-ranged caster behaviour gates pass
-   focused/race/broad checks; next pending spells and Archer swings (Go docs/HERO-SPELL-DISPATCH.md).
+   focused/race/broad checks. Archer swing range/front-cell targeting now passes
+   focused/race; next pending spells and shared impact gaps (Go docs/HERO-SPELL-DISPATCH.md).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
