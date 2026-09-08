@@ -178,9 +178,9 @@ Continue in this order:
    passes focused/session/race. Taoist selector/dispatch/acceptance passes focused/refresh/race/
    filtered broad. Healing/MassHealing checkpoints pass focused/refresh/race/filtered broad.
    Player Healing metadata passes focused/refresh/race/filtered broad.
-   Monster friendliness correction passes focused support/healing checks; next
-   delayed Healing practice/targets pass focused/refresh/race; broad only known
-   inspection flake. Session skill/logout checks pass with race; next player MassHealing.
+   Monster friendliness and delayed Healing pass focused/refresh/race; broad only known
+   inspection flake. Session skill/logout checks pass with race. Player MassHealing
+   metadata passes focused/session; next live-cell completion (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
