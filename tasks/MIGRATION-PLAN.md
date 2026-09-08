@@ -172,8 +172,9 @@ Continue in this order:
    pass focused/refresh/race/filtered broad. Next shared player area dispatch
    and returned-damage training correction passes focused/refresh/race. Next
    session practice/checkpoint acceptance and Attacked miss-state coverage pass
-   focused checks. Next player area cast metadata and FlameField rejection
-   global-delay correction (Go audit); race/filtered broad verification running.
+   focused/race/filtered broad checks (same six exclusions). FlameField rejection
+   global-delay correction passes focused checks. Next randomized player area
+   cast metadata (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
