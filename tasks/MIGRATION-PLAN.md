@@ -199,7 +199,9 @@ Continue in this order:
    armour, Protection/revival and special monsters. Delayed Vampirism dispatch
    and deferred Hero healing pass focused/refresh-audit/race/filtered broad checks.
    Archive/reload and dismissal acceptance pass; pending healing is transient.
-   Next TurnUndead chance/retarget and delayed kill authority (Go audit).
+   TurnUndead chance/retarget and delayed kill authority pass focused/refresh
+   checks, including Hero EXPOwner and special death overrides. Next archive/
+   reload and dismissal acceptance, then Repulsion (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
