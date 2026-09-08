@@ -203,7 +203,9 @@ Continue in this order:
    checks, including Hero EXPOwner and special death overrides. Archive/reload,
    dismissal and statue-training acceptance pass focused/race/filtered broad.
    Repulsion shared live-cell traversal passes focused/refresh checks. Next
-   Hero synchronous push/damage authority (Go audit).
+   Hero synchronous push/damage authority now passes focused/refresh tests.
+   Next immediate archive/checkpoint acceptance, then player Repulsion-family
+   metadata damage correction (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
