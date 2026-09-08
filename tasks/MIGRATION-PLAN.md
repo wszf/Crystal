@@ -189,7 +189,9 @@ Continue in this order:
    MagicBooster priority/delayed visible buff now passes focused/race/broad.
    Wizard offensive selector passes focused/race tests; live dispatch remains open.
    MAC-only Human-victim impact authority passes focused/race tests.
-   Next monster impact, delayed effects and tick connection (Go audit).
+   FlameDisruptor/ThunderBolt now dispatch delayed impacts through ticks;
+   focused/refresh-audit/race pass. Next offensive session/reload acceptance
+   and remaining effects (Go audit); final filtered broad running.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
