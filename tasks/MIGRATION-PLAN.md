@@ -187,7 +187,8 @@ Continue in this order:
    and cooldowns pass focused/race/broad checks. Summon/snapshot boundaries and
    archived-owner cast/training JSON checkpoints pass focused/race acceptance.
    MagicBooster priority/delayed visible buff now passes focused/race/broad.
-   Next Wizard offensive selection/delayed effects and shared impact gaps (Go audit).
+   Wizard offensive selector passes focused/race tests; live dispatch remains open.
+   Next MAC-only Hero impact authority, delayed effects and tick connection (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
