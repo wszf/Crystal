@@ -183,7 +183,9 @@ Continue in this order:
    Hero timing, same-cell melee and learned-ranged caster behaviour gates pass
    focused/race/broad checks. Archer swing range/front-cell targeting now passes
    focused/race. Player/Hero victims use owner combat authority; focused/race
-   and filtered broad pass. Next MagicShield dispatch and shared impact gaps (Go spell audit).
+   and filtered broad pass. MagicShield tick dispatch, delayed training/private buffs
+   and cooldowns now pass focused/race checks. Next summon/session checkpoint
+   acceptance, MagicBooster and shared impact gaps (Go spell audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
