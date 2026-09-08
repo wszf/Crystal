@@ -177,13 +177,13 @@ Continue in this order:
    filtered broad checks. FIND/MOVE text, missing-map and group-gate fixes pass
    focused/session/race and filtered broad tests. LEAVEGUILD deferred buffs and
    localized/ordered replies pass focused/session/race/broad checks. MAPMOVE/RECALL
-   pre-gates pass focused/race/final broad; next: skill announcement order.
+   pre-gates pass focused/race/final broad. Skill announcements pass focused/race;
+   next: TRIGGER world insertion order.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots and ambient speech work. CALL uses LoadedObjectID zero;
    its guarded NPC side effects are verified in Go status. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
-   connected item/storage/reward and guild-storage authority are implemented;
-   retain global-index continuation gaps; the remaining operator audit stays open.
+   connected item/storage/reward and guild-storage authority work; retain global-index gaps.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
