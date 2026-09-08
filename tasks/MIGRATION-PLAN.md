@@ -179,7 +179,8 @@ Continue in this order:
    passes focused/session/race checks. Taoist support selector foundation passes
    focused checks. Purification dispatch/no-target gates pass focused/refresh;
    race/filtered broad. Archive/dismissal acceptance passes focused/race. Healing
-   dispatch passes focused/refresh; next healing checkpoint acceptance, then MassHealing.
+   dispatch/checkpoint acceptance passes focused/refresh/race/filtered broad.
+   Next MassHealing map queue and live friendly targets (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
