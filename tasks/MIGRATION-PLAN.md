@@ -193,7 +193,8 @@ Continue in this order:
    focused/refresh-audit/race/broad pass. Offensive archived-owner session/reload
    and snapshot acceptance pass focused/race. FireBall/GreatFireBall flight/distance
    delays pass focused/race/broad; projectile archived-owner checkpoints pass
-   focused/race. Next FrostCrunch poison effects and remaining priorities (Go audit).
+   focused/race. FrostCrunch poison authority/order passes focused/race; final
+   broad running. Next archived-owner and poison-caster lifecycle acceptance.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
