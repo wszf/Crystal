@@ -170,8 +170,7 @@ Continue in this order:
    archived-owner acceptance, pass focused/refresh/race/filtered broad. Next
    IceStorm/FireBang 3x3 actions, positive-return training and archive acceptance
    pass focused/refresh/race/filtered broad. Next shared player area dispatch
-   and returned-damage training correction passes focused/refresh/race. Next
-   session practice/checkpoint acceptance and Attacked miss-state coverage pass
+   and returned-damage training, session checkpoints and Attacked miss states pass
    focused/race/filtered broad checks (same six exclusions). FlameField rejection
    global-delay correction and randomized player area cast metadata pass focused/
    race/filtered broad checks. Taoist support audit confirms self/owner priority
@@ -180,8 +179,8 @@ Continue in this order:
    focused checks. Purification dispatch/acceptance passes focused/refresh/race/
    filtered broad. Healing
    dispatch/checkpoint acceptance passes focused/refresh/race/filtered broad.
-   MassHealing map queue/live friendly targets pass focused/refresh. Next archived
-   checkpoint acceptance, then shared player Healing audit (Go audit).
+   MassHealing runtime/checkpoints pass focused/refresh/race/filtered broad.
+   Next shared player Healing metadata, delayed practice and target validation.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
