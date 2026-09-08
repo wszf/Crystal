@@ -175,16 +175,15 @@ Continue in this order:
    focused/session/race and filtered broad checks, including archive isolation
    and ordered object replay. Free STARTWAR now passes focused/session/race and
    filtered broad checks. FIND/MOVE text, missing-map and group-gate fixes pass
-   focused/session/race and filtered broad tests. LEAVEGUILD deferred buffs pass
-   and localized/ordered replies pass focused/session/race/broad checks.
-   Next: MAPMOVE/RECALL group admission before destination validation.
-   TRIGGER queues target-session callbacks with NPCUpdate order. RELOADNPCS drains goods and reloads scripts without changing NPC identities; ordinary root quest
-   endpoints and ambient speech are implemented. CALL uses LoadedObjectID zero;
+   focused/session/race and filtered broad tests. LEAVEGUILD deferred buffs and
+   localized/ordered replies pass focused/session/race/broad checks. MAPMOVE/RECALL
+   pre-gates pass focused/race/final broad; next: skill announcement order.
+   TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
+   ordinary quest roots and ambient speech work. CALL uses LoadedObjectID zero;
    its guarded NPC side effects are verified in Go status. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward and guild-storage authority are implemented;
-   retain remaining global-index continuation gaps in scope
-   before claiming command parity. The remaining operator audit stays open.
+   retain global-index continuation gaps; the remaining operator audit stays open.
 2. Finish packet, Settings, spell and AI behavior audits, including remaining
    item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
    focused commits with tests and update this plan as evidence changes.
@@ -194,6 +193,7 @@ recovery, Hiding, NPC delayed GOTO, cross-map LoverRecall). Their unchanged-base
 reproductions and earlier repaired fixtures are recorded in Go status. This is
 not an unfiltered-green suite. OmaMage extra-roll transcript flakiness also
 reproduces on untouched ccdb06b; it has not been added to the six exclusions.
-Inspection packet-26 flakiness reproduced 21/100 on 9821e04; no added skip.
+Inspection packet-26 reproduces 21/100 on 9821e04; timed-recall queue flake
+reproduces 10/5000 on 6a61c66. Neither adds a skip.
 New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
 cutover acceptance remain unproven. No migration-complete claim yet.
