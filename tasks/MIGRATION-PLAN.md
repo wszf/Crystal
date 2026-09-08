@@ -191,8 +191,9 @@ Continue in this order:
    MAC-only Human-victim impact authority passes focused/race tests.
    FlameDisruptor/ThunderBolt now dispatch delayed impacts through ticks;
    focused/refresh-audit/race/broad pass. Offensive archived-owner session/reload
-   and snapshot acceptance pass focused/race. Next FireBall/GreatFireBall
-   flight/distance delays and remaining higher-priority effects (Go audit).
+   and snapshot acceptance pass focused/race. FireBall/GreatFireBall flight/distance
+   delays pass focused/race; broad running. Next projectile session checkpoints
+   and remaining higher-priority effects (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
