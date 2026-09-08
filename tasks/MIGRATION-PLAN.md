@@ -171,8 +171,9 @@ Continue in this order:
    IceStorm/FireBang 3x3 actions, positive-return training and archive acceptance
    pass focused/refresh/race/filtered broad. Next shared player area dispatch
    and returned-damage training correction passes focused/refresh/race. Next
-   session practice/checkpoint acceptance, then player area cast metadata and
-   FlameField global-delay audit (Go audit).
+   session practice/checkpoint acceptance and Attacked miss-state coverage pass
+   focused checks. Next player area cast metadata and FlameField rejection
+   global-delay correction (Go audit); race/filtered broad verification running.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
