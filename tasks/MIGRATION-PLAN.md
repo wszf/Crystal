@@ -200,8 +200,9 @@ Continue in this order:
    and deferred Hero healing pass focused/refresh-audit/race/filtered broad checks.
    Archive/reload and dismissal acceptance pass; pending healing is transient.
    TurnUndead chance/retarget and delayed kill authority pass focused/refresh
-   checks, including Hero EXPOwner and special death overrides. Next archive/
-   reload and dismissal acceptance, then Repulsion (Go audit).
+   checks, including Hero EXPOwner and special death overrides. Archive/reload,
+   dismissal and statue-training acceptance pass focused/race/filtered broad.
+   Next Repulsion traversal/push/damage authority (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
