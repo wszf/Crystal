@@ -181,7 +181,7 @@ Continue in this order:
    inspection flake. Session skill/logout checks pass with race. Player MassHealing
    metadata/live-cell completion pass focused/session/refresh/race/filtered broad.
    Armour/Hiding SC, support wake/live cells pass focused/session/race/broad; target lock focused/race.
-   Hero armour/combined amulet authority passes focused/archive/race/broad; UltimateEnhancer passes focused/archive/race/broad; Taoist selector/Poisoning metadata pass focused/race/broad; Poisoning passes focused/archive/race/broad; Curse metadata/impact focused/session/race; Hero Curse focused/archive/race/broad; Revelation metadata focused/session; next impact/Hero. TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
+   Hero armour/combined amulet authority passes focused/archive/race/broad; UltimateEnhancer passes focused/archive/race/broad; Taoist selector/Poisoning metadata pass focused/race/broad; Poisoning passes focused/archive/race/broad; Curse metadata/impact focused/session/race; Hero Curse focused/archive/race/broad; Revelation foundation focused/session/race; broad only known inspection flake; next Hero. TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward and guild-storage authority work; retain global-index gaps.
