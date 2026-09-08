@@ -168,9 +168,9 @@ Continue in this order:
    correction passes focused/refresh/race/filtered broad. Next FlameField/
    ThunderStorm map-owned queue and eligible-attempt training, including
    archived-owner acceptance, pass focused/refresh/race/filtered broad. Next
-   IceStorm/FireBang 3x3 actions and positive-return training pass focused/refresh.
-   Next targeted-area archive acceptance, then shared player area training
-   correction (Go audit).
+   IceStorm/FireBang 3x3 actions, positive-return training and archive acceptance
+   pass focused/refresh/race/filtered broad. Next shared player area dispatch
+   and returned-damage training correction (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
