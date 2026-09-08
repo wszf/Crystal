@@ -178,15 +178,15 @@ Continue in this order:
    focused/session/race and filtered broad tests. LEAVEGUILD deferred buffs and
    localized/ordered replies pass focused/session/race/broad checks. MAPMOVE/RECALL
    pre-gates, skill announcements and TRIGGER world order pass focused/race/broad.
-   Shared global replies pass focused/race; next: SETLIGHT/STARTCONQUEST map order.
+   Shared global replies and SETLIGHT/STARTCONQUEST map order pass focused/race/broad.
+   Next: RELOADNPCS custom-command registration and default-NPC dispatch.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots and ambient speech work. CALL uses LoadedObjectID zero;
    its guarded NPC side effects are verified in Go status. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward and guild-storage authority work; retain global-index gaps.
-2. Finish packet, Settings, spell and AI behavior audits, including remaining
-   item-ID allocation and NPC conquest/tax price paths. Fix confirmed gaps in
-   focused commits with tests and update this plan as evidence changes.
+2. Audit packet, Settings, spell/AI, item-ID allocation and NPC conquest/tax paths.
+   Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
 Regression policy: keep the six reproduced baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
 recovery, Hiding, NPC delayed GOTO, cross-map LoverRecall). Their unchanged-baseline
