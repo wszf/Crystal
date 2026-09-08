@@ -165,8 +165,8 @@ Continue in this order:
    Repulsion shared live-cell traversal and Hero synchronous push/damage
    authority and immediate archive/checkpoint acceptance pass focused/refresh,
    race and filtered broad tests. Player Repulsion-family metadata damage
-   correction passes focused/refresh tests. Next Wizard area-spell dispatch
-   audit, starting with FlameField/ThunderStorm (Go audit).
+   correction passes focused/refresh/race/filtered broad. Next FlameField/
+   ThunderStorm map-owned queue and eligible-attempt training (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
