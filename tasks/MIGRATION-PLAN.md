@@ -192,8 +192,8 @@ Continue in this order:
    FlameDisruptor/ThunderBolt now dispatch delayed impacts through ticks;
    focused/refresh-audit/race/broad pass. Offensive archived-owner session/reload
    and snapshot acceptance pass focused/race. FireBall/GreatFireBall flight/distance
-   delays pass focused/race; broad running. Next projectile session checkpoints
-   and remaining higher-priority effects (Go audit).
+   delays pass focused/race/broad; projectile archived-owner checkpoints pass
+   focused/race. Next FrostCrunch poison effects and remaining priorities (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
