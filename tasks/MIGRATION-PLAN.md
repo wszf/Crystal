@@ -186,7 +186,8 @@ Continue in this order:
    and filtered broad pass. MagicShield tick dispatch, delayed training/private buffs
    and cooldowns pass focused/race/broad checks. Summon/snapshot boundaries and
    archived-owner cast/training JSON checkpoints pass focused/race acceptance.
-   Next MagicBooster and shared impact gaps (Go spell audit).
+   MagicBooster priority/delayed visible buff now passes focused/race/broad.
+   Next Wizard offensive selection/delayed effects and shared impact gaps (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
