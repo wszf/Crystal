@@ -180,7 +180,7 @@ Continue in this order:
    pre-gates, skill announcements and TRIGGER world order pass focused/race/broad.
    Shared global replies and SETLIGHT/STARTCONQUEST map order pass focused/race/broad.
    RELOADNPCS custom registration/dispatch passes focused/session/race/broad.
-   Public/GM toggle callbacks are covered; next HAIR/DECO callbacks.
+   Toggle/HAIR/DECO focused/race pass; broad hits baseline flakes. Next CLEARBUFFS/BAG.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
@@ -194,6 +194,6 @@ reproductions and earlier repaired fixtures are recorded in Go status. This is
 not an unfiltered-green suite. OmaMage extra-roll transcript flakiness also
 reproduces on untouched ccdb06b; it has not been added to the six exclusions.
 Inspection packet-26 reproduces 21/100 on 9821e04; timed-recall queue flake
-reproduces 10/5000 on 6a61c66. Neither adds a skip.
+reproduces 10/5000 on 6a61c66. Skill-session timing also reproduces on 20325e4; no new skips.
 New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
 cutover acceptance remain unproven. No migration-complete claim yet.
