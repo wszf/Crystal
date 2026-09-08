@@ -182,8 +182,8 @@ Continue in this order:
    RELOADNPCS custom registration/dispatch passes focused/session/race/broad.
    Hero timing, same-cell melee and learned-ranged caster behaviour gates pass
    focused/race/broad checks. Archer swing range/front-cell targeting now passes
-   focused/race. Hero victims now use owner damage/checkpoint authority; next
-   pending spells and shared impact gaps (Go docs/HERO-SPELL-DISPATCH.md).
+   focused/race. Player/Hero victims use owner combat authority; focused/race
+   and filtered broad pass. Next MagicShield dispatch and shared impact gaps (Go spell audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
