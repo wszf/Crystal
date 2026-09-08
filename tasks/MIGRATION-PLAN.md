@@ -174,7 +174,10 @@ Continue in this order:
    session practice/checkpoint acceptance and Attacked miss-state coverage pass
    focused/race/filtered broad checks (same six exclusions). FlameField rejection
    global-delay correction and randomized player area cast metadata pass focused/
-   race checks; final filtered broad runs. Next Taoist support dispatch audit.
+   race/filtered broad checks. Taoist support audit confirms self/owner priority
+   and no-target dispatch gaps. Shared Purification operation wake correction
+   passes focused/session/race checks. Next Taoist support selection and Purification
+   dispatch, then Healing/MassHealing (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
