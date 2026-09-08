@@ -178,7 +178,7 @@ Continue in this order:
    focused/session/race and filtered broad tests. LEAVEGUILD deferred buffs and
    localized/ordered replies pass focused/session/race/broad checks. MAPMOVE/RECALL
    pre-gates, skill announcements and TRIGGER world order pass focused/race/broad.
-   Next: remaining shared global replies and SETLIGHT reverse-map broadcast order.
+   Shared global replies pass focused/race; next: SETLIGHT/STARTCONQUEST map order.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots and ambient speech work. CALL uses LoadedObjectID zero;
    its guarded NPC side effects are verified in Go status. CLEARIPBLOCKS
