@@ -179,8 +179,8 @@ Continue in this order:
    filtered broad. Healing/MassHealing checkpoints pass focused/refresh/race/filtered broad.
    Player Healing metadata passes focused/refresh/race/filtered broad.
    Monster friendliness correction passes focused support/healing checks; next
-   delayed Healing practice/targets pass focused/refresh. Next session skill
-   logout acceptance and final race/filtered broad (Go audit).
+   delayed Healing practice/targets pass focused/refresh/race; broad only known
+   inspection flake. Session skill/logout checks pass with race; next player MassHealing.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
