@@ -170,7 +170,8 @@ Continue in this order:
    archived-owner acceptance, pass focused/refresh/race/filtered broad. Next
    IceStorm/FireBang 3x3 actions, positive-return training and archive acceptance
    pass focused/refresh/race/filtered broad. Next shared player area dispatch
-   and returned-damage training correction (Go audit).
+   and returned-damage training correction: impact-result foundation passes
+   focused tests; area dispatch integration is next (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
