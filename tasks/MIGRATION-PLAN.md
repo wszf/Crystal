@@ -177,10 +177,10 @@ Continue in this order:
    and no-target dispatch gaps. Shared Purification operation wake correction
    passes focused/session/race checks. Taoist support selector foundation passes
    focused checks. Purification dispatch/acceptance passes focused/refresh/race/
-   filtered broad. Healing
-   dispatch/checkpoint acceptance passes focused/refresh/race/filtered broad.
+   filtered broad. Healing dispatch/checkpoints pass focused/refresh/race/filtered broad.
    MassHealing runtime/checkpoints pass focused/refresh/race/filtered broad.
-   Next shared player Healing metadata, delayed practice and target validation.
+   Player Healing metadata passes focused/refresh/race/filtered broad.
+   Next delayed player Healing practice and target validation (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
