@@ -176,9 +176,9 @@ Continue in this order:
    and ordered object replay. Free STARTWAR now passes focused/session/race and
    filtered broad checks. FIND/MOVE text, missing-map and group-gate fixes pass
    focused/session/race and filtered broad tests. LEAVEGUILD deferred buffs pass
-   focused/race/broad checks; next: silent admission, replies and broadcast order.
-   TRIGGER queues target-session default callbacks with NPCUpdate ordering.
-   Core RELOADNPCS saves/drains goods and reloads scripts without changing NPC identities; ordinary root quest
+   and localized/ordered replies pass focused/session/race/broad checks.
+   Next: MAPMOVE/RECALL group admission before destination validation.
+   TRIGGER queues target-session callbacks with NPCUpdate order. RELOADNPCS drains goods and reloads scripts without changing NPC identities; ordinary root quest
    endpoints and ambient speech are implemented. CALL uses LoadedObjectID zero;
    its guarded NPC side effects are verified in Go status. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
