@@ -180,7 +180,7 @@ Continue in this order:
    Monster friendliness and delayed Healing pass focused/refresh/race; broad only known
    inspection flake. Session skill/logout checks pass with race. Player MassHealing
    metadata/live-cell completion pass focused/session/refresh/race/filtered broad.
-   Armour/Hiding SC and support wake pass focused/session/race; next live cells then Hero amulets.
+   Armour/Hiding SC, support wake/live cells pass focused/session/race/broad; next target lock/Hero amulets.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
