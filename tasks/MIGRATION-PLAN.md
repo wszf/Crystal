@@ -179,8 +179,8 @@ Continue in this order:
    localized/ordered replies pass focused/session/race/broad checks. MAPMOVE/RECALL
    pre-gates, skill announcements and TRIGGER world order pass focused/race/broad.
    Shared global replies and SETLIGHT/STARTCONQUEST map order pass focused/race/broad.
-   RELOADNPCS custom registration passes focused/race; next: default-NPC dispatch
-   and source-specific built-in fallthrough.
+   RELOADNPCS custom registration/dispatch passes focused/session/race/broad.
+   Next: LEAVEGUILD, MOVE/MAPMOVE and GIVESKILL custom-command fallthrough.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
