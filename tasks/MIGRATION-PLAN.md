@@ -180,7 +180,7 @@ Continue in this order:
    pre-gates, skill announcements and TRIGGER world order pass focused/race/broad.
    Shared global replies and SETLIGHT/STARTCONQUEST map order pass focused/race/broad.
    RELOADNPCS custom registration/dispatch passes focused/session/race/broad.
-   Callback slices pass focused/race; broad hits known inspection flake. Next toggles.
+   Public toggle callbacks are covered; next GM toggles, then HAIR/DECO callbacks.
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
