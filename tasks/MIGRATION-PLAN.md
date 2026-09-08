@@ -173,14 +173,14 @@ Continue in this order:
    and returned-damage training, session checkpoints and Attacked miss states pass
    focused/race/filtered broad checks (same six exclusions). FlameField rejection
    global-delay correction and randomized player area cast metadata pass focused/
-   race/filtered broad checks. Taoist support audit confirms self/owner priority
-   and no-target dispatch gaps. Shared Purification operation wake correction
+   race/filtered broad checks. Taoist support and Purification operation wake
    passes focused/session/race. Taoist selector/dispatch/acceptance passes focused/refresh/race/
    filtered broad. Healing/MassHealing checkpoints pass focused/refresh/race/filtered broad.
    Player Healing metadata passes focused/refresh/race/filtered broad.
    Monster friendliness and delayed Healing pass focused/refresh/race; broad only known
    inspection flake. Session skill/logout checks pass with race. Player MassHealing
-   metadata passes focused/session; next live-cell completion (Go audit).
+   metadata/live-cell completion pass focused/session/refresh; final race/broad runs.
+   Next Taoist amulet support dispatch audit (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
