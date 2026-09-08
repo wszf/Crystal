@@ -195,7 +195,9 @@ Continue in this order:
    delays pass focused/race/broad; projectile archived-owner checkpoints pass
    focused/race. FrostCrunch poison authority/order passes focused/race/broad;
    archived-owner and poison-caster lifecycle acceptance pass focused/race.
-   Next Vampirism returned damage and deferred Hero healing (Go audit).
+   Vampirism damage-return foundation passes focused tests for overkill,
+   armour, Protection/revival and special monsters. Next delayed dispatch and
+   deferred Hero healing (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
