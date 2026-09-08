@@ -177,7 +177,8 @@ Continue in this order:
    race/filtered broad checks. Taoist support audit confirms self/owner priority
    and no-target dispatch gaps. Shared Purification operation wake correction
    passes focused/session/race checks. Taoist support selector foundation passes
-   focused checks; next Purification dispatch, then Healing/MassHealing (Go audit).
+   focused checks. Purification dispatch/no-target gates pass focused/refresh;
+   next archive/dismissal acceptance, then Healing/MassHealing (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
