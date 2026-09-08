@@ -166,9 +166,10 @@ Continue in this order:
    authority and immediate archive/checkpoint acceptance pass focused/refresh,
    race and filtered broad tests. Player Repulsion-family metadata damage
    correction passes focused/refresh/race/filtered broad. Next FlameField/
-   ThunderStorm map-owned queue and eligible-attempt training pass focused/
-   refresh tests. Next archived-owner area acceptance, then IceStorm/FireBang
-   source audit; shared player-area differences remain open (Go audit).
+   ThunderStorm map-owned queue and eligible-attempt training, including
+   archived-owner acceptance, pass focused/refresh/race/filtered broad. Next
+   IceStorm/FireBang 3x3 actions and positive-return training; shared player-area
+   differences remain open (Go audit).
    TRIGGER preserves callback/NPCUpdate order. RELOADNPCS drains goods/reloads scripts;
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
