@@ -189,10 +189,12 @@ Continue in this order:
    DragonWarrior, Kirin, ScalyBeast, WereTiger, PlagueCrab and TreeGuardian with
    focused/session/race evidence; IcePhantom, RhinoPriest, HoodedSummoner,
    HoodedSummonerScrolls and KingHydrax now have the same coverage. The
-   consolidated batch gates found only repaired Furbolg fixtures and documented
-   Guard/LoverRecall/timed-recall packet-order baseline flakes. Continue with
-   the remaining specialized AI classes, preserving explicit no-op/custom roam
-   overrides.
+   DarkOmaKing, GasToad, LightTurtle, ManectricClaw and PeacockSpider are now
+   covered as well. The consolidated batch gates found only repaired Furbolg
+   fixtures and documented Guard/LoverRecall/timed-recall baseline flakes; the
+   latest filtered gate passed all packages with the six documented skips.
+   Continue with the remaining specialized AI classes, preserving explicit
+   no-op/custom roam overrides.
 2. Audit packet, Settings, spell/AI, item-ID allocation and NPC conquest/tax paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
