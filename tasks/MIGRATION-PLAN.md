@@ -185,6 +185,11 @@ Continue in this order:
    ordinary quest roots/speech and CALL side effects are tested. CLEARIPBLOCKS
    preserves live admission counts and creation-abuse history. Archive registry,
    connected item/storage/reward and guild-storage authority work; retain global-index gaps.
+   Idle Turn/ProcessRoam audit now covers Furbolg, Horned/Snow, BlackTortoise,
+   DragonWarrior and Kirin with focused/session/race evidence; the consolidated
+   batch gate found only the repaired Furbolg fixture cases and the known Guard
+   packet-order baseline flake. Continue with the remaining specialized AI
+   classes, preserving explicit no-op/custom roam overrides.
 2. Audit packet, Settings, spell/AI, item-ID allocation and NPC conquest/tax paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
