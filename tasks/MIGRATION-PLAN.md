@@ -212,3 +212,11 @@ Inspection packet-26 reproduces 21/100 on 9821e04; timed-recall queue flake
 reproduces 10/5000 on 6a61c66; skill timing on 20325e4; YinDevilNode 5/5000 on 498caac; TaoGuard colour 5/50 on 3bc5121 (two missing, three early). Guard AttackMode packet order reproduces 8/100 on b75248a (six missing, two early). No new skips.
 New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
 cutover acceptance remain unproven. No migration-complete claim yet.
+
+The latest committed Settings/packet batch is `908a3ad`, `001cff4`, `c70cf8d`,
+`7ce3fac`, and `3714d8a`; focused and targeted race checks pass. Its filtered
+broad gate reproduced only the known Guard/TaoGuard attack packet-order
+baseline failures, with no new skip. Continue with the confirmed Settings
+consumers (`MaxLuck`, relationship/mentor bonuses, rested XP, and monster
+recall) before the remaining packet/spell-AI/item-ID and NPC conquest/tax
+audit.
