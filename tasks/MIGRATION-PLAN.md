@@ -187,10 +187,12 @@ Continue in this order:
    connected item/storage/reward and guild-storage authority work; retain global-index gaps.
    Idle Turn/ProcessRoam audit now covers Furbolg, Horned/Snow, BlackTortoise,
    DragonWarrior, Kirin, ScalyBeast, WereTiger, PlagueCrab and TreeGuardian with
-   focused/session/race evidence; the consolidated batch gates found only the
-   repaired Furbolg fixtures and documented Guard/LoverRecall packet-order
-   baseline flakes. Continue with the remaining specialized AI classes,
-   preserving explicit no-op/custom roam overrides.
+   focused/session/race evidence; IcePhantom, RhinoPriest, HoodedSummoner,
+   HoodedSummonerScrolls and KingHydrax now have the same coverage. The
+   consolidated batch gates found only repaired Furbolg fixtures and documented
+   Guard/LoverRecall/timed-recall packet-order baseline flakes. Continue with
+   the remaining specialized AI classes, preserving explicit no-op/custom roam
+   overrides.
 2. Audit packet, Settings, spell/AI, item-ID allocation and NPC conquest/tax paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
