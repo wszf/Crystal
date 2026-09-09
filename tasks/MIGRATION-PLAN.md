@@ -193,6 +193,9 @@ Continue in this order:
    covered as well. The consolidated batch gates found only repaired Furbolg
    fixtures and documented Guard/LoverRecall/timed-recall baseline flakes; the
    latest filtered gate passed all packages with the six documented skips.
+   EarthGolem, ManTree, StoneGolem, ThunderElement and TucsonGeneral now also
+   execute inherited idle Turn/ProcessRoam, with a shared receiver publication
+   fix for immune direct fields; their filtered gate passed all packages.
    Continue with the remaining specialized AI classes, preserving explicit
    no-op/custom roam overrides.
 2. Audit packet, Settings, spell/AI, item-ID allocation and NPC conquest/tax paths.
