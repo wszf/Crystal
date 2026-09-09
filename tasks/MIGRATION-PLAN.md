@@ -196,8 +196,10 @@ Continue in this order:
    EarthGolem, ManTree, StoneGolem, ThunderElement and TucsonGeneral now also
    execute inherited idle Turn/ProcessRoam, with a shared receiver publication
    fix for immune direct fields; their filtered gate passed all packages.
-   Continue with the remaining specialized AI classes, preserving explicit
-   no-op/custom roam overrides.
+   The inherited idle Turn/ProcessRoam audit is complete. Explicit
+   no-op/custom roam exclusions are recorded in Go status; move next to the
+   packet/Settings/spell-AI/item-ID and NPC conquest/tax behavior audit, then
+   representative restart/economy integration.
 2. Audit packet, Settings, spell/AI, item-ID allocation and NPC conquest/tax paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
