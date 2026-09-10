@@ -339,6 +339,8 @@ integration.
   Focused death/NPC-access/integration tests and the targeted race slice pass.
 - `03e8e32` restores the ordinary PlayerObject.LevelUp default-NPC callback
   through the shared experience notification path; focused/race checks pass.
+- `1d45f0d` restores default-NPC `[@_MapEnter(map)]` at the shared cross-map
+  transition boundary with focused/race coverage.
 - The corrected filtered broad gate with the six documented timing exclusions
   completed the server package in 104.339s. It retained only the known
   Guard/TaoGuard packet-order failures; all other packages passed. No new skip
