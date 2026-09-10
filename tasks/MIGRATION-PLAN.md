@@ -337,10 +337,12 @@ integration.
   `[@_Die]` page and preserves the existing default activation path when that
   page is absent. `5e81c2c` adds the positive registered-page session case.
   Focused death/NPC-access/integration tests and the targeted race slice pass.
+- `03e8e32` restores the ordinary PlayerObject.LevelUp default-NPC callback
+  through the shared experience notification path; focused/race checks pass.
 - The corrected filtered broad gate with the six documented timing exclusions
-  completed the server package in 104.457s. It retained only the known
-  Guard/TaoGuard packet-order failures and the intermittent PlayerMeleePvP
-  transcript baseline; all other packages passed. No new skip was added.
+  completed the server package in 104.339s. It retained only the known
+  Guard/TaoGuard packet-order failures; all other packages passed. No new skip
+  was added.
 - Continue the remaining package-5 packet/spell-AI behavior audit and record
   each confirmed gap with focused tests before the next consolidated gate.
 
