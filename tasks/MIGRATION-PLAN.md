@@ -275,6 +275,15 @@ timing tests skipped completed crystal-server in 104.668s and failed
 only the known Guard/TaoGuard attack packet-order baseline flakes
 (`TestSessionGuardAttackTranscript` and
 `TestSessionTaoGuardAttackTranscript`). Inspection/shop quirks did not
-fail this run. No new skip. Remaining work is leftover packet/spell-AI
-behavior (including the +300ms ordinary melee delay), then
-representative restart/economy integration.
+fail this run. No new skip. Leftover ordinary Spell.None CompleteAttack
+landed as `0191044`, `7e17b73`, and `166df69`: player melee queues the
+shared +300ms ACAgility impact used by Slaying. Holy, FatalSword arming,
+MPEater, Hemorrhage, and FocusMasterTarget stay at admission. Focused
+tests and targeted race pass. Filtered broad with the six documented
+timing tests skipped completed crystal-server in 115.415s and failed
+only the known Guard/TaoGuard attack packet-order baseline flakes
+(`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`; this run was the missing-73/74/75/77
+variant). Inspection/shop quirks did not fail this run. No new skip.
+Remaining work is leftover packet/spell-AI behavior, then representative
+restart/economy integration.
