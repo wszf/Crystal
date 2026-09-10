@@ -266,8 +266,15 @@ packet-26 flake (`TestInspectArchivedOnlineObjectUsesRegistry`). No new
 skip. CastleGate `AutoOpen` is dead C# and is not implemented.
 `PvpCanResistMagic` is editor-only. `CredxGold` is the editor GameShop
 gold-price seed. Leftover FocusMasterTarget assignment landed as
-`5979d6a`: player Attack/RangeAttack/Magic copy a live hostile target
-onto non-creature pets and the spawned Hero immediately. Focused tests
-and targeted race pass. Remaining work is leftover packet/spell-AI
+`5979d6a`, `ce04c0e`, and `168460a`: player Attack/RangeAttack/Magic
+copy a live hostile target onto non-creature pets and the spawned Hero
+immediately, leftover FireBall Hero admission uses luck-aware MC, and
+RangeAttack assigns pets before CanFly can cancel the shot. Focused
+tests and targeted race pass. Filtered broad with the six documented
+timing tests skipped completed crystal-server in 104.668s and failed
+only the known Guard/TaoGuard attack packet-order baseline flakes
+(`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`). Inspection/shop quirks did not
+fail this run. No new skip. Remaining work is leftover packet/spell-AI
 behavior (including the +300ms ordinary melee delay), then
 representative restart/economy integration.
