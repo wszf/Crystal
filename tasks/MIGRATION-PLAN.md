@@ -211,9 +211,12 @@ Continue in this order:
    acceptance is now covered by `ccc8515` with focused/race evidence in Go
    status.
    The shared PlayerObject.Die PK/luck penalty path is restored as `a14250c`;
-   default-NPC Die callback parity remains explicitly separate.
+   default-NPC Die callback parity is now page-gated and uses the Legacy
+   `[@_Die]` key in `e143c1d`; absent pages remain silent without changing
+   normal default-NPC activation behavior.
    Focused representative quest/shop/guild/economy/combat restart checks pass;
-   the post-death filtered broad gate retains only Guard/TaoGuard baselines.
+   the corrected filtered broad gate retains Guard/TaoGuard plus the already
+   documented intermittent PlayerMeleePvP baseline.
 2. Audit remaining packet, spell/AI and item-ID allocation paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
@@ -327,6 +330,19 @@ missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
 did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
+
+## Current package-5 checkpoint — 2026-09-10
+
+- `e143c1d` gates the player death default-NPC callback on a registered
+  `[@_Die]` page and preserves the existing default activation path when that
+  page is absent. Focused death/NPC-access/integration tests and the targeted
+  race slice pass.
+- The corrected filtered broad gate with the six documented timing exclusions
+  completed the server package in 104.457s. It retained only the known
+  Guard/TaoGuard packet-order failures and the intermittent PlayerMeleePvP
+  transcript baseline; all other packages passed. No new skip was added.
+- Continue the remaining package-5 packet/spell-AI behavior audit and record
+  each confirmed gap with focused tests before the next consolidated gate.
 
 Leftover Hero OwnerRecall Back and HumanObject.Teleport stacking landed
 as Go `1e55c03` and `4a99f20`. OwnerRecall uses Owner.Back (owner cell
