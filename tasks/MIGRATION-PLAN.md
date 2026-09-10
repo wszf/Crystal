@@ -341,6 +341,8 @@ integration.
   through the shared experience notification path; focused/race checks pass.
 - `1d45f0d` restores default-NPC `[@_MapEnter(map)]` at the shared cross-map
   transition boundary with focused/race coverage.
+- `5c734af` restores registered default-NPC `[@_Login]` during authenticated
+  bootstrap with focused/race coverage; absent pages remain silent.
 - The corrected filtered broad gate with the six documented timing exclusions
   completed the server package in 104.339s. It retained only the known
   Guard/TaoGuard packet-order failures; all other packages passed. No new skip
