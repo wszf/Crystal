@@ -285,5 +285,19 @@ only the known Guard/TaoGuard attack packet-order baseline flakes
 (`TestSessionGuardAttackTranscript` and
 `TestSessionTaoGuardAttackTranscript`; this run was the missing-73/74/75/77
 variant). Inspection/shop quirks did not fail this run. No new skip.
-Remaining work is leftover packet/spell-AI behavior, then representative
-restart/economy integration.
+Leftover Hiding HideFromTargets and MoonLight/DarkBody CheckSneakRadius
+landed as Go `7eaffd2` and `40b4c40`. Player Hiding now clears nearby
+monster targets like MoonLight. SneakingActive uses Chebyshev radius 3
+for other Players only; isolated sneak is non-blocking ObjectRemove,
+nearby players restore BroadcastInfo, and Heroes/radius-4 do not count.
+C# FlashDash still excludes Hero. CastleGate AutoOpen is dead C# and is
+not implemented. PvpCanResistMagic is editor-only. CredxGold is the
+editor GameShop gold-price seed. Focused tests and targeted race pass.
+Filtered broad with the six documented timing tests skipped completed
+crystal-server in 121.395s and failed only the known Guard/TaoGuard
+attack packet-order baseline flakes (`TestSessionGuardAttackTranscript`
+and `TestSessionTaoGuardAttackTranscript`; this run was the
+missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
+did not fail this run. No new skip. Remaining work is leftover
+packet/spell-AI behavior, then representative restart/economy
+integration.
