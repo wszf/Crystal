@@ -210,6 +210,8 @@ Continue in this order:
    existing Hero tick/cast authority as `cf85e04`; connected-client transcript
    acceptance is now covered by `ccc8515` with focused/race evidence in Go
    status.
+   The shared PlayerObject.Die PK/luck penalty path is restored as `a14250c`;
+   default-NPC Die callback parity remains explicitly separate.
 2. Audit remaining packet, spell/AI and item-ID allocation paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
