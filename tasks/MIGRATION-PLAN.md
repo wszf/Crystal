@@ -351,6 +351,9 @@ integration.
 - `f53ea02` / `382f5d1` add the production online midnight Daily reset and
   `[@_Daily]` callback with focused/race coverage; offline NewDay persistence
   remains open.
+- `1409ec3` adds auth-wide offline daily-completion reset; focused auth/server
+  tests and targeted race pass. Offline `[@_Daily]` execution on next login
+  remains separate.
 - The corrected filtered broad gate with the six documented timing exclusions
   completed the server package in 104.339s. It retained only the known
   Guard/TaoGuard packet-order failures; all other packages passed. No new skip
