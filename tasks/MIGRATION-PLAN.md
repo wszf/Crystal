@@ -265,6 +265,9 @@ Guard/TaoGuard attack packet-order baseline flakes
 packet-26 flake (`TestInspectArchivedOnlineObjectUsesRegistry`). No new
 skip. CastleGate `AutoOpen` is dead C# and is not implemented.
 `PvpCanResistMagic` is editor-only. `CredxGold` is the editor GameShop
-gold-price seed. Remaining work is leftover packet/spell-AI behavior
-(FocusMasterTarget immediate pet/hero assignment, then the +300ms
-ordinary melee delay), then representative restart/economy integration.
+gold-price seed. Leftover FocusMasterTarget assignment landed as
+`5979d6a`: player Attack/RangeAttack/Magic copy a live hostile target
+onto non-creature pets and the spawned Hero immediately. Focused tests
+and targeted race pass. Remaining work is leftover packet/spell-AI
+behavior (including the +300ms ordinary melee delay), then
+representative restart/economy integration.
