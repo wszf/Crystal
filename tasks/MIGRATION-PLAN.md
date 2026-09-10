@@ -231,15 +231,21 @@ identity landed as `e09364a`, `ecebe8c`, and `d54f91d`: leftover targeted
 magic uses luck-aware MC range plus UserMagic.GetDamage, NPC partial-stack
 sell CreateFreshItem uses Envir.NextUserItemID including gold-overflow
 consumption, and PoisonShot expected damage uses production range MC.
-Focused tests pass. Filtered broad with the six documented timing tests
-skipped completed in 122.528s for crystal-server and failed only the known
-Guard/TaoGuard attack packet-order baseline flakes
-(`TestSessionGuardAttackTranscript` and
-`TestSessionTaoGuardAttackTranscript`; this run was the missing-73/74/75/77
-variant). Shop quirks did not fail this run; treat suite flakes there as
-documented, not a new skip. CastleGate `AutoOpen` is dead C# and is not
-implemented. `PvpCanResistMagic` is editor-only. `CredxGold` is the editor
-GameShop gold-price seed. Remaining work is leftover packet/spell-AI
-behavior and test-only item-ID fallbacks (shop buy placeholder, split
-wrapper, mine/drop/intelligent-creature when no allocator is supplied),
+Leftover ordinary DC damage landed as `d0081db`, `169de5e`, `c59bbe4`,
+and `b87b32b`: Spell.None melee uses luck-aware GetAttackPower, FlashDash
+uses UserMagic.GetDamage of that DC range, RangeAttack uses
+GetRangeAttackPower instead of MinDC-only scaling, and MaxDC<=0 keeps the
+level/min-1 melee bridge. Test-only CreateFreshItem fallbacks landed as
+`c9aefec`, `aa1b856`, `ec0ec61`, and `a950352` (shop buy after gold,
+inventory split, mine/drop, and nil-Create BlackStone). Focused tests
+pass. Targeted race on the three formula tests passed. Filtered broad
+with the six documented timing tests skipped completed in 114.053s for
+crystal-server and failed only the known Guard/TaoGuard attack
+packet-order baseline flakes (`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`; this run was the
+missing-73/74/75/77 variant). Shop quirks and inspection packet-26 did
+not fail this run; treat suite flakes there as documented, not a new
+skip. CastleGate `AutoOpen` is dead C# and is not implemented.
+`PvpCanResistMagic` is editor-only. `CredxGold` is the editor GameShop
+gold-price seed. Remaining work is leftover packet/spell-AI behavior,
 then representative restart/economy integration. No new skip.
