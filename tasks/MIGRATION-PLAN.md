@@ -201,6 +201,11 @@ Continue in this order:
    NPC conquest tax, LineMessageTimer and OnlinePlayers workloop broadcasts
    are landed; move next to remaining packet/spell-AI/item-ID behavior audit,
    then representative restart/economy integration.
+   WarriorHero HalfMoon/CrossHalfMoon/TwinDrakeBlade leftovers and Hero
+   high-bar MagicKey routing are now landed as Go commits `239a9ea`, `4327a29`
+   and `597129c`, with focused/race evidence in Go status. The batch broad
+   gate still has the documented Guard/TaoGuard ordering failures; the
+   PlayerMeleePvP transcript also reproduces on untouched `424cda4`.
 2. Audit remaining packet, spell/AI and item-ID allocation paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
