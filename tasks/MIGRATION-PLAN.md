@@ -345,6 +345,9 @@ integration.
   bootstrap with focused/race coverage; absent pages remain silent.
 - `a7873f0` restores registered default-NPC `[@_UseItem(shape)]` for Script
   items with focused/session/race coverage and authority-backed consumption.
+- `aa6bd72` restores `[@_MapCoord(map,x,y)]` registration and Turn/Walk/Run
+  dispatch with focused/race coverage; Daily remains blocked on missing Go
+  NewDay state.
 - The corrected filtered broad gate with the six documented timing exclusions
   completed the server package in 104.339s. It retained only the known
   Guard/TaoGuard packet-order failures; all other packages passed. No new skip
