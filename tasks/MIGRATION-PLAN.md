@@ -314,3 +314,20 @@ missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
 did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
+
+Leftover Hero OwnerRecall Back and HumanObject.Teleport stacking landed
+as Go `1e55c03` and `4a99f20`. OwnerRecall uses Owner.Back (owner cell
+if Back is invalid); Summon still uses Front. OwnerRecall, TurtleKing,
+and HornedMage arm the 1s stacking push after CheckStacked for players
+and Heroes. C# FlashDash still excludes Hero. CastleGate AutoOpen is
+dead C# and is not implemented. PvpCanResistMagic is editor-only.
+CredxGold is the editor GameShop gold-price seed. Focused tests and
+targeted race pass. Filtered broad with the six documented timing tests
+skipped completed crystal-server in 105.903s and failed only the known
+Guard/TaoGuard attack packet-order baseline flakes
+(`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`; this run was the
+missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
+did not fail this run. No new skip. Remaining work is leftover
+packet/spell-AI behavior, then representative restart/economy
+integration.
