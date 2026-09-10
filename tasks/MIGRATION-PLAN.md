@@ -206,6 +206,9 @@ Continue in this order:
    and `597129c`, with focused/race evidence in Go status. The batch broad
    gate still has the documented Guard/TaoGuard ordering failures; the
    PlayerMeleePvP transcript also reproduces on untouched `424cda4`.
+   Manual `ClientMagic` requests addressed to a summoned Hero now enter the
+   existing Hero tick/cast authority as `cf85e04`; connected-client transcript
+   coverage remains part of the final integration audit.
 2. Audit remaining packet, spell/AI and item-ID allocation paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
