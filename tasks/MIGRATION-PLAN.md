@@ -208,7 +208,8 @@ Continue in this order:
    PlayerMeleePvP transcript also reproduces on untouched `424cda4`.
    Manual `ClientMagic` requests addressed to a summoned Hero now enter the
    existing Hero tick/cast authority as `cf85e04`; connected-client transcript
-   coverage remains part of the final integration audit.
+   acceptance is now covered by `ccc8515` with focused/race evidence in Go
+   status.
 2. Audit remaining packet, spell/AI and item-ID allocation paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
