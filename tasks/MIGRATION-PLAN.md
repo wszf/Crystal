@@ -237,11 +237,16 @@ uses UserMagic.GetDamage of that DC range, RangeAttack uses
 GetRangeAttackPower instead of MinDC-only scaling, and MaxDC<=0 keeps the
 level/min-1 melee bridge. Test-only CreateFreshItem fallbacks landed as
 `c9aefec`, `aa1b856`, `ec0ec61`, and `a950352` (shop buy after gold,
-inventory split, mine/drop, and nil-Create BlackStone). Focused tests
-pass. Targeted race on the three formula tests passed. Filtered broad
-with the six documented timing tests skipped completed in 114.053s for
-crystal-server and failed only the known Guard/TaoGuard attack
-packet-order baseline flakes (`TestSessionGuardAttackTranscript` and
+inventory split, mine/drop, and nil-Create BlackStone). Leftover Hero
+target gaps landed as `7984918`, `64112df`, and `a3c452c`: Spell.None
+melee hits a front-cell Hero after Player/Monster, ordinary RangeAttack
+queues live Hero projectiles, and player Purification admits friendly
+Heroes through owner IsFriendlyTarget. C# FlashDash still excludes Hero
+and was not extended. Focused tests pass. Targeted race on the hero-
+target tests passed 2.016s. Filtered broad with the six documented
+timing tests skipped completed crystal-server in 104.318s and failed
+only the known Guard/TaoGuard attack packet-order baseline flakes
+(`TestSessionGuardAttackTranscript` and
 `TestSessionTaoGuardAttackTranscript`; this run was the
 missing-73/74/75/77 variant). Shop quirks and inspection packet-26 did
 not fail this run; treat suite flakes there as documented, not a new
