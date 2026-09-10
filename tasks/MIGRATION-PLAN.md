@@ -335,8 +335,8 @@ integration.
 
 - `e143c1d` gates the player death default-NPC callback on a registered
   `[@_Die]` page and preserves the existing default activation path when that
-  page is absent. Focused death/NPC-access/integration tests and the targeted
-  race slice pass.
+  page is absent. `5e81c2c` adds the positive registered-page session case.
+  Focused death/NPC-access/integration tests and the targeted race slice pass.
 - The corrected filtered broad gate with the six documented timing exclusions
   completed the server package in 104.457s. It retained only the known
   Guard/TaoGuard packet-order failures and the intermittent PlayerMeleePvP
