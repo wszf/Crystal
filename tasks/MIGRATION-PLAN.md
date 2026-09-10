@@ -250,7 +250,21 @@ only the known Guard/TaoGuard attack packet-order baseline flakes
 `TestSessionTaoGuardAttackTranscript`; this run was the
 missing-73/74/75/77 variant). Shop quirks and inspection packet-26 did
 not fail this run; treat suite flakes there as documented, not a new
+skip.
+Leftover ordinary melee/shield slices landed as `2342683`, `3a650bb`,
+`8d3abc2`, and `a16d4ca`: undead ordinary and warrior front hits add
+Stat.Holy, Spell.None selects frontTargets[0] in cell insertion order
+(empty list still falls back to playerAtLocked/monsterAtLocked), and
+MagicShield/ElementalBarrier durations use luck-aware MC. C# FlashDash
+still excludes Hero. Ordinary +300ms delayed impact remains immediate.
+Focused tests pass. Filtered broad with the six documented timing tests
+skipped completed crystal-server in 104.964s and failed only the known
+Guard/TaoGuard attack packet-order baseline flakes
+(`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`) plus the known inspection
+packet-26 flake (`TestInspectArchivedOnlineObjectUsesRegistry`). No new
 skip. CastleGate `AutoOpen` is dead C# and is not implemented.
 `PvpCanResistMagic` is editor-only. `CredxGold` is the editor GameShop
-gold-price seed. Remaining work is leftover packet/spell-AI behavior,
-then representative restart/economy integration. No new skip.
+gold-price seed. Remaining work is leftover packet/spell-AI behavior
+(FocusMasterTarget immediate pet/hero assignment, then the +300ms
+ordinary melee delay), then representative restart/economy integration.
