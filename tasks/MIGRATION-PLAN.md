@@ -197,10 +197,11 @@ Continue in this order:
    execute inherited idle Turn/ProcessRoam, with a shared receiver publication
    fix for immune direct fields; their filtered gate passed all packages.
    The inherited idle Turn/ProcessRoam audit is complete. Explicit
-   no-op/custom roam exclusions are recorded in Go status; move next to the
-   packet/Settings/spell-AI/item-ID and NPC conquest/tax behavior audit, then
-   representative restart/economy integration.
-2. Audit packet, Settings, spell/AI, item-ID allocation and NPC conquest/tax paths.
+   no-op/custom roam exclusions are recorded in Go status. Settings consumers,
+   NPC conquest tax, LineMessageTimer and OnlinePlayers workloop broadcasts
+   are landed; move next to remaining packet/spell-AI/item-ID behavior audit,
+   then representative restart/economy integration.
+2. Audit remaining packet, spell/AI and item-ID allocation paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
 Regression policy: keep the six reproduced baseline timing failures skipped (PoisonCloud, map-hazard restart, mount stale
@@ -213,10 +214,15 @@ reproduces 10/5000 on 6a61c66; skill timing on 20325e4; YinDevilNode 5/5000 on 4
 New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
 cutover acceptance remain unproven. No migration-complete claim yet.
 
-The latest committed Settings/packet batch is `908a3ad`, `001cff4`, `c70cf8d`,
-`7ce3fac`, and `3714d8a`; focused and targeted race checks pass. Its filtered
-broad gate reproduced only the known Guard/TaoGuard attack packet-order
-baseline failures, with no new skip. Continue with the confirmed Settings
-consumers (`MaxLuck`, relationship/mentor bonuses, rested XP, and monster
-recall) before the remaining packet/spell-AI/item-ID and NPC conquest/tax
-audit.
+The latest committed Settings/packet/workloop batch is `908a3ad`, `001cff4`,
+`c70cf8d`, `7ce3fac`, `3714d8a`, `1f699df`, `bacd310`, `f58e8e8`, `6903286`,
+`488f02d`, `245cad9`, `3f8eaa6`, and `42aeb51`; focused and targeted race
+checks pass. Confirmed Settings consumers now cover `MaxLuck`,
+relationship/mentor bonuses, rested XP, monster recall, and
+`LineMessageTimer`. NPC conquest shop/repair `PriceRate` and `GoldStorage`
+tax, plus the five-minute OnlinePlayers workloop hint, are landed.
+CastleGate `AutoOpen` is dead C# (never set true) and is not implemented.
+`PvpCanResistMagic` is editor-only and unused by the server. `CredxGold` is
+the editor GameShop gold-price seed. Client packet IDs already have
+dispatcher cases; remaining work is packet/spell-AI/item-ID behavior audit.
+No new skip.
