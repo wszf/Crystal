@@ -226,14 +226,20 @@ the experience owner. Item-ID CreateFreshItem gaps landed as `06e1c6c`,
 `386a1d6`, `57af2ff`, `5828edf`, `6ea93f5`, and `8993825` (partial stack
 drop including DestroyOnDrop, NPC GiveItem, craft output including failed
 rolls, quest carry including failed CanGainQuestItem, UniqueID-0 pickup,
-and awakening disassemble). Focused item-ID tests pass. Filtered broad with
-the six documented timing tests skipped completed in 122.010s for
-crystal-server and failed only the known Guard/TaoGuard attack packet-order
-baseline flakes (`TestSessionGuardAttackTranscript` and
-`TestSessionTaoGuardAttackTranscript`). Shop quirks did not fail this run;
-treat suite flakes there as documented, not a new skip. CastleGate
-`AutoOpen` is dead C# and is not implemented. `PvpCanResistMagic` is
-editor-only. `CredxGold` is the editor GameShop gold-price seed. Remaining
-work is leftover packet/spell-AI behavior (including generic
-`playerMagicDamage` MinMC-only fallback) and test-only item-ID fallbacks,
+and awakening disassemble). Leftover generic magic and remaining shop
+identity landed as `e09364a`, `ecebe8c`, and `d54f91d`: leftover targeted
+magic uses luck-aware MC range plus UserMagic.GetDamage, NPC partial-stack
+sell CreateFreshItem uses Envir.NextUserItemID including gold-overflow
+consumption, and PoisonShot expected damage uses production range MC.
+Focused tests pass. Filtered broad with the six documented timing tests
+skipped completed in 122.528s for crystal-server and failed only the known
+Guard/TaoGuard attack packet-order baseline flakes
+(`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`; this run was the missing-73/74/75/77
+variant). Shop quirks did not fail this run; treat suite flakes there as
+documented, not a new skip. CastleGate `AutoOpen` is dead C# and is not
+implemented. `PvpCanResistMagic` is editor-only. `CredxGold` is the editor
+GameShop gold-price seed. Remaining work is leftover packet/spell-AI
+behavior and test-only item-ID fallbacks (shop buy placeholder, split
+wrapper, mine/drop/intelligent-creature when no allocator is supplied),
 then representative restart/economy integration. No new skip.
