@@ -217,12 +217,23 @@ cutover acceptance remain unproven. No migration-complete claim yet.
 The latest committed Settings/packet/workloop batch is `908a3ad`, `001cff4`,
 `c70cf8d`, `7ce3fac`, `3714d8a`, `1f699df`, `bacd310`, `f58e8e8`, `6903286`,
 `488f02d`, `245cad9`, `3f8eaa6`, and `42aeb51`; focused and targeted race
-checks pass. Confirmed Settings consumers now cover `MaxLuck`,
-relationship/mentor bonuses, rested XP, monster recall, and
-`LineMessageTimer`. NPC conquest shop/repair `PriceRate` and `GoldStorage`
-tax, plus the five-minute OnlinePlayers workloop hint, are landed.
-CastleGate `AutoOpen` is dead C# (never set true) and is not implemented.
-`PvpCanResistMagic` is editor-only and unused by the server. `CredxGold` is
-the editor GameShop gold-price seed. Client packet IDs already have
-dispatcher cases; remaining work is packet/spell-AI/item-ID behavior audit.
-No new skip.
+checks pass. Leftover recall/rested slices landed as `c18935e`, `9ed4553`,
+`4f9928e`, and `164b112`: monster recall stays in the revelation refresh
+ledger, AutoRev wild health notifies the master group then a distinct
+experience-owner group (not nearby-all), login Rested AddBuff is drained
+during StartGame bootstrap, and recall fixtures attribute AutoRev health to
+the experience owner. Item-ID CreateFreshItem gaps landed as `06e1c6c`,
+`386a1d6`, `57af2ff`, `5828edf`, `6ea93f5`, and `8993825` (partial stack
+drop including DestroyOnDrop, NPC GiveItem, craft output including failed
+rolls, quest carry including failed CanGainQuestItem, UniqueID-0 pickup,
+and awakening disassemble). Focused item-ID tests pass. Filtered broad with
+the six documented timing tests skipped completed in 122.010s for
+crystal-server and failed only the known Guard/TaoGuard attack packet-order
+baseline flakes (`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`). Shop quirks did not fail this run;
+treat suite flakes there as documented, not a new skip. CastleGate
+`AutoOpen` is dead C# and is not implemented. `PvpCanResistMagic` is
+editor-only. `CredxGold` is the editor GameShop gold-price seed. Remaining
+work is leftover packet/spell-AI behavior (including generic
+`playerMagicDamage` MinMC-only fallback) and test-only item-ID fallbacks,
+then representative restart/economy integration. No new skip.
