@@ -212,6 +212,8 @@ Continue in this order:
    status.
    The shared PlayerObject.Die PK/luck penalty path is restored as `a14250c`;
    default-NPC Die callback parity remains explicitly separate.
+   Focused representative quest/shop/guild/economy/combat restart checks pass;
+   the post-death filtered broad gate retains only Guard/TaoGuard baselines.
 2. Audit remaining packet, spell/AI and item-ID allocation paths.
    Fix confirmed gaps in focused commits with tests; update this plan with evidence.
 3. Complete remaining integration acceptance and report its actual limits.
