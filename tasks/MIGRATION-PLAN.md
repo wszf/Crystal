@@ -354,6 +354,9 @@ integration.
 - `1409ec3` adds auth-wide offline daily-completion reset; focused auth/server
   tests and targeted race pass. Offline `[@_Daily]` execution on next login
   remains separate.
+- `7386296` replays pending registered `[@_Daily]` once during authenticated
+  bootstrap and consumes the marker for online callbacks, with focused/race
+  coverage.
 - The corrected filtered broad gate with the six documented timing exclusions
   completed the server package in 104.339s. It retained only the known
   Guard/TaoGuard packet-order failures; all other packages passed. No new skip
