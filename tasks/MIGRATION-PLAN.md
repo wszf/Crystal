@@ -298,6 +298,19 @@ crystal-server in 121.395s and failed only the known Guard/TaoGuard
 attack packet-order baseline flakes (`TestSessionGuardAttackTranscript`
 and `TestSessionTaoGuardAttackTranscript`; this run was the
 missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
+did not fail this run. No new skip.
+Leftover HumanObject.Process run fatigue, stacking unstack, and torch wear
+landed as Go `26d721f`. Unmounted runs increment `_runCounter` and
+ChangeHP(-1) after 10. Teleport/NPC Show arm 1s stacking pushes.
+Equipped torches wear every 10s and delete at 0 dura. C# FlashDash still
+excludes Hero. CastleGate AutoOpen is dead C# and is not implemented.
+PvpCanResistMagic is editor-only. CredxGold is the editor GameShop
+gold-price seed. Focused tests and targeted race pass. Filtered broad
+with the six documented timing tests skipped completed crystal-server in
+105.159s and failed only the known Guard/TaoGuard attack packet-order
+baseline flakes (`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`; this run was the
+missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
 did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
