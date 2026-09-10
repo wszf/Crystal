@@ -331,3 +331,20 @@ missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
 did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
+
+Leftover Hero Process torch wear and WarriorHero.ProcessFriend Rage/
+ProtectionField landed as Go `cfbf214` and `4deff57`. Heroes wear torches
+every 10s and DeleteItem at 0 dura without DuraChanged. Warriors select
+Rage then ProtectionField while a target exists and apply them immediately
+during Magic. C# FlashDash still excludes Hero. CastleGate AutoOpen is
+dead C# and is not implemented. PvpCanResistMagic is editor-only.
+CredxGold is the editor GameShop gold-price seed. Focused tests and
+targeted race pass. Filtered broad with the six documented timing tests
+skipped completed crystal-server in 105.105s and failed only the known
+Guard/TaoGuard attack packet-order baseline flakes
+(`TestSessionGuardAttackTranscript` and
+`TestSessionTaoGuardAttackTranscript`; this run was the
+missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
+did not fail this run. No new skip. Remaining work is leftover
+packet/spell-AI behavior, then representative restart/economy
+integration.
