@@ -348,6 +348,9 @@ integration.
 - `aa6bd72` restores `[@_MapCoord(map,x,y)]` registration and Turn/Walk/Run
   dispatch with focused/race coverage; Daily remains blocked on missing Go
   NewDay state.
+- `f53ea02` / `382f5d1` add the production online midnight Daily reset and
+  `[@_Daily]` callback with focused/race coverage; offline NewDay persistence
+  remains open.
 - The corrected filtered broad gate with the six documented timing exclusions
   completed the server package in 104.339s. It retained only the known
   Guard/TaoGuard packet-order failures; all other packages passed. No new skip
