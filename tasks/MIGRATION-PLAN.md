@@ -385,6 +385,15 @@ the remaining packet/spell-AI audit from the documented non-goals.
   skip was added, and `cmd/crystal-server/Envir/Goods/700.msd` remains
   untracked/excluded.
 
+- `7a93606` restores Legacy monster-master targeting for Hero CounterAttack:
+  a pet hit now retaliates against its Player, Hero or monster master instead
+  of the pet object, matching `LastHitter = attacker.Master ?? attacker`.
+  Focused master-target coverage and the targeted race pass. The shared-helper
+  filtered broad gate completed `cmd/crystal-server` in 127.777s and retained
+  only the documented Guard/TaoGuard packet-order baselines; all other
+  packages passed. No new skip was added, and `700.msd` remains
+  untracked/excluded.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
