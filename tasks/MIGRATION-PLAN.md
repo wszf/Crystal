@@ -397,6 +397,13 @@ inherited-alone state before returning. Active-target behavior is unchanged;
 focused and targeted-race checks pass. The documented PoisonCloud broad
 timeout remains the last batch-level baseline, so no broad rerun was repeated.
 
+Go commit `87ea623` extends the same post-hook boundary through Shinsu,
+EvilMir, EarthGolem, CreeperPlant and HornedCommander. Mode, sleep/wake, stone,
+visibility and health-phase transitions remain active before idle search is
+suppressed; focused and targeted-race checks pass. Owner/pet-specific custom
+loops and non-base StoneTrap behavior remain intentionally outside this gate,
+and no broad rerun was started after the known PoisonCloud timeout.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
