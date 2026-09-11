@@ -404,6 +404,12 @@ suppressed; focused and targeted-race checks pass. Owner/pet-specific custom
 loops and non-base StoneTrap behavior remain intentionally outside this gate,
 and no broad rerun was started after the known PoisonCloud timeout.
 
+Go commit `d7f19e5` adds the source ledger test for the remaining non-inherited
+exceptions: owner/pet-only HumanAssassin, VampireSpider, SpittingToad,
+SnakeTotem, CharmedSnake and IntelligentCreature paths, plus CastleGate,
+BoulderSpirit and StoneTrap. Focused and targeted-race checks pass; no broad
+rerun was repeated for this test-only audit closure.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
