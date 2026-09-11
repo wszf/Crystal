@@ -356,6 +356,11 @@ the remaining packet/spell-AI audit from the documented non-goals.
   CounterAttack toggle route; its packet order and mana result pass focused
   and targeted-race validation.
 
+- Real-data rehearsal startup/handshake now passes from a fresh 117/0 export
+  in a disposable runtime. Authenticated replay remains open because the
+  exported account credentials are unavailable; continue with the documented
+  representative authenticated dataset evidence when credentials are supplied.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
