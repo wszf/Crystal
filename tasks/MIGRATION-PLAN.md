@@ -331,6 +331,13 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+Go commit `51d6b11` adds bootstrap-only idle-timeout grace. The default-timeout
+full-map replay now clears the GameMaster bootstrap but still resets before the
+first movement response after full-population visibility; the same replay
+passes with the disposable 60-second timeout override. Isolate that remaining
+movement/visibility latency before changing production timeout policy; no
+production configuration or cutover claim is made.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
