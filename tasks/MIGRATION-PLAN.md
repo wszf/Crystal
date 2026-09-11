@@ -342,6 +342,10 @@ the remaining packet/spell-AI audit from the documented non-goals.
   `CounterAttack`: living summoned Heroes now receive the seven-second AC/MAC
   buff and authoritative mana deduction, with focused/race coverage. Hero
   CounterAttack retaliation in shared receivers remains the next focused leaf.
+- `74703a8` completes that retaliation leaf for positive player/monster→Hero
+  receiver paths, including Hero-owned delayed AC damage, skill training and
+  owner-backed target authority. Focused/race coverage passes; the filtered
+  broad gate retains only the documented Guard/TaoGuard packet-order baselines.
 
 ## Current package-5 checkpoint — 2026-09-10
 
