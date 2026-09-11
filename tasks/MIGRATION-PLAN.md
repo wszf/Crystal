@@ -363,6 +363,9 @@ the remaining packet/spell-AI audit from the documented non-goals.
 - A second clean startup/shutdown against the same exported files also reaches
   `Network Started`, so restart loading is evidenced; authenticated replay and
   persisted gameplay comparison remain credential-gated.
+- `1e04104` wires Hero CounterAttack into five specialized monster→Hero
+  receivers that bypass the shared body, with focused/race coverage and a
+  filtered broad gate retaining only the documented Guard/TaoGuard baselines.
 
 ## Current package-5 checkpoint — 2026-09-10
 
