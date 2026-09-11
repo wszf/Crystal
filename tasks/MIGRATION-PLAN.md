@@ -331,6 +331,18 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## Package-5 item-identity checkpoint — 2026-09-11
+
+Go commit `912f7ce` removes the intelligent-creature BlackStone/Strongbox
+`nextCharacterItemID` fallback. Persistent creature rewards now require the
+configured world allocator, matching production `authService.AllocateItemID`;
+absent or exhausted allocators reject creation rather than fabricating a
+character-local identity. Focused and targeted-race IntelligentCreature tests
+pass. The remaining item-identity audit is limited to detached shop/split/
+mine/drop fixtures, followed by representative restart/economy acceptance.
+The known Guard/TaoGuard packet-order baselines remain non-blocking, and
+`cmd/crystal-server/Envir/` remains untracked.
+
 ## Current package-5 checkpoint — 2026-09-11
 
 Daily parity is complete across online midnight reset, offline auth reset,
