@@ -351,6 +351,21 @@ Timing isolates that boundary: about 75,743 monsters are loaded and
 skips roughly 66,550 objects; suppressing custom alone-processing classes
 requires a Legacy audit and is not safe to invent.
 
+The first source-confirmed custom-AI idle audit is now landed in Go commits
+`34fd959`, `0a4300f` and `daf5513`: RevivingZombie uses the inherited idle gate
+because its separate revival pass already runs before live AI; wild HumanWizard
+uses it because the owner-MP branch is handled by ordinary-pet processing; and
+idle Trainers are skipped only when no attacker report is pending. Focused and
+targeted-race tests pass. The audit leaves Zuma/Wooma/DigOut/Cannibal and other
+nearby-object visibility/wake overrides active because Legacy `FindNearby`
+includes eligible monsters and Heroes, so no speculative custom suppression is
+claimed. The post-batch filtered broad gate completed in 111.9s, with all
+non-server packages passing; the server package reproduced current unrelated
+awakening, loot/harvest/fishing, LoverRecall, reload-drop and mob-command
+baseline failures plus the known Guard/TaoGuard packet-order failures. These
+remain documented/non-blocking and no new skip was added. Continue the remaining
+source-confirmed custom-AI audit and then rerun the consolidated acceptance gate.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
