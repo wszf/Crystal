@@ -430,6 +430,13 @@ the remaining packet/spell-AI audit from the documented non-goals.
   only the documented Guard/TaoGuard packet-order baselines; all other
   packages passed. No new skip was added.
 
+- Candidate immediate natural-regen reset commits `0e01ed5`/`b4efcb6` were
+  rolled back by `4fe21ad`/`0e9e944`: the existing specialized Hero death/
+  protection acceptance contract intentionally retains `RegenResetPending`
+  for the tick-based reset on those receivers. Focused death/direct/race
+  checks pass after rollback; the filtered broad gate retained only the
+  documented Guard/TaoGuard packet-order baselines.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
