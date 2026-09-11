@@ -367,6 +367,15 @@ the remaining packet/spell-AI audit from the documented non-goals.
   receivers that bypass the shared body, with focused/race coverage and a
   filtered broad gate retaining only the documented Guard/TaoGuard baselines.
 
+- `bc18674` wires Hero CounterAttack into the next five specialized
+  monster→Hero receivers: DarkOmaKing, GeneralMeowMeow, TucsonGeneral,
+  EarthGolem and AssassinBird. Focused direct-receiver coverage and the
+  targeted race pass. The filtered broad gate completed
+  `cmd/crystal-server` in 105.144s and retained only the documented
+  Guard/TaoGuard packet-order baselines; all other packages passed. No new
+  skip was added, and `cmd/crystal-server/Envir/Goods/700.msd` remains
+  untracked/excluded.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
