@@ -338,6 +338,13 @@ passes with the disposable 60-second timeout override. Isolate that remaining
 movement/visibility latency before changing production timeout policy; no
 production configuration or cutover claim is made.
 
+Go commit `fcdc892` reduces idle inherited-AI work on playerless maps while
+preserving CheckAlone state and custom/route behavior. Focused/race tests pass;
+the full-map default-timeout replay now reaches movement but still resets at
+logout response, while the disposable 60-second run succeeds. Isolate the
+remaining full-population world/write latency before changing production
+timeout policy.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
