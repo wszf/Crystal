@@ -418,6 +418,13 @@ character (`c9387064...` to `e089ebf2...`); `world.json` remained byte-for-byte
 unchanged. The default 10-second movement/visibility latency boundary remains
 open, with no production timeout or cutover change claimed.
 
+The matching current-code diagnostic without the disposable timeout loaded all
+463 map metadata records and reached the authenticated relogin turn on isolated
+`127.0.0.2:17321`, then timed out waiting for the turn response after 15
+seconds. This confirms the existing default 10-second full-population
+movement/visibility boundary; no persisted comparison, production timeout
+change, or cutover claim follows.
+
 The focused representative restart/economy batch was rerun after the
 custom-AI audit and passes normally and under targeted `-race`: quest reward
 restart, NPC shop logout persistence, guild storage restart, economy checkpoint
