@@ -356,12 +356,14 @@ account character/item counters while leaving `world.json` byte-for-byte
 unchanged. Focused probe/race tests pass. This closes the focused persisted
 restart boundary; full representative load/cutover acceptance remains open.
 
-The complete-map follow-up reached Go `Network Started` with all 463 map
-metadata records but retained 63 export/asset filename mismatches; the
-authenticated existing-character session reset during the GameMaster
-bootstrap keep-alive barrier. This is a concrete real-data bootstrap blocker,
-not a credential blocker. Stop and isolate that boundary before another
-identical replay; no cutover claim is made.
+The complete-map follow-up is now isolated: Go commit `b0b897b` matches Legacy
+case-insensitively on map filenames/extensions, and the changed rehearsal
+loaded all 463 map metadata records from 497 available map files with zero map
+warnings. Existing-character authenticated gameplay/logout passed with the
+explicit disposable `CRYSTAL_TIMEOUT_MS=60000` override. The default 10-second
+timeout still resets this large bootstrap, so production/default-timeout tuning
+and full load/cutover acceptance remain open; no production configuration was
+changed and no credential blocker remains.
 
 ## Current package-5 checkpoint — 2026-09-11
 
