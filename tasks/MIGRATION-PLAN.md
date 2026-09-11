@@ -414,6 +414,15 @@ the remaining packet/spell-AI audit from the documented non-goals.
   105.195s and retained only the documented Guard/TaoGuard packet-order
   baselines; all other packages passed. No new skip was added.
 
+- `9af1b37` applies the shared Hero stealth-removal rule to the first five
+  direct monster receivers; `063599a` completes the remaining five. Positive
+  monster hits clear Hero MoonLight/DarkBody state and publish the existing
+  hidden-state removal packet before retaliation/damage. Focused direct/race
+  checks pass. The consolidated filtered broad gate completed
+  `cmd/crystal-server` in 105.777s and retained only the documented
+  Guard/TaoGuard packet-order baselines plus the intermittent inspection
+  registry baseline; all other packages passed. No new skip was added.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
