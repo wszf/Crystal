@@ -410,6 +410,13 @@ SnakeTotem, CharmedSnake and IntelligentCreature paths, plus CastleGate,
 BoulderSpirit and StoneTrap. Focused and targeted-race checks pass; no broad
 rerun was repeated for this test-only audit closure.
 
+The focused representative restart/economy batch was rerun after the
+custom-AI audit and passes normally and under targeted `-race`: quest reward
+restart, NPC shop logout persistence, guild storage restart, economy checkpoint
+counters/collection, and ordinary combat. Full representative load/cutover
+acceptance remains open; the documented PoisonCloud broad timeout and unrelated
+baseline failures are unchanged.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
