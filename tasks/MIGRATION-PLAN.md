@@ -406,6 +406,14 @@ the remaining packet/spell-AI audit from the documented non-goals.
   inspection packet-26 baseline; all other packages passed. No new skip was
   added.
 
+- `c6ecac4` adds the source-confirmed 500ms Hero monster-hit
+  `Struck`/`ObjectStruck` throttle to the shared receiver and first five
+  specialized paths; `54113eb` completes the remaining five specialized
+  paths. Focused repeated-hit coverage and targeted race checks pass. The
+  consolidated filtered broad gate completed `cmd/crystal-server` in
+  105.195s and retained only the documented Guard/TaoGuard packet-order
+  baselines; all other packages passed. No new skip was added.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
