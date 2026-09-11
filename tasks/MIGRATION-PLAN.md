@@ -346,6 +346,12 @@ the remaining packet/spell-AI audit from the documented non-goals.
   receiver paths, including Hero-owned delayed AC damage, skill training and
   owner-backed target authority. Focused/race coverage passes; the filtered
   broad gate retains only the documented Guard/TaoGuard packet-order baselines.
+- The follow-up Legacy packet/spell-AI comparison found no additional
+  reachable gap after the inherited Hero toggle audit. The focused
+  representative integration batch (quest relogin/restart, NPC shop logout,
+  guild storage restart, economy checkpoint and ordinary combat) passes.
+  Continue toward the representative dataset rehearsal; retain the documented
+  non-goals and baseline failures.
 
 ## Current package-5 checkpoint — 2026-09-10
 
