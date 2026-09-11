@@ -461,6 +461,12 @@ the remaining packet/spell-AI audit from the documented non-goals.
   Guard/TaoGuard packet-order baselines; all other packages passed. No new
   skip was added.
 
+- Focused representative package-5 rehearsal batch passes in 0.323s:
+  quest reward restart, NPC shop logout persistence, guild storage, economy
+  checkpoint collection, and ordinary combat transcript. Real-data
+  authenticated replay and paired persisted-state comparison remain gated on
+  credentials unavailable in the exported dataset.
+
 - `e4c5a62` restores non-weapon Hero `DamageDura` for the first five direct
   monster receivers; `56e87ff` completes the remaining five, and `1874f12`
   extends the same runtime-authority wear to shared monster/player→Hero
