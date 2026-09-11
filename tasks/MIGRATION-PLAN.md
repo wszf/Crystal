@@ -423,6 +423,13 @@ the remaining packet/spell-AI audit from the documented non-goals.
   Guard/TaoGuard packet-order baselines plus the intermittent inspection
   registry baseline; all other packages passed. No new skip was added.
 
+- `b43597c` applies the source-confirmed LRParalysis removal and Hero operation
+  reset to the first five direct monster receivers; `24354aa` completes the
+  remaining five. Focused poison-state/race checks pass. The consolidated
+  filtered broad gate completed `cmd/crystal-server` in 105.471s and retained
+  only the documented Guard/TaoGuard packet-order baselines; all other
+  packages passed. No new skip was added.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
