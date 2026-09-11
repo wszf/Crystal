@@ -375,6 +375,16 @@ and the same unrelated awakening/loot/harvest/fishing/LoverRecall/reload-drop/
 mob-command plus Guard/TaoGuard baseline failures. No new skip or regression
 was identified; continue the remaining custom-AI source audit.
 
+Go commits `6821978`, `d6f4f10` and `11d7dcb` continue the source-confirmed
+post-hook gate through TurtleGrass, ManTree, HoodedSummonerScrolls,
+PurpleFaeFlower, TrapRock, GreatFoxSpirit, DragonStatue, TurtleKing,
+FrostTiger and Yimoogi. Focused and targeted-race checks pass. The following
+filtered broad run reproduced the same unrelated awakening/loot/harvest/fishing
+and Guard/TaoGuard baselines, then reached the documented five-minute
+`TestSessionPoisonCloudTranscriptAndPersistence` timeout; auxiliary packages
+passed and no new skip was added. GeneralMeowMeow, DemonGuard and HellLord
+remain separate state-machine audits.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
