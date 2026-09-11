@@ -352,6 +352,9 @@ the remaining packet/spell-AI audit from the documented non-goals.
   guild storage restart, economy checkpoint and ordinary combat) passes.
   Continue toward the representative dataset rehearsal; retain the documented
   non-goals and baseline failures.
+- `76dbe08` adds connected-session acceptance for the inherited Hero
+  CounterAttack toggle route; its packet order and mana result pass focused
+  and targeted-race validation.
 
 ## Current package-5 checkpoint — 2026-09-10
 
