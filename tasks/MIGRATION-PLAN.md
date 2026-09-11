@@ -360,6 +360,9 @@ the remaining packet/spell-AI audit from the documented non-goals.
   in a disposable runtime. Authenticated replay remains open because the
   exported account credentials are unavailable; continue with the documented
   representative authenticated dataset evidence when credentials are supplied.
+- A second clean startup/shutdown against the same exported files also reaches
+  `Network Started`, so restart loading is evidenced; authenticated replay and
+  persisted gameplay comparison remain credential-gated.
 
 ## Current package-5 checkpoint — 2026-09-10
 
