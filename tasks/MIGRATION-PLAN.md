@@ -343,6 +343,12 @@ the next slice is representative restart/economy acceptance. The known
 Guard/TaoGuard packet-order baselines remain non-blocking, and
 `cmd/crystal-server/Envir/` remains untracked.
 
+The focused representative acceptance batch also passes after the identity
+audit: quest reward restart, NPC shop logout persistence, guild storage
+restart, economy checkpoint counters, and ordinary combat pass in focused and
+targeted-race runs. Full representative load/cutover evidence remains open;
+the known Guard/TaoGuard packet-order baselines remain non-blocking.
+
 ## Current package-5 checkpoint — 2026-09-11
 
 Daily parity is complete across online midnight reset, offline auth reset,
