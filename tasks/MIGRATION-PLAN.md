@@ -391,6 +391,12 @@ it and dead-state revival remains separately processed. Focused and targeted-
 race checks pass. No additional broad run was started after the documented
 PoisonCloud timeout; GeneralMeowMeow and HellLord remain separate audits.
 
+Go commit `d36b685` completes that small state-machine slice: GeneralMeowMeow
+gates playerless search, while HellLord resets its stage and preserves the
+inherited-alone state before returning. Active-target behavior is unchanged;
+focused and targeted-race checks pass. The documented PoisonCloud broad
+timeout remains the last batch-level baseline, so no broad rerun was repeated.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
