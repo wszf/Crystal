@@ -331,6 +331,13 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## Current package-5 checkpoint — 2026-09-11
+
+Daily parity is complete across online midnight reset, offline auth reset,
+and one-shot authenticated `[@_Daily]` replay. The final filtered gate
+retained only the documented Guard/TaoGuard packet-order baselines; continue
+the remaining packet/spell-AI audit from the documented non-goals.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
