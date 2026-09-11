@@ -357,6 +357,10 @@ integration.
 - `7386296` replays pending registered `[@_Daily]` once during authenticated
   bootstrap and consumes the marker for online callbacks, with focused/race
   coverage.
+- Consolidated focused package-5 acceptance passes across NewDay replay,
+  MapCoord, default-NPC callbacks, quest/shop/guild/economy restart and combat
+  transcripts. No additional source-confirmed packet/spell-AI leaf is selected
+  yet; retain the documented baselines and non-goals.
 - The corrected filtered broad gate with the six documented timing exclusions
   completed the server package in 104.339s. It retained only the known
   Guard/TaoGuard packet-order failures; all other packages passed. No new skip
