@@ -554,6 +554,32 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## Credentialed Package-5 replay update — 2026-09-11
+
+The earlier startup-only rehearsal's credential blocker is lifted. A fresh
+disposable Go run copied from `/tmp/pkg5-auth-ready/` authenticated as
+`pkg5test`, created `Pkg5Replay`, completed gameplay/bootstrap traffic, cleanly
+logged out, relogged the same character, performed one harmless turn, and
+cleanly logged out again on isolated listener `127.0.0.2:17453`. The protected
+4L `127.0.0.1:7000` server and its databases, `Envir/`, and `Goods/` were not
+stopped or modified. Go commit `b2307b8` adds the opt-in relogin probe path and
+real-data ambient bootstrap filtering.
+
+Post-shutdown persistence evidence: `accounts.json` changed from zero
+`pkg5test` characters to persisted character index 3 (`Pkg5Replay`), with
+`nextCharacterId` 3→4 and `nextItemId` 8→12. `world.json` remained
+byte-for-byte unchanged. Exact hashes, the 463-map metadata startup evidence,
+and the clean-stop log markers are recorded in
+`Crystal.GoServer/docs/MIGRATION-REHEARSAL.md` and
+`Crystal.GoServer/docs/MIGRATION-STATUS.md`. Credentials and disposable JSON
+files remain outside Git.
+
+This closes the credential-only replay blocker, not Package 5 acceptance. The
+remaining slice is the source-confirmed packet/spell-AI audit and consolidated
+restart/economy acceptance. Existing Guard/TaoGuard packet-order baseline
+failures remain documented and non-blocking; no broad suite was rerun for this
+focused replay leaf.
+
 Leftover Hero Process torch wear and WarriorHero.ProcessFriend Rage/
 ProtectionField landed as Go `cfbf214` and `4deff57`. Heroes wear torches
 every 10s and DeleteItem at 0 dura without DuraChanged. Warriors select
