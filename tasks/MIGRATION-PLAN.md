@@ -338,6 +338,11 @@ and one-shot authenticated `[@_Daily]` replay. The final filtered gate
 retained only the documented Guard/TaoGuard packet-order baselines; continue
 the remaining packet/spell-AI audit from the documented non-goals.
 
+- `a9dd9c3` restores the source-confirmed Hero `SpellToggle(None)` route for
+  `CounterAttack`: living summoned Heroes now receive the seven-second AC/MAC
+  buff and authoritative mana deduction, with focused/race coverage. Hero
+  CounterAttack retaliation in shared receivers remains the next focused leaf.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
