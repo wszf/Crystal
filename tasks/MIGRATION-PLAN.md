@@ -410,6 +410,14 @@ SnakeTotem, CharmedSnake and IntelligentCreature paths, plus CastleGate,
 BoulderSpirit and StoneTrap. Focused and targeted-race checks pass; no broad
 rerun was repeated for this test-only audit closure.
 
+A fresh current-code full-map replay now passes under the disposable
+`CRYSTAL_TIMEOUT_MS=60000` override: all 463 map metadata records loaded,
+authenticated `Pkg5Current` create/gameplay/logout/relogin/turn completed, and
+the server stopped cleanly. The account export changed only for the persisted
+character (`c9387064...` to `e089ebf2...`); `world.json` remained byte-for-byte
+unchanged. The default 10-second movement/visibility latency boundary remains
+open, with no production timeout or cutover change claimed.
+
 The focused representative restart/economy batch was rerun after the
 custom-AI audit and passes normally and under targeted `-race`: quest reward
 restart, NPC shop logout persistence, guild storage restart, economy checkpoint
