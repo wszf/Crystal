@@ -356,6 +356,13 @@ account character/item counters while leaving `world.json` byte-for-byte
 unchanged. Focused probe/race tests pass. This closes the focused persisted
 restart boundary; full representative load/cutover acceptance remains open.
 
+The complete-map follow-up reached Go `Network Started` with all 463 map
+metadata records but retained 63 export/asset filename mismatches; the
+authenticated existing-character session reset during the GameMaster
+bootstrap keep-alive barrier. This is a concrete real-data bootstrap blocker,
+not a credential blocker. Stop and isolate that boundary before another
+identical replay; no cutover claim is made.
+
 ## Current package-5 checkpoint — 2026-09-11
 
 Daily parity is complete across online midnight reset, offline auth reset,
