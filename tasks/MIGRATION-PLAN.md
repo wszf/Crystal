@@ -437,6 +437,15 @@ the remaining packet/spell-AI audit from the documented non-goals.
   checks pass after rollback; the filtered broad gate retained only the
   documented Guard/TaoGuard packet-order baselines.
 
+- `9f7b65f` applies Legacy shield-duration damage to the first five direct
+  monster→Hero receivers; `a767018` completes the remaining five. Positive
+  hits shorten MagicShield/ElementalBarrier while preserving buff stats and
+  clocks. Focused duration/race checks pass. The consolidated filtered broad
+  gate completed `cmd/crystal-server` in 106.409s and retained only the known
+  Guard/TaoGuard packet-order baselines plus the documented intermittent
+  `TestSessionPlayerMeleePvPTranscript` baseline; all other packages passed.
+  No new skip was added.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
