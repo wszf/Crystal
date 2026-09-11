@@ -476,6 +476,13 @@ the remaining packet/spell-AI audit from the documented non-goals.
   105.468s and retained only the documented Guard/TaoGuard packet-order
   baselines; all other packages passed. No new skip was added.
 
+- `710ec23` applies Legacy `DamageReductionPercent` before armour admission to
+  the three remaining direct Hero receivers: AncientBringer, AssassinBird and
+  HumanAssassin. Focused HP-reduction/race checks pass. The consolidated
+  filtered broad gate completed `cmd/crystal-server` in 104.824s and retained
+  only the documented Guard/TaoGuard packet-order baselines; all other
+  packages passed. No new skip was added.
+
 - `e4c5a62` restores Legacy non-weapon Hero `DamageDura` for the first five
   direct monster receivers; `56e87ff` completes the remaining five. Runtime
   equipment authority wears one point per eligible slot, refreshes broken
