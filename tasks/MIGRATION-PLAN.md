@@ -385,6 +385,12 @@ and Guard/TaoGuard baselines, then reached the documented five-minute
 passed and no new skip was added. GeneralMeowMeow, DemonGuard and HellLord
 remain separate state-machine audits.
 
+Go commit `0eee3ee` closes the DemonGuard portion of that audit: the live Zuma
+wake hook remains active, while the inherited playerless tail is gated after
+it and dead-state revival remains separately processed. Focused and targeted-
+race checks pass. No additional broad run was started after the documented
+PoisonCloud timeout; GeneralMeowMeow and HellLord remain separate audits.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
