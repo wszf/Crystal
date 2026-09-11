@@ -446,6 +446,13 @@ the remaining packet/spell-AI audit from the documented non-goals.
   `TestSessionPlayerMeleePvPTranscript` baseline; all other packages passed.
   No new skip was added.
 
+- `ae79835` applies the existing Hero EnergyShield absorption authority to the
+  first five direct monster→Hero receivers; `9456c57` completes the remaining
+  five. Focused absorption-order/race checks pass. The consolidated filtered
+  broad gate completed `cmd/crystal-server` in 107.888s and retained only the
+  documented Guard/TaoGuard packet-order baselines; all other packages passed.
+  No new skip was added.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
