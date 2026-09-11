@@ -415,8 +415,9 @@ A fresh current-code full-map replay now passes under the disposable
 authenticated `Pkg5Current` create/gameplay/logout/relogin/turn completed, and
 the server stopped cleanly. The account export changed only for the persisted
 character (`c9387064...` to `e089ebf2...`); `world.json` remained byte-for-byte
-unchanged. The default 10-second movement/visibility latency boundary remains
-open, with no production timeout or cutover change claimed.
+unchanged. **KNOWN OPEN BOUNDARY:** the default 10-second
+movement/visibility latency remains open, with no production timeout or
+cutover change claimed.
 
 The matching current-code diagnostic without the disposable timeout loaded all
 463 map metadata records and reached the authenticated relogin turn on isolated
