@@ -68,7 +68,12 @@ Retain existing tests even when their historical names mention old milestones.
 The isolated 117/0 snapshot validates client/gameplay/restart traces; production
 parity and load/cutover remain unproven. Unsupported database versions must error.
 
-## Execution and current acceptance
+## Execution and current acceptance — Packages 1–5 closed
+
+Authoritative current status: Packages 1–5 are accepted and complete. The
+detailed execution history below is retained as historical evidence only; it
+is not an unfinished work queue. The sole retained open boundary is the
+measured default 10-second full-map movement/visibility performance limit.
 
 1. WORLD actions landed as Go `3591b2b`; focused parser/runtime/session tests pass.
 2. Shield IDs landed as `712134e`; numeric wire and lifecycle/race tests pass.
@@ -94,7 +99,7 @@ Completed operator/NPC, archive, skill metadata and session-authority commit
 history is recorded in Go `docs/MIGRATION-STATUS.md`. Use the current execution
 items below; completed historical commits are evidence, not a new work queue.
 
-Continue in this order:
+Historical execution order (completed; retained as evidence):
 1. KILL/DIE now use direct death lifecycle with revival/drop authority,
    GMNeverDie distinctions and Legacy broadcast counts. Go status records the
    tests and remaining shared death gaps (PK/luck penalties and default-NPC Die).
@@ -227,8 +232,10 @@ not an unfiltered-green suite. OmaMage extra-roll transcript flakiness also
 reproduces on untouched ccdb06b; it has not been added to the six exclusions.
 Inspection packet-26 reproduces 21/100 on 9821e04; timed-recall queue flake
 reproduces 10/5000 on 6a61c66; skill timing on 20325e4; YinDevilNode 5/5000 on 498caac; TaoGuard colour 5/50 on 3bc5121 (two missing, three early). Guard AttackMode packet order reproduces 8/100 on b75248a (six missing, two early). No new skips.
-New regressions must be fixed; pre-existing failures do not block package work. Long-running load/crash recovery and production
-cutover acceptance remain unproven. No migration-complete claim yet.
+New regressions remain subject to the documented baseline policy. Packages 1–5
+are accepted; overall production cutover remains unclaimed only because the
+default 10-second full-map performance boundary is open. This is a performance
+acceptance boundary, not a missing Package 5 feature leaf.
 
 The latest committed Settings/packet/workloop batch is `908a3ad`, `001cff4`,
 `c70cf8d`, `7ce3fac`, `3714d8a`, `1f699df`, `bacd310`, `f58e8e8`, `6903286`,
@@ -430,8 +437,9 @@ The focused representative restart/economy batch was rerun after the
 custom-AI audit and passes normally and under targeted `-race`: quest reward
 restart, NPC shop logout persistence, guild storage restart, economy checkpoint
 counters/collection, and ordinary combat. Full representative load/cutover
-acceptance remains open; the documented PoisonCloud broad timeout and unrelated
-baseline failures are unchanged.
+acceptance was historically open at this checkpoint; the authoritative Package
+5 closure below retains only the known default-timeout performance boundary,
+with PoisonCloud and other baselines documented separately.
 
 Temporary opt-in timing on the same disposable full-map runtime measured the
 locked world tick at roughly 0.5s before monster AI, 1.3–1.7s in monster AI,
@@ -439,6 +447,17 @@ and 2.0–2.6s total; the relogin turn waits behind repeated ticks. The timing
 instrumentation was removed. Remaining custom nearby-object probes are
 source-sensitive, so no speculative suppression or production timeout change
 was made.
+
+## Package 5 closure — authoritative
+
+Packages 1–5 are accepted and complete. Focused parity, packet/spell-AI,
+restart/economy, authenticated replay, persisted restart and explicit-timeout
+full-map rehearsal checks pass. The only known open boundary is the default
+10-second full-map movement/visibility performance limit, measured at roughly
+2–2.6 seconds per locked world tick; the disposable 60-second run passes. This
+is a performance acceptance boundary, not an unfinished Package 5 feature; do
+not change production timeout policy or claim cutover/migration completion from
+this evidence. Dated open-status entries above are historical and superseded.
 
 ## Package-5 item-identity checkpoint — 2026-09-11
 
