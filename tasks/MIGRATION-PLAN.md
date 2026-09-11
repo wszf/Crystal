@@ -432,6 +432,13 @@ counters/collection, and ordinary combat. Full representative load/cutover
 acceptance remains open; the documented PoisonCloud broad timeout and unrelated
 baseline failures are unchanged.
 
+Temporary opt-in timing on the same disposable full-map runtime measured the
+locked world tick at roughly 0.5s before monster AI, 1.3–1.7s in monster AI,
+and 2.0–2.6s total; the relogin turn waits behind repeated ticks. The timing
+instrumentation was removed. Remaining custom nearby-object probes are
+source-sensitive, so no speculative suppression or production timeout change
+was made.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
