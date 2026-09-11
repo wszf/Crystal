@@ -453,6 +453,14 @@ the remaining packet/spell-AI audit from the documented non-goals.
   documented Guard/TaoGuard packet-order baselines; all other packages passed.
   No new skip was added.
 
+- `3ed5420` adds pre-damage Hero reflection to the first five direct monster
+  receivers; `dea04dd` completes the remaining five. `623ab3b` corrects the
+  zero-rate path so Reflect does not consume an RNG draw when disabled. Focused
+  reflection/race checks pass. The consolidated filtered broad gate completed
+  `cmd/crystal-server` in 105.481s and retained only the documented
+  Guard/TaoGuard packet-order baselines; all other packages passed. No new
+  skip was added.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
