@@ -366,6 +366,15 @@ baseline failures plus the known Guard/TaoGuard packet-order failures. These
 remain documented/non-blocking and no new skip was added. Continue the remaining
 source-confirmed custom-AI audit and then rerun the consolidated acceptance gate.
 
+Go commit `6a18b3e` extends the same source-confirmed inherited-tail boundary
+through the Zuma family, WoomaTaurus, DigOutZombie, CannibalPlant,
+EvilCentipede and WaterDragon. Custom wake/visibility/stage/hole hooks run
+before the playerless gate; focused and targeted-race tests pass. The next
+filtered broad gate completed in 105.4s with all non-server packages passing
+and the same unrelated awakening/loot/harvest/fishing/LoverRecall/reload-drop/
+mob-command plus Guard/TaoGuard baseline failures. No new skip or regression
+was identified; continue the remaining custom-AI source audit.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
