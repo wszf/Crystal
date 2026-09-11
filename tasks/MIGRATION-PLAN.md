@@ -349,6 +349,13 @@ restart, economy checkpoint counters, and ordinary combat pass in focused and
 targeted-race runs. Full representative load/cutover evidence remains open;
 the known Guard/TaoGuard packet-order baselines remain non-blocking.
 
+Go commit `734edc7` adds an existing-character restart probe. A fresh
+post-session export restarted on an isolated listener, relogged `Pkg5Replay`
+without creating/deleting it, completed gameplay/logout, and preserved the
+account character/item counters while leaving `world.json` byte-for-byte
+unchanged. Focused probe/race tests pass. This closes the focused persisted
+restart boundary; full representative load/cutover acceptance remains open.
+
 ## Current package-5 checkpoint — 2026-09-11
 
 Daily parity is complete across online midnight reset, offline auth reset,
