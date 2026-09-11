@@ -394,6 +394,18 @@ the remaining packet/spell-AI audit from the documented non-goals.
   packages passed. No new skip was added, and `700.msd` remains
   untracked/excluded.
 
+- `fe14312` records Hero monster hitter attribution in the first five direct
+  specialized receivers (AncientBringer, ScalyBeast, RhinoPriest,
+  StoningStatue and DarkOmaKing); `a58b7a2` completes the remaining five
+  (GeneralMeowMeow, TucsonGeneral, EarthGolem, AssassinBird and HumanAssassin).
+  Positive hits retain the source-confirmed ten-second monster/Player/Hero
+  hitter IDs after the existing Hero damage reset. Focused attribution/race
+  checks pass. The consolidated filtered broad gate completed
+  `cmd/crystal-server` in 105.025s and reproduced only the known
+  Guard/TaoGuard packet-order baselines plus the documented intermittent
+  inspection packet-26 baseline; all other packages passed. No new skip was
+  added.
+
 ## Current package-5 checkpoint — 2026-09-10
 
 - `e143c1d` gates the player death default-NPC callback on a registered
