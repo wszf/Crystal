@@ -345,6 +345,12 @@ logout response, while the disposable 60-second run succeeds. Isolate the
 remaining full-population world/write latency before changing production
 timeout policy.
 
+Timing isolates that boundary: about 75,743 monsters are loaded and
+`tickMonsterAILocked` still spends roughly 10–12 seconds processing about
+8,086 custom-AI monsters while no players are present. The inherited idle pass
+skips roughly 66,550 objects; suppressing custom alone-processing classes
+requires a Legacy audit and is not safe to invent.
+
 ## Package-5 item-identity checkpoint — 2026-09-11
 
 Go commits `912f7ce` and `f868ffe` remove the intelligent-creature and shared
