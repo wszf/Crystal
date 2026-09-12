@@ -98,12 +98,11 @@ following is the active, short ranked plan. Dated execution text below remains
 historical evidence and must not be read as a revived leaf/matrix queue.
 
 1. **Default-timeout capacity.** Keep the production/default `TimeOut=10000`
-   unchanged. The source-confirmed AI cache (`08815a5`) passes three full-data
-   single-session runs and two 4/4 concurrent relogin waves; successive
-   C#-compatible-heartbeat 8-client waves reached 7/8 and 4/8, while the
-   60-second disposable diagnostic reaches 8/8. Acceptance still requires
-   explaining or eliminating the default higher-concurrency reset and a
-   repeatable higher-capacity/long-soak result.
+   unchanged. The source-confirmed AI cache (`08815a5`) plus the scheduler
+   service window (`44e6b1b`) pass two fresh 8/8 existing-character waves
+   (20.538–36.703s and 14.726–25.860s) with the C#-compatible heartbeat.
+   The earlier 4/8 and 7/8 waves remain pre-fix evidence; higher-capacity,
+   long-duration and production-soak acceptance remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. The paired combat
    path is reached but combat counts/outcomes and full payload equality differ;
