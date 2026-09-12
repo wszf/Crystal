@@ -99,11 +99,11 @@ historical evidence and must not be read as a revived leaf/matrix queue.
 
 1. **Default-timeout capacity.** Keep the production/default `TimeOut=10000`
    unchanged. The source-confirmed AI cache (`08815a5`) passes three full-data
-   single-session runs and two 4/4 concurrent relogin waves; a C#-compatible
-   heartbeat reaches 7/8 in one clean 8-client wave, while the 60-second
-   disposable diagnostic reaches 8/8. Acceptance still requires explaining or
-   eliminating the default higher-concurrency reset and a repeatable
-   higher-capacity/long-soak result.
+   single-session runs and two 4/4 concurrent relogin waves; successive
+   C#-compatible-heartbeat 8-client waves reached 7/8 and 4/8, while the
+   60-second disposable diagnostic reaches 8/8. Acceptance still requires
+   explaining or eliminating the default higher-concurrency reset and a
+   repeatable higher-capacity/long-soak result.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. The paired combat
    path is reached but combat counts/outcomes and full payload equality differ;
