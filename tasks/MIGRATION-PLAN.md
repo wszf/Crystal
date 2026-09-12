@@ -72,8 +72,9 @@ parity and load/cutover remain unproven. Unsupported database versions must erro
 
 Authoritative current status: Packages 1–5 are accepted and complete. The
 detailed execution history below is retained as historical evidence only; it
-is not an unfinished work queue. The sole retained open boundary is the
-measured default 10-second full-map movement/visibility performance limit.
+is not an unfinished work queue. Post-audit work evaluates true completion
+against the real C# source and current Go evidence without reopening the
+historical Package 5 acceptance decision.
 
 1. WORLD actions landed as Go `3591b2b`; focused parser/runtime/session tests pass.
 2. Shield IDs landed as `712134e`; numeric wire and lifecycle/race tests pass.
@@ -83,8 +84,43 @@ measured default 10-second full-map movement/visibility performance limit.
 4. NPC roots and automatic contexts landed as `8bf588b` / `89daa2d`; event-driven
    context/parameter isolation, configured roots and race checks pass. Package
    complete. Go `docs/NPC-EXECUTION-CONTEXTS.md` records the source audit.
-5. Rehearsal and integration audit remain open. Detailed commit and test evidence
-   lives in Go `docs/MIGRATION-STATUS.md` and `docs/MIGRATION-REHEARSAL.md`.
+5. Rehearsal and integration acceptance is closed by decision. The post-audit
+   true-completion evidence and remaining cutover limits live in Go
+   `docs/CSHARP-GO-COMPLETION-AUDIT.md`, `docs/CSHARP-GO-REPLAY.md` and
+   `docs/MIGRATION-STATUS.md`.
+
+## Active true-completion replan — 2026-09-12
+
+The current Go completion audit is
+`Crystal.GoServer/docs/CSHARP-GO-COMPLETION-AUDIT.md`; its verdict is
+functional migration **Partial** and production replacement **No**. The
+following is the active, short ranked plan. Dated execution text below remains
+historical evidence and must not be read as a revived leaf/matrix queue.
+
+1. **Default-timeout capacity.** Keep the production/default `TimeOut=10000`
+   unchanged. The source-confirmed AI cache (`08815a5`) passes three full-data
+   single-session runs and two 4/4 concurrent relogin waves; a C#-compatible
+   heartbeat reaches 7/8 in one clean 8-client wave, while the 60-second
+   disposable diagnostic reaches 8/8. Acceptance still requires explaining or
+   eliminating the default higher-concurrency reset and a repeatable
+   higher-capacity/long-soak result.
+2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
+   4L lifecycle and clean disposable restart are proven. The paired combat
+   path is reached but combat counts/outcomes and full payload equality differ;
+   use controlled same-state evidence or a source-backed Go fix before changing
+   the audit verdict.
+3. **Regression gate.** Keep the unfiltered gate red and visible until the
+   PoisonCloud timeout and exact baseline failures are fixed or an explicitly
+   approved accepted-skip policy is adopted. Filtered runs never count as
+   unfiltered green.
+4. **Protocol compatibility.** Use
+   `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`: inactive rows are
+   accepted only as inactive, wire-only rows have no invented triggers, C/148
+   remains partial, and GameMaster 100 is distinct from Rested 112.
+5. **Operations.** Disposable two-generation restart/recovery passes, but
+   crash recovery, rollback, monitoring/runbook readiness and production load
+   remain unproven. No cutover claim is allowed until 1–4 have evidence-backed
+   closure.
 
 Package 5 has corrected map decoding and experience paths, full-population
 runtime scans and bootstrap delivery, 279 packet ordinals, player/Hero starter
