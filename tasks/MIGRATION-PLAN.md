@@ -147,10 +147,12 @@ historical evidence and must not be read as a revived leaf/matrix queue.
 5. **Operations.** Current-source disposable two-generation restart/recovery
    passes in `/tmp/pkg5-ops-current.A9i0pm`; one abrupt disposable kill during
    relogin followed by restart also recovers the persisted character, and
-   focused legacy checkpoint restart/race checks pass. Transaction rollback,
-   corruption recovery, monitoring/runbook readiness and production load
-   remain unproven. No cutover claim is allowed while the behavioral proof and
-   current baseline gate boundaries remain.
+   focused legacy checkpoint restart/race checks pass. The current-source
+   operations batch passes normally in 10.776s and the selected lifecycle/
+   checkpoint race slice passes in 7.093s. Transaction rollback, corruption
+   recovery, monitoring/runbook readiness and production load remain unproven.
+   No cutover claim is allowed while the behavioral proof and operations
+   boundaries remain.
 
 Package 5 has corrected map decoding and experience paths, full-population
 runtime scans and bootstrap delivery, 279 packet ordinals, player/Hero starter
