@@ -473,6 +473,19 @@ replay/operations evidence. Same-state 4L combat/payload parity, extended soak,
 monitoring/runbooks and production cutover remain explicit blockers. Generated
 `Envir/` and `Goods/` data remains excluded.
 
+## Legacy bridge generation follow-up — 2026-09-13
+
+Go commit `f9c558d` closes the account-generation replacement boundary. A 117
+reload now clears transient Daily callback markers and rebinds cached auction
+seller/buyer account projections to the replacement character registry while
+preserving world-owned economy, guild, and conquest authorities. Repeated
+generation tests cover the resulting market view and guild/conquest state;
+focused auth/bridge tests and targeted `-race` pass.
+
+Next: audit the remaining cross-file checkpoint retry/rollback edges and
+corruption handling. Same-state 4L combat/payload parity, extended soak,
+monitoring/runbooks, and production cutover remain explicit blockers.
+
 Go commit `51d6b11` adds bootstrap-only idle-timeout grace. The default-timeout
 full-map replay now clears the GameMaster bootstrap but still resets before the
 first movement response after full-population visibility; the same replay
