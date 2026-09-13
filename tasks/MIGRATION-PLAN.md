@@ -426,6 +426,16 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## Active Package 5 persistence execution — 2026-09-13
+
+`1046074` closes the next loader boundary: modern JSON replacement resets
+incoming-generation counters and non-persisted session projections, while
+legacy array exports retain world-owned counter precedence. Focused auth tests
+and targeted race checks pass. Continue with legacy account-bridge replacement
+and checkpoint retry behavior; keep transaction rollback beyond exercised paths,
+corruption recovery policy, monitoring/runbooks, behavioral parity, extended
+soak, and production cutover explicitly open.
+
 ## Active execution checkpoint — 2026-09-13
 
 The historical Package 5 closure is retained, but the current true-completion
