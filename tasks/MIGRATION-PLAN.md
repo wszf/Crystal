@@ -144,10 +144,14 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    4L selected different target types/IDs and produced different impact
    traffic. One bounded current credentialed recheck then returned EOF during
    the initial 4L handshake before lifecycle/combat capture. Same-state combat
-   outcomes, full payload equality and reward/death equivalence remain open. An
+   outcomes, full payload equality and reward/death equivalence remain open. A
+   fresh post-`078533f` source-isolated replay passed the identical eight-request
+   lifecycle on Go and 4L; both traces contain 9 `ObjectNPC` and 0
+   `NewNPCInfo` frames after the passive-visibility correction. Ambient volume
+   still differs (Go 303 versus 4L 145 `NewItemInfo`, and Go 17 versus 4L 11
+   `ObjectMonster`), so this narrows but does not close payload parity. An
    opt-in direct credentialed relogin probe also returned EOF before
-   `LoginSuccess`; no verdict is softened from the completion audit and no
-   identical retry is planned.
+   `LoginSuccess`; no verdict is softened from the completion audit.
 3. **Regression gate.** The preceding consolidated gate is green after
    `b1881d3` synchronizes the delayed-NPC test's post-response queue assertion
    without changing production flow (`cmd/crystal-server` 116.213s; log
