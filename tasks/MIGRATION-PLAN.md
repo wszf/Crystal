@@ -99,10 +99,13 @@ historical evidence and must not be read as a revived leaf/matrix queue.
 
 1. **Default-timeout capacity.** Keep the production/default `TimeOut=10000`
    unchanged. The source-confirmed AI cache (`08815a5`) plus the scheduler
-   service window (`44e6b1b`) pass two fresh 8/8 existing-character waves
-   (20.538–36.703s and 14.726–25.860s) with the C#-compatible heartbeat.
-   The earlier 4/8 and 7/8 waves remain pre-fix evidence; higher-capacity,
-   long-duration and production-soak acceptance remain open.
+   service window (`44e6b1b`) pass fresh 8/8 and 10/10 existing-character
+   waves. Follow-up commit `8782ee1` routes direct-field exact-cell lookup
+   through the existing spatial index; a fresh full-population 16/16 wave
+   then passes in 29.459s (individual 11.670–29.459s) over about 75,743
+   materialized monsters. The earlier 4/8, 7/8, 11/16 and 14/16 resets remain
+   historical comparison evidence; MaxUser-scale, long-duration and
+   production-soak acceptance remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. A 2026-09-13
    controlled driver sent 20 attacks to each live target and held the Go socket
@@ -111,16 +114,13 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    traffic. Same-state combat outcomes, full payload equality and
    reward/death equivalence remain open; no verdict is softened from the
    completion audit.
-3. **Regression gate.** Keep the unfiltered gate red and visible until the
-   PoisonCloud timeout and exact baseline failures are fixed or an explicitly
-   approved accepted-skip policy is adopted. Filtered runs never count as
-   unfiltered green. The 2026-09-13 focused recheck passes three consecutive
-   PoisonCloud runs but reproduces the net.Pipe timeout under 20-run stress;
-   the latest unfiltered gate now reaches PoisonCloud after the Hiding
-   test-layer synchronization fix and caster-scope oracle updates. The extra
-   Brown colour-refresh packets and PoisonCloud closed-pipe behavior remain
-   documented as known baseline boundaries rather than hidden by weakening
-   assertions.
+3. **Regression gate.** The latest consolidated unfiltered gate is green
+   (`/tmp/pkg5-completion-unfiltered-mountfix-20260913.log`, including
+   `cmd/crystal-server` in 103.829s). Keep the dated baseline reproductions
+   and focused PoisonCloud/PvP evidence visible; filtered runs are not a
+   substitute for that result, and future-environment repeatability plus
+   policy ownership remain cutover concerns. Do not hide historical baseline
+   failures by weakening assertions.
 4. **Protocol compatibility.** `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`
    now records the explicit accept/reject decisions: inactive rows are accepted
    only as inactive, wire-only rows have no invented triggers, C/148 remains
@@ -280,9 +280,11 @@ reproduces on untouched ccdb06b; it has not been added to the six exclusions.
 Inspection packet-26 reproduces 21/100 on 9821e04; timed-recall queue flake
 reproduces 10/5000 on 6a61c66; skill timing on 20325e4; YinDevilNode 5/5000 on 498caac; TaoGuard colour 5/50 on 3bc5121 (two missing, three early). Guard AttackMode packet order reproduces 8/100 on b75248a (six missing, two early). No new skips.
 New regressions remain subject to the documented baseline policy. Packages 1–5
-are accepted; overall production cutover remains unclaimed only because the
-default 10-second full-map performance boundary is open. This is a performance
-acceptance boundary, not a missing Package 5 feature leaf.
+are accepted; overall production cutover remains unclaimed because the active
+completion audit still has ranked proof gaps in same-state combat/payload
+equivalence, MaxUser/long-duration load, and crash/rollback/operations
+readiness. These are completion/cutover acceptance boundaries, not missing
+historical Package 5 feature leaves.
 
 The latest committed Settings/packet/workloop batch is `908a3ad`, `001cff4`,
 `c70cf8d`, `7ce3fac`, `3714d8a`, `1f699df`, `bacd310`, `f58e8e8`, `6903286`,
