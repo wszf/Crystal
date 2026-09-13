@@ -423,11 +423,17 @@ The first implementation batch from that audit is now landed in Go:
   after a failed staged rename and cleans owned staging artifacts.
 - `9f543c1` applies the same rollback boundary to world/UsedGoods checkpoint
   staging; `7712d3d` syncs JSON/account-export staging files before replacement.
+- `b7e8a8d` makes respawn runtime-state promotion restore the prior file on
+  failure; `b08e124` copies the live 117 file before periodic save work; and
+  `fb3fb3c` makes world backups atomic without disturbing the live world.
 - Focused auth, legacy-account, legacy-world tests and targeted races pass.
-  The consolidated `go test ./... -count=1 -timeout 5m` gate completed all
-  internal packages successfully and reproduced only the known asynchronous
+  The initial consolidated gate reproduced only the known asynchronous
   `TestInspectArchivedOnlineObjectUsesRegistry` mail-before-keepalive baseline
-  in `cmd/crystal-server`; no new skip or regression was added.
+  in `cmd/crystal-server`; the follow-up unfiltered gate completed every
+  package successfully (`cmd/crystal-server` 104.204s), with raw output at
+  `/tmp/pkg5-persistence-world-unfiltered-20260913.log` (SHA-256
+  `3790b4082fe2009dbe7f69f3572125e9bca9e9526d7c6136f23109a297382d4a`).
+  No new skip or regression was added.
 
 Next, in dependency order: extend corruption/retry coverage across the JSON and
 117 bridge without automatic speculative restore; continue only source-backed
