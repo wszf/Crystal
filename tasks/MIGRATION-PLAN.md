@@ -114,15 +114,13 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    traffic. Same-state combat outcomes, full payload equality and
    reward/death equivalence remain open; no verdict is softened from the
    completion audit.
-3. **Regression gate.** The prior consolidated unfiltered gate is green
-   (`/tmp/pkg5-completion-unfiltered-mountfix-20260913.log`, including
-   `cmd/crystal-server` in 103.829s), but the current post-spatial gate
-   (`/tmp/pkg5-completion-postspatial-20260913.log`) reproduces one known
-   intermittent fake-clock NPC delayed-GOTO baseline; a focused repetition is
-   4/5. Keep the dated baseline reproductions and focused PoisonCloud/PvP
-   evidence visible; filtered runs are not a substitute for the full result,
-   and do not attribute the unrelated NPC flow flake to `8782ee1`.
-   Do not hide historical baseline failures by weakening assertions.
+3. **Regression gate.** The current consolidated unfiltered gate is green
+   after `b1881d3` synchronizes the delayed-NPC test's post-response queue
+   assertion without changing production flow (`cmd/crystal-server` 116.213s;
+   log `/tmp/pkg5-completion-post-npc-sync-20260913.log`). Keep the dated
+   baseline reproductions and focused PoisonCloud/PvP evidence visible;
+   filtered runs are not a substitute for the full result, and do not hide
+   historical baseline failures by weakening assertions.
 4. **Protocol compatibility.** `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`
    now records the explicit accept/reject decisions: inactive rows are accepted
    only as inactive, wire-only rows have no invented triggers, C/148 remains
