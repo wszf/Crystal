@@ -129,11 +129,12 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    partial, and GameMaster 100 is distinct from Rested 112. Focused ordinal,
    GameMaster and Rested tests pass; strict future-client behavior remains a
    cutover caveat rather than an unclassified inventory gap.
-5. **Operations.** Disposable two-generation restart/recovery passes, but
-   focused legacy checkpoint restart/race checks now pass as well. Crash
-   recovery, rollback, monitoring/runbook readiness and production load remain
-   unproven. No cutover claim is allowed until the remaining behavioral and
-   regression evidence is resolved.
+5. **Operations.** Current-source disposable two-generation restart/recovery
+   passes in `/tmp/pkg5-ops-current.A9i0pm`, and focused legacy checkpoint
+   restart/race checks pass as well. Crash recovery, rollback,
+   monitoring/runbook readiness and production load remain unproven. No
+   cutover claim is allowed while the behavioral proof and current baseline
+   gate boundaries remain.
 
 Package 5 has corrected map decoding and experience paths, full-population
 runtime scans and bootstrap delivery, 279 packet ordinals, player/Hero starter
