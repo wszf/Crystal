@@ -103,8 +103,9 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    waves. Follow-up commit `8782ee1` routes direct-field exact-cell lookup
    through the existing spatial index; a fresh full-population 16/16 wave
    then passes in 29.459s (individual 11.670–29.459s) over about 75,743
-   materialized monsters. Two 32-client repeats reach 31/32 in 35.60s and
-   37.83s, each with one relogin/logout response reset. The earlier 4/8, 7/8,
+   materialized monsters. Two 32-client repeats on the retained path reach
+   31/32 in 35.60s and 37.83s, and a run including `212c9e9` reaches 31/32 in
+   43.46s; each has one relogin/logout response reset. The earlier 4/8, 7/8,
    11/16 and 14/16 resets remain historical comparison evidence; MaxUser-scale,
    long-duration and production-soak acceptance remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
@@ -115,13 +116,15 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    traffic. Same-state combat outcomes, full payload equality and
    reward/death equivalence remain open; no verdict is softened from the
    completion audit.
-3. **Regression gate.** The current consolidated unfiltered gate is green
-   after `b1881d3` synchronizes the delayed-NPC test's post-response queue
-   assertion without changing production flow (`cmd/crystal-server` 116.213s;
-   log `/tmp/pkg5-completion-post-npc-sync-20260913.log`). Keep the dated
-   baseline reproductions and focused PoisonCloud/PvP evidence visible;
-   filtered runs are not a substitute for the full result, and do not hide
-   historical baseline failures by weakening assertions.
+3. **Regression gate.** The preceding consolidated gate is green after
+   `b1881d3` synchronizes the delayed-NPC test's post-response queue assertion
+   without changing production flow (`cmd/crystal-server` 116.213s; log
+   `/tmp/pkg5-completion-post-npc-sync-20260913.log`). The latest post-visual
+   gate reproduces the documented intermittent inspection baseline
+   `TestInspectArchivedOnlineObjectUsesRegistry` (focused 20/20 passes), so
+   the current full gate is not called unfiltered-green. Keep dated baseline
+   reproductions visible; filtered runs are not a substitute and must not hide
+   failures by weakening assertions.
 4. **Protocol compatibility.** `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`
    now records the explicit accept/reject decisions: inactive rows are accepted
    only as inactive, wire-only rows have no invented triggers, C/148 remains
