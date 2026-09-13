@@ -118,9 +118,11 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    controlled driver sent 20 attacks to each live target and held the Go socket
    open for delayed-response drain; both combat paths were reached, but Go and
    4L selected different target types/IDs and produced different impact
-   traffic. Same-state combat outcomes, full payload equality and
-   reward/death equivalence remain open; no verdict is softened from the
-   completion audit.
+   traffic. One bounded current credentialed recheck then returned EOF during
+   the initial 4L handshake before lifecycle/combat capture. Same-state combat
+   outcomes, full payload equality and reward/death equivalence remain open; no
+   verdict is softened from the completion audit and no identical retry is
+   planned.
 3. **Regression gate.** The preceding consolidated gate is green after
    `b1881d3` synchronizes the delayed-NPC test's post-response queue assertion
    without changing production flow (`cmd/crystal-server` 116.213s; log
