@@ -114,8 +114,11 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    regression result. `4a748f1` adds owner-scoped cleanup indexing, and two
    protocol-created 50-client existing-character waves then pass 50/50 with
    slowest totals of 13.256s and 16.235s under the unchanged timeout. The
-   bounded MaxUser lifecycle is now positive; long-duration soak, rollback and
-   production operations evidence remain open.
+   bounded MaxUser lifecycle is now positive. A subsequent four-wave
+   200/200 existing-character soak also passes under the unchanged timeout,
+   with slowest totals of 15.331s, 17.674s, 16.564s and 17.349s. Extended
+   production-duration soak, rollback and production operations evidence
+   remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. A 2026-09-13
    controlled driver sent 20 attacks to each live target and held the Go socket
