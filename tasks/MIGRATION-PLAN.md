@@ -434,6 +434,46 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## Current true-completion ranked recheck — 2026-09-13
+
+This is active true-completion evidence, not the archived Goal/leaf/matrix
+orchestration. The Go audit was rechecked against the current diff/replay/
+status documents and commit `b8f31b5`: functional migration remains
+**Partial**, production replacement remains **No**, and Package 5 remains
+historically closed.
+
+1. Rank 1 is now positively reproduced with explicit account/world/map/route/
+   log exports: 50/50 distinct existing-character bootstrap → turn → logout,
+   3.29s slowest client, 463 maps, 6,341 spawns, unchanged `TimeOut=10000`
+   and `MaxUser=50`, and no timeout override. The world hash remains
+   `d45f8ad0fddccb121d5befaea120d94524948576fc74b39313a1d90ab0d2f09e`.
+   The prior 0/50 no-export runs are discarded diagnostics because their
+   startup omitted account/world export loading. Extended production-duration
+   scheduler stability remains open.
+2. Rank 2 lifecycle is positive on Go and live 4L for the same account/
+   character and identical eight-request client sequence. Redacted frame
+   hashes are Go `46b292f42e782dec17ecbd756716c6ebc35cdb76982d68b80428fb4a467ed86c`
+   and 4L `9ffae68912860f907095b9cbb4f29b5dacf613ea996e3fd769f9e2003a597b84`.
+   Five attacks reached both paths, but the Go/4L combat traces use
+   unsynchronized target classes/states and differ in impact output; parity
+   remains an honest fail/open. Full payload and same-state economy/quest/
+   guild equivalence remain unproven.
+3. Rank 3 unfiltered `go test ./... -count=1 -timeout 5m` is green (20/20,
+   113.276s; log SHA-256
+   `a1073e838ef158b121b4f50f401725ba34cdd57137a9b20459b6ca351ab6dcd0`).
+   Rank 4 focused policy tests pass normal and targeted race
+   (`2366f2f7f2046d27698cdc5ba324a7f02984cd38611fff5dc82a7eb7f01f4397`).
+4. Rank 5 focused lifecycle/checkpoint/recovery tests pass normal and
+   targeted race (`0a9f7c151d8a7c87f266b4a61ef21da6c230ed0e76ff520bd593208472708263`).
+   The existing operations runbook still explicitly lacks cross-store
+   rollback, corruption drills, health/alerting, and production cutover
+   controls.
+
+The next actionable blocker remains same-state combat/full-payload evidence;
+the current bounded capacity and regression gates are positive but do not
+authorize a cutover claim. Protected `Envir/`/`Goods/` data and the live 4L
+listener remain outside this work.
+
 ## Package 5 persistence/recovery follow-up — 2026-09-13
 
 The cross-file checkpoint audit now covers interrupted `n/o` promotions for
