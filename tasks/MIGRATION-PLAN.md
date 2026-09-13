@@ -426,15 +426,39 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## Package 5 persistence/recovery follow-up — 2026-09-13
+
+The cross-file checkpoint audit now covers interrupted `n/o` promotions for
+the 117 account database, world database, conquest files, UsedGoods files and
+respawn runtime state. Go loaders promote a complete `.n`, restore `.o` when
+promotion stopped after the old file moved, and leave an existing final file
+authoritative. `1fc3047` adds the shared recovery helper and focused loader
+coverage; `147f1d0` wires the same recovery into respawn runtime loading.
+
+`ec3ec4d` makes `WriteGuildFiles(refresh=true)` build a complete sibling
+directory before swapping it into place. A readiness marker and `Guilds.n` /
+`Guilds.o` recovery prevent process loss from exposing a partially refreshed
+guild set; `d1f8450` updates the periodic/shutdown failure fixtures and
+`4d1fd7a` removes the marker after successful activation. Focused affected
+package tests and targeted race checks pass. The consolidated unfiltered
+`go test ./... -count=1 -timeout 5m` gate after `d1f8450` is green, with
+`cmd/crystal-server` completing in 108.843s and every package reporting `ok`.
+
+Generated `Configs/`, `Envir/`, `Localization/`, `Logs/` and
+`cmd/crystal-server/Envir/` remain excluded from commits. Broader transaction
+rollback, malformed-artifact policy, monitoring/runbooks, behavioral parity,
+extended soak and production cutover remain open; no completion or cutover
+claim follows from this persistence slice.
+
 ## Active Package 5 persistence execution — 2026-09-13
 
 `1046074` closes the next loader boundary: modern JSON replacement resets
 incoming-generation counters and non-persisted session projections, while
 legacy array exports retain world-owned counter precedence. Focused auth tests
-and targeted race checks pass. Continue with legacy account-bridge replacement
-and checkpoint retry behavior; keep transaction rollback beyond exercised paths,
-corruption recovery policy, monitoring/runbooks, behavioral parity, extended
-soak, and production cutover explicitly open.
+and targeted race checks pass. The follow-up account-bridge generation work
+and cross-file checkpoint staging/recovery are recorded above; keep transaction
+rollback beyond exercised paths, malformed-artifact policy, monitoring/runbooks,
+behavioral parity, extended soak, and production cutover explicitly open.
 
 ## Active execution checkpoint — 2026-09-13
 
