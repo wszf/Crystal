@@ -104,10 +104,13 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    The earlier 4/8 and 7/8 waves remain pre-fix evidence; higher-capacity,
    long-duration and production-soak acceptance remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
-   4L lifecycle and clean disposable restart are proven. The paired combat
-   path is reached but combat counts/outcomes and full payload equality differ;
-   use controlled same-state evidence or a source-backed Go fix before changing
-   the audit verdict.
+   4L lifecycle and clean disposable restart are proven. A 2026-09-13
+   controlled driver sent 20 attacks to each live target and held the Go socket
+   open for delayed-response drain; both combat paths were reached, but Go and
+   4L selected different target types/IDs and produced different impact
+   traffic. Same-state combat outcomes, full payload equality and
+   reward/death equivalence remain open; no verdict is softened from the
+   completion audit.
 3. **Regression gate.** Keep the unfiltered gate red and visible until the
    PoisonCloud timeout and exact baseline failures are fixed or an explicitly
    approved accepted-skip policy is adopted. Filtered runs never count as
