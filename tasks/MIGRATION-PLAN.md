@@ -156,13 +156,14 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    cutover caveat rather than an unclassified inventory gap.
 5. **Operations.** Current-source disposable two-generation restart/recovery
    passes in `/tmp/pkg5-ops-current.A9i0pm`; one abrupt disposable kill during
-   relogin followed by restart also recovers the persisted character, and
-   focused legacy checkpoint restart/race checks pass. The current-source
-   operations batch passes normally in 10.776s and the selected lifecycle/
-   checkpoint race slice passes in 7.093s. Transaction rollback, corruption
-   recovery, monitoring/runbook readiness and production load remain unproven.
-   No cutover claim is allowed while the behavioral proof and operations
-   boundaries remain.
+   relogin followed by restart also recovers the persisted character. The
+   fresh selected operations batch covers 42 lifecycle/startup/shutdown cases
+   and 45 auth/bridge/staged-file/world persistence cases, passing normally
+   and under targeted `-race`; the procedure and limits are recorded in
+   `Crystal.GoServer/docs/CSHARP-GO-OPERATIONS.md`. Transaction rollback,
+   corruption drills, monitoring/alerting and production runbook readiness
+   remain unproven. No cutover claim is allowed while the behavioral proof and
+   operations boundaries remain.
 
 ## Package 5 persistence follow-up — 2026-09-13
 
