@@ -411,6 +411,31 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## Active execution checkpoint — 2026-09-13
+
+The historical Package 5 closure is retained, but the current true-completion
+audit still leaves operations/data-integrity and external parity evidence open.
+The first implementation batch from that audit is now landed in Go:
+
+- `1997753` makes `auth.LoadJSON` validate every account encoding/timestamp
+  before replacing live state, with malformed-later-record coverage.
+- `f0df9e5` makes 117 account checkpoint promotion recover the original file
+  after a failed staged rename and cleans owned staging artifacts.
+- `9f543c1` applies the same rollback boundary to world/UsedGoods checkpoint
+  staging; `7712d3d` syncs JSON/account-export staging files before replacement.
+- Focused auth, legacy-account, legacy-world tests and targeted races pass.
+  The consolidated `go test ./... -count=1 -timeout 5m` gate completed all
+  internal packages successfully and reproduced only the known asynchronous
+  `TestInspectArchivedOnlineObjectUsesRegistry` mail-before-keepalive baseline
+  in `cmd/crystal-server`; no new skip or regression was added.
+
+Next, in dependency order: extend corruption/retry coverage across the JSON and
+117 bridge without automatic speculative restore; continue only source-backed
+packet/spell/AI differences; then repeat the consolidated gate and update the
+replay/operations evidence. Same-state 4L combat/payload parity, extended soak,
+monitoring/runbooks and production cutover remain explicit blockers. Generated
+`Envir/` and `Goods/` data remains excluded.
+
 Go commit `51d6b11` adds bootstrap-only idle-timeout grace. The default-timeout
 full-map replay now clears the GameMaster bootstrap but still resets before the
 first movement response after full-population visibility; the same replay
