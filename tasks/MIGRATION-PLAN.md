@@ -498,6 +498,26 @@ outside the helper's bounded melee window. The redacted traces/diagnostic and
 hashes are recorded in `Crystal.GoServer/docs/CSHARP-GO-REPLAY.md`; lifecycle
 is positive, while same-state combat and full-payload parity remain fail/open.
 
+## Rank 1 corrected 20-wave MaxUser soak — 2026-09-13
+
+The valid current-source Rank 1 follow-up used disposable runtime
+`/tmp/pkg5-rank1-extended-runtime.4fa00o` with explicit account/world exports,
+463 maps and 6,341 spawns (about 75,743 materialized monsters). Production
+defaults remained `TimeOut=10000` and `MaxUser=50`; no timeout override was
+set. Twenty cooldown-aware waves of 50 distinct existing-character clients
+all passed bootstrap → turn → logout, for 1,000/1,000 sessions. Per-wave
+slowest clients ranged from 4.215s to 5.584s, with an overall maximum of
+5.584s. The driver outputs, aggregate log/hash and clean shutdown boundary are
+recorded in `Crystal.GoServer/docs/CSHARP-GO-REPLAY.md` and
+`CSHARP-GO-COMPLETION-AUDIT.md`.
+
+The aggregate log includes an earlier discarded status-port collision before
+the valid interval; that interval alone is counted. This is stronger bounded
+default-timeout MaxUser evidence, not indefinite production-duration scheduler
+acceptance. Same-state combat/full-payload parity, rollback/corruption drills,
+monitoring and cutover remain open. Protected `Envir/`/`Goods/` data and the
+live 4L listener were untouched.
+
 ## Package 5 persistence/recovery follow-up — 2026-09-13
 
 The cross-file checkpoint audit now covers interrupted `n/o` promotions for
