@@ -116,8 +116,11 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    approved accepted-skip policy is adopted. Filtered runs never count as
    unfiltered green. The 2026-09-13 focused recheck passes three consecutive
    PoisonCloud runs but reproduces the net.Pipe timeout under 20-run stress;
-   the two extra Brown colour-refresh packets are documented as the known
-   baseline boundary rather than hidden by weakening assertions.
+   the latest unfiltered gate now reaches PoisonCloud after the Hiding
+   test-layer synchronization fix and caster-scope oracle updates. The extra
+   Brown colour-refresh packets and PoisonCloud closed-pipe behavior remain
+   documented as known baseline boundaries rather than hidden by weakening
+   assertions.
 4. **Protocol compatibility.** `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`
    now records the explicit accept/reject decisions: inactive rows are accepted
    only as inactive, wire-only rows have no invented triggers, C/148 remains
