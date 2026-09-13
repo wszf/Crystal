@@ -118,7 +118,14 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    200/200 existing-character soak also passes under the unchanged timeout,
    with slowest totals of 15.331s, 17.674s, 16.564s and 17.349s. Extended
    production-duration soak, rollback and production operations evidence
-   remain open.
+   remain open. A current post-`b08f73a` disposable full-data recheck also
+   passed 50/50 bootstrap → turn → logout with a 2.957s slowest client from
+   50 unique existing-character sessions, while retaining `MaxUser=50`,
+   `TimeOut=10000`, no `CRYSTAL_TIMEOUT_MS` override, and an unchanged
+   world-export hash. The post-commit spatial/route/Elephant/cell focused
+   tests pass normally and under targeted `-race`; this closes the bounded
+   movement/relogin target for the current source, not extended production
+   duration or cutover acceptance.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. A 2026-09-13
    controlled driver sent 20 attacks to each live target and held the Go socket
