@@ -114,7 +114,10 @@ historical evidence and must not be read as a revived leaf/matrix queue.
 3. **Regression gate.** Keep the unfiltered gate red and visible until the
    PoisonCloud timeout and exact baseline failures are fixed or an explicitly
    approved accepted-skip policy is adopted. Filtered runs never count as
-   unfiltered green.
+   unfiltered green. The 2026-09-13 focused recheck passes three consecutive
+   PoisonCloud runs but reproduces the net.Pipe timeout under 20-run stress;
+   the two extra Brown colour-refresh packets are documented as the known
+   baseline boundary rather than hidden by weakening assertions.
 4. **Protocol compatibility.** Use
    `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`: inactive rows are
    accepted only as inactive, wire-only rows have no invented triggers, C/148
