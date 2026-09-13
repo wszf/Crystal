@@ -444,6 +444,11 @@ package tests and targeted race checks pass. The consolidated unfiltered
 `go test ./... -count=1 -timeout 5m` gate after `d1f8450` is green, with
 `cmd/crystal-server` completing in 108.843s and every package reporting `ok`.
 
+`c19a115` wires account checkpoint recovery before production startup checks
+whether `Server.MirADB` exists; a crash leaving only `.n` or `.o` is now
+loaded rather than treated as a missing optional database. The production
+restart regression and targeted race checks pass.
+
 Generated `Configs/`, `Envir/`, `Localization/`, `Logs/` and
 `cmd/crystal-server/Envir/` remain excluded from commits. Broader transaction
 rollback, malformed-artifact policy, monitoring/runbooks, behavioral parity,
