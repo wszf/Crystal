@@ -157,6 +157,21 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    No cutover claim is allowed while the behavioral proof and operations
    boundaries remain.
 
+## Package 5 persistence follow-up — 2026-09-13
+
+The post-closure recovery audit has now covered JSON account decoding, 117
+account/world/UsedGoods staging, JSON and export fsync, respawn runtime
+promotion, periodic account backup, world backup replacement, invalid JSON
+roots/store versions/runtime envelopes, and guild/conquest/UsedGoods retry
+acknowledgement. Commits `1997753`, `f0df9e5`, `9f543c1`, `7712d3d`, `b7e8a8d`,
+`b08e124`, `fb3fb3c`, `0500687`, `e5557a1`, `ffeaccf`, `54abc9b`, `0742cbd`
+and `12dbdb2` are recorded in Go status. Focused tests and the latest
+unfiltered gate pass; the known inspection packet-26 ordering baseline is
+retained where reproduced. The next source-backed boundary is transactional
+guild refresh deletion/write failure handling. Rollback beyond these file
+paths, corruption recovery policy, monitoring/runbooks, same-state combat
+parity, extended soak and production cutover remain open.
+
 Package 5 has corrected map decoding and experience paths, full-population
 runtime scans and bootstrap delivery, 279 packet ordinals, player/Hero starter
 items, monster experience/rarity, globally allocated NPC purchases, atomic guild
