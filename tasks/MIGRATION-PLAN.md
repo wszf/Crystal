@@ -106,8 +106,13 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    `CheckAlone` boundary. Three fresh 32-client existing-character waves over
    about 75,743 materialized monsters pass 32/32 in 28.606s, 30.733s and
    33.526s under unchanged `TimeOut=10000`; the earlier 31/32 waves are
-   pre-change comparison evidence. MaxUser-scale, long-duration and
-   production-soak acceptance remain open.
+   pre-change comparison evidence. `aede46f` indexes due regeneration
+   candidates with focused normal and targeted-race coverage. A subsequent
+   disposable 50-client diagnostic accepted all connections but reached 0/50
+   login-success responses before the ten-second client deadline; its fixture
+   used cloned disposable records and is not promoted as a clean acceptance or
+   regression result. MaxUser-scale, long-duration and production-soak
+   acceptance remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. A 2026-09-13
    controlled driver sent 20 attacks to each live target and held the Go socket
@@ -121,8 +126,9 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    without changing production flow (`cmd/crystal-server` 116.213s; log
    `/tmp/pkg5-completion-post-npc-sync-20260913.log`). The latest post-visual
    gate reproduces the documented intermittent inspection baseline
-   `TestInspectArchivedOnlineObjectUsesRegistry` (focused 20/20 passes), so
-   the current full gate is not called unfiltered-green. Keep dated baseline
+   `TestInspectArchivedOnlineObjectUsesRegistry` (focused 20/20 passes), and
+   the required post-`aede46f` gate reproduces that same baseline, so the
+   current full gate is not called unfiltered-green. Keep dated baseline
    reproductions visible; filtered runs are not a substitute and must not hide
    failures by weakening assertions.
 4. **Protocol compatibility.** `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`
