@@ -98,16 +98,16 @@ following is the active, short ranked plan. Dated execution text below remains
 historical evidence and must not be read as a revived leaf/matrix queue.
 
 1. **Default-timeout capacity.** Keep the production/default `TimeOut=10000`
-   unchanged. The source-confirmed AI cache (`08815a5`) plus the scheduler
-   service window (`44e6b1b`) pass fresh 8/8 and 10/10 existing-character
-   waves. Follow-up commit `8782ee1` routes direct-field exact-cell lookup
-   through the existing spatial index; a fresh full-population 16/16 wave
-   then passes in 29.459s (individual 11.670–29.459s) over about 75,743
-   materialized monsters. Two 32-client repeats on the retained path reach
-   31/32 in 35.60s and 37.83s, and a run including `212c9e9` reaches 31/32 in
-   43.46s; each has one relogin/logout response reset. The earlier 4/8, 7/8,
-   11/16 and 14/16 resets remain historical comparison evidence; MaxUser-scale,
-   long-duration and production-soak acceptance remain open.
+   unchanged. The source-confirmed AI cache (`08815a5`), scheduler service
+   window (`44e6b1b`), and spatial lookup (`8782ee1`) established bounded
+   8/8, 10/10 and 16/16 waves. Follow-up commit `e474a70` reuses sorted monster
+   IDs, indexes sparse AI/route populations, avoids unchanged writebacks, and
+   initializes playerless base-family monsters at the Legacy inherited
+   `CheckAlone` boundary. Three fresh 32-client existing-character waves over
+   about 75,743 materialized monsters pass 32/32 in 28.606s, 30.733s and
+   33.526s under unchanged `TimeOut=10000`; the earlier 31/32 waves are
+   pre-change comparison evidence. MaxUser-scale, long-duration and
+   production-soak acceptance remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. A 2026-09-13
    controlled driver sent 20 attacks to each live target and held the Go socket
