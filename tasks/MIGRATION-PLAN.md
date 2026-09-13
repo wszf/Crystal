@@ -118,10 +118,12 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    PoisonCloud runs but reproduces the net.Pipe timeout under 20-run stress;
    the two extra Brown colour-refresh packets are documented as the known
    baseline boundary rather than hidden by weakening assertions.
-4. **Protocol compatibility.** Use
-   `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`: inactive rows are
-   accepted only as inactive, wire-only rows have no invented triggers, C/148
-   remains partial, and GameMaster 100 is distinct from Rested 112.
+4. **Protocol compatibility.** `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`
+   now records the explicit accept/reject decisions: inactive rows are accepted
+   only as inactive, wire-only rows have no invented triggers, C/148 remains
+   partial, and GameMaster 100 is distinct from Rested 112. Focused ordinal,
+   GameMaster and Rested tests pass; strict future-client behavior remains a
+   cutover caveat rather than an unclassified inventory gap.
 5. **Operations.** Disposable two-generation restart/recovery passes, but
    crash recovery, rollback, monitoring/runbook readiness and production load
    remain unproven. No cutover claim is allowed until 1–4 have evidence-backed
