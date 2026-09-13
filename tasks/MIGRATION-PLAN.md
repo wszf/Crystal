@@ -426,13 +426,19 @@ The first implementation batch from that audit is now landed in Go:
 - `b7e8a8d` makes respawn runtime-state promotion restore the prior file on
   failure; `b08e124` copies the live 117 file before periodic save work; and
   `fb3fb3c` makes world backups atomic without disturbing the live world.
+- `0500687` rejects scalar/null JSON roots without replacing live account or
+  world state; `e5557a1` rejects unsupported account-store versions while
+  retaining version-0 object compatibility; `ffeaccf` rejects empty or
+  unknown respawn-runtime envelopes.
 - Focused auth, legacy-account, legacy-world tests and targeted races pass.
   The initial consolidated gate reproduced only the known asynchronous
   `TestInspectArchivedOnlineObjectUsesRegistry` mail-before-keepalive baseline
-  in `cmd/crystal-server`; the follow-up unfiltered gate completed every
-  package successfully (`cmd/crystal-server` 104.204s), with raw output at
-  `/tmp/pkg5-persistence-world-unfiltered-20260913.log` (SHA-256
-  `3790b4082fe2009dbe7f69f3572125e9bca9e9526d7c6136f23109a297382d4a`).
+  in `cmd/crystal-server`; the first follow-up unfiltered gate completed every
+  package successfully (`cmd/crystal-server` 104.204s). The subsequent
+  recovery-loader gate also completed every package successfully
+  (`cmd/crystal-server` 115.431s), with raw output at
+  `/tmp/pkg5-recovery-loader-unfiltered-20260913.log` (SHA-256
+  `ff472a2c14744ed3c8fa6acc7f3bd8e0c1f914443d6ef42e2298d10a3abf98d9`).
   No new skip or regression was added.
 
 Next, in dependency order: extend corruption/retry coverage across the JSON and
