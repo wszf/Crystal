@@ -111,8 +111,11 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    disposable 50-client diagnostic accepted all connections but reached 0/50
    login-success responses before the ten-second client deadline; its fixture
    used cloned disposable records and is not promoted as a clean acceptance or
-   regression result. MaxUser-scale, long-duration and production-soak
-   acceptance remain open.
+   regression result. `4a748f1` adds owner-scoped cleanup indexing, and two
+   protocol-created 50-client existing-character waves then pass 50/50 with
+   slowest totals of 13.256s and 16.235s under the unchanged timeout. The
+   bounded MaxUser lifecycle is now positive; long-duration soak, rollback and
+   production operations evidence remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. A 2026-09-13
    controlled driver sent 20 attacks to each live target and held the Go socket
@@ -130,9 +133,10 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    gate reproduces the documented intermittent inspection baseline
    `TestInspectArchivedOnlineObjectUsesRegistry` (focused 20/20 passes), and
    the required post-`aede46f` gate reproduces that same baseline, so the
-   current full gate is not called unfiltered-green. Keep dated baseline
-   reproductions visible; filtered runs are not a substitute and must not hide
-   failures by weakening assertions.
+   current full gate is now green after `4a748f1` (`cmd/crystal-server`
+   118.193s; all packages `ok`), while the dated inspection baseline remains
+   visible. Filtered runs are not a substitute and must not hide failures by
+   weakening assertions.
 4. **Protocol compatibility.** `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`
    now records the explicit accept/reject decisions: inactive rows are accepted
    only as inactive, wire-only rows have no invented triggers, C/148 remains
