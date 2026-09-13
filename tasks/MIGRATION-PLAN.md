@@ -103,9 +103,10 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    waves. Follow-up commit `8782ee1` routes direct-field exact-cell lookup
    through the existing spatial index; a fresh full-population 16/16 wave
    then passes in 29.459s (individual 11.670–29.459s) over about 75,743
-   materialized monsters. The earlier 4/8, 7/8, 11/16 and 14/16 resets remain
-   historical comparison evidence; MaxUser-scale, long-duration and
-   production-soak acceptance remain open.
+   materialized monsters. Two 32-client repeats reach 31/32 in 35.60s and
+   37.83s, each with one relogin/logout response reset. The earlier 4/8, 7/8,
+   11/16 and 14/16 resets remain historical comparison evidence; MaxUser-scale,
+   long-duration and production-soak acceptance remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. A 2026-09-13
    controlled driver sent 20 attacks to each live target and held the Go socket
