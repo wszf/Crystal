@@ -125,7 +125,18 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    world-export hash. The post-commit spatial/route/Elephant/cell focused
    tests pass normally and under targeted `-race`; this closes the bounded
    movement/relogin target for the current source, not extended production
-   duration or cutover acceptance.
+   duration or cutover acceptance. The cooldown-aware follow-up then ran
+   twelve consecutive 50-client waves (600/600) from a fresh disposable
+   runtime, with per-wave slowest clients from 3.638s to 4.279s, while
+   honoring the five-second Legacy IP cooldown. Its server log is
+   `/tmp/pkg5-rank1-current-soak.u0Q58D/Logs/rank1-12wave/Server/Server (13-09-2026).log`
+   (SHA-256
+   `ff1fa91425f19d0951566841b3bf485d9856b86537de80d933d3c9f358fb5106`),
+   and the world export stayed at SHA-256
+   `d45f8ad0fddccb121d5befaea120d94524948576fc74b39313a1d90ab0d2f09e`.
+   This strengthens bounded movement/relogin evidence under the unchanged
+   default timeout; extended production-duration soak, rollback and cutover
+   acceptance remain open.
 2. **Behavioral parity evidence.** Same-account PBKDF2 auth (`b58663e`), strict
    4L lifecycle and clean disposable restart are proven. A 2026-09-13
    controlled driver sent 20 attacks to each live target and held the Go socket
@@ -445,8 +456,13 @@ historically closed.
 1. Rank 1 is now positively reproduced with explicit account/world/map/route/
    log exports: 50/50 distinct existing-character bootstrap → turn → logout,
    3.29s slowest client, 463 maps, 6,341 spawns, unchanged `TimeOut=10000`
-   and `MaxUser=50`, and no timeout override. The world hash remains
-   `d45f8ad0fddccb121d5befaea120d94524948576fc74b39313a1d90ab0d2f09e`.
+   and `MaxUser=50`, and no timeout override. A cooldown-aware follow-up
+   passed twelve consecutive 50-client waves (600/600) with slowest clients
+   from 3.638s to 4.279s, using six-second inter-wave waits for the five-second
+   Legacy IP admission cooldown. The world hash remains
+   `d45f8ad0fddccb121d5befaea120d94524948576fc74b39313a1d90ab0d2f09e`;
+   the detailed server log and per-wave outputs are recorded in the Go replay
+   and completion audit.
    The prior 0/50 no-export runs are discarded diagnostics because their
    startup omitted account/world export loading. Extended production-duration
    scheduler stability remains open.
