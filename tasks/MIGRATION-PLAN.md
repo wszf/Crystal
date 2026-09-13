@@ -490,6 +490,14 @@ the current bounded capacity and regression gates are positive but do not
 authorize a cutover claim. Protected `Envir/`/`Goods/` data and the live 4L
 listener remain outside this work.
 
+The supplemental Rank 2 Guard-target retry adds no parity claim: Go selected
+Guard object `4075` at adjacent coordinates and completed five combat-only
+attack writes with no target-impact packets, while the identical 4L attempt
+selected Guard object `4090` but stopped before attack when the target was
+outside the helper's bounded melee window. The redacted traces/diagnostic and
+hashes are recorded in `Crystal.GoServer/docs/CSHARP-GO-REPLAY.md`; lifecycle
+is positive, while same-state combat and full-payload parity remain fail/open.
+
 ## Package 5 persistence/recovery follow-up — 2026-09-13
 
 The cross-file checkpoint audit now covers interrupted `n/o` promotions for
