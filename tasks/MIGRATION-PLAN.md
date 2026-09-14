@@ -193,15 +193,28 @@ transcript is
 QuestP7 failures exposed by `eec03d2` were fixed by `0f1324f`; they are not
 baseline skips. Rank 3 is green for this batch.
 
+Rank 1 now has positive bounded evidence: the current full-population
+`TimeOut=10000`/`MaxUser=50` run completed 30 consecutive 50-client waves,
+1,500/1,500 bootstrap → turn → logout sessions, with a 5.075s maximum client
+time and no timeout override. Rank 2's fresh same-account lifecycle passes on
+both Go and 4L, but the corrected five-attack Scarecrow captures differ (Go
+4 `ObjectStruck`/5 health updates versus 4L 0/0), with unsynchronized target
+IDs/coordinates and EOF/read-error cleanup. Therefore lifecycle is Pass while
+same-state combat and full-payload parity remain Fail/open. Details and trace
+hashes are in Go `docs/CSHARP-GO-COMPLETION-AUDIT.md` Section 4.20 and
+`docs/CSHARP-GO-REPLAY.md`.
+
 Continue the active ranked work in order: (1) retain the measured default
-`TimeOut=10000` performance boundary and document any further production-scale
-evidence without increasing the timeout; (2) perform the fresh same-account
-Go/4L lifecycle, payload and controlled combat comparison with honest
-pass/fail classification; (3) keep the unfiltered regression gate and known
-baseline policy explicit; (4) retain the accept/reject policy for dead or
-protocol-only rows and `GameMaster=100` versus `Rested=112`; and (5) document
-operations/recovery evidence only after the earlier items move. The live 4L
-listener remains at `127.0.0.1:7000` and must not be stopped or reconfigured.
+`TimeOut=10000` performance boundary and document or improve any remaining
+production-scale scheduler/long-duration evidence without increasing the
+timeout; (2) continue paired same-account Go/4L payload and controlled combat
+work, synchronizing target state where the unmodified 4L runtime permits and
+recording honest pass/fail results; (3) keep the unfiltered regression gate
+and known baseline policy explicit; (4) retain the accept/reject policy for
+dead or protocol-only rows and `GameMaster=100` versus `Rested=112`; and (5)
+document operations/recovery evidence only after the earlier items move. The
+live 4L listener remains at `127.0.0.1:7000` and must not be stopped or
+reconfigured.
 
 ## Package 5 persistence follow-up — 2026-09-13
 
