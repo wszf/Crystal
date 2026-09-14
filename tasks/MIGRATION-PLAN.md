@@ -574,6 +574,25 @@ Package 5 remains historically closed, the production `TimeOut=10000` and live
 excluded. Further work may now be labeled alignment only when it cites one of
 these five rows and one checklist item, then records an honest result.
 
+## Rank 1 source scheduling alignment checkpoint — 2026-09-14
+
+The first post-checklist Rank 1 alignment audit found a real architectural
+candidate but no proven defect. Legacy processes due objects incrementally
+through `OperateTime` and a work-budget loop (`Server/MirEnvir/Envir.cs:1996-2218`);
+its monster turn orders AI, buffs, regeneration, and poison, with route handling
+inside the AI turn (`MonsterObject.cs:1192-1310`, `1671-1840`). Go holds the
+world lock for globally phased route, AI, regeneration, poison, expiration,
+removal, and respawn work over indexed populations
+(`cmd/crystal-server/world.go:11820-12106`).
+
+The difference warrants measurement around route/target/alone gating and due-
+time boundaries, but no reproduced movement, notification, combat, state, or
+timing divergence justifies a Go patch. Checklist item 2 remains partial/open.
+The next measurement must separate startup/materialization from steady-state
+ticks and use approved duration/thresholds for population, CPU/memory/RSS, GC,
+network, tick latency, lock duration, reconnects, timeouts, and errors. No
+thresholds are invented and the protected 4L listener remains untouched.
+
 ## True-completion Step 0 and current ranked evidence — 2026-09-14
 
 Rechecked the current Go completion audit against
