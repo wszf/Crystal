@@ -152,17 +152,17 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    `ObjectMonster`), so this narrows but does not close payload parity. An
    opt-in direct credentialed relogin probe also returned EOF before
    `LoginSuccess`; no verdict is softened from the completion audit.
-3. **Regression gate.** The preceding consolidated gate is green after
-   `b1881d3` synchronizes the delayed-NPC test's post-response queue assertion
-   without changing production flow (`cmd/crystal-server` 116.213s; log
-   `/tmp/pkg5-completion-post-npc-sync-20260913.log`). The latest post-visual
-   gate reproduces the documented intermittent inspection baseline
-   `TestInspectArchivedOnlineObjectUsesRegistry` (focused 20/20 passes), and
-   the required post-`aede46f` gate reproduces that same baseline, so the
-   current full gate is now green after `4a748f1` (`cmd/crystal-server`
-   118.193s; all packages `ok`), while the dated inspection baseline remains
-   visible. Filtered runs are not a substitute and must not hide failures by
-   weakening assertions.
+3. **Regression gate.** The current required unfiltered command is
+   non-repeatable/open. At Go commit `9a311f7`, the first unchanged run failed
+   after 109.116s at `cmd/crystal-server/inspection_session_test.go:120`
+   (`ServerKeepAlive` packet 3 expected, mail packet 26 observed) while 21 of
+   22 packages passed; an unchanged rerun passed all 22 packages in 108.921s.
+   The full-log SHA-256 values are
+   `3050369c78b1c0265fe32a9d324b4b5d37aa161248b5e0bca8eecb5a4e4ef179` and
+   `6e15320a7dbbe4d79d5eabdfa4a602766add8c67a10c7d9ab5e0590272206ea8`.
+   A targeted five-repeat passed. Filtered runs are not a substitute and must
+   not hide failures by weakening assertions; the exact package manifest and
+   historical disposition remain in the latest Step 0 Rank 3 checkpoint.
 4. **Protocol compatibility.** `Crystal.GoServer/docs/CSHARP-GO-COMPATIBILITY-POLICY.md`
    now records the explicit accept/reject decisions: inactive rows are accepted
    only as inactive, wire-only rows have no invented triggers, C/148 remains
@@ -180,11 +180,13 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    remain unproven. No cutover claim is allowed while the behavioral proof and
    operations boundaries remain.
 
-## Current true-completion checkpoint — 2026-09-14
+## Historical true-completion checkpoint — 2026-09-14 (superseded for Rank 3)
 
-The Step 0 audit recheck remains A=`Partial`, B=`No`; Packages 1–5 remain
-historically closed and archived orchestration is not revived. The required
-post-`0f1324f` unfiltered gate
+This is a historical snapshot before the later `9a311f7` repeatability runs;
+its green gate result remains evidence at that revision, not the current Rank 3
+verdict. The Step 0 audit recheck remains A=`Partial`, B=`No`; Packages 1–5
+remain historically closed and archived orchestration is not revived. The
+required post-`0f1324f` unfiltered gate
 `go test ./... -count=1 -timeout 5m` passed all 21 listed command/internal
 packages, with `cmd/crystal-server` completing in 108.924s. Its captured
 transcript is
@@ -216,8 +218,10 @@ document operations/recovery evidence only after the earlier items move. The
 live 4L listener remains at `127.0.0.1:7000` and must not be stopped or
 reconfigured.
 
-## Current true-completion checkpoint — 2026-09-14 (continued)
+## Historical true-completion checkpoint — 2026-09-14 (continued)
 
+This continuation is retained as historical evidence; the later Step 0
+Rank 3 checkpoint records the authoritative repeatability disposition.
 Rank 1 received Go commit `2b2f013`, which maintains and reuses the sorted
 monster ObjectID order during production world ticks. Focused spatial tests
 pass normally and under targeted `-race`. The isolated benchmark mean fell
@@ -697,9 +701,11 @@ in the Go replay/audit docs. The worlds and target state are not synchronized,
 so same-state combat, full-payload and reward/death equivalence remain
 Fail/open despite both lifecycle paths accepting five attacks.
 
-Rank 3's current unfiltered gate is green: all 21 packages passed in
-`/tmp/pkg5-post-0526aaf-fixture-unfiltered-20260914.log`; known historical
-baseline failures remain documented without a new skip. Rank 4 retains the
+That historical Rank 3 snapshot reported all 21 packages passed in
+`/tmp/pkg5-post-0526aaf-fixture-unfiltered-20260914.log`; it is superseded for
+current disposition by the later 22-package manifest and non-repeatable gate
+recorded above. Known historical baseline failures remain documented without a
+new skip. Rank 4 retains the
 explicit accept/reject policy: dead/protocol-only rows are inactive or
 wire-only, `SetCompass` has no invented trigger, C/148 remains partial, and
 `GameMaster=100` is distinct from `Rested=112`. Rank 5 operations evidence
