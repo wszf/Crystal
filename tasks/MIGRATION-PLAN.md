@@ -519,6 +519,41 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## True-completion Step 0 and current ranked evidence — 2026-09-14
+
+Rechecked the current Go completion audit against
+`Crystal.GoServer/docs/CSHARP-GO-DIFF.md`,
+`Crystal.GoServer/docs/CSHARP-GO-REPLAY.md`, and
+`Crystal.GoServer/docs/MIGRATION-STATUS.md` through Go commit `68d6771`.
+The verdict remains functional migration A=`Partial` and production
+replacement B=`No`; no No→Yes change is made. Packages 1–5 remain historically
+closed and archived Goal/leaf/matrix orchestration is not revived.
+
+Rank 1 retains positive bounded default-timeout evidence: the current
+full-population run passed 1,500/1,500 bootstrap → turn → logout sessions over
+30 cooldown-aware 50-client waves, with a 5.075 s maximum client time, about
+75,743 materialized monsters, `TimeOut=10000`, `MaxUser=50`, and no timeout
+override. The persistent monster-order optimization in `2b2f013` reduced the
+isolated benchmark mean from 140.432 ms to 98.769 ms. Extended production-
+duration scheduler stability and production-capacity acceptance remain open.
+
+Rank 2's newest corrected five-attack traces supersede the older Go-hit count:
+Go has 659 frames, no target strikes or health updates, and 4 miss indicators;
+4L has 615 frames, no target strikes or health updates, and 5 miss indicators.
+The raw trace hashes and the green fixture-focused unfiltered gate are recorded
+in the Go replay/audit docs. The worlds and target state are not synchronized,
+so same-state combat, full-payload and reward/death equivalence remain
+Fail/open despite both lifecycle paths accepting five attacks.
+
+Rank 3's current unfiltered gate is green: all 21 packages passed in
+`/tmp/pkg5-post-0526aaf-fixture-unfiltered-20260914.log`; known historical
+baseline failures remain documented without a new skip. Rank 4 retains the
+explicit accept/reject policy: dead/protocol-only rows are inactive or
+wire-only, `SetCompass` has no invented trigger, C/148 remains partial, and
+`GameMaster=100` is distinct from `Rested=112`. Rank 5 operations evidence
+remains bounded and is not a cutover claim. Continue in this order, without
+stopping/reconfiguring live 4L or committing generated `Envir/`/`Goods/` data.
+
 ## True-completion Step 0 recheck — 2026-09-14
 
 The current Go audit was rechecked against `CSHARP-GO-DIFF.md`,
