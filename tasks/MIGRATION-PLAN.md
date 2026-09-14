@@ -566,10 +566,11 @@ register; this plan records the same boundaries:
    `5385b242dd517b43b3bf2ab5a1cb31f4e3b022b61f5c205532355af9fcff4b8e`). The
    current package manifest has 22 entries (SHA-256
    `7af8d79b2272a43cee9f90fd11ee6409ae756a7a947b63652c5577f4392471c1`).
-   Older status text records an initial seven-test failure set while historical
-   plan text names six timing exclusions. The exact test-name manifest and
-   disposition of formerly excluded tests, environment and thresholds remain
-   open; repeatability and the no-new-skip policy remain explicit;
+   The seven historical failures and six timing-policy exclusions are separate
+   categories; only `TestMountSessionStaleRecoveryKeepsConnectionAndRetries`
+   appears in both. The exact test-name manifest and disposition of formerly
+   excluded tests, environment and thresholds remain open; repeatability and
+   the no-new-skip policy remain explicit;
 4. protocol caveats: dead/protocol-only rows, wire-only `SetCompass`, partial
    C/148, and `GameMaster=100` versus `Rested=112` are accepted policy rows,
    not invented active features. The 72/72 command-name result and ordinal
