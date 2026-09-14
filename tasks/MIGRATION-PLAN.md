@@ -180,6 +180,29 @@ historical evidence and must not be read as a revived leaf/matrix queue.
    remain unproven. No cutover claim is allowed while the behavioral proof and
    operations boundaries remain.
 
+## Current true-completion checkpoint — 2026-09-14
+
+The Step 0 audit recheck remains A=`Partial`, B=`No`; Packages 1–5 remain
+historically closed and archived orchestration is not revived. The required
+post-`0f1324f` unfiltered gate
+`go test ./... -count=1 -timeout 5m` passed all 21 listed command/internal
+packages, with `cmd/crystal-server` completing in 108.924s. Its captured
+transcript is
+`/tmp/pkg5-post-0f1324f-unfiltered-20260914.log` (SHA-256
+`799f7d82e13ba57a3a22e17675d37a2b0601dcbbf4217dfcd4fe5348bca7de7`). The
+QuestP7 failures exposed by `eec03d2` were fixed by `0f1324f`; they are not
+baseline skips. Rank 3 is green for this batch.
+
+Continue the active ranked work in order: (1) retain the measured default
+`TimeOut=10000` performance boundary and document any further production-scale
+evidence without increasing the timeout; (2) perform the fresh same-account
+Go/4L lifecycle, payload and controlled combat comparison with honest
+pass/fail classification; (3) keep the unfiltered regression gate and known
+baseline policy explicit; (4) retain the accept/reject policy for dead or
+protocol-only rows and `GameMaster=100` versus `Rested=112`; and (5) document
+operations/recovery evidence only after the earlier items move. The live 4L
+listener remains at `127.0.0.1:7000` and must not be stopped or reconfigured.
+
 ## Package 5 persistence follow-up — 2026-09-13
 
 The post-closure recovery audit has now covered JSON account decoding, 117
