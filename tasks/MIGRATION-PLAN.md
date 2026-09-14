@@ -1633,3 +1633,38 @@ disposition remain separate. Keep checklist item 5 open pending that policy and
 ownership reconciliation; A=`Partial`, B=`No`, Package 5 historically closed,
 C# read-only, the live 4L listener untouched, and generated `Envir/`/`Goods/`
 data excluded.
+
+## Rank 3 historical-disposition filtered recheck — 2026-09-14
+
+At Go HEAD `6f1d19e`, reran the exact anchored selection of the seven historical
+failure records and six timing-policy records, with
+`TestMountSessionStaleRecoveryKeepsConnectionAndRetries` intentionally retained
+as the one overlap:
+
+```text
+go test ./cmd/crystal-server -run '^(TestSessionHallucinationTranscript|TestProductionStartupReturnsBootstrapError|TestProductionRuntimeBootstrapPrecedesGameBind|TestProcessLifecycleOuterBootstrapFailureKeepsStaleRunning|TestMountSessionStaleRecoveryKeepsConnectionAndRetries|TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin|TestDropIncludesExpandLikeGrowingLegacyList|TestSessionPoisonCloudTranscriptAndPersistence|TestSessionMapHazardSpawnDamageRemovalAndRestart|TestSessionHidingTranscriptPersistenceAndExpiry|TestNPCP7ControlFlowSessionDelayGotoFakeClockProductionEntry|TestLoverRecallNetworkSameMapCooldownAndCrossMapStaticRefresh)$' -count=1 -timeout 20m
+```
+
+The selected package passed in 0.129s. Log
+`/tmp/pkg5-rank3-historical-dispositions-20260914.log` has SHA-256
+`df8b3bff3a6cc3e22f6d4d2c894b57ae4fd16c506f5ea0c82332587ea5f984e6`.
+All 12 names are current passes. The six non-overlap historical-failure records
+are `TestSessionHallucinationTranscript`,
+`TestProductionStartupReturnsBootstrapError`,
+`TestProductionRuntimeBootstrapPrecedesGameBind`,
+`TestProcessLifecycleOuterBootstrapFailureKeepsStaleRunning`,
+`TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin`, and
+`TestDropIncludesExpandLikeGrowingLegacyList`; the overlap record is
+`TestMountSessionStaleRecoveryKeepsConnectionAndRetries`; and the five
+non-overlap timing-policy records are `TestSessionPoisonCloudTranscriptAndPersistence`,
+`TestSessionMapHazardSpawnDamageRemovalAndRestart`,
+`TestSessionHidingTranscriptPersistenceAndExpiry`,
+`TestNPCP7ControlFlowSessionDelayGotoFakeClockProductionEntry`, and
+`TestLoverRecallNetworkSameMapCooldownAndCrossMapStaticRefresh`.
+
+This current pass result does not erase the historical labels and is not the
+required unfiltered baseline. No skip, timeout, current failure, or weakened
+assertion occurred. Checklist item 5 remains open pending reconciliation of the
+six-exclusion policy and owner acceptance. Keep A=`Partial`, B=`No`, Package 5
+historically closed, C# read-only, the live 4L listener untouched, and generated
+`Envir/`/`Goods/` data excluded.
