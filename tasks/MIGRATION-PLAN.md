@@ -1717,3 +1717,26 @@ the historical seven-failure records, six timing-policy records, overlap, and
 owner-approved disposition as separate open policy categories. A=`Partial`,
 B=`No`, Package 5 historically closed, C# read-only, the live 4L listener
 untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 2 portable empty-DC ordinary-melee snapshot — 2026-09-14
+
+At Go commit `a322f69`, added the second portable Rank 2 vector
+`Crystal.GoServer/cmd/crystal-server/testdata/rank2_ordinary_melee_empty_dc_snapshot.json`
+(SHA-256 `335d2d0cdf28416bf18e4cb43c2e71b2960c634925b92d9de39b9a5befcb4485`)
+and `TestPortableRank2OrdinaryMeleeEmptyDCSnapshot`. It fixes ordinary
+`Spell.None`, zero DC, zero target AC, adjacent cells, and 300ms delay; asserts
+zero admission damage, exact attack payload, impact IDs `[75]`, exact zero-
+damage miss indicator, no `ObjectStruck`/health traffic, unchanged HP 100, no
+death, and random bounds `[1,1,1,4]`.
+
+The first provisional random vector omitted the final bound; the deterministic
+source result `[1,1,1,4]` was recorded in the fixture without a production-code
+change. Normal 100/100 passed (SHA-256
+`f3b1f20c4fca83a12ea004a76291aab5929bbc41ba1380c1df0cb3ae89d0c0f0`), race
+20/20 passed (SHA-256
+`63074470065e6d0048b19a2cd6a14d22aed822627767463599c556814bb4cb65`), and the
+post-fixture unfiltered gate passed all 22 packages in 104.212s (SHA-256
+`064bbbea18fe86afc72fba4ed007ea29b8a860ce0873055eaae31e39857ff937`). This
+remains Go-only fixture evidence, not synchronized Go/4L parity. Keep Rank 2
+item 3 open, A=`Partial`, B=`No`, Package 5 historically closed, C# read-only,
+the live 4L listener untouched, and generated `Envir/`/`Goods/` data excluded.
