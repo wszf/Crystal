@@ -1696,3 +1696,24 @@ is longer controlled Go-only evidence, not an imported-world/C#/4L comparison,
 production threshold, or indefinite soak. Rank 1/item 2 remains open. Keep
 A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the live 4L
 listener untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 3 current unfiltered regression gate — 2026-09-14
+
+At Go HEAD `8226b1d`, the unchanged required gate passed all 22 listed packages:
+
+```text
+go test ./... -count=1 -timeout 5m
+```
+
+`cmd/crystal-server` completed in 103.858s. Raw log
+`/tmp/pkg5-rank3-post-8226b1d-unfiltered-20260914.log` has SHA-256
+`0b54235b82662d9d8c02a17a40ebefea6a6aa33783bc9035c945f388db7ca5a8`. This is
+the fourth current unfiltered green observation after the three prior
+post-convergence gates. It used no filter, skip, weakened assertion, production
+source change, live 4L operation, C# edit, or generated-data staging.
+
+This strengthens current-source gate evidence but does not close item 5. Keep
+the historical seven-failure records, six timing-policy records, overlap, and
+owner-approved disposition as separate open policy categories. A=`Partial`,
+B=`No`, Package 5 historically closed, C# read-only, the live 4L listener
+untouched, and generated `Envir/`/`Goods/` data excluded.
