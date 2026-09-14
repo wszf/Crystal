@@ -1617,3 +1617,19 @@ canonical imported-world or C#/4L steady-state comparison and not an approved
 capacity threshold. Keep Rank 1/item 2 open, A=`Partial`, B=`No`, Package 5
 historically closed, C# read-only, the live 4L listener untouched, and
 `Envir/`/`Goods/` data excluded.
+
+## Rank 3 authoritative test-name manifest — 2026-09-14
+
+Checklist item 5 now has the checked-in manifest
+`Crystal.GoServer/docs/CSHARP-GO-TEST-MANIFEST-2026-09-14.txt`, generated at Go
+HEAD `606280d` from `go list ./...` and `go test "$package" -list .` for every
+package. It contains 22 package headings, 4,859 `Test*` names, one benchmark,
+and 4,908 lines; SHA-256
+`3ee1de7d181f5287c721f712ec3d65846cbde7710270adce17f47beb6cc4a979`.
+
+This is an exact name inventory, not an execution result. The unfiltered gate,
+historical failure set, timing exclusions, overlap, and owner-approved baseline
+disposition remain separate. Keep checklist item 5 open pending that policy and
+ownership reconciliation; A=`Partial`, B=`No`, Package 5 historically closed,
+C# read-only, the live 4L listener untouched, and generated `Envir/`/`Goods/`
+data excluded.
