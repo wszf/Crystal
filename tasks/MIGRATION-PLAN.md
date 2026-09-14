@@ -1740,3 +1740,18 @@ post-fixture unfiltered gate passed all 22 packages in 104.212s (SHA-256
 remains Go-only fixture evidence, not synchronized Go/4L parity. Keep Rank 2
 item 3 open, A=`Partial`, B=`No`, Package 5 historically closed, C# read-only,
 the live 4L listener untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 3 authoritative manifest regeneration — 2026-09-14
+
+After Go commit `a322f69` added the empty-DC fixture, regenerated
+`Crystal.GoServer/docs/CSHARP-GO-TEST-MANIFEST-2026-09-14.txt` using
+`go list ./...` and `go test "$package" -list .` for every package. It contains
+22 package headings, 4,860 test names, one benchmark, zero examples, and 4,909
+lines; SHA-256 `45b216aa95450155667f04376b5377d23a2777e7d11e7b2b6843ac8b1ec3c1ee`.
+The new empty-DC portable test name is included.
+
+This remains an inventory update, not a green execution claim. Keep item 5 open
+for reconciliation of the unfiltered gate, historical failure/timing-policy
+records, overlap, and owner-approved baseline disposition. A=`Partial`, B=`No`,
+Package 5 historically closed, C# read-only, the live 4L listener untouched,
+and generated `Envir/`/`Goods/` data excluded.
