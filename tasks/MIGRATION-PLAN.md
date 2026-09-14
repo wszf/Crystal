@@ -1572,3 +1572,28 @@ historical failures, exclusions, and the authoritative manifest/ownership are
 reconciled. A=`Partial`, B=`No`, Package 5 remains historically closed, C#
 remains read-only, the live 4L listener remains untouched, and generated
 `Envir/`/`Goods/` data remains excluded.
+
+## Rank 2 portable ordinary-melee snapshot fixture — 2026-09-14
+
+Checklist item 3 now has a test-only portable semantic vector at
+`Crystal.GoServer/cmd/crystal-server/testdata/rank2_ordinary_melee_snapshot.json`
+(SHA-256 `ed7745d164a2004fe4551f99d9a40f0d9a6e7895e2172c497653cc7879606ccb`).
+It fixes the attacker/target state, 300ms impact boundary, admission result,
+load-bearing packet payload fields, final HP/death state, packet IDs, and
+random-bound sequence. `rank2_snapshot_test.go` embeds and executes the vector;
+it is a future offline comparator input, not a live 4L injection mechanism.
+
+The focused normal run passed 100/100 (SHA-256
+`bea1425e7819a8506e54f70f350e60bac10f52c378cd3ed6eccaf54920107297`), the
+focused race run passed 20/20 (SHA-256
+`ae877ffc0574a725c56c4187cac53c1de981dc33e9af598915756ce29ee5aa66`), and the
+combined deterministic combat checks passed three repetitions. A subsequent
+unfiltered gate passed all 22 listed packages; `cmd/crystal-server` completed
+in 104.527s (SHA-256
+`b2ef7791203c788d5c7e935ca82eb3a6a7af24c07e32a8629be47a05de2c72a9`).
+
+This advances portable Go-only Rank 2 fixture evidence but does not establish
+synchronized Go/4L state, full payload equality, or same-state combat/economy
+outcomes. Keep Rank 2 fail/open, A=`Partial`, B=`No`, Package 5 historically
+closed, C# read-only, the live 4L listener untouched, and generated
+`Envir/`/`Goods/` data excluded.
