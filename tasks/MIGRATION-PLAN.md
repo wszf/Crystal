@@ -671,6 +671,27 @@ Go/4L snapshot or live replay, does not inject state into `127.0.0.1:7000`, and
 does not close same-state combat/full-payload parity or persistence/restart
 equivalence. A=`Partial`, B=`No` remain unchanged.
 
+## Rank 3 unfiltered gate recheck after Rank 2 fixture — 2026-09-14
+
+At Go HEAD `ab6d12b`, the required unchanged command
+`go test ./... -count=1 -timeout 5m` passed twice. All 22 listed packages reported
+`ok`; `cmd/crystal-server` completed in 104.405s and 104.159s. The raw-log
+SHA-256 values are
+`7654086edaffa06d2ad829bd41c9f6350de1fee3e8fc18592a1d03558ea1ac92` and
+`14b80b3e2a380b7ddfefacf9e4b6439c0f4322b86f3da03aca7199a5484953ac`.
+
+The focused reproduction
+`go test ./cmd/crystal-server -run '^TestInspectArchivedOnlineObjectUsesRegistry$' -count=5`
+failed before completing five repetitions: `inspection_session_test.go:120`
+received mail packet `26` where `ServerKeepAlive` packet `3` was expected. Its
+raw log is `/tmp/rank3-post-ab6d12b-inspection-repeat-20260914.log` with
+SHA-256 `5359e33b93c1a7cac75333170d6bfcbf5ebc2a69d36ec22362fc93dc2140c439`.
+
+The two current full-suite passes are useful samples, but the focused
+reproduction preserves Rank 3 as non-repeatable/open. Historical seven failures
+and six timing-policy exclusions remain separate categories; no skip or
+weakened assertion was added. A=`Partial`, B=`No` remain unchanged.
+
 ## Rank 3 gate repeatability checkpoint — 2026-09-14
 
 The required unfiltered gate ran twice unchanged at Go commit `9a311f7`. The
