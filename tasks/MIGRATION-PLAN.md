@@ -519,6 +519,20 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## Current Rank 1 timing diagnostic — 2026-09-14
+
+A focused current-source full-world diagnostic materialized 75,719 monsters
+under the unchanged production/default `TimeOut=10000` and measured three
+world-tick passes at 1.141s, 1.080s and 1.146s. The CPU profile is
+`/tmp/pkg5-fulltick-current-20260914.cpuprofile` (SHA-256
+`a94a68f25e99caee05dd84a3174058e3d0f214781537e96578fc8da4e8cc93af`). The
+5.74s profile includes startup/load work as well as ticks; therefore
+`spawnPositions` (0.84s inclusive) is not recorded as a steady-state tick
+cost. `gameWorld.tick` was 3.34s inclusive and `tickMonsterAILocked` 1.17s in
+the capture. This strengthens the bounded Rank 1 evidence without closing
+indefinite scheduler soak or production cutover acceptance. A=`Partial`,
+B=`No` remain unchanged; Packages 1–5 remain historically closed.
+
 ## True-completion Step 0 and current ranked evidence — 2026-09-14
 
 Rechecked the current Go completion audit against
