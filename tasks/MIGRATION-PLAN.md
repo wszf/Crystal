@@ -1668,3 +1668,31 @@ assertion occurred. Checklist item 5 remains open pending reconciliation of the
 six-exclusion policy and owner acceptance. Keep A=`Partial`, B=`No`, Package 5
 historically closed, C# read-only, the live 4L listener untouched, and generated
 `Envir/`/`Goods/` data excluded.
+
+## Rank 1 longer controlled steady-state benchmark — 2026-09-14
+
+At Go HEAD `29da9de`, reran the controlled Rank 1 scheduler fixture with
+`GOMAXPROCS=1`, `-benchtime=10x`, `-benchmem`, and three repetitions. The
+75,719-monster one-map fixture retains unique cells, no players, three warm-up
+ticks, and future due fields pinned:
+
+| Mode | Mean | Range | Allocations |
+| --- | ---: | ---: | ---: |
+| `playerless-skip` | 449.239 ms | 418.715–477.348 ms | 310,145,728 B / 75,748 allocs |
+| `process-when-alone` | 4,474.710 ms | 4,457.564–4,495.933 ms | 386,618,944 B / 151,467 allocs |
+
+Command:
+
+```text
+GOMAXPROCS=1 go test ./cmd/crystal-server -run '^$' \\
+  -bench '^BenchmarkWorldTickSteadyStateControlledPopulation$' \\
+  -benchtime=10x -benchmem -count=3 -timeout 15m
+```
+
+The package completed in 417.466s. Raw log
+`/tmp/rank1-steady-state-controlled-10x-29da9de-20260914.log` has SHA-256
+`a5f81570a901ac4f2c1a1a53d46456db9a8ce0edfd7605cf5614d3d7c8aa4e02`. This
+is longer controlled Go-only evidence, not an imported-world/C#/4L comparison,
+production threshold, or indefinite soak. Rank 1/item 2 remains open. Keep
+A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the live 4L
+listener untouched, and generated `Envir/`/`Goods/` data excluded.
