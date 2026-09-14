@@ -216,6 +216,20 @@ document operations/recovery evidence only after the earlier items move. The
 live 4L listener remains at `127.0.0.1:7000` and must not be stopped or
 reconfigured.
 
+## Current true-completion checkpoint — 2026-09-14 (continued)
+
+Rank 1 received Go commit `2b2f013`, which maintains and reuses the sorted
+monster ObjectID order during production world ticks. Focused spatial tests
+pass normally and under targeted `-race`. The isolated benchmark mean fell
+from 140.432 ms to 98.769 ms (29.7%) across three samples. A fresh
+full-population runtime loaded 463 maps, 6,341 spawns and approximately 75,743
+monsters with unchanged `TimeOut=10000`/`MaxUser=50`; one 50/50 wave passed in
+3.506 s and twelve cooldown-aware waves passed 600/600 with a 4.707 s maximum
+slowest client. This advances, but does not close, the extended-duration and
+production-capacity Rank 1 boundary. Continue to Rank 2 same-account paired
+payload/combat proof; preserve the honest A=`Partial`, B=`No` verdict and do
+not stop or reconfigure live 4L.
+
 ## Package 5 persistence follow-up — 2026-09-13
 
 The post-closure recovery audit has now covered JSON account decoding, 117
