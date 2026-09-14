@@ -1441,3 +1441,41 @@ missing-73/74/75/77 variant, packet 82 only). Inspection/shop quirks
 did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
+
+## Rank 5 recovery transaction contract — 2026-09-14
+
+The next true-completion checkpoint records checklist item 7 without reviving
+the historical Package 5 queue or changing runtime behavior. The current Go
+contract is local atomic/recoverable staging per artifact, not one transaction
+across account JSON, 117 account state, world JSON/`Server.MirDB`, guilds,
+conquests, UsedGoods, and respawn/runtime state.
+
+Source-backed boundaries:
+
+- `persistPeriodicWorkLoopSave` runs `accounts → database → guilds → goods →
+  conquests`, keeps the first error, and continues later steps;
+- `auth.Service.SaveJSON` renames JSON before its registered 117 checkpoint hook,
+  and a hook failure reports `JSONCommitted=true`;
+- account, world, conquest, UsedGoods, and respawn binary/sidecar writers use
+  local temporary/`n/o` promotion, while guild refresh adds `.ready` and
+  `Guilds.n`/`Guilds.o` directory recovery;
+- existing final artifacts remain authoritative under local recovery rules;
+  malformed primaries fail load, and dated backups are not automatically
+  selected;
+- goods acknowledgement is per file, guild/conquest acknowledgement is after
+  its writer succeeds, and failed respawn persistence restores its dirty flag.
+
+There is no shared generation/transaction manifest, checksum catalog,
+cross-store commit identifier, durable recovery record, deterministic rollback
+selector, or automated newest-known-good restore selector. A later periodic
+failure can therefore leave earlier stores committed and later stores at their
+prior generation; local `.n`/`.o`/`.ready` recovery cannot reconcile that
+cross-store state. The full matrix and source references are recorded in
+`Crystal.GoServer/docs/CSHARP-GO-OPERATIONS.md`; the audit, replay, and status
+documents carry the same boundary.
+
+This is documentation-only evidence for checklist item 7. Restore/corruption
+drills, observability/readiness, semantic 4L persistence comparison, and the
+final decision gate remain open. A=`Partial`, B=`No`, Package 5 remains
+historically closed, C# remains read-only, the live 4L listener remains
+untouched, and generated `Envir/`/`Goods/` data remains excluded.
