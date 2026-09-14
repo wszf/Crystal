@@ -536,31 +536,43 @@ B=`No` remain unchanged; Packages 1–5 remain historically closed.
 ## True-completion Step 0 — full ranked inventory gate — 2026-09-14
 
 Before any further C#→Go alignment, the five active blockers are explicitly
-inventoried in order in `Crystal.GoServer/docs/CSHARP-GO-COMPLETION-AUDIT.md`:
+inventoried in order in `Crystal.GoServer/docs/CSHARP-GO-COMPLETION-AUDIT.md`.
+The audit's detailed ten-item checklist is the authoritative proof/governance
+register; this plan records the same boundaries:
 
 1. default-timeout full-population performance/capacity: bounded 1,500/1,500
-   evidence and three 75,719-monster tick samples are positive, but indefinite
-   scheduler/capacity proof and direct C#/4L steady-state comparison remain
-   open;
+   evidence and three 75,719-monster tick samples are positive, but the mixed
+   startup/load profile, absent duration/CPU/memory/GC/network/tick-latency/
+   reconnect/error-rate thresholds, indefinite scheduler/capacity proof, and
+   direct C#/4L steady-state comparison remain open;
 2. same-state combat/payload versus live 4L: lifecycle and combat-path reach
    pass, but packet volumes, target state, impact output and cleanup are not
-   synchronized, so parity is fail/open;
+   synchronized. No common deterministic world-state fixture exists, and
+   persistence/restart equivalence across stores is unresolved, so parity is
+   fail/open;
 3. regression gate/baseline policy: the current unfiltered gate is green, but
-   historical baselines, repeatability, and the no-new-skip policy remain
+   older status text records an initial seven-test failure set while historical
+   plan text names six timing exclusions. The exact current package/test
+   manifest, environment, thresholds, and disposition of formerly excluded
+   tests are not published; repeatability and the no-new-skip policy remain
    explicit;
 4. protocol caveats: dead/protocol-only rows, wire-only `SetCompass`, partial
    C/148, and `GameMaster=100` versus `Rested=112` are accepted policy rows,
-   not invented active features;
-5. operations/restart: disposable clean/abrupt recovery passes, while
-   cross-store rollback, corruption/restore drills, monitoring/alerting,
-   production runbook/readiness, and 4L binary semantic comparison remain
+   not invented active features. The 72/72 command-name result and ordinal
+   counts still need consolidated behavioral dispositions for authorization,
+   lookup, persistence, ordering, side effects, and errors;
+5. operations/restart: disposable clean/abrupt recovery passes, while a
+   unified generation/transaction manifest, cross-store commit identifier,
+   rollback selector, newest-known-good backup selection, corruption/restore
+   drills, monitoring/alerting, production runbook/readiness, explicit
+   operator ownership/escalation, and 4L binary semantic comparison remain
    open.
 
 The inventory gate is complete, not a completion claim. A=`Partial`, B=`No`,
 Package 5 remains historically closed, the production `TimeOut=10000` and live
 4L safety boundaries remain unchanged, and generated `Envir/`/`Goods/` data is
 excluded. Further work may now be labeled alignment only when it cites one of
-these five rows and records an honest result.
+these five rows and one checklist item, then records an honest result.
 
 ## True-completion Step 0 and current ranked evidence — 2026-09-14
 
