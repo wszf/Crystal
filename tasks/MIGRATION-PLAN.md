@@ -230,6 +230,26 @@ production-capacity Rank 1 boundary. Continue to Rank 2 same-account paired
 payload/combat proof; preserve the honest A=`Partial`, B=`No` verdict and do
 not stop or reconfigure live 4L.
 
+## Current Rank 2 paired-evidence checkpoint — 2026-09-14
+
+The focused `cmd/pkg5-combat-driver` and `internal/probe` tests pass normally
+and under targeted `-race`. The latest redacted same-account replay uses
+`/tmp/4l-planb-credentials.txt`, with disposable Go at `127.0.0.7:17397` and
+live 4L still at `127.0.0.1:7000`. Both sides complete the identical
+eight-request lifecycle (Go 560 frames, 4L 558), but packet volumes differ:
+Go `ObjectMonster=18`, `ObjectNPC=1`, `NPCResponse=2`, `ObjectSpell=23`,
+`NPCUpdate=1`; 4L `ObjectMonster=9`, `ObjectNPC=10`, no `NPCResponse`,
+`ObjectSpell=22`, `NPCUpdate=2`.
+
+The paired bounded combat driver sends five attacks on each `Scarecrow` path.
+Go records 3 target strikes/3 damage indicators/3 health updates in 698
+frames; 4L records 0/5/0 in 630 frames. This is lifecycle and combat-path
+reach evidence, while synchronized combat and full-payload parity remain
+**Fail/open** because target IDs, coordinates and runtime states are not
+synchronized. Continue the ranked true-completion order with this honest
+Rank 2 boundary; A=`Partial`, B=`No` remain unchanged. Keep the live 4L
+listener untouched and exclude generated `Envir/`/`Goods/` data from commits.
+
 ## Package 5 persistence follow-up — 2026-09-13
 
 The post-closure recovery audit has now covered JSON account decoding, 117
