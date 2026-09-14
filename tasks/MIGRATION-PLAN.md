@@ -449,6 +449,34 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## True-completion follow-up — 2026-09-14
+
+The active post-audit order remains Rank 1 performance, Rank 2 paired
+behavioral proof, Rank 3 regression policy, Rank 4 protocol compatibility and
+Rank 5 operations evidence. Package 5 remains historically closed; this is
+new true-completion evidence, not a revived Goal/leaf/matrix queue.
+
+- Rank 1 valid current-source full-population evidence now includes 30
+  cooldown-aware waves of 50 existing-character clients: 1,500/1,500
+  bootstrap → turn → logout sessions. The run loaded 463 maps and 6,341
+  spawns (about 75,743 materialized monsters), kept `TimeOut=10000` and
+  `MaxUser=50`, used no timeout override, and measured 3.313s–5.075s slowest
+  clients. Runtime, per-wave outputs, log hash and unchanged world hash are
+  recorded in the Go completion audit and replay. The earlier wrong-map launch
+  in that disposable runtime is explicitly excluded. Bounded performance is
+  positive; indefinite production-duration scheduler/load acceptance remains
+  open.
+- Go commit `eec03d2` closes the next local quest visibility correction with
+  focused and targeted-race coverage: quest collection definitions stay in
+  `NewQuestInfo`, explicit text links request only referenced definitions, and
+  actual quest item transfers announce definitions immediately before their
+  first transfer. This does not establish paired 4L quest payload equality.
+- Step 0 A/B remains A=`Partial`, B=`No`. Continue Rank 2 paired same-account
+  lifecycle, combat and full-payload comparison against live 4L using
+  `/tmp/4l-planb-credentials.txt`; document honest pass/fail and do not stop or
+  reconfigure 4L. Keep baseline failures visible and do not add artificial
+  skips. Generated `Envir/`/`Goods/` data remains excluded.
+
 ## Current true-completion ranked recheck — 2026-09-13
 
 This is active true-completion evidence, not the archived Goal/leaf/matrix
