@@ -533,12 +533,41 @@ the capture. This strengthens the bounded Rank 1 evidence without closing
 indefinite scheduler soak or production cutover acceptance. A=`Partial`,
 B=`No` remain unchanged; Packages 1–5 remain historically closed.
 
+## True-completion Step 0 — full ranked inventory gate — 2026-09-14
+
+Before any further C#→Go alignment, the five active blockers are explicitly
+inventoried in order in `Crystal.GoServer/docs/CSHARP-GO-COMPLETION-AUDIT.md`:
+
+1. default-timeout full-population performance/capacity: bounded 1,500/1,500
+   evidence and three 75,719-monster tick samples are positive, but indefinite
+   scheduler/capacity proof and direct C#/4L steady-state comparison remain
+   open;
+2. same-state combat/payload versus live 4L: lifecycle and combat-path reach
+   pass, but packet volumes, target state, impact output and cleanup are not
+   synchronized, so parity is fail/open;
+3. regression gate/baseline policy: the current unfiltered gate is green, but
+   historical baselines, repeatability, and the no-new-skip policy remain
+   explicit;
+4. protocol caveats: dead/protocol-only rows, wire-only `SetCompass`, partial
+   C/148, and `GameMaster=100` versus `Rested=112` are accepted policy rows,
+   not invented active features;
+5. operations/restart: disposable clean/abrupt recovery passes, while
+   cross-store rollback, corruption/restore drills, monitoring/alerting,
+   production runbook/readiness, and 4L binary semantic comparison remain
+   open.
+
+The inventory gate is complete, not a completion claim. A=`Partial`, B=`No`,
+Package 5 remains historically closed, the production `TimeOut=10000` and live
+4L safety boundaries remain unchanged, and generated `Envir/`/`Goods/` data is
+excluded. Further work may now be labeled alignment only when it cites one of
+these five rows and records an honest result.
+
 ## True-completion Step 0 and current ranked evidence — 2026-09-14
 
 Rechecked the current Go completion audit against
 `Crystal.GoServer/docs/CSHARP-GO-DIFF.md`,
 `Crystal.GoServer/docs/CSHARP-GO-REPLAY.md`, and
-`Crystal.GoServer/docs/MIGRATION-STATUS.md` through Go commit `68d6771`.
+`Crystal.GoServer/docs/MIGRATION-STATUS.md` through Go commit `3a4f882`.
 The verdict remains functional migration A=`Partial` and production
 replacement B=`No`; no No→Yes change is made. Packages 1–5 remain historically
 closed and archived Goal/leaf/matrix orchestration is not revived.
