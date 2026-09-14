@@ -1479,3 +1479,37 @@ drills, observability/readiness, semantic 4L persistence comparison, and the
 final decision gate remain open. A=`Partial`, B=`No`, Package 5 remains
 historically closed, C# remains read-only, the live 4L listener remains
 untouched, and generated `Envir/`/`Goods/` data remains excluded.
+
+## Rank 5 restore and corruption drill checkpoint — 2026-09-14
+
+Checklist item 8 now has a bounded automated Go-only JSON/117 bridge drill in
+`Crystal.GoServer/internal/legacyaccountbridge/bridge_test.go`, using a private
+`t.TempDir()` and no live 4L or generated runtime data. The test proves only
+local artifact behavior: failed JSON staging preserves the prior final; a
+post-rename 117 hook failure returns `JSONCommitted=true` with newer JSON and
+prior 117 state; `.n` and `.o` recover into fresh services; stale `.n`/`.o`
+remain subordinate to an existing final; and malformed JSON/117 primaries fail
+without speculative stale `.tmp`/`.o` fallback. Account, character, gold, and
+counter sentinels are checked after fresh reload.
+
+The repeated normal command passed three times (output SHA-256
+`70f38337bee8580262c9da3f96a224b83569835bf0c6c3d0ca7db4f1325b03e8`):
+
+```text
+go test ./internal/legacyaccountbridge -run '^TestRecoveryDrillJSONAndLegacyBridge$' -count=3 -timeout 5m
+```
+
+The targeted race command passed once (output SHA-256
+`c219ef815c40b15115523ce995d1f752298890ad64c3aefa0b8d405b3ced9bee`):
+
+```text
+go test -race ./internal/legacyaccountbridge -run '^TestRecoveryDrillJSONAndLegacyBridge$' -count=1 -timeout 5m
+```
+
+This advances item-8 evidence but does not close it. Dated-backup restore,
+crash/power-loss points, complete cross-store restart equivalence,
+world/economy/runtime corruption coverage, semantic 4L persistence comparison,
+observability/readiness, and the final decision gate remain open. A=`Partial`,
+B=`No`, Package 5 remains historically closed, C# remains read-only, the live
+4L listener remains untouched, and generated `Envir/`/`Goods/` data remains
+excluded.
