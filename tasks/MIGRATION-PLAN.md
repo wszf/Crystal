@@ -537,6 +537,25 @@ the capture. This strengthens the bounded Rank 1 evidence without closing
 indefinite scheduler soak or production cutover acceptance. A=`Partial`,
 B=`No` remain unchanged; Packages 1–5 remain historically closed.
 
+## Rank 1 controlled steady-state scheduler benchmark — 2026-09-14
+
+The test-only `cmd/crystal-server/rank1_steady_state_benchmark_test.go` now
+provides a reproducible controlled scheduler measurement separate from
+startup/materialization. It builds exactly 75,719 monsters on one open 512×512
+map, uses unique cells and no players, pins due fields beyond the measured
+window, and warms up for three ticks. This is not the canonical imported-world
+fixture or a C#/4L comparison.
+
+The `GOMAXPROCS=1`, `-benchtime=3x`, `-count=3` run from Go source base
+`d901765` is recorded at
+`/tmp/rank1-steady-state-controlled-d901765-20260914.log` (SHA-256
+`2294e27e8a9de97c80eada32028bcc4188a1b4756bc06267f4a0d4994ef90a52`). The
+three repeated per-tick means/ranges were 445.083 ms (441.789–447.232 ms) for
+`MonsterProcessWhenAlone=false` and 5,136.142 ms (4,714.785–5,403.898 ms) for
+`MonsterProcessWhenAlone=true`; allocation rates were 310,145,728 B/75,748
+allocs and 386,618,944 B/151,467 allocs respectively. No approved threshold
+exists, so this is evidence only and leaves A=`Partial`, B=`No` unchanged.
+
 ## True-completion Step 0 — full ranked inventory gate — 2026-09-14
 
 Before any further C#→Go alignment, the five active blockers are explicitly
@@ -602,11 +621,13 @@ removal, and respawn work over indexed populations
 
 The difference warrants measurement around route/target/alone gating and due-
 time boundaries, but no reproduced movement, notification, combat, state, or
-timing divergence justifies a Go patch. Checklist item 2 remains partial/open.
-The next measurement must separate startup/materialization from steady-state
-ticks and use approved duration/thresholds for population, CPU/memory/RSS, GC,
-network, tick latency, lock duration, reconnects, timeouts, and errors. No
-thresholds are invented and the protected 4L listener remains untouched.
+timing divergence justifies a Go patch. The controlled benchmark now separates
+three warm-up ticks and repeated steady-state `world.tick` samples, but it is
+one-map Go-only evidence: the canonical imported-world fixture,
+CPU/memory/RSS, GC, network, lock duration, reconnects, timeouts, errors,
+approved duration and thresholds, and a comparable C#/4L baseline remain open.
+Checklist item 2 remains partial/open. No thresholds are invented and the
+protected 4L listener remains untouched.
 
 ## Rank 2 combat source and replay alignment checkpoint — 2026-09-14
 
