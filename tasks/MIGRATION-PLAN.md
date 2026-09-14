@@ -570,7 +570,8 @@ register; this plan records the same boundaries:
    direct C#/4L steady-state comparison remain open;
 2. same-state combat/payload versus live 4L: lifecycle and combat-path reach
    pass, but packet volumes, target state, impact output and cleanup are not
-   synchronized. No common deterministic world-state fixture exists, and
+   synchronized. A Go-only fixed-state combat/payload fixture now exists, but
+   no common Go/4L world-state fixture or portable snapshot exists, and
    persistence/restart equivalence across stores is unresolved, so parity is
    fail/open;
 3. regression gate/baseline policy: the required unfiltered command is
@@ -643,10 +644,32 @@ The live captures remain diagnostic: the independently running servers selected
 different object IDs/coordinates and have uncontrolled HP, AC, MAC, DC,
 equipment, buffs, progression, AI state, and RNG. Canonical target hashing
 normalizes object-ID bytes only. Equal or unequal impact counts therefore do
-not isolate a formula or payload defect. Checklist items 3 and 4 remain open;
-without a common deterministic fixture or equivalent allowed snapshot, no
-same-state combat, payload, or persistence-equivalence claim is made and no Go
-patch is justified.
+not isolate a formula or payload defect. A Go-only fixed-state ordinary-melee
+fixture now exists, but checklist items 3 and 4 remain open: without a common
+Go/4L fixture or equivalent allowed snapshot, no same-state combat, payload, or
+persistence-equivalence claim is made and no Go patch is justified.
+
+## Rank 2 deterministic Go combat/payload fixture — 2026-09-14
+
+Go commit `8eb0283` adds the test-only fixture
+`cmd/crystal-server/combat_durability_test.go:TestDeterministicAttackerTargetSnapshot`.
+It fixes attacker object `1` at map `0`, `(10,10)`, direction `2`,
+`MinDC=MaxDC=20`, accuracy `100`, and target object `2` at `(11,10)`, direction
+`4`, `HP=MaxHP=100`, AC `3`. FatalSword is removed, monster AI is disabled,
+the existing fixed test clock is used, and all combat rolls return zero.
+
+The fixture asserts the `+300ms` ordinary-melee boundary, exact `ObjectAttack`,
+`ObjectStruck`, and `DamageIndicator(-17, 0, 2)` payload bytes, final HP `83`,
+no death or pending action, and roll bounds `[1 1 1 4 100]`. The focused normal
+suite passed with SHA-256
+`5aa30872c6b45891ce68fe45d6ae4272624fe6f78d39401727993e87759182ed`; the
+focused `-race` suite passed with SHA-256
+`366d10a6012b753cea14829a8d082d0bcfd71431a04b37fb338d4bfcd2d652ee`.
+
+This is deterministic Go behavior/payload evidence only. It is not a common
+Go/4L snapshot or live replay, does not inject state into `127.0.0.1:7000`, and
+does not close same-state combat/full-payload parity or persistence/restart
+equivalence. A=`Partial`, B=`No` remain unchanged.
 
 ## Rank 3 gate repeatability checkpoint — 2026-09-14
 
