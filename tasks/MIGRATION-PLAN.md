@@ -1513,3 +1513,30 @@ observability/readiness, and the final decision gate remain open. A=`Partial`,
 B=`No`, Package 5 remains historically closed, C# remains read-only, the live
 4L listener remains untouched, and generated `Envir/`/`Goods/` data remains
 excluded.
+
+## Rank 5 operational observability/readiness checkpoint — 2026-09-14
+
+Checklist item 9 is a source-backed documentation-only checkpoint, not a new
+implementation task. Current Go evidence covers lifecycle generation and
+stop/join behavior in `cmd/crystal-server/main.go` and
+`cmd/crystal-server/process_lifecycle_test.go`; startup/shutdown marker order
+for `EnvirStarted`, `NetworkStarted`, `NetworkStopped`, and `EnvirStopped`;
+persistence failure and shutdown error outcomes; game/Legacy status listener
+reachability; and `SIGHUP`/reboot generation transitions. Rolling category logs
+and the on-demand credentialed protocol probe provide local signals only.
+
+The repository still lacks a readiness/health endpoint, metrics exporter,
+alerting policy or destination, supervisor unit, automatic crash restart/backoff
+policy, automated dated-backup restore command, durable cross-store transaction
+log, and owned operator escalation record. The Legacy status listener is not a
+readiness or dependency-health endpoint. An unexpected runner failure requires
+an explicit operator stop before a new start is accepted; there is no external
+monitor or owner for that transition. The item-8 JSON/117 drill does not
+provide these controls, and no authorized operations owner has accepted their
+absence.
+
+Item 9 remains open and item 10 is therefore ineligible. This checkpoint adds
+no runtime behavior or production control. Keep A=`Partial`, B=`No`, Package 5
+historically closed, C# read-only, the live 4L listener untouched, and generated
+`Envir/`/`Goods/` data excluded while the operations owner/acceptance,
+observability, and readiness gaps remain unresolved.
