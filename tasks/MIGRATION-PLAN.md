@@ -550,12 +550,22 @@ register; this plan records the same boundaries:
    synchronized. No common deterministic world-state fixture exists, and
    persistence/restart equivalence across stores is unresolved, so parity is
    fail/open;
-3. regression gate/baseline policy: the current unfiltered gate is green, but
-   older status text records an initial seven-test failure set while historical
-   plan text names six timing exclusions. The exact current package/test
-   manifest, environment, thresholds, and disposition of formerly excluded
-   tests are not published; repeatability and the no-new-skip policy remain
-   explicit;
+3. regression gate/baseline policy: the required unfiltered command is
+   non-repeatable/open, not a stable green gate. From Go commit `9a311f7`, the
+   first run failed after 109.116s at
+   `cmd/crystal-server/inspection_session_test.go:120` (expected
+   `ServerKeepAlive` packet 3, observed mail packet 26) while 21 other packages
+   passed; an unchanged rerun passed all 22 packages in 108.921s. The full-log
+   SHA-256 values are `3050369c78b1c0265fe32a9d324b4b5d37aa161248b5e0bca8eecb5a4e4ef179`
+   and `6e15320a7dbbe4d79d5eabdfa4a602766add8c67a10c7d9ab5e0590272206ea8`.
+   A targeted five-repeat passed (SHA-256
+   `5385b242dd517b43b3bf2ab5a1cb31f4e3b022b61f5c205532355af9fcff4b8e`). The
+   current package manifest has 22 entries (SHA-256
+   `7af8d79b2272a43cee9f90fd11ee6409ae756a7a947b63652c5577f4392471c1`).
+   Older status text records an initial seven-test failure set while historical
+   plan text names six timing exclusions. The exact test-name manifest and
+   disposition of formerly excluded tests, environment and thresholds remain
+   open; repeatability and the no-new-skip policy remain explicit;
 4. protocol caveats: dead/protocol-only rows, wire-only `SetCompass`, partial
    C/148, and `GameMaster=100` versus `Rested=112` are accepted policy rows,
    not invented active features. The 72/72 command-name result and ordinal
@@ -611,6 +621,25 @@ not isolate a formula or payload defect. Checklist items 3 and 4 remain open;
 without a common deterministic fixture or equivalent allowed snapshot, no
 same-state combat, payload, or persistence-equivalence claim is made and no Go
 patch is justified.
+
+## Rank 3 gate repeatability checkpoint — 2026-09-14
+
+The required unfiltered gate ran twice unchanged at Go commit `9a311f7`. The
+first run failed after 109.116s at
+`cmd/crystal-server/inspection_session_test.go:120`: it expected
+`ServerKeepAlive` packet 3 but observed mail packet 26; 21 of 22 packages
+passed. Log SHA-256:
+`3050369c78b1c0265fe32a9d324b4b5d37aa161248b5e0bca8eecb5a4e4ef179`.
+The unchanged rerun passed all 22 packages in 108.921s; log SHA-256:
+`6e15320a7dbbe4d79d5eabdfa4a602766add8c67a10c7d9ab5e0590272206ea8`.
+A targeted five-repeat passed; SHA-256:
+`5385b242dd517b43b3bf2ab5a1cb31f4e3b022b61f5c205532355af9fcff4b8e`.
+The 22-package manifest is at
+`/tmp/pkg5-go-package-manifest-9a311f7-20260914.txt` with SHA-256
+`7af8d79b2272a43cee9f90fd11ee6409ae756a7a947b63652c5577f4392471c1`.
+This demonstrates an intermittent packet-ordering symptom, not a stable
+baseline pass; historical seven-test failures and six timing exclusions remain
+unreconciled and no skip or weakened assertion was added.
 
 ## True-completion Step 0 and current ranked evidence — 2026-09-14
 
