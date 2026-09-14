@@ -1559,10 +1559,12 @@ normal 100-repeat run and focused `-race` 20-repeat run both passed, with
 output SHA-256 values
 `8b7a3f4dad6b750d849d0c8d7cf689dd08f495b9f3d6ee5cd6befd84f78e3026` and
 `1bdcbb4d7060830bd01dfbaa368a98fe30b9f7eab61250696d70e4ecaae22d98`.
-Two consecutive unfiltered gates passed all 22 listed packages, with output
-SHA-256 values
-`b682023edb835756f36e8acce024e6ea0a967bbf25e18fdc05e444dd60691a89` and
-`8182673ebc5b085787cdc9b6b1957ef0562753c8afd41393b4588ed5dd8bae61`.
+Three consecutive unfiltered gates passed all 22 listed packages; `cmd/crystal-server`
+completed in 105.156s, 105.683s, and 105.272s. Their output SHA-256 values are
+`b682023edb835756f36e8acce024e6ea0a967bbf25e18fdc05e444dd60691a89`,
+`8182673ebc5b085787cdc9b6b1957ef0562753c8afd41393b4588ed5dd8bae61`, and
+`5cb0390ba96cff2c1488f056602a68541f957aeaa32500bb991ecd293cb04d27`; the
+third retained log is `/tmp/pkg5-rank3-post-8042a08-unfiltered-20260914.log`.
 
 This converges the specific packet-order symptom without changing production
 behavior or live 4L. The broader Rank 3 baseline policy remains open until
