@@ -1540,3 +1540,33 @@ no runtime behavior or production control. Keep A=`Partial`, B=`No`, Package 5
 historically closed, C# read-only, the live 4L listener untouched, and generated
 `Envir/`/`Goods/` data excluded while the operations owner/acceptance,
 observability, and readiness gaps remain unresolved.
+
+## Rank 3 inspection/mail ordering convergence — 2026-09-14
+
+The intermittent inspection/mail packet-order item now has a bounded
+current-source convergence result. Before the test-only synchronization fix,
+`go test ./cmd/crystal-server -run '^TestInspectArchivedOnlineObjectUsesRegistry$' -count=20 -timeout 5m`
+failed 5/20 with `ServerObjectRemove` packet ID 26 where the strict barrier
+expected `ServerKeepAlive` packet ID 3. The cause was a test boundary: the
+bootstrap helper returned at `ServerGuildBuffList`, while production startup
+continued to `MaterializeCharacterRankingAt` in `main.go:6508-6511`; archiving
+the target before that step allowed its asynchronous removal notification to
+contaminate the viewer stream.
+
+`inspection_session_test.go` now waits on `targetClient.barrier(t, 7100)` before
+`ARCHIVEPLAYER`. The strict packet assertions remain unchanged. The focused
+normal 100-repeat run and focused `-race` 20-repeat run both passed, with
+output SHA-256 values
+`8b7a3f4dad6b750d849d0c8d7cf689dd08f495b9f3d6ee5cd6befd84f78e3026` and
+`1bdcbb4d7060830bd01dfbaa368a98fe30b9f7eab61250696d70e4ecaae22d98`.
+Two consecutive unfiltered gates passed all 22 listed packages, with output
+SHA-256 values
+`b682023edb835756f36e8acce024e6ea0a967bbf25e18fdc05e444dd60691a89` and
+`8182673ebc5b085787cdc9b6b1957ef0562753c8afd41393b4588ed5dd8bae61`.
+
+This converges the specific packet-order symptom without changing production
+behavior or live 4L. The broader Rank 3 baseline policy remains open until
+historical failures, exclusions, and the authoritative manifest/ownership are
+reconciled. A=`Partial`, B=`No`, Package 5 remains historically closed, C#
+remains read-only, the live 4L listener remains untouched, and generated
+`Envir/`/`Goods/` data remains excluded.
