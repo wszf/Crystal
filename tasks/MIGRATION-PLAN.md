@@ -692,6 +692,32 @@ reproduction preserves Rank 3 as non-repeatable/open. Historical seven failures
 and six timing-policy exclusions remain separate categories; no skip or
 weakened assertion was added. A=`Partial`, B=`No` remain unchanged.
 
+## Rank 4 bounded exceptional protocol disposition evidence — 2026-09-14
+
+At Go commit `e78bdb0`, the test-only
+`internal/protocol/legacy_packet_dispositions_test.go:TestExceptionalProtocolDispositions`
+locks the bounded eight-row policy slice: S/16 `StartGameDelay`, S/213
+`UserAttackMove`, and S/220 `ObjectSneaking` remain inactive/protocol-only; S/273
+`SetCompass` remains wire-only; S/48 `RefineCancel`, S/101 `TeleportIn`, and
+S/165 `ChatItemStats` remain ordinal-catalog/protocol-only; and C/148
+`PurchaseGuildTerritory` remains partial. The test records source-declared wire
+shapes and keeps `BuffGameMaster=100` distinct from `BuffRested=112`.
+
+The focused test passed ten repetitions (SHA-256
+`505b3496caaf1d4f484973f239b18497d73803c5e30440d61c71f3f1c87d1f45`). The
+combined protocol batch passed three repetitions normally (SHA-256
+`01d62bd7e9149940c1dd0645afab5b0994512facb81494d9b8606290971ecd81`) and once
+under `-race` (SHA-256
+`0602833095ff742341ddc80a946711962b635671cba3369dc86cefc3cc182970`). The
+focused GameMaster/Rested probe batch passed three repetitions (SHA-256
+`1927b61bf7d79c4eace864b0427e1d50a27d0b8c5d85490bb2bc8612ac365728`).
+
+This is a Go policy/evidence lock, not a replacement for the C# source traces
+for absent or commented sends, alternate live packet paths, or the C/148 decoder
+omission. The all-ordinal behavioral ledger and 72-command side-effect/
+authorization comparison remain open. No live 4L listener was contacted, no
+inactive trigger was invented, and A=`Partial`, B=`No` remain unchanged.
+
 ## Rank 3 gate repeatability checkpoint — 2026-09-14
 
 The required unfiltered gate ran twice unchanged at Go commit `9a311f7`. The
