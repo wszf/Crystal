@@ -641,6 +641,36 @@ This demonstrates an intermittent packet-ordering symptom, not a stable
 baseline pass; historical seven-test failures and six timing exclusions remain
 unreconciled and no skip or weakened assertion was added.
 
+## Rank 4 focused compatibility checkpoint — 2026-09-14
+
+The focused ordinal/codec checks passed three repetitions normally and under
+`-race`: `TestAllDeclaredPacketIDsMatchLegacySourceFixture`,
+`TestPacketIDsMatchLegacyEnums`, `TestDefinedPacketIDsAreUniqueWithinDirection`,
+and `TestSetCompassLegacyWire`. Normal and race log SHA-256 values are
+`ef9b554fa3a2c2986e1738388ae9c284e745702ca30934cb80c7dd724b46d8a3` and
+`dd935d7b3174f0d500d06475c4b8cf5d444ade3d8f0e2349fb925e4880552296`.
+The GameMaster/Rested probe checks also passed normally and under race, with
+SHA-256 values `1927b61bf7d79c4eace864b0427e1d50a27d0b8c5d85490bb2bc8612ac365728`
+and `80dc154488eaa547176811a67797489fce30a4ddc0c0086384f5547c01f9ff36`.
+This supports the `GameMaster=100` versus `Rested=112` policy and wire-only
+`SetCompass`, but does not close per-ordinal behavioral classifications or the
+72-command side-effect/authorization comparison; no inactive trigger is
+invented.
+
+## Rank 5 focused persistence/recovery checkpoint — 2026-09-14
+
+The component persistence/recovery packages
+`internal/auth`, `internal/legacyaccount`, `internal/legacyaccountbridge`,
+`internal/legacyfile`, `internal/legacyworld`, and `internal/worlddata` passed
+three normal repetitions and a focused `-race` run. Log SHA-256 values are
+`a141d860c6a135256af02c9774e10fc007e84bcda723b8cf205ec4c6747539bc` and
+`05605683e8cd61f11892d199a9c4611af21219aae6c0fd0d999dce522bce365f`.
+These passes support component-level staged-file, backup, checkpoint, restart,
+and persistence behavior only. Cross-store transaction/rollback manifests,
+checksums, corruption/restore drills, readiness/metrics/alerting, supervision,
+and semantic 4L `Server.MirADB` comparison remain open; no operational patch or
+cutover claim follows.
+
 ## True-completion Step 0 and current ranked evidence — 2026-09-14
 
 Rechecked the current Go completion audit against
