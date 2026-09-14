@@ -1597,3 +1597,23 @@ synchronized Go/4L state, full payload equality, or same-state combat/economy
 outcomes. Keep Rank 2 fail/open, A=`Partial`, B=`No`, Package 5 historically
 closed, C# read-only, the live 4L listener untouched, and generated
 `Envir/`/`Goods/` data excluded.
+
+## Rank 1 controlled steady-state benchmark recheck — 2026-09-14
+
+At Go HEAD `cf528ac`, the controlled Rank 1 scheduler fixture was rerun with
+`GOMAXPROCS=1`, `-benchtime=3x`, `-benchmem`, and `-count=3`. It contains
+75,719 monsters on one open 512×512 map, unique cells, no players, three warm-up
+ticks, and pinned future due fields.
+
+| Mode | Mean | Range | Allocations |
+| --- | ---: | ---: | ---: |
+| `playerless-skip` | 445.602 ms | 435.385–459.422 ms | 310,145,728 B / 75,748 allocs |
+| `process-when-alone` | 4,565.073 ms | 4,521.481–4,588.005 ms | 386,618,944 B / 151,467 allocs |
+
+Raw log `/tmp/rank1-steady-state-controlled-cf528ac-20260914.log` has
+SHA-256 `1f6806c691584d21ad0a8e29affd13e2645dffab3a311aa6ebe4e5a1760357ee`.
+This adds controlled Go-only repeatability/allocation evidence, not a
+canonical imported-world or C#/4L steady-state comparison and not an approved
+capacity threshold. Keep Rank 1/item 2 open, A=`Partial`, B=`No`, Package 5
+historically closed, C# read-only, the live 4L listener untouched, and
+`Envir/`/`Goods/` data excluded.
