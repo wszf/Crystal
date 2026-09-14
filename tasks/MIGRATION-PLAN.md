@@ -485,6 +485,33 @@ did not fail this run. No new skip. Remaining work is leftover
 packet/spell-AI behavior, then representative restart/economy
 integration.
 
+## True-completion Step 0 recheck — 2026-09-14
+
+The current Go audit was rechecked against `CSHARP-GO-DIFF.md`,
+`CSHARP-GO-REPLAY.md`, and `MIGRATION-STATUS.md` through Go commit `6baf502`.
+The verdict remains functional migration A=`Partial` and production
+replacement B=`No`; no No→Yes change is made. Package 5 remains historically
+closed and archived Goal/leaf/matrix orchestration is not revived.
+
+The post-`6baf502` same-account probes again pass the identical eight-request
+Go/4L lifecycle using `/tmp/4l-planb-credentials.txt`. Go recorded 560 frames
+(8 client / 552 server), SHA-256
+`a9915bedaa8f662a5956a05d801c70274f12a6b7e1f9059ca2990f0614bf5a56`; 4L
+recorded 558 (8 / 550), SHA-256
+`88925a0b2f54df6a76d0191721fe9b9697fe7dec96621485878abc029511afe`.
+`6baf502` accepts the source-confirmed delayed default-NPC update with strict
+four-byte validation and net.Pipe coverage. Payload volumes remain unequal
+(Go `ObjectNPC=3`, `NPCResponse=2`, `ObjectSpell=30`; 4L `ObjectNPC=10`, no
+`NPCResponse`, `ObjectSpell=22`), so same-state combat/full-payload parity
+remains open.
+
+Continue the ranked true-completion order: default-timeout full-population
+performance/long-duration evidence without raising `TimeOut`; paired
+same-account combat and payload comparison; regression baseline policy;
+dead/protocol-only and `GameMaster=100` versus `Rested=112` compatibility
+policy; then operations evidence. Generated `Envir/`/`Goods/` data remains
+excluded from commits.
+
 ## True-completion follow-up — 2026-09-14
 
 The active post-audit order remains Rank 1 performance, Rank 2 paired
