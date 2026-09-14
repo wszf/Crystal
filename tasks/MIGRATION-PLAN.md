@@ -1755,3 +1755,15 @@ for reconciliation of the unfiltered gate, historical failure/timing-policy
 records, overlap, and owner-approved baseline disposition. A=`Partial`, B=`No`,
 Package 5 historically closed, C# read-only, the live 4L listener untouched,
 and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 2 combined portable fixture determinism — 2026-09-14
+
+The successful-hit and empty-DC vectors passed together under the anchored
+selection with normal `-count=3` (SHA-256
+`05157d4c6e617614fe26b87f67da710fdf61d90fef8e6dba5024ae716e455bd6`) and
+`-race -count=20` (SHA-256
+`2ad6e4f8cffe561c76857be2f498a19bb8ca76f75e550e078f641c3825eba190`). This
+checks deterministic fixture coexistence, not synchronized Go/4L parity. Keep
+Rank 2 item 3 open, A=`Partial`, B=`No`, Package 5 historically closed, C#
+read-only, the live 4L listener untouched, and generated `Envir/`/`Goods/` data
+excluded.
