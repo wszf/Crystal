@@ -593,6 +593,25 @@ ticks and use approved duration/thresholds for population, CPU/memory/RSS, GC,
 network, tick latency, lock duration, reconnects, timeouts, and errors. No
 thresholds are invented and the protected 4L listener remains untouched.
 
+## Rank 2 combat source and replay alignment checkpoint — 2026-09-14
+
+The post-inventory source/replay review found no concrete Go combat defect that
+justifies a speculative patch. The ordinary attack paths cover direct
+`MinDC`/`MaxDC`, Luck handling, front-cell target lookup, delayed impact,
+durability, critical handling, poison/armour behavior, and target revalidation
+across C# (`Server/MirObjects/HumanObject.cs:2848-3203, 6775-6825`,
+`MonsterObject.cs:2569-2779`) and Go (`cmd/crystal-server/world.go:8555-8680`,
+`warrior_attack.go:452-556, 630-817, 967-1030`).
+
+The live captures remain diagnostic: the independently running servers selected
+different object IDs/coordinates and have uncontrolled HP, AC, MAC, DC,
+equipment, buffs, progression, AI state, and RNG. Canonical target hashing
+normalizes object-ID bytes only. Equal or unequal impact counts therefore do
+not isolate a formula or payload defect. Checklist items 3 and 4 remain open;
+without a common deterministic fixture or equivalent allowed snapshot, no
+same-state combat, payload, or persistence-equivalence claim is made and no Go
+patch is justified.
+
 ## True-completion Step 0 and current ranked evidence — 2026-09-14
 
 Rechecked the current Go completion audit against
