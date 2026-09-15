@@ -1767,3 +1767,47 @@ checks deterministic fixture coexistence, not synchronized Go/4L parity. Keep
 Rank 2 item 3 open, A=`Partial`, B=`No`, Package 5 historically closed, C#
 read-only, the live 4L listener untouched, and generated `Envir/`/`Goods/` data
 excluded.
+
+## Rank 1 one-minute controlled steady-state benchmark — 2026-09-15
+
+At Go HEAD `e1b6de6`, ran the 75,719-monster controlled scheduler fixture with
+one minute per benchmark sample, `GOMAXPROCS=1`, `-benchmem`, and `-count=3`:
+
+| Mode | Mean | Range | Allocations |
+| --- | ---: | ---: | ---: |
+| `playerless-skip` | 432.964 ms | 423.484–440.142 ms | 310,145,728 B / 75,748 allocs |
+| `process-when-alone` | 4,497.364 ms | 4,429.252–4,579.545 ms | 386,618,944 B / 151,467 allocs |
+
+The package completed in 871.287s. Raw log
+`/tmp/rank1-steady-state-controlled-1m-e1b6de6-20260915.log` has SHA-256
+`da49cb6ca3858c303c1b6a5d8cee90ac2993738ca3b7083947ee581042c1bac5`. This is
+longer controlled Go-only time-based evidence, not an imported-world/C#/4L
+comparison, accepted capacity threshold, or indefinite soak. Keep Rank 1/item 2
+open, A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the
+live 4L listener untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 2 cross-map delayed-target revalidation fixture — 2026-09-15
+
+Go commit `2db7546` added the portable fixture
+`Crystal.GoServer/cmd/crystal-server/testdata/rank2_ordinary_melee_cross_map_snapshot.json`
+(SHA-256 `d778411b38f097c3b680531805988f438a16e9554941fdd498db787c2e182e41`)
+and `TestPortableRank2OrdinaryMeleeCrossMapSnapshot`. The vector admits an
+ordinary adjacent melee attack for damage 20, mutates the target map index to 1
+before the 300ms delayed impact, and verifies no impact packets, unchanged HP
+100, no death, no pending action, and random bounds `[1]`.
+
+Focused normal 100/100 passed (SHA-256
+`a533f408de48784d73b72804f7fdaee09675f4279a8094f1b548e53c6f72e2da`); focused
+race 20/20 passed (SHA-256
+`b3efa249d02adb361e2157d47933fda2705abde1e6c2ebe356b8bbb0f7853fc5`). The
+anchored three-fixture normal run passed with SHA-256
+`e0fd51318171076e0be8daeb39f050567811b4ee1b265e5866018d35b1ec4178`. The
+post-fixture `go test ./... -count=1 -timeout 5m` gate passed all 22 packages;
+`cmd/crystal-server` completed in 105.579s. Raw log
+`/tmp/pkg5-rank2-cross-map-unfiltered-20260915.log` has SHA-256
+`8e765bfcf589f4e7b97eb43430fd607436440a323ec18996616fb994a8478f52`.
+
+This remains portable Go-only evidence, not synchronized Go/4L parity or
+same-state payload/outcome equivalence. Keep Rank 2 item 3 open, A=`Partial`,
+B=`No`, Package 5 historically closed, C# read-only, the live 4L listener
+untouched, and generated `Envir/`/`Goods/` data excluded.
