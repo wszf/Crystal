@@ -2056,3 +2056,26 @@ owner-approved disposition. Rank 3/checklist item 5 remains open. A=`Partial`,
 B=`No`, Package 5 remains historically closed, C# remains read-only, the live
 4L listener remains untouched, and generated `Envir/`/`Goods/` data remains
 excluded.
+
+## Rank 3 focused race characterization — 2026-09-15
+
+At Go HEAD `fd98c19`, reran the two failing `cmd/crystal-server` tests in
+isolation under the race detector:
+
+```text
+go test -race ./cmd/crystal-server -run '^TestDeathCommandRemoteSessionBroadcastAndReload$' -count=20 -timeout 20m
+go test -race ./cmd/crystal-server -run '^TestSessionPoisonCloudTranscriptAndPersistence$' -count=20 -timeout 20m
+```
+
+The death-command focused run passed with log SHA-256
+`7edda4aefa8c62401d88419eba6f95c91187915689a21d3c6be8992e66728b1d`.
+The poison-cloud focused command failed with the same race detector report;
+its write was at `poison_cloud_session_test.go:95`, the concurrent read at
+`main.go:4615`, and the serving goroutine originated at
+`poison_cloud_session_test.go:78`. Its log SHA-256 is
+`b460425a46f16e76d9b22136c7ec4429d40a0df6d8c98513f582812467b90c4c`.
+The isolated death-command pass does not clear the full-suite packet-order
+failure, and the poison-cloud race remains reproducible in focused execution.
+Rank 3/checklist item 5 remains open; A=`Partial`, B=`No`, Package 5 remains
+historically closed, C# remains read-only, the live 4L listener remains
+untouched, and generated `Envir/`/`Goods/` data remains excluded.
