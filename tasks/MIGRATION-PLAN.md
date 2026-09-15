@@ -1869,7 +1869,7 @@ the host default `GOMAXPROCS=8`:
 | Mode | Observed | Allocations |
 | --- | ---: | ---: |
 | `playerless-skip` | 339.000 ms/op | 310,145,764 B/op / 75,748 allocs/op |
-| `process-when-alone` | 4,631.332742 s/op | 386,618,977 B/op / 151,467 allocs/op |
+| `process-when-alone` | 4,631.332742 ms/op | 386,618,977 B/op / 151,467 allocs/op |
 
 Command used `time go test ./cmd/crystal-server -run '^$' -bench
 '^BenchmarkWorldTickSteadyStateControlledPopulation$' -benchtime=10x -benchmem
@@ -1914,3 +1914,29 @@ This checkpoint changes no runtime behavior, does not stop or reconfigure live
 4L, and does not stage generated `Envir/`/`Goods/` data. Keep A=`Partial`,
 B=`No`, Package 5 historically closed, and continue only with bounded Rank 1,
 Rank 2, or Rank 3 evidence.
+
+## Rank 2 delayed target-removal fixture — 2026-09-15
+
+Go commit `79f9562` added the portable fixture
+`Crystal.GoServer/cmd/crystal-server/testdata/rank2_ordinary_melee_target_removed_snapshot.json`
+(SHA-256 `67f3e13df94705650c2ae89d13fdcfdfdba57d6a7ed9cdff377557c485cb85aa`)
+and `TestPortableRank2OrdinaryMeleeTargetRemovedSnapshot`. The target is
+removed after accepted admission and before the 300ms impact; delayed
+resolution emits no impact packets, drains the queued action, leaves the target
+absent, and records random bounds `[1]`.
+
+Focused normal 100/100 passed (SHA-256
+`a92b7320b3341a8186c6b3c20966da96a9a5c38d04c52415007510c4fa595630`); focused
+race 20/20 passed (SHA-256
+`a5050867430a1de44079735294f77801064c6c177cc962c2a57c248df86a5ad5`). The
+anchored five-fixture normal run passed with SHA-256
+`e0fd51318171076e0be8daeb39f050567811b4ee1b265e5866018d35b1ec4178`. The
+post-source unfiltered `go test ./... -count=1 -timeout 5m` gate passed all 22
+packages; `cmd/crystal-server` completed in 105.474s. Raw log
+`/tmp/pkg5-rank2-target-removed-unfiltered-20260915.log` has SHA-256
+`6d359c1593a54622699c9101ea3706ace8d544cffbba8fcc6f80fb3052b6916b`.
+
+This remains portable Go-only delayed-action evidence, not synchronized Go/4L
+parity or same-state payload/outcome equivalence. Keep Rank 2 item 3 open,
+A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the live 4L
+listener untouched, and generated `Envir/`/`Goods/` data excluded.
