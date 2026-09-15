@@ -1832,3 +1832,30 @@ baseline policy or reconcile historical failure/timing-policy categories,
 their overlap, or owner-approved disposition. Keep Rank 3 item 5 open;
 A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the live 4L
 listener untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 2 same-map delayed movement fixture — 2026-09-15
+
+Go commit `9127ebc` added the portable fixture
+`Crystal.GoServer/cmd/crystal-server/testdata/rank2_ordinary_melee_same_map_move_snapshot.json`
+(SHA-256 `a5e82d4e53e51a70f4551f00a3e695d0c1c029193367e9e6589e2f4897bb8889`)
+and `TestPortableRank2OrdinaryMeleeSameMapMoveSnapshot`. After accepted
+admission, the target moves from `(11,10)` to `(12,10)` on the same map before
+the 300ms impact. Delayed resolution preserves target identity, lands 17 damage,
+emits `ObjectStruck` and `DamageIndicator` at current coordinates, leaves HP at
+83, and records random bounds `[1,1,1,4,100]`.
+
+Focused normal 100/100 passed (SHA-256
+`e91a081d6b61aef9928438888701aa5876ae0af4957308d46899a87e0a2a1dd5`); focused
+race 20/20 passed (SHA-256
+`3fab4e5c5e6c83bc03d027028e4aaca692dc9e7c0327228b59a8cb37eff2ecc0`). The
+anchored four-fixture normal run passed with SHA-256
+`6d0f29a1984844568acdaef088f2356c73320c24cd521046521e070b68835bc7`. The
+post-source unfiltered `go test ./... -count=1 -timeout 5m` gate passed all 22
+packages; `cmd/crystal-server` completed in 105.667s. Raw log
+`/tmp/pkg5-rank2-same-map-move-unfiltered-20260915.log` has SHA-256
+`caed0842fd78a270161a5751b15309c85d31cf57f201b1336da4fce4a0a5a087`.
+
+This remains portable Go-only evidence, not synchronized Go/4L parity or
+same-state payload/outcome equivalence. Keep Rank 2 item 3 open, A=`Partial`,
+B=`No`, Package 5 historically closed, C# read-only, the live 4L listener
+untouched, and generated `Envir/`/`Goods/` data excluded.
