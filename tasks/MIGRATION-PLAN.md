@@ -1883,3 +1883,20 @@ production RSS/GC/network/reconnect, C#/4L, indefinite-soak, or accepted
 capacity-threshold evidence. Keep Rank 1 item 2 open, A=`Partial`, B=`No`,
 Package 5 historically closed, C# read-only, the live 4L listener untouched,
 and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 3 shuffled historical-disposition recheck — 2026-09-15
+
+At Go HEAD `4142261`, reran the same 12-test historical-failure, overlap, and
+timing-policy disposition set with `-count=20 -shuffle=on`:
+
+```text
+go test ./cmd/crystal-server -run '^(TestSessionHallucinationTranscript|TestProductionStartupReturnsBootstrapError|TestProductionRuntimeBootstrapPrecedesGameBind|TestProcessLifecycleOuterBootstrapFailureKeepsStaleRunning|TestMountSessionStaleRecoveryKeepsConnectionAndRetries|TestQuestP7ProgressQuirksSessionClassZeroNameCountAndRelogin|TestDropIncludesExpandLikeGrowingLegacyList|TestSessionPoisonCloudTranscriptAndPersistence|TestSessionMapHazardSpawnDamageRemovalAndRestart|TestSessionHidingTranscriptPersistenceAndExpiry|TestNPCP7ControlFlowSessionDelayGotoFakeClockProductionEntry|TestLoverRecallNetworkSameMapCooldownAndCrossMapStaticRefresh)$' -count=20 -shuffle=on -timeout 20m
+```
+
+All 12 selected tests passed in 2.058s. Retained log
+`/tmp/rank3-historical-dispositions-shuffle20-4142261-20260915.log` has
+SHA-256 `19e08971a83fa0123817006e6b62253b11e70b036ba234530cc877d852d96a65`.
+This is a current shuffled filtered recheck; historical labels remain in force,
+not the required unfiltered baseline or owner-approved disposition. Keep Rank 3
+item 5 open; A=`Partial`, B=`No`, Package 5 historically closed, C# read-only,
+the live 4L listener untouched, and generated `Envir/`/`Goods/` data excluded.
