@@ -2032,3 +2032,27 @@ synchronized Go/4L state, payload, or outcome equivalence. Rank 2/checklist
 item 3 remains open. A=`Partial`, B=`No`, Package 5 remains historically closed,
 C# remains read-only, the live 4L listener remains untouched, and generated
 `Envir/`/`Goods/` data remains excluded.
+
+## Rank 3 full race-gate failure — 2026-09-15
+
+At Go HEAD `e645905`, ran the unfiltered race gate:
+
+```text
+go test -race ./... -count=1 -timeout 30m
+```
+
+The gate failed in `cmd/crystal-server` after 142.756s; the other 21 package
+results were green. `TestDeathCommandRemoteSessionBroadcastAndReload` failed
+with `death_commands_session_test.go:38: mail packet id = 82, want 30 ({ID:82 Payload:[19 69 139 255]})`.
+`TestSessionPoisonCloudTranscriptAndPersistence` failed under the race detector:
+its write was at `poison_cloud_session_test.go:95`, the concurrent read was at
+`main.go:4615`, and the serving goroutine originated at
+`poison_cloud_session_test.go:78`. Retained raw log
+`/tmp/rank3-full-race-gate-20260915.log` has SHA-256
+`0ccbceada5d69310ad6536d31591fd75a94fa8614e42ca4db53ce9ce1a00ca51`.
+
+This is failed race/concurrency evidence, not a green regression baseline or
+owner-approved disposition. Rank 3/checklist item 5 remains open. A=`Partial`,
+B=`No`, Package 5 remains historically closed, C# remains read-only, the live
+4L listener remains untouched, and generated `Envir/`/`Goods/` data remains
+excluded.
