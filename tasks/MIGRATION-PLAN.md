@@ -2002,3 +2002,33 @@ indefinite soak, or approved capacity threshold. Rank 1/checklist item 2
 remains open. A=`Partial`, B=`No`, Package 5 remains historically closed, C#
 read-only, the live 4L listener remains untouched, and generated
 `Envir/`/`Goods/` data remains excluded.
+
+## Rank 2 delayed target-dead fixture and manifest refresh — 2026-09-15
+
+Go commit `8c2de30` added the portable fixture
+`Crystal.GoServer/cmd/crystal-server/testdata/rank2_ordinary_melee_target_dead_snapshot.json`
+(SHA-256 `5833b9bedacf08f00e65f04e5c04a5d6d998b0d0cac70a0797ebd5cfa77d8a36`)
+and `TestPortableRank2OrdinaryMeleeTargetDeadSnapshot`. After ordinary melee
+admission, the fixture marks the target dead before the 300ms impact. Delayed
+resolution emits no impact packets, retains the target with HP 100 and
+`Dead=true`, drains the pending action, and records random bounds `[1]`.
+
+The focused normal 100-repeat run passed with output SHA-256
+`bd66982944e730a913ed7a72193e1dc0094ab4a08758d25d88bc495ca298600b`; the
+focused race 20-repeat run passed with output SHA-256
+`b3efa249d02adb361e2157d47933fda2705abde1e6c2ebe356b8bbb0f7853fc5`. The
+six-fixture anchored normal run passed with output SHA-256
+`e79926aece0de181837a316bc93de7104c2d883d58e387d7314c92770c73d0f0`.
+
+The post-source unfiltered `go test ./... -count=1 -timeout 5m` gate passed all
+22 packages; `cmd/crystal-server` completed in 108.729s. Retained raw log
+`/tmp/pkg5-rank2-target-dead-unfiltered-20260915.log` has SHA-256
+`90d241f381629c407348f6176b9b3bff0d1ddfbfcf6d5c5b0a82b95bf1d94c54`.
+The refreshed authoritative manifest at Go HEAD `8c2de30` contains 22 package
+headings, 4,864 test names, one benchmark, zero examples, and 4,913 lines; its
+SHA-256 is `34e32f2f0091aba8ef775a53770c214240b50aba38d6b8bfb067d5dd5d43269d`.
+It includes the target-dead test. This remains portable Go-only evidence, not
+synchronized Go/4L state, payload, or outcome equivalence. Rank 2/checklist
+item 3 remains open. A=`Partial`, B=`No`, Package 5 remains historically closed,
+C# remains read-only, the live 4L listener remains untouched, and generated
+`Envir/`/`Goods/` data remains excluded.
