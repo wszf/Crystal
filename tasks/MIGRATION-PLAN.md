@@ -1957,3 +1957,21 @@ The refreshed inventory includes `TestPortableRank2OrdinaryMeleeCrossMapSnapshot
 not a green execution result and not synchronized Go/4L behavioral parity.
 A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the live 4L
 listener untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 3 unfiltered shuffled regression recheck — 2026-09-15
+
+At Go HEAD `3fbb33e`, ran three shuffled repetitions of the full package gate:
+
+```text
+go test ./... -count=3 -shuffle=on -timeout 20m
+```
+
+All 22 packages passed. `cmd/crystal-server` reported 312.567s for the
+three-repetition package run. Retained log
+`/tmp/rank3-full-unfiltered-shuffle3-20260915-retry.log` has SHA-256
+`114fe5e7eb917d3ebffe2bbf3b725640dd4f1671f76d4c8ffcf7488c216aa968`.
+This is current unfiltered shuffled stability evidence, but it is not an
+owner-approved baseline or an approval of the historical disposition labels.
+Rank 3/checklist item 5 remains open. A=`Partial`, B=`No`, Package 5 remains
+historically closed, C# read-only, the live 4L listener remains untouched, and
+generated `Envir/`/`Goods/` data remains excluded.
