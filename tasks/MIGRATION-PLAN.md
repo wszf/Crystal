@@ -2079,3 +2079,37 @@ failure, and the poison-cloud race remains reproducible in focused execution.
 Rank 3/checklist item 5 remains open; A=`Partial`, B=`No`, Package 5 remains
 historically closed, C# remains read-only, the live 4L listener remains
 untouched, and generated `Envir/`/`Goods/` data remains excluded.
+
+## Rank 3 synchronized session-gate remediation — 2026-09-15
+
+The reproducible PoisonCloud race was confined to the shared
+`sessionWorldConfigured` flag: detached test sessions changed it after
+bootstrap while `main.go:4615` read it from a live serving goroutine. The Go
+change makes this flag an `atomic.Bool` and routes every read and write through
+`isSessionWorldConfigured`/`setSessionWorldConfigured`; no combat, persistence,
+or wire behavior was changed.
+
+At the resulting Go working tree, the focused race gate passed:
+
+```text
+go test -race ./cmd/crystal-server -run '^TestSessionPoisonCloudTranscriptAndPersistence$' -count=20 -timeout 20m
+```
+
+The log SHA-256 is
+`9d916482a4094ac75c482324875572d89f0b73e755a9b6c0081a7eea8d404d7e`.
+The full `cmd/crystal-server` race package was then run:
+
+```text
+go test -race ./cmd/crystal-server -count=1 -timeout 30m
+```
+
+It still failed at `TestDeathCommandRemoteSessionBroadcastAndReload` with
+`death_commands_session_test.go:38: mail packet id = 82, want 30`; its log SHA-256
+is `a4f95b3d4e61374eab24b8ff884101cf5c9fb0c059f8a3d869dee0444b01afc9`.
+That run contained no `WARNING: DATA RACE` and no PoisonCloud test failure.
+This clears the previously characterized PoisonCloud data race for the tested
+path, but the full package race gate remains failed because the packet-order
+failure persists. Rank 3/checklist item 5 remains open; A=`Partial`, B=`No`,
+Package 5 remains historically closed, C# remains read-only, the live 4L
+listener remains untouched, and generated `Envir/`/`Goods/` data remains
+excluded.
