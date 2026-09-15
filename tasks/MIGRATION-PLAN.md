@@ -1900,3 +1900,17 @@ This is a current shuffled filtered recheck; historical labels remain in force,
 not the required unfiltered baseline or owner-approved disposition. Keep Rank 3
 item 5 open; A=`Partial`, B=`No`, Package 5 historically closed, C# read-only,
 the live 4L listener untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 5 item 9 owner boundary — 2026-09-15
+
+No authorized operations owner acceptance of the missing production controls is
+recorded: readiness/health endpoint, metrics exporter, alert destination or
+policy, supervisor and automatic restart/backoff, automated dated-backup
+restore, durable cross-store transaction log, and owned escalation path. Item 9
+remains open and item 10 remains ineligible. This is an explicit evidence
+boundary, not a waiver or permission to invent those controls.
+
+This checkpoint changes no runtime behavior, does not stop or reconfigure live
+4L, and does not stage generated `Envir/`/`Goods/` data. Keep A=`Partial`,
+B=`No`, Package 5 historically closed, and continue only with bounded Rank 1,
+Rank 2, or Rank 3 evidence.
