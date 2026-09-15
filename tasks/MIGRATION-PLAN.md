@@ -1940,3 +1940,20 @@ This remains portable Go-only delayed-action evidence, not synchronized Go/4L
 parity or same-state payload/outcome equivalence. Keep Rank 2 item 3 open,
 A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the live 4L
 listener untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Authoritative Go test manifest refresh — 2026-09-15
+
+Regenerated `Crystal.GoServer/docs/CSHARP-GO-TEST-MANIFEST-2026-09-14.txt`
+from Go HEAD `325054b` on 2026-09-15 using the manifest's recorded command:
+`for package in $(go list ./...); do go test "$package" -list .; done`.
+The filename is retained for continuity; the header records the new source
+commit and date. The inventory contains 22 package headings, 4,863 test names,
+one benchmark, zero examples, and 4,912 lines. Its SHA-256 is
+`ab53a22b1f7a0dbe28b28db7373307b3bfd5059ff03bee93f52c022d688c7ef7`.
+
+The refreshed inventory includes `TestPortableRank2OrdinaryMeleeCrossMapSnapshot`,
+`TestPortableRank2OrdinaryMeleeSameMapMoveSnapshot`, and
+`TestPortableRank2OrdinaryMeleeTargetRemovedSnapshot`. It is a name inventory,
+not a green execution result and not synchronized Go/4L behavioral parity.
+A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the live 4L
+listener untouched, and generated `Envir/`/`Goods/` data excluded.
