@@ -1811,3 +1811,24 @@ This remains portable Go-only evidence, not synchronized Go/4L parity or
 same-state payload/outcome equivalence. Keep Rank 2 item 3 open, A=`Partial`,
 B=`No`, Package 5 historically closed, C# read-only, the live 4L listener
 untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 3 current unfiltered regression gate — 2026-09-15
+
+At Go HEAD `a366797`, the unchanged required gate passed all 22 packages:
+
+```text
+go test ./... -count=1 -timeout 5m
+```
+
+`cmd/crystal-server` completed in 105.052s. Retained raw log
+`/tmp/pkg5-rank3-post-a366797-unfiltered-20260915.log` has SHA-256
+`5ffd1a77e4fcfe8e96231e33423a9d152b7e651f938f37de719e794b6d054e11`. This is
+another current unfiltered green observation after the cross-map fixture, with
+no filter, skip, weakened assertion, production source change, live 4L
+operation, C# edit, or generated-data staging.
+
+This strengthens current-source execution evidence but does not approve a
+baseline policy or reconcile historical failure/timing-policy categories,
+their overlap, or owner-approved disposition. Keep Rank 3 item 5 open;
+A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, the live 4L
+listener untouched, and generated `Envir/`/`Goods/` data excluded.
