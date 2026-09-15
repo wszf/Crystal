@@ -1859,3 +1859,27 @@ This remains portable Go-only evidence, not synchronized Go/4L parity or
 same-state payload/outcome equivalence. Keep Rank 2 item 3 open, A=`Partial`,
 B=`No`, Package 5 historically closed, C# read-only, the live 4L listener
 untouched, and generated `Envir/`/`Goods/` data excluded.
+
+## Rank 1 default-GOMAXPROCS timed controlled benchmark — 2026-09-15
+
+At Go HEAD `3724fdc`, ran one 10-iteration sample per controlled 75,719-monster
+scheduler mode without overriding `GOMAXPROCS`; benchmark suffix `-8` records
+the host default `GOMAXPROCS=8`:
+
+| Mode | Observed | Allocations |
+| --- | ---: | ---: |
+| `playerless-skip` | 339.000 ms/op | 310,145,764 B/op / 75,748 allocs/op |
+| `process-when-alone` | 4,631.332742 s/op | 386,618,977 B/op / 151,467 allocs/op |
+
+Command used `time go test ./cmd/crystal-server -run '^$' -bench
+'^BenchmarkWorldTickSteadyStateControlledPopulation$' -benchtime=10x -benchmem
+-count=1 -timeout 15m`. The package reported 138.013s; shell timing was real
+2m19.400s, user 2m22.161s, sys 0m2.202s. Raw log
+`/tmp/rank1-steady-state-controlled-10x-timing-3724fdc-20260915.log` has
+SHA-256 `5f4a7e7253a02941deb5bca5fe2311fd0f0102773bf61f6b3e95ca652bae1730`.
+This is controlled Go-only timing/allocation evidence under default runtime
+concurrency, not directly comparable to the prior `GOMAXPROCS=1` run, and not
+production RSS/GC/network/reconnect, C#/4L, indefinite-soak, or accepted
+capacity-threshold evidence. Keep Rank 1 item 2 open, A=`Partial`, B=`No`,
+Package 5 historically closed, C# read-only, the live 4L listener untouched,
+and generated `Envir/`/`Goods/` data excluded.
