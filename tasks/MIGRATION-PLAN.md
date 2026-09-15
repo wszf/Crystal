@@ -1975,3 +1975,30 @@ owner-approved baseline or an approval of the historical disposition labels.
 Rank 3/checklist item 5 remains open. A=`Partial`, B=`No`, Package 5 remains
 historically closed, C# read-only, the live 4L listener remains untouched, and
 generated `Envir/`/`Goods/` data remains excluded.
+
+## Rank 1 repeated controlled-population benchmark — 2026-09-15
+
+At Go HEAD `886bd0f`, reran the controlled 75,719-monster, one-open-map
+fixture with `GOMAXPROCS=1`, `-benchtime=30s`, and `-count=3`:
+
+```text
+env GOMAXPROCS=1 go test ./cmd/crystal-server -run '^$' \
+  -bench '^BenchmarkWorldTickSteadyStateControlledPopulation$' \
+  -benchtime=30s -benchmem -count=3 -timeout 30m
+```
+
+| Mode | Sample 1 | Sample 2 | Sample 3 | Allocations |
+| --- | ---: | ---: | ---: | ---: |
+| `playerless-skip` | 418.362487 ms/op | 415.014491 ms/op | 422.210364 ms/op | 310,145,728 B/op / 75,748 allocs/op |
+| `process-when-alone` | 4,421.392547 ms/op | 4,333.109218 ms/op | 4,409.258426 ms/op | 386,618,944 B/op / 151,467 allocs/op |
+
+The package reported 560.099s; shell timing was real 9m21.812s, user
+9m12.588s, and sys 0m10.016s. Retained log
+`/tmp/rank1-steady-state-controlled-30s-gomaxprocs1-886bd0f-20260915.log` has
+SHA-256 `90a6d9e8f2733e174237b1a12f8d76229c1387d7292489b335b01be51f626e3a`.
+This is repeated controlled Go-only timing/allocation evidence. It is not a
+production RSS/GC/network/reconnect acceptance record, C#/4L comparator,
+indefinite soak, or approved capacity threshold. Rank 1/checklist item 2
+remains open. A=`Partial`, B=`No`, Package 5 remains historically closed, C#
+read-only, the live 4L listener remains untouched, and generated
+`Envir/`/`Goods/` data remains excluded.
