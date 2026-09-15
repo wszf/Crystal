@@ -2113,3 +2113,32 @@ failure persists. Rank 3/checklist item 5 remains open; A=`Partial`, B=`No`,
 Package 5 remains historically closed, C# remains read-only, the live 4L
 listener remains untouched, and generated `Envir/`/`Goods/` data remains
 excluded.
+
+## Rank 1 five-minute controlled steady-state samples — 2026-09-15
+
+At Go HEAD `e1ace10`, reran the deterministic controlled Rank 1 benchmark with
+exactly 75,719 monsters on one open 512x512 map, no players, three warm-up
+ticks, `GOMAXPROCS=1`, `-benchtime=5m`, `-benchmem`, and two samples per
+scheduler mode:
+
+```text
+env GOMAXPROCS=1 go test ./cmd/crystal-server -run '^$' \\
+  -bench '^BenchmarkWorldTickSteadyStateControlledPopulation$' \\
+  -benchtime=5m -benchmem -count=2 -timeout 40m
+```
+
+| Mode | Sample 1 | Sample 2 | Allocations per tick |
+|---|---:|---:|---:|
+| `playerless-skip` | 404.401851 ms/op | 418.486757 ms/op | 310,145,728 B/op; 75,748 allocs/op |
+| `process-when-alone` | 4,305.634012 ms/op | 4,334.195416 ms/op | 386,618,944 B/op; 151,467 allocs/op |
+
+The benchmark package completed in `1725.248s`; the raw log is
+`/tmp/rank1-steady-state-controlled-5m-gomaxprocs1-e1ace10-20260915.log` with
+SHA-256 `6bf97e2a1ced6e18c2167a32c062239dd3e08431757956c245122a756b765689`.
+This extends the controlled duration beyond the prior one-minute and 30-second
+samples, but it remains Go-only fixture evidence: it is not an imported-world
+production soak, RSS/GC/network/reconnect acceptance record, C#/4L comparator,
+approved capacity threshold, or indefinite run. Rank 1 acceptance remains
+open; A=`Partial`, B=`No`, Package 5 remains historically closed, C# remains
+read-only, the live 4L listener remains untouched, and generated
+`Envir/`/`Goods/` data remains excluded.
