@@ -2181,3 +2181,19 @@ acceptance threshold or regression, and checklist item 2 remains open.
 `0b6c2584eafd696ede89217c97e95f94fa73efeabaa95c4fc96135d775961633`.
 A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, live 4L
 untouched, generated `Envir/`/`Goods/` excluded.
+
+
+## Goal lock and Rank 1 self-use player-cap acceptance (8-16) — 2026-09-25
+
+Goal locked to self-use/internal test (A=`Partial`, B=`No`, no production C#
+replacement). Rank 1 target is a self-use cap of 8-16 concurrent clients under
+default `TimeOut=10000`; no `MaxUser=50` production soak. Rank 2 same-state
+Go/4L combat parity stopped (gear/attributes/RNG); only play-blocking combat
+bugs in scope. Rank 5 production ops deprioritized unless play-blocking.
+Package 5 closed, 4L :7000 untouched, `Envir/`/`Goods/` uncommitted.
+
+Acceptance matrix: 8 clients 64/64 (8 runs), 12 clients 72/72 (6 runs), 16
+clients 96/96 (6 runs), zero errors, client P50 4,921-6,504 ms, host load
+10.85-14.06. 8 solid; 12/16 passed; accepted cap 8-16.
+`/tmp/rank1-selfuse-cap-20260925/matrix-summary.json` SHA-256
+`9faea6021139bf8262dcb909957c9319e587cfc0e78f0d00b9b9edaa5ce3355e`.
