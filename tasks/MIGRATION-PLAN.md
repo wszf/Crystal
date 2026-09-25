@@ -2142,3 +2142,25 @@ approved capacity threshold, or indefinite run. Rank 1 acceptance remains
 open; A=`Partial`, B=`No`, Package 5 remains historically closed, C# remains
 read-only, the live 4L listener remains untouched, and generated
 `Envir/`/`Goods/` data remains excluded.
+
+
+## Rank 1 cross-session chat-delivery defect and fix — 2026-09-25
+
+Re-walked Rank 1 with fresh disposable imported-world matrices under the default
+10,000 ms timeout, `MaxUser=50`, `MaxIP=5`, no overrides, and `-relogin=false`;
+4L stayed running and untouched. The unmodified Go binary reproduced the
+load-sensitive boundary (8/8 at 8 clients, 5/12 at 12, 3/16 and 12/16 at 16,
+9/20 and 4/20 at 20), always as a logout `connection reset by peer`. A temporary
+session-exit diagnostic proved the failed server sessions ended in-game
+(`stage=3`) with `ClientChat` last; the Go `ClientChat` handler returned on a
+recipient `deliverChatNotifications` failure and killed the innocent sender,
+while Legacy `MirConnection.Enqueue` / `HumanObject.Enqueue` never propagate a
+recipient failure to the sender. The handler now logs and continues, with the
+regression test `TestChatRecipientDeliveryFailureKeepsSenderSession` (fails
+before, passes after). Post-fix: 12/16/20/32 clients all passed (60/60, 32/32,
+40/40, 64/64); 50 clients reached 26/50 and now fails only by default-timeout
+saturation (client P50 10,686.5 ms vs 10,000 ms). Unfiltered `go test ./...`
+passed all 22 packages; the full race gate failed only at the documented
+`TestSessionYinDevilNodeTranscript/42` baseline flake. Rank 1 acceptance and
+checklist item 2 remain open; A=`Partial`, B=`No`, Package 5 historically
+closed, C# read-only, live 4L untouched, generated `Envir/`/`Goods/` excluded.
