@@ -2164,3 +2164,20 @@ passed all 22 packages; the full race gate failed only at the documented
 `TestSessionYinDevilNodeTranscript/42` baseline flake. Rank 1 acceptance and
 checklist item 2 remain open; A=`Partial`, B=`No`, Package 5 historically
 closed, C# read-only, live 4L untouched, generated `Envir/`/`Goods/` excluded.
+
+
+## Rank 1 residual boundary host-load sensitivity — 2026-09-25
+
+A fixed-binary sweep at 32/36/40/44/48/50 clients (one wave each, default
+10,000 ms timeout, `-relogin=false`) recorded 15/32, 19/36, 1/40, 1/44, 0/48,
+and 0/50 with client P50 pinned at 10,443-11,030 ms, alongside P8
+cross-session packet-interleaving observations and `context deadline exceeded`
+failures. The host load average was about 13 (four unrelated Godot processes at
+~97% CPU each) versus about 2.5 during the fixed-binary matrix that passed
+12/12-32/32, so the sweep is load-contaminated bounded evidence that the
+residual default-timeout boundary depends on host CPU contention. It is not an
+acceptance threshold or regression, and checklist item 2 remains open.
+`/tmp/rank1-timeout-20260925/matrix-summary.json` SHA-256
+`0b6c2584eafd696ede89217c97e95f94fa73efeabaa95c4fc96135d775961633`.
+A=`Partial`, B=`No`, Package 5 historically closed, C# read-only, live 4L
+untouched, generated `Envir/`/`Goods/` excluded.
