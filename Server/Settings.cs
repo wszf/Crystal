@@ -64,6 +64,7 @@ namespace Server
         public static string IPAddress = "127.0.0.1";
 
         public static ushort Port = 7000,
+                             StatusPort = 3000,
                              TimeOut = 10000,
                              MaxUser = 50,
                              RelogDelay = 50,
@@ -391,6 +392,7 @@ namespace Server
             //Paths
             IPAddress = Reader.ReadString("Network", "IPAddress", IPAddress);
             Port = Reader.ReadUInt16("Network", "Port", Port);
+            StatusPort = Reader.ReadUInt16("Network", "StatusPort", StatusPort);
             TimeOut = Reader.ReadUInt16("Network", "TimeOut", TimeOut);
             MaxUser = Reader.ReadUInt16("Network", "MaxUser", MaxUser);
             MaxIP = Reader.ReadUInt16("Network", "MaxIP", MaxIP);
@@ -679,6 +681,7 @@ namespace Server
             //Paths
             Reader.Write("Network", "IPAddress", IPAddress);
             Reader.Write("Network", "Port", Port);
+            Reader.Write("Network", "StatusPort", StatusPort);
             Reader.Write("Network", "TimeOut", TimeOut);
             Reader.Write("Network", "MaxUser", MaxUser);
             Reader.Write("Network", "MaxIP", MaxIP);
