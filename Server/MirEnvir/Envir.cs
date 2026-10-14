@@ -2188,11 +2188,12 @@ namespace Server.MirEnvir
                             });
                         }
 
-                        // Pattern B: Manually align the execution time to exactly 10,000 ticks (1ms) using SpinWait
-                        while (Stopwatch.ElapsedTicks - tickStartTicks < 10000)
-                        {
-                            Thread.SpinWait(10);
-                        }
+                        // Stopwatch ticks depend on the platform. Yield the CPU when this
+                        // iteration finishes early; scheduler overshoot is preferable to busy waiting.
+                        long remainingTicks = System.Diagnostics.Stopwatch.Frequency / 1000
+                            - (Stopwatch.ElapsedTicks - tickStartTicks);
+                        if (remainingTicks > 0)
+                            Thread.Sleep(1);
                     }
                 }
                 catch (Exception ex)
@@ -2245,31 +2246,52 @@ namespace Server.MirEnvir
                     Info._current = Info.ObjectsList.First;
                 stopping = Info._current == null;
 
+                long passTime = Time;
+                bool passComplete = false;
                 while (Running)
                 {
-                    if (Info._current == null)
-                        Info._current = Info.ObjectsList.First;
+                    // Time is held constant while the main thread waits for this batch.
+                    // Scanning the same objects again cannot make another operation due.
+                    if (passComplete && Time == passTime)
+                    {
+                        Thread.Sleep(1);
+                    }
                     else
                     {
-                        var next = Info._current.Next;
+                        if (passComplete)
+                        {
+                            passTime = Time;
+                            passComplete = false;
+                        }
+                        if (Info._current == null)
+                        {
+                            Info._current = Info.ObjectsList.First;
+                            passComplete = Info._current == null;
+                        }
+                        else
+                        {
+                            var next = Info._current.Next;
 
-                        //if we reach the end of our list > go back to the top (since we are running threaded, we dont want the system to sit there for xxms doing nothing)
-                        if (Info._current == Info.ObjectsList.Last)
-                        {
-                            next = Info.ObjectsList.First;
-                            Info.LastRunTime = (Info.LastRunTime + (Time - Info.StartTime)) / 2;
-                            //Info.LastRunTime = (Time - Info.StartTime) /*> 0 ? (Time - Info.StartTime) : Info.LastRunTime */;
-                            Info.StartTime = Time;
-                        }
-                        if (Time > Info._current.Value.OperateTime)
-                        {
-                            if (Info._current.Value.Master == null) //since we are running multithreaded, dont allow pets to be processed (unless you constantly move pets into their map appropriate thead)
+                            //if we reach the end of our list > go back to the top (since we are running threaded, we dont want the system to sit there for xxms doing nothing)
+                            if (Info._current == Info.ObjectsList.Last)
                             {
-                                Info._current.Value.Process();
-                                Info._current.Value.SetOperateTime();
+                                next = Info.ObjectsList.First;
+                                passComplete = true;
+                                Info.LastRunTime = (Info.LastRunTime + (Time - Info.StartTime)) / 2;
+                                //Info.LastRunTime = (Time - Info.StartTime) /*> 0 ? (Time - Info.StartTime) : Info.LastRunTime */;
+                                Info.StartTime = Time;
                             }
+                            if (Time > Info._current.Value.OperateTime)
+                            {
+                                if (Info._current.Value.Master == null) //since we are running multithreaded, dont allow pets to be processed (unless you constantly move pets into their map appropriate thead)
+                                {
+                                    Info._current.Value.Process();
+                                    Info._current.Value.SetOperateTime();
+                                }
+                            }
+                            Info._current = next;
                         }
-                        Info._current = next;
+
                     }
 
                     //if it's the main thread > make it loop till the subthreads are done, else make it stop after 'endtime'

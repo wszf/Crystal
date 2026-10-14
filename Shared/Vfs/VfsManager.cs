@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -62,58 +63,47 @@ namespace Shared.Vfs
             return path.Replace('\\', '/');
         }
 
-        public static string Resolve(string path)
+        public static string Resolve(string path) => ResolvePath(path, false);
+
+        public static string ResolveDir(string path) => ResolvePath(path, true);
+
+        private static string ResolvePath(string path, bool directory)
         {
             if (string.IsNullOrEmpty(path)) return path;
+            var fullPath = Path.GetFullPath(NormalizePath(path));
+            var index = directory ? _vfsDirIndex : _vfsIndex;
+            bool Exists(string candidate) => directory ? Directory.Exists(candidate) : File.Exists(candidate);
 
-            var normalizedInput = NormalizePath(path);
-            var fullPath = Path.GetFullPath(normalizedInput).Replace('\\', '/');
-
+            // Prefer the exact name, and never return stale cached paths after deletion.
+            if (Exists(fullPath)) return fullPath;
             lock (_lock)
             {
-                if (_vfsIndex.TryGetValue(fullPath, out var resolvedPath))
-                {
-                    return resolvedPath;
-                }
+                if (index.TryGetValue(fullPath, out var cached) && Exists(cached))
+                    return cached;
+                index.Remove(fullPath);
             }
 
-            if (File.Exists(path))
+            var parent = Path.GetDirectoryName(fullPath);
+            if (string.IsNullOrEmpty(parent)) return fullPath;
+            var resolvedParent = ResolveDir(parent);
+            var name = Path.GetFileName(fullPath);
+            var resolved = Path.Combine(resolvedParent, name);
+            if (Directory.Exists(resolvedParent))
             {
-                lock (_lock)
+                var entries = directory
+                    ? Directory.EnumerateDirectories(resolvedParent)
+                    : Directory.EnumerateFiles(resolvedParent);
+                foreach (var entry in entries)
                 {
-                    _vfsIndex[fullPath] = path;
-                }
-                return path;
-            }
-
-            return path;
-        }
-
-        public static string ResolveDir(string path)
-        {
-            if (string.IsNullOrEmpty(path)) return path;
-
-            var normalizedInput = NormalizePath(path);
-            var fullPath = Path.GetFullPath(normalizedInput).Replace('\\', '/');
-
-            lock (_lock)
-            {
-                if (_vfsDirIndex.TryGetValue(fullPath, out var resolvedPath))
-                {
-                    return resolvedPath;
+                    if (!string.Equals(Path.GetFileName(entry), name, StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    lock (_lock) index[fullPath] = entry;
+                    return entry;
                 }
             }
 
-            if (Directory.Exists(path))
-            {
-                lock (_lock)
-                {
-                    _vfsDirIndex[fullPath] = path;
-                }
-                return path;
-            }
-
-            return path;
+            // New files still need normalized separators and the existing parent's casing.
+            return resolved;
         }
 
         public static bool FileExists(string path)
@@ -270,89 +260,21 @@ namespace Shared.Vfs
         public static string[] GetFilesMatching(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             var resolvedDir = ResolveDir(path);
-            if (!Directory.Exists(resolvedDir))
-            {
-                return Array.Empty<string>();
-            }
-
+            if (!Directory.Exists(resolvedDir)) return Array.Empty<string>();
             var regex = ConvertGlobToRegex(searchPattern);
-            var results = new List<string>();
-            var normalizedDirPrefix = Path.GetFullPath(NormalizePath(resolvedDir)).Replace('\\', '/');
-            if (!normalizedDirPrefix.EndsWith("/"))
-            {
-                normalizedDirPrefix += "/";
-            }
-
-            lock (_lock)
-            {
-                foreach (var kvp in _vfsIndex)
-                {
-                    var fileFullPath = kvp.Key;
-                    var physicalPath = kvp.Value;
-
-                    if (fileFullPath.StartsWith(normalizedDirPrefix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        var relativePart = fileFullPath.Substring(normalizedDirPrefix.Length);
-                        
-                        if (searchOption == SearchOption.TopDirectoryOnly && relativePart.Contains('/'))
-                        {
-                            continue;
-                        }
-
-                        var fileName = Path.GetFileName(physicalPath);
-                        if (regex.IsMatch(fileName))
-                        {
-                            results.Add(physicalPath);
-                        }
-                    }
-                }
-            }
-
-            return results.ToArray();
+            // Enumerate the filesystem so files created by FileStream or external tools
+            // are visible, and deleted files cannot remain in directory listings.
+            return Directory.EnumerateFiles(resolvedDir, "*", searchOption)
+                .Where(file => regex.IsMatch(Path.GetFileName(file))).ToArray();
         }
 
         public static string[] GetDirectoriesMatching(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             var resolvedDir = ResolveDir(path);
-            if (!Directory.Exists(resolvedDir))
-            {
-                return Array.Empty<string>();
-            }
-
+            if (!Directory.Exists(resolvedDir)) return Array.Empty<string>();
             var regex = ConvertGlobToRegex(searchPattern);
-            var results = new List<string>();
-            var normalizedDirPrefix = Path.GetFullPath(NormalizePath(resolvedDir)).Replace('\\', '/');
-            if (!normalizedDirPrefix.EndsWith("/"))
-            {
-                normalizedDirPrefix += "/";
-            }
-
-            lock (_lock)
-            {
-                foreach (var kvp in _vfsDirIndex)
-                {
-                    var dirFullPath = kvp.Key;
-                    var physicalPath = kvp.Value;
-
-                    if (dirFullPath.StartsWith(normalizedDirPrefix, StringComparison.OrdinalIgnoreCase))
-                    {
-                        var relativePart = dirFullPath.Substring(normalizedDirPrefix.Length);
-                        
-                        if (searchOption == SearchOption.TopDirectoryOnly && relativePart.Contains('/'))
-                        {
-                            continue;
-                        }
-
-                        var dirName = Path.GetFileName(physicalPath);
-                        if (regex.IsMatch(dirName))
-                        {
-                            results.Add(physicalPath);
-                        }
-                    }
-                }
-            }
-
-            return results.ToArray();
+            return Directory.EnumerateDirectories(resolvedDir, "*", searchOption)
+                .Where(dir => regex.IsMatch(Path.GetFileName(dir))).ToArray();
         }
     }
 }

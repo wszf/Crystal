@@ -1,3 +1,4 @@
+using System.Formats.Nrbf;
 using System.Drawing;
 using System.IO.Compression;
 
@@ -451,31 +452,47 @@ public static class Functions
                 writer.Write((byte)3);
                 writer.Write(s);
             }
-            else
+            else if (item is null)
             {
                 writer.Write((byte)0);
+            }
+            else
+            {
+                throw new InvalidDataException($"Unsupported buff value type: {item.GetType()}.");
             }
             return stream.ToArray();
         }
     }
     public static object DeserializeFromBytes(byte[] bytes)
     {
-        using (var stream = new MemoryStream(bytes))
-        using (var reader = new BinaryReader(stream))
+        ArgumentNullException.ThrowIfNull(bytes);
+        using var stream = new MemoryStream(bytes, writable: false);
+
+        // A legacy BinaryFormatter payload starts with a stream header (0).
+        // The current null encoding is just one byte, so the formats are distinct.
+        if (bytes.Length > 1 && bytes[0] == 0)
         {
-            byte type = reader.ReadByte();
-            switch (type)
-            {
-                case 1:
-                    return reader.ReadBoolean();
-                case 2:
-                    return reader.ReadInt64();
-                case 3:
-                    return reader.ReadString();
-                default:
-                    return null;
-            }
+            var record = NrbfDecoder.Decode(stream, leaveOpen: true);
+            if (stream.Position != stream.Length)
+                throw new InvalidDataException("Trailing data in legacy buff value.");
+            if (record is PrimitiveTypeRecord primitive &&
+                primitive.Value is bool or long or string)
+                return primitive.Value;
+            throw new InvalidDataException("Unsupported legacy buff value type.");
         }
+
+        using var reader = new BinaryReader(stream);
+        object value = reader.ReadByte() switch
+        {
+            0 => null,
+            1 => reader.ReadBoolean(),
+            2 => reader.ReadInt64(),
+            3 => reader.ReadString(),
+            _ => throw new InvalidDataException("Unknown buff value type.")
+        };
+        if (stream.Position != stream.Length)
+            throw new InvalidDataException("Trailing data in buff value.");
+        return value;
     }
 
     /// <summary>

@@ -18,7 +18,7 @@ namespace Server.Headless
 
             // Configure log4net
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-            XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+            XmlConfigurator.Configure(logRepository, new FileInfo(Path.Combine(AppContext.BaseDirectory, "log4net.config")));
 
             var host = new ConsoleServerHost();
             Envir.Initialise(host);
@@ -27,6 +27,16 @@ namespace Server.Headless
 
             try
             {
+                // Loading a missing database creates an empty one. Fail clearly instead
+                // when the CLI is launched from a directory without game data.
+                if (!Server.File.Exists(Envir.DatabasePath) || !Server.Directory.Exists(Settings.MapPath)
+                    || !Server.Directory.Exists(Settings.EnvirPath))
+                {
+                    host.Log($"[CRITICAL] Missing Server.MirDB, Maps or Envir in {System.IO.Directory.GetCurrentDirectory()}. Run from the server data directory.");
+                    Environment.ExitCode = 1;
+                    return;
+                }
+
                 Settings.Load();
 
                 host.Log("Loading Database...");
@@ -34,13 +44,14 @@ namespace Server.Headless
                 if (!dbLoaded)
                 {
                     host.Log("[CRITICAL] Failed to load server database. Exiting.");
+                    Environment.ExitCode = 1;
                     return;
                 }
 
                 host.Log("Starting Server Environment...");
                 Envir.Main.Start();
 
-                host.Log("Server successfully started. Press Ctrl+C or type 'exit' to stop.");
+                host.Log("Server startup requested. Wait for the network-started message. Press Ctrl+C or type 'exit' to stop.");
 
                 var cts = new CancellationTokenSource();
                 Console.CancelKeyPress += (sender, e) =>
@@ -65,6 +76,7 @@ namespace Server.Headless
             {
                 Logger.GetLogger().Error("Fatal execution error in Headless server host", ex);
                 host.Log($"[FATAL] {ex}");
+                Environment.ExitCode = 1;
             }
         }
     }

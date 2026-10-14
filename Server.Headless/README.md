@@ -1,19 +1,19 @@
 # Legend of Mir Crystal - Headless Server
 
-This project is the modernized, headless version of the Legend of Mir Crystal Server, fully migrated to **.NET 10.0**. It is designed specifically to run natively and efficiently on Linux environments without any dependencies on Windows-specific UI frameworks (like Windows Forms) or image rendering libraries.
+This project is the modernized, headless version of the Legend of Mir Crystal Server, fully migrated to **.NET 10.0**. It is designed to run natively on macOS, Linux and Windows without any dependencies on Windows-specific UI frameworks (like Windows Forms) or image rendering libraries.
 
 ## 🌟 Features
 - **True Headless Design:** Fully decoupled from UI forms; runs directly as a console application.
-- **High-Precision Tick Loop:** Utilizes a custom Spin-Loop throttling mechanism for hyper-accurate 1ms tick alignment without yielding to the Linux OS scheduler, guaranteeing zero timing dilation.
-- **Native Linux Path Resolution:** Automatically normalizes directory separators and enforces consistent lowercasing for map loaders to seamlessly resolve paths on case-sensitive Linux filesystems.
-- **Lightweight Serialization:** Features a hand-rolled, type-safe binary serialization protocol for the buff system, fully replacing the obsolete and insecure `BinaryFormatter`.
+- **Paced Tick Loop:** Uses the platform Stopwatch frequency and yields the CPU for short iterations. The nominal minimum interval is 1ms; actual scheduling depends on the operating system.
+- **Cross-Platform Paths:** Normalizes Windows separators and resolves existing names case-insensitively without renaming game assets. Directory listings include files created by external tools.
+- **Buff Save Compatibility:** Writes the existing compact bool/long/string format and reads legacy BinaryFormatter values with `System.Formats.Nrbf`, without instantiating serialized classes. Unsupported or malformed values fail explicitly instead of silently becoming null.
 
 ---
 
 ## 🛠️ Prerequisites
 
 To run this server natively, your environment must have:
-- **OS:** Linux (Ubuntu/Debian, CentOS, AlmaLinux, etc.) or Windows (cross-platform compatible).
+- **OS:** macOS (Apple Silicon or Intel), Linux, or Windows. No FNA, SDL, or graphical desktop is required.
 - **Runtime:** [.NET 10.0 SDK or Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
 ---
@@ -25,7 +25,7 @@ To compile the headless server from the source code, navigate to the root soluti
 ```bash
 dotnet build Server.Headless/Server.Headless.csproj -c Release
 ```
-This will compile the `Server.Headless`, `Server.Library`, and `Shared` projects and output the executable to `Server.Headless/bin/Release/net10.0/`.
+This will compile the `Server.Headless`, `Server.Library`, and `Shared` projects and output the executable to `Build/Server/Release/net10.0/`.
 
 ### 2. Environment Setup
 The server requires specific data folders to operate. Place your built executable alongside the following core directories (often found in the release `Jev` package):
@@ -34,7 +34,7 @@ The server requires specific data folders to operate. Place your built executabl
 - `Envir/` (Drops, NPCs, Quests, Routes, and Scripts)
 - `Maps/` (Game map `.map` files)
 
-*Note: If you are migrating maps from a Windows server, it is highly recommended to batch-rename all your `.map` files to lowercase to ensure native case-sensitive resolution.*
+*Keep a backup of existing account and world data before upgrading. Game data is resolved from the working directory; the CLI rejects missing database, Maps or Envir directories.*
 
 ### 3. Running the Server
 You can launch the server directly using the `.NET` CLI from the directory containing your environment files:
@@ -95,8 +95,8 @@ Available subcommands:
 
 ## ⚙️ Configuration
 
-### Game Settings (`Configs/Settings.ini`)
-When the server runs for the first time, it will automatically generate or load `Settings.ini` inside the `Configs/` directory. You can edit this file to adjust ports, experience rates, drop rates, and other environmental properties.
+### Game Settings (`Configs/Setup.ini`)
+When the server runs for the first time, it will automatically generate or load `Setup.ini` inside the `Configs/` directory. You can edit this file to adjust ports, experience rates, drop rates, and other environmental properties.
 
 ### Logging (`log4net.config`)
 Console output and log files are managed by `log4net`. The logging configuration is located in `log4net.config` at the root of the executable directory. 
@@ -108,5 +108,27 @@ Console output and log files are managed by `log4net`. The logging configuration
 ## 🔧 Troubleshooting
 
 - **Script Not Found Errors:** If the server console reports `Script Not Found` or `INSERT Script Not Found`, ensure that all custom scripts referenced in your `Envir/` directory exist and that their internal references (`#INCLUDE`, `#INSERT`) correctly match your file structure.
-- **Failed to Load Map:** Ensure your map files are properly placed in the `Maps/` directory and are named in strictly lowercase (e.g., `d011.map` instead of `D011.map`) to satisfy Linux filesystem requirements.
+- **Failed to Load Map:** Ensure the map files referenced by the database are present in `Maps/`. Mixed-case filenames are supported.
 - **Address Already in Use:** If the server fails to bind the network socket, ensure no other instance of the server is running in the background and that your configured port (default TCP `7000`) is free.
+
+## Compatibility regression checks
+
+```bash
+dotnet run --project Tests/Server.Compatibility -c Release
+```
+
+This verifies legacy and current buff values, corrupt input handling, normalized
+writes and live directory listings. Run the server from your data directory:
+
+```bash
+cd /path/to/server-data
+dotnet /path/to/Crystal/Build/Server/Release/net10.0/Server.Headless.dll
+```
+
+On macOS, `Scripts/start-server.command /path/to/server-data` builds and starts the
+server in that data directory. Double-clicking the script uses `Build/ServerDemo`
+when that demonstration dataset has been prepared. Use `status` to inspect the
+running server and `exit` to save and stop it. If port 7000 is occupied, choose a
+free port in `Configs/Setup.ini` and use the same port in your client.
+
+Legacy save decoding follows the [Microsoft NRBF migration guide](https://learn.microsoft.com/en-us/dotnet/standard/serialization/binaryformatter-migration-guide/read-nrbf-payloads).
